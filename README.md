@@ -10,8 +10,8 @@ This is not an official Google product (experimental or otherwise), it is just c
 
 ## Overview
 
-This project synthesizes the dependency resolution logic, and some of the
-functionality of Cargo, such as features and build scripts, into executable
+This project synthesizes the dependency resolution logic and some of the
+functionality of Cargo such as features and build scripts into executable
 rules that Bazel can run to compile Rust crates. Though the standard rules_rust
 rules can be used to compile Rust code from scratch, the fine granularity of the
 dependency ecosystem makes transforming dependency trees based on that ecosystem
@@ -21,7 +21,7 @@ onerous, even for code with few dependencies.
 
 cargo-raze can generate buildable targets in one of two modes: Vendoring, or
 Non-Vendoring. In the vendoring mode, developers use the common `cargo-vendor`
-tool to retried the dependencies indicated by their workspace Cargo.toml into
+tool to retrieve the dependencies indicated by their workspace Cargo.toml into
 directories that cargo-raze then populates with BUILD files. In the
 non-vendoring mode, cargo-raze generates a flat list of BUILD files, and a
 workspace-level macro that can be invoked in the WORKSPACE file to pull down the
@@ -279,8 +279,13 @@ byte-for-byte equivalent final result.
 
 In exchange, users are rewarded with a customizable and extensible build system
 that compiles any kind of compilable target and allows expressing "unconventional
-dependencies", such as rotobuf objects, precompiled graphics shaders, or
+dependencies", such as Protobuf objects, precompiled graphics shaders, or
 generated code, while remaining fast and correct.
+
+Its also probable (though not yet demonstrated with benchmarks) that lare
+applications built with Bazel's strengths in mind: highly graular build units,
+will compile significantly faster as they are able to cache more aggressively,
+and avoid recompilation of as much code while iterating.
 
 ## Why try to integrate Cargo's dependencies into this build tool?
 
@@ -293,7 +298,7 @@ must reinvent many wheels.
 
 Putting that aside, there are also fantastic crates that help Rust developers
 interact with industry standard systems and libraries which can greatly
-accellerate development.
+accelerate development.
 
 ## Why not build directly with Cargo / Why generate rustc invocations?
 
@@ -309,7 +314,7 @@ compiler.
 ## What is buildable right now with Bazel, and what is not?
 
 With a little bit of elbow grease, it is possible to build nearly everything,
-includin gprojects that depend on openssl-sys. Many sys crates will require
+including projects that depend on openssl-sys. Many sys crates will require
 identifying the system library that they wrap, and either vendoring it into the
 project, or telling Bazel where it lives on your system. Some may require minor
 source tweaks, such as eliminating hardcoded cargo environment variable
