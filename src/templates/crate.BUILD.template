@@ -1,0 +1,34 @@
+"""
+cargo-raze crate build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+package(default_visibility = ["{{workspace.workspace_path}}:__subpackages__"])
+
+load(
+    "@io_bazel_rules_rust//rust:rust.bzl",
+    "rust_library",
+    "rust_binary",
+    "rust_test",
+    "rust_bench_test",
+)
+
+{%- set crate_name_sanitized = crate.pkg_name | replace(from="-", to="_") %}
+{%- if crate.build_script_target %}
+{%- include "templates/partials/build_script.template" %}
+{%- endif %}
+{%- for target in crate.targets %}
+{%- if target.kind == "lib" %}
+{%- include "templates/partials/rust_library.template" %}
+{%- elif target.kind == "bin" %}
+{%- include "templates/partials/rust_binary.template" %}
+{%- elif target.kind == "proc-macro" %}
+{%- include "templates/partials/rust_library.template" %}
+{%- elif target.kind == "dylib" %}
+{%- include "templates/partials/rust_library.template" %}
+{%- elif target.kind == "rlib" %}
+{%- include "templates/partials/rust_library.template" %}
+{%- else %}
+# Unsupported target "{{ target.name }}" with type "{{ target.kind }}" omitted
+{%- endif %}
+{%- endfor %}

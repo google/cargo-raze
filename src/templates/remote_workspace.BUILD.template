@@ -1,0 +1,23 @@
+"""
+cargo-raze workspace build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+package(default_visibility = ["//visibility:public"])
+{% for crate in crates %}
+{%- if crate.is_root_dependency %}
+{%- set crate_name_sanitized = crate.pkg_name | replace(from="-", to="_") %}
+alias(
+    name = "{{crate_name_sanitized}}",
+    actual = "@{{workspace.gen_workspace_prefix}}__{{crate.pkg_name | slugify | replace(from="-", to="_")}}__{{crate.pkg_version | slugify | replace(from="-", to="_")}}//:{{crate_name_sanitized}}",
+)
+{%- endif %}
+{%- for aliased_target in crate.extra_aliased_targets %}
+alias(
+    # Extra aliased target, from raze configuration
+    # N.B.: The exact form of this is subject to change.
+    name = "{{aliased_target}}",
+    actual = "@{{workspace.gen_workspace_prefix}}__{{crate.pkg_name | slugify | replace(from="-", to="_")}}__{{crate.pkg_version | slugify | replace(from="-", to="_")}}//:{{aliased_target}}",
+)
+{%- endfor %}
+{%- endfor %}
