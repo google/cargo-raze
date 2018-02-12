@@ -64,5 +64,5 @@ pub struct WorkspaceContext {
    *
    * This has no effect unless the GenMode setting is Remote.
    */
-  pub gen_workspace_prefix: String
+  pub gen_workspace_prefix: String,
 }

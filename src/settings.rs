@@ -110,10 +110,10 @@ pub struct CrateSettings {
   pub skipped_deps: Vec<String>,
 
   /**
-  * Library targets that should be aliased in the root BUILD file.
-  *
-  * This is useful to facilitate using binary utility crates, such as bindgen, as part of genrules.
-  */
+   * Library targets that should be aliased in the root BUILD file.
+   *
+   * This is useful to facilitate using binary utility crates, such as bindgen, as part of genrules.
+   */
   #[serde(default)]
   pub extra_aliased_targets: Vec<String>,
 
@@ -129,7 +129,6 @@ pub struct CrateSettings {
    */
   #[serde(default = "default_gen_buildrs")]
   pub gen_buildrs: bool,
-
 }
 
 fn default_gen_buildrs() -> bool {

@@ -21,8 +21,8 @@ use cargo::core::Resolve;
 use cargo::core::SourceId;
 use cargo::core::Workspace;
 use cargo::core::dependency::Kind;
-use cargo::ops::Packages;
 use cargo::ops;
+use cargo::ops::Packages;
 use cargo::util::CargoResult;
 use cargo::util::Cfg;
 use cargo::util::Config;
@@ -31,8 +31,8 @@ use context::BuildDependency;
 use context::BuildTarget;
 use context::CrateContext;
 use context::WorkspaceContext;
-use settings::RazeSettings;
 use settings::GenMode;
+use settings::RazeSettings;
 use std::collections::HashSet;
 use std::env;
 use std::fs;
@@ -53,9 +53,8 @@ pub struct BuildPlanner<'a> {
   registry: Option<SourceId>,
 }
 
-impl <'a>  BuildPlanner<'a> {
-  pub fn new(settings: RazeSettings,
-             cargo_config: &'a Config) -> CargoResult<BuildPlanner<'a>> {
+impl<'a> BuildPlanner<'a> {
+  pub fn new(settings: RazeSettings, cargo_config: &'a Config) -> CargoResult<BuildPlanner<'a>> {
     Ok(BuildPlanner {
       platform_attrs: try!(util::fetch_attrs(&settings.target)),
       cargo_config: cargo_config,
@@ -70,243 +69,259 @@ impl <'a>  BuildPlanner<'a> {
         self.registry = Some(registry_id);
         Ok(())
       },
-      Err(value) => Err(CargoError::from(value))
+      Err(value) => Err(CargoError::from(value)),
     }
   }
 
   pub fn plan_build(&self) -> CargoResult<PlannedBuild> {
-      let ResolvedPlan {root_name, packages, resolve} =
-          try!(ResolvedPlan::resolve_from_files(&self.cargo_config));
+    let ResolvedPlan {
+      root_name,
+      packages,
+      resolve,
+    } = try!(ResolvedPlan::resolve_from_files(&self.cargo_config));
 
-      let root_package_id = try!(resolve.iter()
-          .filter(|dep| dep.name() == root_name)
-          .next()
-          .ok_or(CargoError::from("root crate should be in cargo resolve")));
-      let root_direct_deps = resolve.deps(&root_package_id).cloned().collect::<HashSet<_>>();
+    let root_package_id = try!(
+      resolve
+        .iter()
+        .filter(|dep| dep.name() == root_name)
+        .next()
+        .ok_or(CargoError::from("root crate should be in cargo resolve"))
+    );
+    let root_direct_deps = resolve.deps(&root_package_id).cloned().collect::<HashSet<_>>();
 
-      let mut crate_contexts = Vec::new();
+    let mut crate_contexts = Vec::new();
 
-      let source_id = match self.registry.clone() {
-        Some(v) => v,
-        None => try!(SourceId::crates_io(&self.cargo_config)),
-      };
+    let source_id = match self.registry.clone() {
+      Some(v) => v,
+      None => try!(SourceId::crates_io(&self.cargo_config)),
+    };
 
-      for id in try!(find_all_package_ids(source_id, &resolve)) {
-          let package = packages.get(&id).unwrap().clone();
-          let mut features = resolve.features(&id).clone().into_iter().collect::<Vec<_>>();
-          features.sort();
-          let full_name = format!("{}-{}", id.name(), id.version());
-          let path = format!("./vendor/{}-{}/", id.name(), id.version());
+    for id in try!(find_all_package_ids(source_id, &resolve)) {
+      let package = packages.get(&id).unwrap().clone();
+      let mut features = resolve.features(&id).clone().into_iter().collect::<Vec<_>>();
+      features.sort();
+      let full_name = format!("{}-{}", id.name(), id.version());
+      let path = format!("./vendor/{}-{}/", id.name(), id.version());
 
-          // Verify that package is really vendored
-          if self.settings.genmode == GenMode::Vendored {
-            try!(fs::metadata(&path).map_err(|_| {
-                CargoError::from(format!("failed to find {}. Either switch to \"Remote\" genmode, or run `cargo vendor -x` first.", &path))
-            }));
-          }
-
-          // Identify all possible dependencies
-          let PlannedDeps { mut build_deps, mut dev_deps, mut normal_deps } =
-              PlannedDeps::find_all_deps(&id, &package, &resolve, &self.settings.target, &self.platform_attrs);
-          build_deps.sort();
-          dev_deps.sort();
-          normal_deps.sort();
-
-          let mut targets = try!(identify_targets(&full_name, &package));
-          targets.sort();
-
-          let possible_crate_settings =
-            self.settings.crates
-              .get(id.name())
-              .and_then(|c| c.get(&id.version().to_string()));
-
-          let should_gen_buildrs =
-            possible_crate_settings.map(|s| s.gen_buildrs.clone()).unwrap_or(false);
-          let build_script_target = if should_gen_buildrs {
-            targets.iter().find(|t| t.kind.deref() == "custom-build").cloned()
-          } else {
-            None
-          };
-
-          let targets_sans_build_script =
-            targets.into_iter().filter(|t| t.kind.deref() != "custom-build").collect::<Vec<_>>();
-
-          let additional_deps =
-            possible_crate_settings.map(|s| s.additional_deps.clone()).unwrap_or(Vec::new());
-
-          let additional_flags =
-            possible_crate_settings.map(|s| s.additional_flags.clone()).unwrap_or(Vec::new());
-
-          let extra_aliased_targets =
-            possible_crate_settings.map(|s| s.extra_aliased_targets.clone()).unwrap_or(Vec::new());
-
-          // Skip generated dependencies explicitly designated to be skipped (potentially due to
-          // being replaced or customized as part of additional_deps)
-          let non_skipped_normal_deps = if let Some(s) = possible_crate_settings {
-            normal_deps.into_iter()
-              .filter(|d| !s.skipped_deps.contains(&format!("{}-{}", d.name, d.version)))
-              .collect::<Vec<_>>()
-          } else {
-            normal_deps
-          };
-
-          crate_contexts.push(CrateContext {
-              pkg_name: id.name().to_owned(),
-              pkg_version: id.version().to_string(),
-              features: features,
-              is_root_dependency: root_direct_deps.contains(&id),
-              metadeps: Vec::new() /* TODO(acmcarther) */,
-              dependencies: non_skipped_normal_deps,
-              build_dependencies: build_deps,
-              dev_dependencies: dev_deps,
-              path: path,
-              build_script_target: build_script_target,
-              targets: targets_sans_build_script,
-              platform_triple: self.settings.target.to_owned(),
-              additional_deps: additional_deps,
-              additional_flags: additional_flags,
-              extra_aliased_targets: extra_aliased_targets,
-          })
+      // Verify that package is really vendored
+      if self.settings.genmode == GenMode::Vendored {
+        try!(fs::metadata(&path).map_err(|_| CargoError::from(format!(
+          "failed to find {}. Either switch to \"Remote\" genmode, or run `cargo vendor -x` first.",
+          &path
+        ))));
       }
 
-      let workspace_context = WorkspaceContext {
-        workspace_path: self.settings.workspace_path.clone(),
-        platform_triple: self.settings.target.clone(),
-        gen_workspace_prefix: self.settings.gen_workspace_prefix.clone(),
+      // Identify all possible dependencies
+      let PlannedDeps {
+        mut build_deps,
+        mut dev_deps,
+        mut normal_deps,
+      } = PlannedDeps::find_all_deps(
+        &id,
+        &package,
+        &resolve,
+        &self.settings.target,
+        &self.platform_attrs,
+      );
+      build_deps.sort();
+      dev_deps.sort();
+      normal_deps.sort();
+
+      let mut targets = try!(identify_targets(&full_name, &package));
+      targets.sort();
+
+      let possible_crate_settings =
+        self.settings.crates.get(id.name()).and_then(|c| c.get(&id.version().to_string()));
+
+      let should_gen_buildrs =
+        possible_crate_settings.map(|s| s.gen_buildrs.clone()).unwrap_or(false);
+      let build_script_target = if should_gen_buildrs {
+        targets.iter().find(|t| t.kind.deref() == "custom-build").cloned()
+      } else {
+        None
       };
 
-      crate_contexts.sort_by_key(|context| format!("{}-{}", context.pkg_name, context.pkg_version));
+      let targets_sans_build_script =
+        targets.into_iter().filter(|t| t.kind.deref() != "custom-build").collect::<Vec<_>>();
 
-      Ok(PlannedBuild{
-        workspace_context: workspace_context,
-        crate_contexts: crate_contexts
+      let additional_deps =
+        possible_crate_settings.map(|s| s.additional_deps.clone()).unwrap_or(Vec::new());
+
+      let additional_flags =
+        possible_crate_settings.map(|s| s.additional_flags.clone()).unwrap_or(Vec::new());
+
+      let extra_aliased_targets =
+        possible_crate_settings.map(|s| s.extra_aliased_targets.clone()).unwrap_or(Vec::new());
+
+      // Skip generated dependencies explicitly designated to be skipped (potentially due to
+      // being replaced or customized as part of additional_deps)
+      let non_skipped_normal_deps = if let Some(s) = possible_crate_settings {
+        normal_deps
+          .into_iter()
+          .filter(|d| !s.skipped_deps.contains(&format!("{}-{}", d.name, d.version)))
+          .collect::<Vec<_>>()
+      } else {
+        normal_deps
+      };
+
+      crate_contexts.push(CrateContext {
+        pkg_name: id.name().to_owned(),
+        pkg_version: id.version().to_string(),
+        features: features,
+        is_root_dependency: root_direct_deps.contains(&id),
+        metadeps: Vec::new(), /* TODO(acmcarther) */
+        dependencies: non_skipped_normal_deps,
+        build_dependencies: build_deps,
+        dev_dependencies: dev_deps,
+        path: path,
+        build_script_target: build_script_target,
+        targets: targets_sans_build_script,
+        platform_triple: self.settings.target.to_owned(),
+        additional_deps: additional_deps,
+        additional_flags: additional_flags,
+        extra_aliased_targets: extra_aliased_targets,
       })
+    }
+
+    let workspace_context = WorkspaceContext {
+      workspace_path: self.settings.workspace_path.clone(),
+      platform_triple: self.settings.target.clone(),
+      gen_workspace_prefix: self.settings.gen_workspace_prefix.clone(),
+    };
+
+    crate_contexts.sort_by_key(|context| format!("{}-{}", context.pkg_name, context.pkg_version));
+
+    Ok(PlannedBuild {
+      workspace_context: workspace_context,
+      crate_contexts: crate_contexts,
+    })
   }
 }
 
 /** The set of all included dependencies for Cargo's dependency categories. */
 pub struct PlannedDeps {
-    pub build_deps: Vec<BuildDependency>,
-    pub dev_deps: Vec<BuildDependency>,
-    pub normal_deps: Vec<BuildDependency>,
+  pub build_deps: Vec<BuildDependency>,
+  pub dev_deps: Vec<BuildDependency>,
+  pub normal_deps: Vec<BuildDependency>,
 }
 
 impl PlannedDeps {
-    /**
-     * Identifies the full set of cargo dependencies for the provided package id using cargo's
-     * resolution details.
-     */
-    pub fn find_all_deps(id: &PackageId,
-                         package: &CargoPackage,
-                         resolve: &Resolve,
-                         platform_triple: &str,
-                         platform_attrs: &Vec<Cfg>) -> PlannedDeps {
-        let platform_deps = package
-            .dependencies()
-            .iter()
-            .filter(|dep| {
-                dep.platform()
-                    .map(|p| p.matches(&platform_triple, Some(&platform_attrs)))
-                    .unwrap_or(true)
-            })
-            .cloned()
-            .collect::<Vec<Dependency>>();
-        let build_deps = util::take_kinded_dep_names(&platform_deps, Kind::Build);
-        let dev_deps = util::take_kinded_dep_names(&platform_deps, Kind::Development);
-        let normal_deps = util::take_kinded_dep_names(&platform_deps, Kind::Normal);
-        let resolved_deps = resolve.deps(&id).into_iter()
-            .map(|dep| BuildDependency {
-                name: dep.name().to_owned(),
-                version: dep.version().to_string(),
-            })
-            .collect::<Vec<BuildDependency>>();
+  /**
+   * Identifies the full set of cargo dependencies for the provided package id using cargo's
+   * resolution details.
+   */
+  pub fn find_all_deps(
+    id: &PackageId,
+    package: &CargoPackage,
+    resolve: &Resolve,
+    platform_triple: &str,
+    platform_attrs: &Vec<Cfg>,
+  ) -> PlannedDeps {
+    let platform_deps = package
+      .dependencies()
+      .iter()
+      .filter(|dep| {
+        dep.platform().map(|p| p.matches(&platform_triple, Some(&platform_attrs))).unwrap_or(true)
+      })
+      .cloned()
+      .collect::<Vec<Dependency>>();
+    let build_deps = util::take_kinded_dep_names(&platform_deps, Kind::Build);
+    let dev_deps = util::take_kinded_dep_names(&platform_deps, Kind::Development);
+    let normal_deps = util::take_kinded_dep_names(&platform_deps, Kind::Normal);
+    let resolved_deps = resolve
+      .deps(&id)
+      .into_iter()
+      .map(|dep| BuildDependency {
+        name: dep.name().to_owned(),
+        version: dep.version().to_string(),
+      })
+      .collect::<Vec<BuildDependency>>();
 
-        PlannedDeps {
-           normal_deps:
-               resolved_deps.iter().filter(|d| normal_deps.contains(&d.name)).cloned().collect(),
-           build_deps:
-               resolved_deps.iter().filter(|d| build_deps.contains(&d.name)).cloned().collect(),
-           dev_deps:
-               resolved_deps.into_iter().filter(|d| dev_deps.contains(&d.name)).collect(),
-        }
+    PlannedDeps {
+      normal_deps: resolved_deps
+        .iter()
+        .filter(|d| normal_deps.contains(&d.name))
+        .cloned()
+        .collect(),
+      build_deps: resolved_deps.iter().filter(|d| build_deps.contains(&d.name)).cloned().collect(),
+      dev_deps: resolved_deps.into_iter().filter(|d| dev_deps.contains(&d.name)).collect(),
     }
+  }
 }
 
 /** A synthesized Cargo dependency resolution. */
 pub struct ResolvedPlan<'a> {
-    pub root_name: String,
-    pub packages: PackageSet<'a>,
-    pub resolve: Resolve,
+  pub root_name: String,
+  pub packages: PackageSet<'a>,
+  pub resolve: Resolve,
 }
 
 impl<'a> ResolvedPlan<'a> {
-    /**
-     * Performs Cargo's own build plan resolution, yielding the root crate, the set of packages, and
-     * the resolution graph.
-     */
-    pub fn resolve_from_files(cargo_config: &Config) -> CargoResult<ResolvedPlan> {
-        let lockfile = Path::new("Cargo.lock");
-        let manifest_path = lockfile.parent().unwrap().join("Cargo.toml");
-        let manifest = env::current_dir().unwrap().join(&manifest_path);
-        let ws = try!(Workspace::new(&manifest, cargo_config));
-        let specs = Packages::All.into_package_id_specs(&ws)?;
-        let root_name = specs.iter().next().unwrap().name().to_owned();
+  /**
+   * Performs Cargo's own build plan resolution, yielding the root crate, the set of packages, and
+   * the resolution graph.
+   */
+  pub fn resolve_from_files(cargo_config: &Config) -> CargoResult<ResolvedPlan> {
+    let lockfile = Path::new("Cargo.lock");
+    let manifest_path = lockfile.parent().unwrap().join("Cargo.toml");
+    let manifest = env::current_dir().unwrap().join(&manifest_path);
+    let ws = try!(Workspace::new(&manifest, cargo_config));
+    let specs = Packages::All.into_package_id_specs(&ws)?;
+    let root_name = specs.iter().next().unwrap().name().to_owned();
 
-        let (packages, resolve) = ops::resolve_ws_precisely(
-                &ws,
-                None,
-                &[],
-                false,
-                false,
-                &specs)?;
+    let (packages, resolve) = ops::resolve_ws_precisely(&ws, None, &[], false, false, &specs)?;
 
-        Ok(ResolvedPlan {
-          root_name: root_name,
-          packages: packages,
-          resolve: resolve,
-        })
-    }
+    Ok(ResolvedPlan {
+      root_name: root_name,
+      packages: packages,
+      resolve: resolve,
+    })
+  }
 }
 
 /** Enumerates the set of all possibly relevant packages for the Cargo dependencies */
 fn find_all_package_ids(registry_id: SourceId, resolve: &Resolve) -> CargoResult<Vec<PackageId>> {
-    try!(fs::metadata("Cargo.lock").map_err(|_| {
-      CargoError::from("failed to find Cargo.lock. Please run `cargo generate-lockfile` first.")
-    }));
+  try!(fs::metadata("Cargo.lock").map_err(|_| CargoError::from(
+    "failed to find Cargo.lock. Please run `cargo generate-lockfile` first."
+  )));
 
-    let mut package_ids = resolve.iter()
-        .filter(|id| *id.source_id() == registry_id)
-        .cloned()
-        .collect::<Vec<_>>();
-    package_ids.sort_by_key(|id| id.name().to_owned());
-    Ok(package_ids)
+  let mut package_ids =
+    resolve.iter().filter(|id| *id.source_id() == registry_id).cloned().collect::<Vec<_>>();
+  package_ids.sort_by_key(|id| id.name().to_owned());
+  Ok(package_ids)
 }
-
 
 /** Derives target objects from Cargo's target information. */
 fn identify_targets(full_name: &str, package: &CargoPackage) -> CargoResult<Vec<BuildTarget>> {
-    let partial_path = format!("{}/", full_name);
-    let partial_path_byte_length = partial_path.as_bytes().len();
-    let mut targets = Vec::new();
+  let partial_path = format!("{}/", full_name);
+  let partial_path_byte_length = partial_path.as_bytes().len();
+  let mut targets = Vec::new();
 
-    for target in package.targets().iter() {
-        let target_path_str = try!(target.src_path().to_str()
-          .ok_or(CargoError::from(format!("path for {}'s target {} wasn't unicode", &full_name, target.name()))))
-          .to_owned();
-        let crate_name_str_idx = try!(target_path_str.find(&partial_path)
-          .ok_or(CargoError::from(format!("path for {}'s target {} should have been in vendor directory", &full_name, target.name()))));
-        let local_path_bytes = target_path_str.bytes()
-          .skip(crate_name_str_idx + partial_path_byte_length)
-          .collect::<Vec<_>>();
-        let local_path_str = String::from_utf8(local_path_bytes).unwrap();
-        for kind in util::kind_to_kinds(target.kind()) {
-          targets.push(BuildTarget {
-            name: target.name().to_owned(),
-            path: local_path_str.clone(),
-            kind: kind,
-          });
-        }
+  for target in package.targets().iter() {
+    let target_path_str = try!(target.src_path().to_str().ok_or(CargoError::from(format!(
+      "path for {}'s target {} wasn't unicode",
+      &full_name,
+      target.name()
+    )))).to_owned();
+    let crate_name_str_idx =
+      try!(target_path_str.find(&partial_path).ok_or(CargoError::from(format!(
+        "path for {}'s target {} should have been in vendor directory",
+        &full_name,
+        target.name()
+      ))));
+    let local_path_bytes = target_path_str
+      .bytes()
+      .skip(crate_name_str_idx + partial_path_byte_length)
+      .collect::<Vec<_>>();
+    let local_path_str = String::from_utf8(local_path_bytes).unwrap();
+    for kind in util::kind_to_kinds(target.kind()) {
+      targets.push(BuildTarget {
+        name: target.name().to_owned(),
+        path: local_path_str.clone(),
+        kind: kind,
+      });
     }
+  }
 
-    Ok(targets)
+  Ok(targets)
 }
