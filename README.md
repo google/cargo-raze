@@ -1,5 +1,7 @@
 # cargo-raze: Bazel BUILD generation for Rust Crates
 
+[![Build Status](https://travis-ci.org/google/cargo-raze.svg?branch=master)](https://travis-ci.org/google/cargo-raze)
+
 An experimental support Cargo plugin for distilling a workspace-level
 Cargo.toml into BUILD targets that code using [rules_rust](https://github.com/bazelbuild/rules_rust)
 can depend on directly.
