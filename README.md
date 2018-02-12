@@ -72,7 +72,7 @@ missing source files for this mock crate. Here is an example:
 name = "compile_with_bazel"
 version = "0.0.0"
 
-# Mandatory (or Cargo is unhappy)
+# Mandatory (or Cargo tooling is unhappy)
 [lib]
 path = "fake_lib.rs"
 
@@ -116,20 +116,20 @@ You can now depend on any *explicit* dependencies in any Rust rule by depending 
 
 ### Remote Dependency Mode
 
-In Remote mode, a directory similiar to the vendoring mode is selected, however
-it only shall contain BUILD files, a vendoring instruction for the WORKSPACE,
+In Remote mode a directory similiar to the vendoring mode is selected. In this
+case though it contains only BUILD files, a vendoring instruction for the WORKSPACE,
 and aliases to the explicit dependencies. Slightly different plumbing is
 required.
 
 #### Generate a Cargo.toml
-Generate a Cargo.toml, similar to Vendoring mode, but add a new directive in the
+Generate a Cargo.toml, similar to Vendoring mode but add a new directive in the
 `[raze]` section
 ```toml
 [raze]
 genmode = "Remote"
 ```
 
-This tells Raze not to expect the dependencies to be vendored, and to generate
+This tells Raze not to expect the dependencies to be vendored and to generate
 different files.
 
 #### Generate buildable targets
@@ -274,8 +274,8 @@ binaries and libraries to share the same target name, Bazel disallows this.
 Bazel ("fast", "correct", choose two) is a battle tested build system used by
 Google to compile incredibly large, multilingual projects without duplicating
 effort, and without compromising on correctness. It accomplishes this in part by
-limiting what mechanisms a given compilation object can use to dissover
-dependencies, and by forcing buildable units to express the complete set of
+limiting what mechanisms a given compilation object can use to discover
+dependencies and by forcing buildable units to express the complete set of
 their dependencies. It expects two identical sets of build target inputs to produce a
 byte-for-byte equivalent final result.
 
@@ -284,9 +284,9 @@ that compiles any kind of compilable target and allows expressing "unconventiona
 dependencies", such as Protobuf objects, precompiled graphics shaders, or
 generated code, while remaining fast and correct.
 
-Its also probable (though not yet demonstrated with benchmarks) that lare
-applications built with Bazel's strengths in mind: highly graular build units,
-will compile significantly faster as they are able to cache more aggressively,
+Its also probable (though not yet demonstrated with benchmarks) that large
+applications built with Bazel's strengths in mind: highly granular build units,
+will compile significantly faster as they are able to cache more aggressively
 and avoid recompilation of as much code while iterating.
 
 ## Why try to integrate Cargo's dependencies into this build tool?
@@ -298,24 +298,24 @@ structured process to stabilization (experimental crate -> 1.0 crate -> RFC ->
 inclusion in stdlib), but it means that people who lack access to this ecosystem
 must reinvent many wheels.
 
-Putting that aside, there are also fantastic crates that help Rust developers
+Putting that aside there are also fantastic crates that help Rust developers
 interact with industry standard systems and libraries which can greatly
-accelerate development.
+accelerate development in the language.
 
 ## Why not build directly with Cargo / Why generate rustc invocations?
 
 Though the burden of emulating Cargo's functionality (where possible at all!) is
 high, it appears to be the only way to maintain the guarantees (correctness,
-reproducibility) that Bazel depends on to stay performant. It is possible (and
-likely, with inflight RFCs) that Cargo will become sufficiently flexible to
-allow it to be used directly for compilation, but at this point in time, it
+reproducibility) that Bazel depends on to stay performant. It is possible and
+likely with inflight RFCs that Cargo will become sufficiently flexible to
+allow it to be used directly for compilation but at this point in time it
 appears that maintaining a semblance of feature parity is actually easier than
 avoiding all of the sharp edges introduced by treating Cargo like the Rust
 compiler.
 
 ## What is buildable right now with Bazel, and what is not?
 
-With a little bit of elbow grease, it is possible to build nearly everything,
+With a little bit of elbow grease it is possible to build nearly everything,
 including projects that depend on openssl-sys. Many sys crates will require
 identifying the system library that they wrap, and either vendoring it into the
 project, or telling Bazel where it lives on your system. Some may require minor
@@ -325,9 +325,6 @@ the most popular crates have been built in an example repo, available at
 https://github.com/acmcarther/cargo-raze-crater
 
 ## Example Repos
-
-
-## Additional Configuration
 
 See these examples of providing crate configuration:
 
