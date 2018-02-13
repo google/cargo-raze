@@ -13,7 +13,7 @@ load(
     "rust_bench_test",
 )
 
-{%- set crate_name_sanitized = crate.pkg_name | replace(from="-", to="_") %}
+{% set crate_name_sanitized = crate.pkg_name | replace(from="-", to="_") %}
 {%- if crate.build_script_target %}
 {%- include "templates/partials/build_script.template" %}
 {%- endif %}
