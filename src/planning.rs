@@ -31,6 +31,7 @@ use context::BuildDependency;
 use context::BuildTarget;
 use context::CrateContext;
 use context::WorkspaceContext;
+use settings::CrateSettings;
 use settings::GenMode;
 use settings::RazeSettings;
 use std::collections::HashSet;
@@ -155,14 +156,12 @@ impl<'a> BuildPlanner<'a> {
 
       // Skip generated dependencies explicitly designated to be skipped (potentially due to
       // being replaced or customized as part of additional_deps)
-      let non_skipped_normal_deps = if let Some(s) = possible_crate_settings {
-        normal_deps
-          .into_iter()
-          .filter(|d| !s.skipped_deps.contains(&format!("{}-{}", d.name, d.version)))
-          .collect::<Vec<_>>()
-      } else {
-        normal_deps
-      };
+      let non_skipped_normal_deps = possible_crate_settings
+        .map(|s| prune_skipped_deps(&normal_deps, s))
+        .unwrap_or_else(|| normal_deps);
+      let non_skipped_build_deps = possible_crate_settings
+        .map(|s| prune_skipped_deps(&build_deps, s))
+        .unwrap_or_else(|| build_deps);
 
       crate_contexts.push(CrateContext {
         pkg_name: id.name().to_owned(),
@@ -171,7 +170,7 @@ impl<'a> BuildPlanner<'a> {
         is_root_dependency: root_direct_deps.contains(&id),
         metadeps: Vec::new(), /* TODO(acmcarther) */
         dependencies: non_skipped_normal_deps,
-        build_dependencies: build_deps,
+        build_dependencies: non_skipped_build_deps,
         dev_dependencies: dev_deps,
         path: path,
         build_script_target: build_script_target,
@@ -324,4 +323,15 @@ fn identify_targets(full_name: &str, package: &CargoPackage) -> CargoResult<Vec<
   }
 
   Ok(targets)
+}
+
+fn prune_skipped_deps(
+  deps: &Vec<BuildDependency>,
+  crate_settings: &CrateSettings,
+) -> Vec<BuildDependency> {
+  deps
+    .iter()
+    .filter(|d| !crate_settings.skipped_deps.contains(&format!("{}-{}", d.name, d.version)))
+    .map(|dep| dep.clone())
+    .collect::<Vec<_>>()
 }
