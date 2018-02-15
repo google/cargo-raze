@@ -267,6 +267,7 @@ mod tests {
       pkg_version: "1.1.1".to_owned(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
       path: "vendor/test-binary-1.1.1/".to_owned(),
+      licenses: Vec::new(),
       dependencies: Vec::new(),
       build_dependencies: Vec::new(),
       dev_dependencies: Vec::new(),
@@ -291,6 +292,7 @@ mod tests {
     CrateContext {
       pkg_name: "test-library".to_owned(),
       pkg_version: "1.1.1".to_owned(),
+      licenses: Vec::new(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
       path: "vendor/test-library-1.1.1/".to_owned(),
       dependencies: Vec::new(),

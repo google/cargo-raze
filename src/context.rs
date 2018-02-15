@@ -31,10 +31,17 @@ pub struct Metadep {
   pub min_version: String,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
+pub struct LicenseData {
+  pub name: String,
+  pub rating: String,
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct CrateContext {
   pub pkg_name: String,
   pub pkg_version: String,
+  pub licenses: Vec<LicenseData>,
   pub features: Vec<String>,
   pub path: String,
   pub dependencies: Vec<BuildDependency>,

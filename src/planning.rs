@@ -30,7 +30,10 @@ use cargo::util::ToUrl;
 use context::BuildDependency;
 use context::BuildTarget;
 use context::CrateContext;
+use context::LicenseData;
 use context::WorkspaceContext;
+use license;
+use settings::CargoPackageSettings;
 use settings::GenMode;
 use settings::RazeSettings;
 use std::collections::HashSet;
@@ -164,9 +167,24 @@ impl<'a> BuildPlanner<'a> {
         normal_deps
       };
 
+      let cargo_license_string = if let Some(ref l) = self.cargo_package_settings.license {
+        l.clone()
+      } else {
+        String::new()
+      };
+
+      let licenses = license::get_available_licenses(&cargo_license_string)
+        .into_iter()
+        .map(|(name, rating)| LicenseData {
+          name: name,
+          rating: rating.to_string(),
+        })
+        .collect();
+
       crate_contexts.push(CrateContext {
         pkg_name: id.name().to_owned(),
         pkg_version: id.version().to_string(),
+        licenses: licenses,
         features: features,
         is_root_dependency: root_direct_deps.contains(&id),
         metadeps: Vec::new(), /* TODO(acmcarther) */
