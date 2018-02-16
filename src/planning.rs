@@ -33,7 +33,6 @@ use context::CrateContext;
 use context::LicenseData;
 use context::WorkspaceContext;
 use license;
-use settings::CargoPackageSettings;
 use settings::GenMode;
 use settings::RazeSettings;
 use std::collections::HashSet;
@@ -90,6 +89,8 @@ impl<'a> BuildPlanner<'a> {
         .next()
         .ok_or(CargoError::from("root crate should be in cargo resolve"))
     );
+
+    // TODO:(get the root package here)
     let root_direct_deps = resolve.deps(&root_package_id).cloned().collect::<HashSet<_>>();
 
     let mut crate_contexts = Vec::new();
@@ -167,7 +168,7 @@ impl<'a> BuildPlanner<'a> {
         normal_deps
       };
 
-      let cargo_license_string = if let Some(ref l) = self.cargo_package_settings.license {
+      let cargo_license_string = if let Some(ref l) = package.manifest().metadata().license {
         l.clone()
       } else {
         String::new()

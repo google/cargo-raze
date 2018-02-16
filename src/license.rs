@@ -1,9 +1,11 @@
+use std::collections::HashMap;
+
 /**
  * The list of Bazel-known license types
  *
  * KEEP ORDERED: The order dictates the preference.
  */
-#[derive(Eq, PartialEq, Ord, PartialOrd, Debug)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Hash)]
 pub enum BazelLicenseType {
   Unencumbered,
   Notice,
@@ -23,9 +25,10 @@ impl ::std::fmt::Display for BazelLicenseType {
         &BazelLicenseType::Unencumbered => "unencumbered",
         &BazelLicenseType::Notice => "notice",
         &BazelLicenseType::Reciprocal => "reciprocal",
-        &BazelLicenseType::ByExceptionOnly => "by_exception_only",
-        &BazelLicenseType::Restricted => "restricted",
-        &BazelLicenseType::Disallowed => "disallowed",
+        // N.B.: Bazel doesn't have a notion of "disallowed" or "by_exception_only", using restricted instead.
+        &BazelLicenseType::Restricted
+        | &BazelLicenseType::ByExceptionOnly
+        | &BazelLicenseType::Disallowed => "restricted",
       }
     )
   }
@@ -37,10 +40,34 @@ impl ::std::fmt::Display for BazelLicenseType {
  * User should
  */
 pub fn get_available_licenses(cargo_license_str: &str) -> Vec<(String, BazelLicenseType)> {
-  let mut available_licenses: Vec<(String, BazelLicenseType)> =
-    cargo_license_str.split('/').map(|s| (s.to_owned(), get_bazel_license_type(s))).collect();
+  if cargo_license_str.is_empty() {
+    return vec![("no license".to_owned(), BazelLicenseType::Restricted)];
+  }
 
-  // Order by license
+  let mut license_type_to_license_name = HashMap::new();
+  for license_name in cargo_license_str.split('/') {
+    if license_name.is_empty() {
+      continue;
+    }
+
+    // Trimming motivated by reem/rust-unreachable
+    let trimmed_license_name = license_name.trim();
+
+    let license_type = get_bazel_license_type(trimmed_license_name);
+    if license_type_to_license_name.contains_key(&license_type) {
+      let mut license_names_str: &mut String =
+        license_type_to_license_name.get_mut(&license_type).unwrap();
+      license_names_str.push_str(",");
+      license_names_str.push_str(trimmed_license_name);
+    } else {
+      license_type_to_license_name.insert(license_type, license_name.to_owned());
+    }
+  }
+
+  let mut available_licenses =
+    license_type_to_license_name.into_iter().map(|(k, v)| (v, k)).collect::<Vec<_>>();
+
+  // Order by license type
   available_licenses.sort_by(|a, b| a.1.cmp(&b.1));
 
   available_licenses

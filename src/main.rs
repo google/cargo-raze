@@ -95,7 +95,6 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
     /* locked = */ false
   ));
   let settings::CargoToml {
-    package,
     mut raze,
     ..
   } = try!(load_settings("Cargo.toml"));
@@ -103,7 +102,7 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
 
   try!(validate_settings(&mut raze));
 
-  let mut planner = try!(BuildPlanner::new(package, raze.clone(), cargo_config));
+  let mut planner = try!(BuildPlanner::new(raze.clone(), cargo_config));
 
   if let Some(host) = options.flag_host {
     try!(planner.set_registry_from_url(host));

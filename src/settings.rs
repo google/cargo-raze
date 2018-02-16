@@ -32,17 +32,8 @@ pub enum GenMode {
   Remote,
 }
 
-/** Part of Cargo's Package TOML object */
-#[derive(Debug, Clone, Deserialize)]
-pub struct CargoPackageSettings {
-  pub license: Option<String>,
-}
-
 #[derive(Debug, Clone, Deserialize)]
 pub struct CargoToml {
-  /** The parts of the cargo package definition that we need. */
-  pub package: CargoPackageSettings,
-
   /** The raze settings (the only part of the Cargo.toml we care about. */
   pub raze: RazeSettings,
 }

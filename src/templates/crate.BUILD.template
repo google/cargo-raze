@@ -5,11 +5,11 @@ DO NOT EDIT! Replaced on runs of cargo-raze
 """
 package(default_visibility = ["{{workspace.workspace_path}}:__subpackages__"])
 
-licenses(
+licenses([
 {%- for license in crate.licenses %}
-  "{{license.rating}}" # "{{license.name}}",
+  "{{license.rating}}", # "{{license.name}}"
 {%- endfor %}
-)
+])
 
 load(
     "@io_bazel_rules_rust//rust:rust.bzl",
