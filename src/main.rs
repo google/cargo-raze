@@ -94,15 +94,11 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
     /* frozen = */ false,
     /* locked = */ false
   ));
-  let settings::CargoToml {
-    mut raze,
-    ..
-  } = try!(load_settings("Cargo.toml"));
-  println!("Loaded override settings: {:#?}", raze);
+  let mut settings = try!(load_settings("Cargo.toml"));
 
-  try!(validate_settings(&mut raze));
+  try!(validate_settings(&mut settings));
 
-  let mut planner = try!(BuildPlanner::new(raze.clone(), cargo_config));
+  let mut planner = try!(BuildPlanner::new(settings.clone(), cargo_config));
 
   if let Some(host) = options.flag_host {
     try!(planner.set_registry_from_url(host));
@@ -114,7 +110,7 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
     path_prefix: "./".to_owned(),
   };
 
-  let bazel_file_outputs = match raze.genmode {
+  let bazel_file_outputs = match settings.genmode {
     GenMode::Vendored => try!(bazel_renderer.render_planned_build(&render_details, &planned_build)),
     GenMode::Remote => {
       try!(bazel_renderer.render_remote_planned_build(&render_details, &planned_build))
@@ -171,7 +167,7 @@ fn write_to_file_loudly(path: &str, contents: &str) -> CargoResult<()> {
   Ok(())
 }
 
-fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<settings::CargoToml, CargoError> {
+fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings, CargoError> {
   let path = cargo_toml_path.as_ref();
   let mut toml = try!(File::open(path).map_err(|e| {
     println!("{:?}", e);
@@ -182,8 +178,10 @@ fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<settings::CargoTo
     println!("{:?}", e);
     CargoError::from(format!("failed to read {:?}", path))
   }));
-  toml::from_str::<settings::CargoToml>(&toml_contents).map_err(|e| {
-    println!("{:?}", e);
-    CargoError::from(format!("failed to parse {:?}", path))
-  })
+  toml::from_str::<settings::CargoToml>(&toml_contents)
+    .map_err(|e| {
+      println!("{:?}", e);
+      CargoError::from(format!("failed to parse {:?}", path))
+    })
+    .map(|toml| toml.raze)
 }

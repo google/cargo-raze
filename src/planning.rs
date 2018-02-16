@@ -89,8 +89,6 @@ impl<'a> BuildPlanner<'a> {
         .next()
         .ok_or(CargoError::from("root crate should be in cargo resolve"))
     );
-
-    // TODO:(get the root package here)
     let root_direct_deps = resolve.deps(&root_package_id).cloned().collect::<HashSet<_>>();
 
     let mut crate_contexts = Vec::new();
