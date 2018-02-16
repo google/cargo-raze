@@ -20,6 +20,7 @@ use planning::PlannedBuild;
 use rendering::BuildRenderer;
 use rendering::FileOutputs;
 use rendering::RenderDetails;
+use std::fs;
 use tera;
 use tera::Context;
 use tera::Tera;
@@ -166,7 +167,7 @@ impl BuildRenderer for BazelRenderer {
       })
     }
 
-    let build_file_path = format!("{}/vendor/BUILD", &path_prefix);
+    let build_file_path = format!("{}/BUILD", &path_prefix);
     let rendered_alias_build_file = try!(
       self
         .render_aliases(&workspace_context, &crate_contexts)
@@ -195,8 +196,13 @@ impl BuildRenderer for BazelRenderer {
     } = planned_build;
     let mut file_outputs = Vec::new();
 
+    // Create "remote/" if it doesn't exist
+    if fs::metadata("remote/").is_err() {
+      try!(fs::create_dir("remote/").map_err(|e| CargoError::from(e.to_string())));
+    }
+
     for package in crate_contexts {
-      let build_file_path = format!("{}-{}.BUILD", &package.pkg_name, &package.pkg_version);
+      let build_file_path = format!("remote/{}-{}.BUILD", &package.pkg_name, &package.pkg_version);
       let rendered_crate_build_file = try!(
         self
           .render_remote_crate(&workspace_context, &package)
