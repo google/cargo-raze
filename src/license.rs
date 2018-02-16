@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 /**
  * The list of Bazel-known license types
  *
@@ -16,21 +14,17 @@ pub enum BazelLicenseType {
   Disallowed,
 }
 
-impl ::std::fmt::Display for BazelLicenseType {
-  fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-    write!(
-      f,
-      "{}",
-      match self {
-        &BazelLicenseType::Unencumbered => "unencumbered",
-        &BazelLicenseType::Notice => "notice",
-        &BazelLicenseType::Reciprocal => "reciprocal",
-        // N.B.: Bazel doesn't have a notion of "disallowed" or "by_exception_only", using restricted instead.
-        &BazelLicenseType::Restricted
-        | &BazelLicenseType::ByExceptionOnly
-        | &BazelLicenseType::Disallowed => "restricted",
-      }
-    )
+impl BazelLicenseType {
+  pub fn to_bazel_rating(&self) -> &'static str {
+    match self {
+      &BazelLicenseType::Unencumbered => "unencumbered",
+      &BazelLicenseType::Notice => "notice",
+      &BazelLicenseType::Reciprocal => "reciprocal",
+      // N.B.: Bazel doesn't have a notion of "disallowed" or "by_exception_only", using restricted instead.
+      &BazelLicenseType::Restricted
+      | &BazelLicenseType::ByExceptionOnly
+      | &BazelLicenseType::Disallowed => "restricted",
+    }
   }
 }
 
@@ -40,11 +34,7 @@ impl ::std::fmt::Display for BazelLicenseType {
  * User should
  */
 pub fn get_available_licenses(cargo_license_str: &str) -> Vec<(String, BazelLicenseType)> {
-  if cargo_license_str.is_empty() {
-    return vec![("no license".to_owned(), BazelLicenseType::Restricted)];
-  }
-
-  let mut license_type_to_license_name = HashMap::new();
+  let mut available_licenses = Vec::new();
   for license_name in cargo_license_str.split('/') {
     if license_name.is_empty() {
       continue;
@@ -54,18 +44,13 @@ pub fn get_available_licenses(cargo_license_str: &str) -> Vec<(String, BazelLice
     let trimmed_license_name = license_name.trim();
 
     let license_type = get_bazel_license_type(trimmed_license_name);
-    if license_type_to_license_name.contains_key(&license_type) {
-      let mut license_names_str: &mut String =
-        license_type_to_license_name.get_mut(&license_type).unwrap();
-      license_names_str.push_str(",");
-      license_names_str.push_str(trimmed_license_name);
-    } else {
-      license_type_to_license_name.insert(license_type, license_name.to_owned());
-    }
+
+    available_licenses.push((trimmed_license_name.to_owned(), license_type));
   }
 
-  let mut available_licenses =
-    license_type_to_license_name.into_iter().map(|(k, v)| (v, k)).collect::<Vec<_>>();
+  if available_licenses.is_empty() {
+    return vec![("no license".to_owned(), BazelLicenseType::Restricted)];
+  }
 
   // Order by license type
   available_licenses.sort_by(|a, b| a.1.cmp(&b.1));
@@ -475,6 +460,17 @@ mod tests {
     assert_eq!(
       get_available_licenses("MIT5.0"),
       vec![("MIT5.0".to_owned(), BazelLicenseType::Restricted)]
+    );
+  }
+
+  #[test]
+  fn whitespace_laden_licenses_are_ok() {
+    assert_eq!(
+      get_available_licenses("MIT / Apache-2.0"),
+      vec![
+        ("MIT".to_owned(), BazelLicenseType::Notice),
+        ("Apache-2.0".to_owned(), BazelLicenseType::Notice),
+      ]
     );
   }
 }

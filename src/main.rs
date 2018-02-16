@@ -95,6 +95,7 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
     /* locked = */ false
   ));
   let mut settings = try!(load_settings("Cargo.toml"));
+  println!("Loaded override settings: {:#?}", settings);
 
   try!(validate_settings(&mut settings));
 

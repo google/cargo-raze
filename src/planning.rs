@@ -21,6 +21,7 @@ use cargo::core::Resolve;
 use cargo::core::SourceId;
 use cargo::core::Workspace;
 use cargo::core::dependency::Kind;
+use cargo::core::manifest::ManifestMetadata;
 use cargo::ops;
 use cargo::ops::Packages;
 use cargo::util::CargoResult;
@@ -35,6 +36,7 @@ use context::WorkspaceContext;
 use license;
 use settings::GenMode;
 use settings::RazeSettings;
+use std::collections::HashMap;
 use std::collections::HashSet;
 use std::env;
 use std::fs;
@@ -166,19 +168,7 @@ impl<'a> BuildPlanner<'a> {
         normal_deps
       };
 
-      let cargo_license_string = if let Some(ref l) = package.manifest().metadata().license {
-        l.clone()
-      } else {
-        String::new()
-      };
-
-      let licenses = license::get_available_licenses(&cargo_license_string)
-        .into_iter()
-        .map(|(name, rating)| LicenseData {
-          name: name,
-          rating: rating.to_string(),
-        })
-        .collect();
+      let licenses = load_and_dedup_licenses(&package.manifest().metadata());
 
       crate_contexts.push(CrateContext {
         pkg_name: id.name().to_owned(),
@@ -341,4 +331,98 @@ fn identify_targets(full_name: &str, package: &CargoPackage) -> CargoResult<Vec<
   }
 
   Ok(targets)
+}
+
+fn load_and_dedup_licenses(metadata: &ManifestMetadata) -> Vec<LicenseData> {
+  let mut cargo_license_string = String::new();
+  if let Some(ref l) = metadata.license {
+    cargo_license_string = l.clone();
+  }
+
+  let mut rating_to_license_name = HashMap::new();
+  for (license_name, license_type) in license::get_available_licenses(&cargo_license_string) {
+    let rating = license_type.to_bazel_rating();
+
+    if rating_to_license_name.contains_key(&rating) {
+      let mut license_names_str: &mut String = rating_to_license_name.get_mut(&rating).unwrap();
+      license_names_str.push_str(",");
+      license_names_str.push_str(&license_name);
+    } else {
+      rating_to_license_name.insert(rating, license_name);
+    }
+  }
+
+  let mut license_data_list = rating_to_license_name
+    .into_iter()
+    .map(|(rating, name)| LicenseData {
+      name: name,
+      rating: rating.to_owned(),
+    })
+    .collect::<Vec<_>>();
+
+  // Make output deterministic
+  license_data_list.sort_by_key(|d| d.rating.clone());
+
+  license_data_list
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use cargo::core::manifest::ManifestMetadata;
+  use std::collections::HashMap;
+
+  fn make_manifest_metadata(licenses: Option<String>) -> ManifestMetadata {
+    ManifestMetadata {
+      authors: Vec::new(),
+      keywords: Vec::new(),
+      categories: Vec::new(),
+      license: licenses,
+      license_file: None,
+      description: None,
+      readme: None,
+      homepage: None,
+      repository: None,
+      documentation: None,
+      badges: HashMap::new(),
+    }
+  }
+
+  #[test]
+  fn license_loading_works_with_no_license() {
+    let no_license_data = vec![
+      LicenseData {
+        name: "no license".to_owned(),
+        rating: "restricted".to_owned(),
+      },
+    ];
+
+    let metadata = make_manifest_metadata(None /* licenses */);
+    assert_eq!(load_and_dedup_licenses(&metadata), no_license_data);
+
+    let metadata = make_manifest_metadata(Some("".to_owned()));
+    assert_eq!(load_and_dedup_licenses(&metadata), no_license_data);
+
+    let metadata = make_manifest_metadata(Some("///".to_owned()));
+    assert_eq!(load_and_dedup_licenses(&metadata), no_license_data);
+  }
+
+  #[test]
+  fn license_loading_dedupes_equivalent_licenses() {
+    // WTFPL is "disallowed",but we map that down tothe same thing as GPL
+    let metadata = make_manifest_metadata(Some("Unlicense/ WTFPL /GPL-3.0".to_owned()));
+    assert_eq!(
+      load_and_dedup_licenses(&metadata),
+      vec![
+        LicenseData {
+          name: "GPL-3.0,WTFPL".to_owned(),
+          rating: "restricted".to_owned(),
+        },
+        LicenseData {
+          name: "Unlicense".to_owned(),
+          rating: "unencumbered".to_owned(),
+        },
+      ]
+    );
+  }
 }
