@@ -31,6 +31,7 @@ mod rendering;
 mod settings;
 mod util;
 mod bazel;
+mod license;
 
 use bazel::BazelRenderer;
 use cargo::CargoError;
