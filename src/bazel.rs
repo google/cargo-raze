@@ -20,7 +20,6 @@ use planning::PlannedBuild;
 use rendering::BuildRenderer;
 use rendering::FileOutputs;
 use rendering::RenderDetails;
-use std::fs;
 use tera;
 use tera::Context;
 use tera::Tera;
@@ -196,10 +195,11 @@ impl BuildRenderer for BazelRenderer {
     } = planned_build;
     let mut file_outputs = Vec::new();
 
-    // Create "remote/" if it doesn't exist
-    if fs::metadata("remote/").is_err() {
-      try!(fs::create_dir("remote/").map_err(|e| CargoError::from(e.to_string())));
-    }
+    // N.B. File needs to exist so that contained xyz-1.2.3.BUILD can be referenced
+    file_outputs.push(FileOutputs {
+      path: "remote/BUILD".to_owned(),
+      contents: String::new(),
+    });
 
     for package in crate_contexts {
       let build_file_path = format!("remote/{}-{}.BUILD", &package.pkg_name, &package.pkg_version);

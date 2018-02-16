@@ -45,6 +45,7 @@ use rendering::RenderDetails;
 use settings::GenMode;
 use settings::RazeSettings;
 use std::env;
+use std::fs;
 use std::fs::File;
 use std::io::Read;
 use std::io::Write;
@@ -114,6 +115,11 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
   let bazel_file_outputs = match settings.genmode {
     GenMode::Vendored => try!(bazel_renderer.render_planned_build(&render_details, &planned_build)),
     GenMode::Remote => {
+      // Create "remote/" if it doesn't exist
+      if fs::metadata("remote/").is_err() {
+        try!(fs::create_dir("remote/").map_err(|e| CargoError::from(e.to_string())));
+      }
+
       try!(bazel_renderer.render_remote_planned_build(&render_details, &planned_build))
     },
     /* exhaustive, we control the definition */
