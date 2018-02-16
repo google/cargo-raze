@@ -112,7 +112,7 @@ $ cargo raze
 ```
 
 You can now depend on any *explicit* dependencies in any Rust rule by depending on
-`//cargo/vendor:your_dependency_name`.
+`//cargo:your_dependency_name`.
 
 ### Remote Dependency Mode
 
@@ -153,7 +153,7 @@ This tells Bazel where to get the dependencies from, and how to build them:
 using the files generated into //cargo.
 
 You can depend on any *explicit* dependencies in any Rust rule by depending on
-`//cargo:your_dependency_name`. Mind the lack of "vendor/" directory.
+`//cargo:your_dependency_name`.
 
 ### Handling Unconventional Crates
 
@@ -328,9 +328,9 @@ https://github.com/acmcarther/cargo-raze-crater
 
 See these examples of providing crate configuration:
 
-- [basic-example](https://github.com/acmcarther/cargo-raze-examples/blob/master/bazel/hello_cargo_library/Cargo.toml)
-- [complicated-example](https://github.com/acmcarther/cargo-raze-examples/blob/master/bazel/complicated_cargo_library/Cargo.toml)
-- [complicated-example-remote](https://github.com/acmcarther/cargo-raze-examples/blob/master/bazel/complicated_cargo_library_remote/Cargo.toml)
+- [basic-example](https://github.com/acmcarther/cargo-raze-examples/blob/master/bazel/hello_cargo_library/cargo/Cargo.toml)
+- [complicated-example](https://github.com/acmcarther/cargo-raze-examples/blob/master/bazel/complicated_cargo_library/cargo/Cargo.toml)
+- [complicated-example-remote](https://github.com/acmcarther/cargo-raze-examples/blob/master/bazel/complicated_cargo_library_remote/cargo/Cargo.toml)
 - [openssl-example](https://github.com/acmcarther/compile_openssl/blob/master/cargo/Cargo.toml)
 
 The [raze] section is derived from a struct declared in [src/settings.rs](./src/settings.rs).

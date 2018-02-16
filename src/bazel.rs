@@ -166,7 +166,7 @@ impl BuildRenderer for BazelRenderer {
       })
     }
 
-    let build_file_path = format!("{}/vendor/BUILD", &path_prefix);
+    let build_file_path = format!("{}/BUILD", &path_prefix);
     let rendered_alias_build_file = try!(
       self
         .render_aliases(&workspace_context, &crate_contexts)
@@ -195,8 +195,14 @@ impl BuildRenderer for BazelRenderer {
     } = planned_build;
     let mut file_outputs = Vec::new();
 
+    // N.B. File needs to exist so that contained xyz-1.2.3.BUILD can be referenced
+    file_outputs.push(FileOutputs {
+      path: "remote/BUILD".to_owned(),
+      contents: String::new(),
+    });
+
     for package in crate_contexts {
-      let build_file_path = format!("{}-{}.BUILD", &package.pkg_name, &package.pkg_version);
+      let build_file_path = format!("remote/{}-{}.BUILD", &package.pkg_name, &package.pkg_version);
       let rendered_crate_build_file = try!(
         self
           .render_remote_crate(&workspace_context, &package)
@@ -315,10 +321,11 @@ mod tests {
     }
   }
 
-  fn extract_contents_matching_path(file_outputs: &Vec<FileOutputs>, crate_name: &str) -> String {
+  fn extract_contents_matching_path(file_outputs: &Vec<FileOutputs>, file_name: &str) -> String {
+    println!("Known files :{:?}", file_outputs);
     let mut matching_files_contents = file_outputs
       .iter()
-      .filter(|output| output.path.contains(crate_name))
+      .filter(|output| output.path.starts_with(file_name))
       .map(|output| output.contents.to_owned())
       .collect::<Vec<String>>();
 
@@ -337,7 +344,7 @@ mod tests {
     let file_outputs = render_crates_for_test(Vec::new());
     let file_names = file_outputs.iter().map(|output| output.path.as_ref()).collect::<Vec<&str>>();
 
-    assert_that!(&file_names, contains(vec!["./some_render_prefix/vendor/BUILD"]).exactly());
+    assert_that!(&file_names, contains(vec!["./some_render_prefix/BUILD"]).exactly());
   }
 
   #[test]
@@ -348,8 +355,8 @@ mod tests {
     assert_that!(
       &file_names,
       contains(vec![
-        "./some_render_prefix/vendor/BUILD",
         "./some_render_prefix/vendor/test-library-1.1.1/BUILD",
+        "./some_render_prefix/BUILD",
       ]).exactly()
     );
   }
@@ -357,7 +364,8 @@ mod tests {
   #[test]
   fn root_crates_get_build_aliases() {
     let file_outputs = render_crates_for_test(vec![dummy_library_crate()]);
-    let root_build_contents = extract_contents_matching_path(&file_outputs, "vendor/BUILD");
+    let root_build_contents =
+      extract_contents_matching_path(&file_outputs, "./some_render_prefix/BUILD");
 
     expect(
       root_build_contents.contains("alias"),
@@ -375,7 +383,8 @@ mod tests {
     non_root_crate.is_root_dependency = false;
 
     let file_outputs = render_crates_for_test(vec![non_root_crate]);
-    let root_build_contents = extract_contents_matching_path(&file_outputs, "vendor/BUILD");
+    let root_build_contents =
+      extract_contents_matching_path(&file_outputs, "./some_render_prefix/BUILD");
 
     expect(
       !root_build_contents.contains("alias"),
@@ -390,8 +399,10 @@ mod tests {
   #[test]
   fn binaries_get_rust_binary_rules() {
     let file_outputs = render_crates_for_test(vec![dummy_binary_crate()]);
-    let crate_build_contents =
-      extract_contents_matching_path(&file_outputs, "vendor/test-binary-1.1.1/BUILD");
+    let crate_build_contents = extract_contents_matching_path(
+      &file_outputs,
+      "./some_render_prefix/vendor/test-binary-1.1.1/BUILD",
+    );
 
     expect(
       crate_build_contents.contains("rust_binary("),
@@ -405,8 +416,10 @@ mod tests {
   #[test]
   fn libraries_get_rust_library_rules() {
     let file_outputs = render_crates_for_test(vec![dummy_library_crate()]);
-    let crate_build_contents =
-      extract_contents_matching_path(&file_outputs, "vendor/test-library-1.1.1/BUILD");
+    let crate_build_contents = extract_contents_matching_path(
+      &file_outputs,
+      "./some_render_prefix/vendor/test-library-1.1.1/BUILD",
+    );
 
     expect(
       crate_build_contents.contains("rust_library("),
