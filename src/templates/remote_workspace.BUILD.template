@@ -4,6 +4,11 @@ cargo-raze workspace build file.
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
 package(default_visibility = ["//visibility:public"])
+
+licenses([
+  "notice" # See individual crates for specific licenses
+])
+
 {% for crate in crates %}
 {%- if crate.is_root_dependency %}
 {%- set crate_name_sanitized = crate.pkg_name | replace(from="-", to="_") %}
