@@ -55,15 +55,19 @@ pub struct CrateContext {
   pub additional_deps: Vec<String>,
   pub additional_flags: Vec<String>,
   pub extra_aliased_targets: Vec<String>,
-  // TODO(acmcarther): Consider plugin topic
+  pub data: Option<String>, // TODO(acmcarther): Consider plugin topic
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct WorkspaceContext {
-  /** The bazel path prefix to the vendor directory */
+  /**
+   * The bazel path prefix to the vendor directory
+   */
   pub workspace_path: String,
 
-  /** The compilation target triple */
+  /**
+   * The compilation target triple
+   */
   pub platform_triple: String,
 
   /**
