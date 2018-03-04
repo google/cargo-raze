@@ -34,14 +34,12 @@ pub enum GenMode {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct CargoToml {
-  /** The raze settings (the only part of the Cargo.toml we care about. */
-  pub raze: RazeSettings,
+  /** The raze settings (the only part of the Cargo.toml we care about. */ pub raze: RazeSettings,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct RazeSettings {
-  /** The path to the Cargo.toml working directory. */
-  pub workspace_path: String,
+  /** The path to the Cargo.toml working directory. */ pub workspace_path: String,
 
   /** The platform target to generate BUILD rules for.
    *
