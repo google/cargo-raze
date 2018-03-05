@@ -44,7 +44,8 @@ pub struct CargoToml {
 pub struct RazeSettings {
   /** The path to the Cargo.toml working directory. */ pub workspace_path: String,
 
-  /** The platform target to generate BUILD rules for.
+  /**
+   * The platform target to generate BUILD rules for.
    *
    * This comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
    */
