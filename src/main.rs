@@ -126,11 +126,7 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
   };
 
   let dry_run = options.flag_dryrun.unwrap_or(false);
-  for FileOutputs {
-    path,
-    contents,
-  } in bazel_file_outputs
-  {
+  for FileOutputs { path, contents } in bazel_file_outputs {
     if !dry_run {
       try!(write_to_file_loudly(&path, &contents));
     } else {

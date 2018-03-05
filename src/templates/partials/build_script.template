@@ -20,9 +20,7 @@ rust_binary(
       "{{feature}}",
       {%- endfor %}
     ],
-    {%- if crate.data %}
-    data = "{{crate.data}}",
-    {%- endif %}
+    data = glob(["*"]),
     visibility = ["//visibility:private"],
 )
 

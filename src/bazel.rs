@@ -309,7 +309,7 @@ mod tests {
       additional_deps: Vec::new(),
       additional_flags: Vec::new(),
       extra_aliased_targets: Vec::new(),
-      data: None,
+      data_attr: None,
     }
   }
 
@@ -337,7 +337,7 @@ mod tests {
       additional_deps: Vec::new(),
       additional_flags: Vec::new(),
       extra_aliased_targets: Vec::new(),
-      data: None,
+      data_attr: None,
     }
   }
 

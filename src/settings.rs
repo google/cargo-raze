@@ -34,7 +34,10 @@ pub enum GenMode {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct CargoToml {
-  /** The raze settings (the only part of the Cargo.toml we care about. */ pub raze: RazeSettings,
+  /**
+   * The raze settings (the only part of the Cargo.toml we care about.
+   */
+  pub raze: RazeSettings,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -128,23 +131,19 @@ pub struct CrateSettings {
   #[serde(default = "default_gen_buildrs")]
   pub gen_buildrs: bool,
 
-  /** The verbatim `data` clause to be included for the generated build targets. */
-  #[serde(default = "default_data")]
-  pub data: Option<String>,
-
-  /** An explicit override to be used for a build script's HOST environment variable. */
-  #[serde(default = "default_buildrs_host_override")]
-  pub buildrs_host_override: Option<String>,
+  /**
+   * The verbatim `data` clause to be included for the generated build targets.
+   *
+   * N.B. Build scripts are always provided all crate files for their `data` attr.
+   */
+  #[serde(default = "default_data_attr")]
+  pub data_attr: Option<String>,
 }
 
 fn default_gen_buildrs() -> bool {
   false
 }
 
-fn default_data() -> Option<String> {
-  None
-}
-
-fn default_buildrs_host_override() -> Option<String> {
+fn default_data_attr() -> Option<String> {
   None
 }

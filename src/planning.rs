@@ -191,7 +191,7 @@ impl<'a> BuildPlanner<'a> {
 
       let licenses = load_and_dedup_licenses(&package.manifest().metadata());
 
-      let data = possible_crate_settings.and_then(|s| s.data.clone());
+      let data_attr = possible_crate_settings.and_then(|s| s.data_attr.clone());
 
       crate_contexts.push(CrateContext {
         pkg_name: id.name().to_owned(),
@@ -210,7 +210,7 @@ impl<'a> BuildPlanner<'a> {
         additional_deps: additional_deps,
         additional_flags: additional_flags,
         extra_aliased_targets: extra_aliased_targets,
-        data: data,
+        data_attr: data_attr,
       })
     }
 
@@ -339,15 +339,7 @@ fn find_all_package_ids(registry_id: SourceId, resolve: &Resolve) -> CargoResult
   Ok(package_ids)
 }
 
-/**
- * Derives target objects from Cargo's target information.
- *
- * Cargo crates know what "targets" they need to build. This does not refer to "targettriples",
- * but rather "compilation targets".
- *
- * We need to discover all of the compilation targets, and convert them into a form that can be
- * used to generate build rules.
- */
+/** Derives target objects from Cargo's target information.  */
 fn identify_targets(full_name: &str, package: &CargoPackage) -> CargoResult<Vec<BuildTarget>> {
   let partial_path = format!("{}/", full_name);
   let partial_path_byte_length = partial_path.as_bytes().len();
