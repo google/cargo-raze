@@ -44,8 +44,8 @@ WORKSPACE. Here is an example:
 ```python
 git_repository(
     name = "io_bazel_rules_rust",
-    commit = "5bc46ddca8817072cdae1961b3f9830a2bc3afa7",
-    remote = "https://github.com/acmcarther/rules_rust.git",
+    commit = "cebb2a9d72ef9a9bc85eab2233ce8a8ec8af5586",
+    remote = "https://github.com/bazelbuild/rules_rust.git",
 )
 load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
 
@@ -77,7 +77,7 @@ version = "0.0.0"
 path = "fake_lib.rs"
 
 [dependencies]
-log = "0.3.6"
+log = "=0.3.6"
 
 [raze]
 # The WORKSPACE relative path to the Cargo.toml working directory.
