@@ -494,17 +494,27 @@ mod tests {
 
   #[test]
   fn test_identify_targets_handles_dot_slash() {
-    let target = Target::lib_target(
+    let normal_target = Target::lib_target(
+      "test_target",
+      vec![LibKind::Lib],
+      PathBuf::from("/some_local_path/test_target-0.0.1/arbitrary_subpath/lib.rs"),
+    );
+    let dotslash_target = Target::lib_target(
       "test_target",
       vec![LibKind::Lib],
       PathBuf::from("/some_local_path/test_target-0.0.1/./arbitrary_subpath/lib.rs"),
     );
 
-    let build_targets = identify_targets("test_target-0.0.1", &[target]);
+    let build_targets = identify_targets("test_target-0.0.1", &[normal_target, dotslash_target]);
     assert!(build_targets.is_ok());
     assert_eq!(
       build_targets.unwrap(),
       vec![
+        BuildTarget {
+          name: "test_target".to_owned(),
+          path: "arbitrary_subpath/lib.rs".to_owned(),
+          kind: "lib".to_owned(),
+        },
         BuildTarget {
           name: "test_target".to_owned(),
           path: "arbitrary_subpath/lib.rs".to_owned(),
