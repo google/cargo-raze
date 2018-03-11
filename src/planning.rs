@@ -19,6 +19,7 @@ use cargo::core::PackageId;
 use cargo::core::PackageSet;
 use cargo::core::Resolve;
 use cargo::core::SourceId;
+use cargo::core::Target;
 use cargo::core::Workspace;
 use cargo::core::dependency::Kind;
 use cargo::core::manifest::ManifestMetadata;
@@ -142,7 +143,7 @@ impl<'a> BuildPlanner<'a> {
       dev_deps.sort();
       normal_deps.sort();
 
-      let mut targets = try!(identify_targets(&full_name, &package));
+      let mut targets = try!(identify_targets(&full_name, package.targets()));
       targets.sort();
 
       let possible_crate_settings = self
@@ -339,13 +340,13 @@ fn find_all_package_ids(registry_id: SourceId, resolve: &Resolve) -> CargoResult
   Ok(package_ids)
 }
 
-/** Derives target objects from Cargo's target information.  */
-fn identify_targets(full_name: &str, package: &CargoPackage) -> CargoResult<Vec<BuildTarget>> {
+/** Derives target objects from Cargo's target information. */
+fn identify_targets(full_name: &str, cargo_targets: &[Target]) -> CargoResult<Vec<BuildTarget>> {
   let partial_path = format!("{}/", full_name);
   let partial_path_byte_length = partial_path.as_bytes().len();
   let mut targets = Vec::new();
 
-  for target in package.targets().iter() {
+  for target in cargo_targets.iter() {
     let target_path_str = try!(target.src_path().to_str().ok_or(CargoError::from(format!(
       "path for {}'s target {} wasn't unicode",
       &full_name,
@@ -362,7 +363,13 @@ fn identify_targets(full_name: &str, package: &CargoPackage) -> CargoResult<Vec<
       .bytes()
       .skip(crate_name_str_idx + partial_path_byte_length)
       .collect::<Vec<_>>();
-    let local_path_str = String::from_utf8(local_path_bytes).unwrap();
+    let mut local_path_str = String::from_utf8(local_path_bytes).unwrap();
+
+    // Dot-slash for local path is OK in Cargo, but not OK in Bazel
+    if local_path_str.starts_with("./") {
+      local_path_str = local_path_str.split_off(2);
+    }
+
     for kind in util::kind_to_kinds(target.kind()) {
       targets.push(BuildTarget {
         name: target.name().to_owned(),
@@ -428,8 +435,11 @@ fn load_and_dedup_licenses(metadata: &ManifestMetadata) -> Vec<LicenseData> {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use cargo::core::LibKind;
+  use cargo::core::Target;
   use cargo::core::manifest::ManifestMetadata;
   use std::collections::HashMap;
+  use std::path::PathBuf;
 
   fn make_manifest_metadata(licenses: Option<String>) -> ManifestMetadata {
     ManifestMetadata {
@@ -480,6 +490,38 @@ mod tests {
         LicenseData {
           name: "Unlicense".to_owned(),
           rating: "unencumbered".to_owned(),
+        },
+      ]
+    );
+  }
+
+  #[test]
+  fn test_identify_targets_handles_dot_slash() {
+    let normal_target = Target::lib_target(
+      "test_target",
+      vec![LibKind::Lib],
+      PathBuf::from("/some_local_path/test_target-0.0.1/arbitrary_subpath/lib.rs"),
+    );
+    let dotslash_target = Target::lib_target(
+      "test_target",
+      vec![LibKind::Lib],
+      PathBuf::from("/some_local_path/test_target-0.0.1/./arbitrary_subpath/lib.rs"),
+    );
+
+    let build_targets = identify_targets("test_target-0.0.1", &[normal_target, dotslash_target]);
+    assert!(build_targets.is_ok());
+    assert_eq!(
+      build_targets.unwrap(),
+      vec![
+        BuildTarget {
+          name: "test_target".to_owned(),
+          path: "arbitrary_subpath/lib.rs".to_owned(),
+          kind: "lib".to_owned(),
+        },
+        BuildTarget {
+          name: "test_target".to_owned(),
+          path: "arbitrary_subpath/lib.rs".to_owned(),
+          kind: "lib".to_owned(),
         },
       ]
     );
