@@ -105,7 +105,22 @@ impl<'a> BuildPlanner<'a> {
       None => try!(SourceId::crates_io(&self.cargo_config)),
     };
 
-    for id in try!(find_all_package_ids(source_id, &resolve)) {
+    let package_ids = try!(find_all_package_ids(source_id, &resolve));
+
+    // Verify that user settings are being used
+    let package_strings = package_ids
+      .iter()
+      .map(|id| (id.name().to_string(), id.version().to_string()))
+      .collect::<HashSet<_>>();
+    for (name, versions) in self.settings.crates.iter() {
+      for v in versions.keys() {
+        if !package_strings.contains(&(name.to_string(), v.to_string())) {
+          eprintln!("Found unused raze settings for {}-{}", name, v);
+        }
+      }
+    }
+
+    for id in package_ids {
       let package = packages.get(&id).unwrap().clone();
       let mut features = resolve
         .features(&id)
