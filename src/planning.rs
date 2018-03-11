@@ -108,14 +108,24 @@ impl<'a> BuildPlanner<'a> {
     let package_ids = try!(find_all_package_ids(source_id, &resolve));
 
     // Verify that user settings are being used
-    let package_strings = package_ids
-      .iter()
-      .map(|id| (id.name().to_string(), id.version().to_string()))
-      .collect::<HashSet<_>>();
+    let mut name_to_versions = HashMap::new();
+    for id in package_ids.iter() {
+      name_to_versions
+        .entry(id.name().to_owned())
+        .or_insert(HashSet::new())
+        .insert(id.version().to_string());
+    }
+    let empty_set = HashSet::new();
     for (name, versions) in self.settings.crates.iter() {
       for v in versions.keys() {
-        if !package_strings.contains(&(name.to_string(), v.to_string())) {
-          eprintln!("Found unused raze settings for {}-{}", name, v);
+        let alternatives = name_to_versions.get(name).unwrap_or(&empty_set);
+        if !alternatives.contains(v) {
+          let help = if alternatives.is_empty() {
+            "no alternatives found.".to_owned()
+          } else {
+            format!("did you mean one of {}-{:?}?", name, alternatives)
+          };
+          eprintln!("Found unused raze settings for {}-{}, {}", name, v, help);
         }
       }
     }
