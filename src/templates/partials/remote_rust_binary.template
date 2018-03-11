@@ -25,6 +25,9 @@ rust_binary(
     {%- if crate.build_script_target %}
     out_dir_tar = ":{{ crate.pkg_name | replace(from="-", to="_")}}_build_script_executor",
     {%- endif %}
+    {%- if crate.data_attr %}
+    data = {{crate.data_attr}},
+    {%- endif %}
     crate_features = [
         {%- for feature in crate.features %}
         "{{feature}}",

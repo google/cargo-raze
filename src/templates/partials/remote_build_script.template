@@ -6,9 +6,6 @@ rust_binary(
     {%- else %}
     crate_root = "build.rs",
     {%- endif %}
-    data = glob([
-      "*"
-    ]),
     deps = [
       {%- for dependency in crate.build_dependencies %}
         "@{{workspace.gen_workspace_prefix}}__{{dependency.name | slugify | replace(from="-", to="_")}}__{{dependency.version | slugify | replace(from="-", to="_")}}//:{{dependency.name | replace(from="-", to="_") }}",
@@ -23,6 +20,7 @@ rust_binary(
       "{{feature}}",
       {%- endfor %}
     ],
+    data = glob(["*"]),
     visibility = ["//visibility:private"],
 )
 

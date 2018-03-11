@@ -55,7 +55,7 @@ pub struct CrateContext {
   pub additional_deps: Vec<String>,
   pub additional_flags: Vec<String>,
   pub extra_aliased_targets: Vec<String>,
-  // TODO(acmcarther): Consider plugin topic
+  pub data_attr: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]

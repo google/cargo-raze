@@ -192,6 +192,8 @@ impl<'a> BuildPlanner<'a> {
 
       let licenses = load_and_dedup_licenses(&package.manifest().metadata());
 
+      let data_attr = possible_crate_settings.and_then(|s| s.data_attr.clone());
+
       crate_contexts.push(CrateContext {
         pkg_name: id.name().to_owned(),
         pkg_version: id.version().to_string(),
@@ -209,6 +211,7 @@ impl<'a> BuildPlanner<'a> {
         additional_deps: additional_deps,
         additional_flags: additional_flags,
         extra_aliased_targets: extra_aliased_targets,
+        data_attr: data_attr,
       })
     }
 

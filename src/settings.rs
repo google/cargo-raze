@@ -34,14 +34,18 @@ pub enum GenMode {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct CargoToml {
-  /** The raze settings (the only part of the Cargo.toml we care about. */ pub raze: RazeSettings,
+  /**
+   * The raze settings (the only part of the Cargo.toml we care about.
+   */
+  pub raze: RazeSettings,
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct RazeSettings {
   /** The path to the Cargo.toml working directory. */ pub workspace_path: String,
 
-  /** The platform target to generate BUILD rules for.
+  /**
+   * The platform target to generate BUILD rules for.
    *
    * This comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
    */
@@ -127,8 +131,20 @@ pub struct CrateSettings {
    */
   #[serde(default = "default_gen_buildrs")]
   pub gen_buildrs: bool,
+
+  /**
+   * The verbatim `data` clause to be included for the generated build targets.
+   *
+   * N.B. Build scripts are always provided all crate files for their `data` attr.
+   */
+  #[serde(default = "default_data_attr")]
+  pub data_attr: Option<String>,
 }
 
 fn default_gen_buildrs() -> bool {
   false
+}
+
+fn default_data_attr() -> Option<String> {
+  None
 }
