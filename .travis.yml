@@ -24,6 +24,9 @@ before_install:
   - ./install.sh --user
   - rm -f install.sh
 
+before_script:
+  - cargo install cargo-vendor
+
 rust:
   - stable
 matrix:
@@ -34,5 +37,4 @@ script:
   - cargo build --verbose
   - cargo test --verbose
   - cargo install --debug -f
-  - cargo install cargo-vendor
   - ./smoke-test.sh
