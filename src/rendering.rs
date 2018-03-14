@@ -15,17 +15,10 @@
 use cargo::util::CargoResult;
 use planning::PlannedBuild;
 
-#[derive(Debug, Clone)]
-pub struct FileOutputs {
-  pub path: String,
-  pub contents: String,
-}
-
-#[derive(Debug, Clone)]
-pub struct RenderDetails {
-  pub path_prefix: String,
-}
-
+/**
+ * An object that can convert a prepared build plan into a series of files for a Bazel-like build
+ * system.
+ */
 pub trait BuildRenderer {
   fn render_planned_build(
     &mut self,
@@ -37,4 +30,15 @@ pub trait BuildRenderer {
     render_details: &RenderDetails,
     planned_build: &PlannedBuild,
   ) -> CargoResult<Vec<FileOutputs>>;
+}
+
+#[derive(Debug, Clone)]
+pub struct FileOutputs {
+  pub path: String,
+  pub contents: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct RenderDetails {
+  pub path_prefix: String,
 }

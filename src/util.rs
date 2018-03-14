@@ -25,11 +25,7 @@ use std::str::FromStr;
 
 /** Extracts the dependencies that are of the provided kind. */
 pub fn take_kinded_dep_names(platform_deps: &Vec<Dependency>, kind: Kind) -> HashSet<String> {
-  platform_deps
-    .iter()
-    .filter(|d| d.kind() == kind)
-    .map(|dep| dep.name().to_owned())
-    .collect()
+  platform_deps.iter().filter(|d| d.kind() == kind).map(|dep| dep.name().to_owned()).collect()
 }
 
 /**
@@ -48,18 +44,13 @@ pub fn kind_to_kinds(kind: &TargetKind) -> Vec<String> {
   }
 }
 
-/**
- * Gets the proper system attributes for the provided platform triple using rustc.
- */
+/** Gets the proper system attributes for the provided platform triple using rustc. */
 pub fn fetch_attrs(target: &str) -> CargoResult<Vec<Cfg>> {
   let args = vec![format!("--target={}", target), "--print=cfg".to_owned()];
 
-  let output = try!(Command::new("rustc").args(&args).output().map_err(|_| {
-    CargoError::from(format!(
-      "could not run rustc to fetch attrs for target {}",
-      target
-    ))
-  }));
+  let output = try!(Command::new("rustc").args(&args).output().map_err(|_| CargoError::from(
+    format!("could not run rustc to fetch attrs for target {}", target)
+  )));
 
   if !output.status.success() {
     panic!(format!(
@@ -78,9 +69,7 @@ pub fn fetch_attrs(target: &str) -> CargoResult<Vec<Cfg>> {
     attr_str
       .lines()
       .map(Cfg::from_str)
-      .map(|cfg| {
-        cfg.expect("attrs from rustc should be parsable into Cargo Cfg")
-      })
+      .map(|cfg| cfg.expect("attrs from rustc should be parsable into Cargo Cfg"))
       .collect(),
   )
 }
