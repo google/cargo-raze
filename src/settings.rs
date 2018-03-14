@@ -102,11 +102,9 @@ pub struct CrateSettings {
   pub additional_deps: Vec<String>,
 
   /**
-   * Dependencies to be removed from a crate, in the form "//etc".
+   * Dependencies to be removed from a crate, in the form "{dep-name}-{dep-version}"
    *
-   * Importantly, the format of dependency references depends on the gen mode.
-   * Remote: @{gen_workspace_prefix}__{dep_name}__{dep_version_sanitized}/:{dep_name}
-   * Vendored: //{workspace_path}/vendor/{dep_name}-{dep_version}:{dep_name}
+   * This is applied during Cargo analysis, so it uses Cargo-style labeling
    */
   #[serde(default)]
   pub skipped_deps: Vec<String>,
