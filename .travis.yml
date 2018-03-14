@@ -1,3 +1,5 @@
+dist: trusty
+sudo: required
 language: rust
 addons:
   apt:
@@ -6,11 +8,33 @@ addons:
     packages:
       - cmake-data
       - cmake
+
+# Thanks, github.com/pubref/rules_protobuf!
+# https://github.com/bazelbuild/bazel/issues/29#issuecomment-271428146
+before_install:
+  - OS=linux
+  - ARCH=x86_64
+  - V=0.11.1
+  - GH_BASE="https://github.com/bazelbuild/bazel/releases/download/$V"
+  - GH_ARTIFACT="bazel-$V-installer-$OS-$ARCH.sh"
+  - URL="$GH_BASE/$GH_ARTIFACT"
+  - echo $URL
+  - wget -O install.sh $URL
+  - chmod +x install.sh
+  - ./install.sh --user
+  - rm -f install.sh
+
+before_script:
+  - cargo install cargo-vendor --debug
+
 rust:
   - stable
-  - beta
-  - nightly
 matrix:
   allow_failures:
     - rust: nightly
 
+script:
+  - cargo build --verbose
+  - cargo test --verbose
+  - cargo install --debug -f
+  - ./smoke-test.sh
