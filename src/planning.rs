@@ -100,12 +100,10 @@ impl<'a> BuildPlanner<'a> {
 
     let mut crate_contexts = Vec::new();
 
-    let source_id = match self.registry.clone() {
-      Some(v) => v,
-      None => try!(SourceId::crates_io(&self.cargo_config)),
-    };
-
-    let package_ids = try!(find_all_package_ids(source_id, &resolve));
+    let mut package_ids: Vec<PackageId> = Vec::new();
+    for dep in root_direct_deps.iter() {
+      package_ids.extend(find_all_package_ids(dep.source_id().clone(), &resolve)?);
+    }
 
     // Verify that user settings are being used
     let mut name_to_versions = HashMap::new();
@@ -138,16 +136,16 @@ impl<'a> BuildPlanner<'a> {
         .into_iter()
         .collect::<Vec<_>>();
       features.sort();
-      let full_name = format!("{}-{}", id.name(), id.version());
-      let path = format!("./vendor/{}-{}/", id.name(), id.version());
+
+      let vendor_path = format!("./vendor/{}-{}/", id.name(), id.version());
 
       // Verify that package is really vendored
       if self.settings.genmode == GenMode::Vendored {
-        try!(fs::metadata(&path).map_err(|_| {
+        try!(fs::metadata(&vendor_path).map_err(|_| {
           CargoError::from(format!(
             "failed to find {}. Either switch to \"Remote\" genmode, or run `cargo vendor -x` \
              first.",
-            &path
+            &vendor_path
           ))
         }));
       }
@@ -168,7 +166,7 @@ impl<'a> BuildPlanner<'a> {
       dev_deps.sort();
       normal_deps.sort();
 
-      let mut targets = try!(identify_targets(&full_name, package.targets()));
+      let mut targets = try!(identify_targets(package.root(), package.targets()));
       targets.sort();
 
       let possible_crate_settings = self
@@ -229,7 +227,7 @@ impl<'a> BuildPlanner<'a> {
         dependencies: non_skipped_normal_deps,
         build_dependencies: non_skipped_build_deps,
         dev_dependencies: dev_deps,
-        path: path,
+        path: vendor_path,
         build_script_target: build_script_target,
         targets: targets_sans_build_script,
         platform_triple: self.settings.target.to_owned(),
@@ -366,29 +364,19 @@ fn find_all_package_ids(registry_id: SourceId, resolve: &Resolve) -> CargoResult
 }
 
 /** Derives target objects from Cargo's target information. */
-fn identify_targets(full_name: &str, cargo_targets: &[Target]) -> CargoResult<Vec<BuildTarget>> {
-  let partial_path = format!("{}/", full_name);
-  let partial_path_byte_length = partial_path.as_bytes().len();
+fn identify_targets(package_root: &Path, cargo_targets: &[Target]) -> CargoResult<Vec<BuildTarget>> {
   let mut targets = Vec::new();
 
   for target in cargo_targets.iter() {
-    let target_path_str = try!(target.src_path().to_str().ok_or(CargoError::from(format!(
-      "path for {}'s target {} wasn't unicode",
-      &full_name,
-      target.name()
+    let local_path = try!(target.src_path().strip_prefix(package_root).map_err(|_| CargoError::from(format!(
+      "Unable to remove root prefix {:?} from target source {:?}",
+      package_root,
+      target.src_path()
+    ))));
+    let mut local_path_str = try!(local_path.to_str().ok_or(CargoError::from(format!(
+      "Unable to convert local path {:?} to unicode",
+      local_path
     )))).to_owned();
-    let crate_name_str_idx = try!(target_path_str.find(&partial_path).ok_or(
-      CargoError::from(format!(
-        "path for {}'s target {} should have been in vendor directory",
-        &full_name,
-        target.name()
-      ))
-    ));
-    let local_path_bytes = target_path_str
-      .bytes()
-      .skip(crate_name_str_idx + partial_path_byte_length)
-      .collect::<Vec<_>>();
-    let mut local_path_str = String::from_utf8(local_path_bytes).unwrap();
 
     // Dot-slash for local path is OK in Cargo, but not OK in Bazel
     if local_path_str.starts_with("./") {
@@ -533,7 +521,8 @@ mod tests {
       PathBuf::from("/some_local_path/test_target-0.0.1/./arbitrary_subpath/lib.rs"),
     );
 
-    let build_targets = identify_targets("test_target-0.0.1", &[normal_target, dotslash_target]);
+    let local_path = Path::new("/some_local_path/test_target-0.0.1");
+    let build_targets = identify_targets(local_path, &[normal_target, dotslash_target]);
     assert!(build_targets.is_ok());
     assert_eq!(
       build_targets.unwrap(),
