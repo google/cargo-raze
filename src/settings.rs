@@ -14,42 +14,28 @@
 
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
-pub enum GenMode {
-  /** Generate Vendored-style dependencies.
-   *
-   * This mode assumes that files are vendored (into vendor/), and generates BUILD files
-   * accordingly
-   */
-  Vendored,
-
-  /**
-   * Generate Remote-style dependencies.
-   *
-   * This mode assumes that files are not locally vendored, and generates a workspace-level
-   * function that can bring them in.
-   */
-  Remote,
-}
-
+/**
+ * A "deserializable struct" for the whole Cargo.toml
+ *
+ * Contains only `raze` settings, (we drop everything else in the toml on the floor).
+ */
 #[derive(Debug, Clone, Deserialize)]
 pub struct CargoToml {
-  /**
-   * The raze settings (the only part of the Cargo.toml we care about.
-   */
   pub raze: RazeSettings,
 }
 
+/** The configuration settings for `cargo-raze`, included in Cargo.toml. */
 #[derive(Debug, Clone, Deserialize)]
 pub struct RazeSettings {
-  /** The path to the Cargo.toml working directory. */ pub workspace_path: String,
+  /** The path to the Cargo.toml working directory. */
+  pub workspace_path: String,
 
   /**
    * The platform target to generate BUILD rules for.
    *
    * This comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
    */
-  #[serde(default = "default_target")]
+  #[serde(default = "default_raze_settings_field_target")]
   pub target: String,
 
   /** Any crate-specific configuration. See CrateSetings for details. */
@@ -65,26 +51,15 @@ pub struct RazeSettings {
    *
    * TODO(acmcarther): Does this have a non-bazel analogue?
    */
-  #[serde(default = "default_gen_workspace_prefix")]
+  #[serde(default = "default_raze_settings_field_gen_workspace_prefix")]
   pub gen_workspace_prefix: String,
 
   /** How to generate the dependencies. See GenMode for details. */
-  #[serde(default = "default_genmode")]
+  #[serde(default = "default_raze_settings_field_genmode")]
   pub genmode: GenMode,
 }
 
-fn default_target() -> String {
-  "x86_64-unknown-linux-gnu".to_owned()
-}
-
-fn default_gen_workspace_prefix() -> String {
-  "raze".to_owned()
-}
-
-fn default_genmode() -> GenMode {
-  GenMode::Vendored
-}
-
+/** Override settings for individual crates (as part of RazeSettings). */
 #[derive(Debug, Clone, Deserialize)]
 pub struct CrateSettings {
   /**
@@ -127,7 +102,7 @@ pub struct CrateSettings {
    * Many build scripts will not function, as they will still be built hermetically. However, build
    * scripts that merely generate files into OUT_DIR may be fully functional.
    */
-  #[serde(default = "default_gen_buildrs")]
+  #[serde(default = "default_crate_settings_field_gen_buildrs")]
   pub gen_buildrs: bool,
 
   /**
@@ -135,14 +110,43 @@ pub struct CrateSettings {
    *
    * N.B. Build scripts are always provided all crate files for their `data` attr.
    */
-  #[serde(default = "default_data_attr")]
+  #[serde(default = "default_crate_settings_field_data_attr")]
   pub data_attr: Option<String>,
 }
 
-fn default_gen_buildrs() -> bool {
+/**
+ * Describes how dependencies should be managed in tree. Options are {Remote, Vendored}.
+ *
+ * Remote:
+ * This mode assumes that files are vendored (into vendor/), and generates BUILD files
+ * accordingly
+ *
+ * Vendored:
+ * This mode assumes that files are not locally vendored, and generates a workspace-level
+ * function that can bring them in.
+ */
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+pub enum GenMode {
+  Vendored,
+  Remote,
+}
+
+fn default_raze_settings_field_target() -> String {
+  "x86_64-unknown-linux-gnu".to_owned()
+}
+
+fn default_raze_settings_field_gen_workspace_prefix() -> String {
+  "raze".to_owned()
+}
+
+fn default_raze_settings_field_genmode() -> GenMode {
+  GenMode::Vendored
+}
+
+fn default_crate_settings_field_gen_buildrs() -> bool {
   false
 }
 
-fn default_data_attr() -> Option<String> {
+fn default_crate_settings_field_data_attr() -> Option<String> {
   None
 }

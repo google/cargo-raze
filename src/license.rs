@@ -28,11 +28,7 @@ impl BazelLicenseType {
   }
 }
 
-/**
- * Breaks apart a cargo license string and yields the available license types.
- *
- * User should
- */
+/** Breaks apart a cargo license string and yields the available license types. */
 pub fn get_available_licenses(cargo_license_str: &str) -> Vec<(String, BazelLicenseType)> {
   let mut available_licenses = Vec::new();
   for license_name in cargo_license_str.split('/') {
