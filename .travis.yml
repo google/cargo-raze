@@ -25,7 +25,7 @@ before_install:
   - rm -f install.sh
 
 before_script:
-  - cargo install cargo-vendor
+  - cargo install cargo-vendor --debug
 
 rust:
   - stable
