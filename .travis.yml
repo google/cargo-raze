@@ -26,8 +26,6 @@ before_install:
 
 rust:
   - stable
-  - beta
-  - nightly
 matrix:
   allow_failures:
     - rust: nightly
@@ -36,4 +34,5 @@ script:
   - cargo build --verbose
   - cargo test --verbose
   - cargo install --debug -f
+  - cargo install cargo-vendor
   - ./smoke-test.sh
