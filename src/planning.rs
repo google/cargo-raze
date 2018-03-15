@@ -38,6 +38,8 @@ use std::str;
 use std::str::FromStr;
 use util;
 
+const CRATES_IO_SOURCE_ID: &'static str = "registry+https://github.com/rust-lang/crates.io-index";
+
 /** An entity that can produce an organized, planned build ready to be rendered. */
 pub trait BuildPlanner {
   fn plan_build(
@@ -75,12 +77,19 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
       gen_workspace_prefix: settings.gen_workspace_prefix.clone(),
     };
 
-    let crate_contexts = try!(self.produce_crate_contexts(&settings, &metadata));
-
-    Ok(PlannedBuild {
-      crate_contexts: crate_contexts,
-      workspace_context: workspace_context,
-    })
+    match self.produce_crate_contexts(&settings, &metadata) {
+      Err(e) => {
+        eprintln!("Something bad happened: Full Metadata: {:#?}", metadata);
+        Err(e)
+      },
+      Ok(crate_contexts) => {
+        Ok(PlannedBuild {
+          // UNWRAP: Safe, guarded above.
+          crate_contexts: crate_contexts,
+          workspace_context: workspace_context,
+        })
+      },
+    }
   }
 }
 
@@ -115,11 +124,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
   fn get_root_deps(&self, metadata: &Metadata) -> CargoResult<Vec<PackageId>> {
     let root_resolve_node_opt = {
       let root_id = &metadata.resolve.root;
-      metadata
-        .resolve
-        .nodes
-        .iter()
-        .find(|node| &node.id == root_id)
+      metadata.resolve.nodes.iter().find(|node| &node.id == root_id)
     };
     let root_resolve_node = if root_resolve_node_opt.is_some() {
       // UNWRAP: Guarded above
@@ -184,6 +189,29 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
             eprintln!("Found unused raze settings for {}-{}, {}", name, v, help);
           }
         }
+      }
+    }
+
+    // Verify that all dependencies are from crates-io under Remote genmode
+    // Non-crates io deps sometimes work under Vendor genmode, so we don't check
+    if settings.genmode == GenMode::Remote {
+      let non_crates_io_pkg_ids = metadata
+        .packages
+        .iter()
+        .filter(|pkg| pkg.id != metadata.resolve.root)
+        .filter(|pkg| match pkg.source.as_ref() {
+          None => true,
+          Some(src) => src.as_str() != CRATES_IO_SOURCE_ID,
+        })
+        .map(|pkg| pkg.id.clone())
+        .collect::<Vec<_>>();
+
+      if !non_crates_io_pkg_ids.is_empty() {
+        return Err(CargoError::from(format!(
+          "Some dependencies originated from unknown or non-crates_io sources: {:?} ... and \
+           `Remote` genmode doesn't know how to pull them down. Try `Vendored` genmode!",
+          non_crates_io_pkg_ids
+        )));
       }
     }
 
@@ -258,39 +286,28 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let mut targets = try!(self.produce_targets(&own_package));
       targets.sort();
 
-      let possible_crate_settings = settings
-        .crates
-        .get(&own_package.name)
-        .and_then(|c| c.get(&own_package.version));
+      let possible_crate_settings =
+        settings.crates.get(&own_package.name).and_then(|c| c.get(&own_package.version));
 
-      let should_gen_buildrs = possible_crate_settings
-        .map(|s| s.gen_buildrs.clone())
-        .unwrap_or(false);
+      let should_gen_buildrs =
+        possible_crate_settings.map(|s| s.gen_buildrs.clone()).unwrap_or(false);
       let build_script_target = if should_gen_buildrs {
-        targets
-          .iter()
-          .find(|t| t.kind.as_str() == "custom-build")
-          .cloned()
+        targets.iter().find(|t| t.kind.as_str() == "custom-build").cloned()
       } else {
         None
       };
 
-      let targets_sans_build_script = targets
-        .into_iter()
-        .filter(|t| t.kind.as_str() != "custom-build")
-        .collect::<Vec<_>>();
+      let targets_sans_build_script =
+        targets.into_iter().filter(|t| t.kind.as_str() != "custom-build").collect::<Vec<_>>();
 
-      let additional_deps = possible_crate_settings
-        .map(|s| s.additional_deps.clone())
-        .unwrap_or(Vec::new());
+      let additional_deps =
+        possible_crate_settings.map(|s| s.additional_deps.clone()).unwrap_or(Vec::new());
 
-      let additional_flags = possible_crate_settings
-        .map(|s| s.additional_flags.clone())
-        .unwrap_or(Vec::new());
+      let additional_flags =
+        possible_crate_settings.map(|s| s.additional_flags.clone()).unwrap_or(Vec::new());
 
-      let extra_aliased_targets = possible_crate_settings
-        .map(|s| s.extra_aliased_targets.clone())
-        .unwrap_or(Vec::new());
+      let extra_aliased_targets =
+        possible_crate_settings.map(|s| s.extra_aliased_targets.clone()).unwrap_or(Vec::new());
 
       // Skip generated dependencies explicitly designated to be skipped (potentially due to
       // being replaced or customized as part of additional_deps)
@@ -301,11 +318,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         .map(|s| prune_skipped_deps(&build_deps, s))
         .unwrap_or_else(|| build_deps);
 
-      let license_str = own_package
-        .license
-        .as_ref()
-        .map(|s| s.as_str())
-        .unwrap_or("");
+      let license_str = own_package.license.as_ref().map(|s| s.as_str()).unwrap_or("");
       let licenses = load_and_dedup_licenses(license_str);
 
       let data_attr = possible_crate_settings.and_then(|s| s.data_attr.clone());
@@ -346,10 +359,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let crate_path_prefix = manifest_pathbuf.parent().unwrap().display().to_string();
 
       // Trim the manifest_path parent dir from the target path (to give us the crate-local path)
-      let mut local_path_str = target
-        .src_path
-        .clone()
-        .split_off(crate_path_prefix.len() + 1);
+      let mut local_path_str = target.src_path.clone().split_off(crate_path_prefix.len() + 1);
 
       // Some crates have a weird prefix, trim that.
       if local_path_str.starts_with("./") {
@@ -375,11 +385,7 @@ fn prune_skipped_deps(
 ) -> Vec<BuildDependency> {
   deps
     .iter()
-    .filter(|d| {
-      !crate_settings
-        .skipped_deps
-        .contains(&format!("{}-{}", d.name, d.version))
-    })
+    .filter(|d| !crate_settings.skipped_deps.contains(&format!("{}-{}", d.name, d.version)))
     .map(|dep| dep.clone())
     .collect::<Vec<_>>()
 }
@@ -415,17 +421,22 @@ fn load_and_dedup_licenses(licenses: &str) -> Vec<LicenseData> {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use hamcrest::core::expect;
+  use hamcrest::prelude::*;
   use metadata::Metadata;
   use metadata::MetadataFetcher;
   use metadata::ResolveNode;
-  use metadata::testing::StubMetadataFetcher;
   use metadata::testing as metadata_testing;
-  use settings::testing as settings_testing;
-  use hamcrest::core::expect;
-  use hamcrest::prelude::*;
+  use metadata::testing::StubMetadataFetcher;
   use settings::RazeSettings;
+  use settings::testing as settings_testing;
 
-  const ROOT_NODE_IDX: usize = 0;
+  // Indexes into hand-crafted metadata `resolve.nodes` and `packages`
+  // This is pretty clunky, but it makes the test easier to read and less verbose.
+  // N.B.: Ordering cannot be relied on for system-generated metadata, ONLY hand generated
+  // metadata.
+  const ROOT_IDX: usize = 0;
+  const DEP_IDX: usize = 1;
 
   fn dummy_workspace_files() -> CargoWorkspaceFiles {
     CargoWorkspaceFiles {
@@ -452,9 +463,7 @@ mod tests {
 
   fn minimum_dependency_metadata() -> Metadata {
     let mut metadata = minimum_valid_metadata();
-    metadata.resolve.nodes[ROOT_NODE_IDX]
-      .dependencies
-      .push("test_dep_id".to_owned());
+    metadata.resolve.nodes[ROOT_IDX].dependencies.push("test_dep_id".to_owned());
     metadata.resolve.nodes.push(ResolveNode {
       id: "test_dep_id".to_owned(),
       dependencies: Vec::new(),
@@ -464,6 +473,7 @@ mod tests {
     test_dep.name = "test_dep".to_owned();
     test_dep.id = "test_dep_id".to_owned();
     test_dep.version = "test_version".to_owned();
+    test_dep.source = Some("registry+https://github.com/rust-lang/crates.io-index".to_owned());
     metadata.packages.push(test_dep);
     metadata
   }
@@ -503,10 +513,8 @@ mod tests {
   fn test_plan_build_missing_resolve_fails() {
     let mut fetcher = StubMetadataFetcher::with_metadata(metadata_testing::dummy_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res = planner.plan_build(
-      &settings_testing::dummy_raze_settings(),
-      dummy_workspace_files(),
-    );
+    let planned_build_res =
+      planner.plan_build(&settings_testing::dummy_raze_settings(), dummy_workspace_files());
 
     println!("{:#?}", planned_build_res);
     assert!(planned_build_res.is_err());
@@ -524,10 +532,8 @@ mod tests {
 
     let mut fetcher = StubMetadataFetcher::with_metadata(metadata);
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res = planner.plan_build(
-      &settings_testing::dummy_raze_settings(),
-      dummy_workspace_files(),
-    );
+    let planned_build_res =
+      planner.plan_build(&settings_testing::dummy_raze_settings(), dummy_workspace_files());
 
     println!("{:#?}", planned_build_res);
     assert!(planned_build_res.is_err());
@@ -537,10 +543,8 @@ mod tests {
   fn test_plan_build_minimum_workspace() {
     let mut fetcher = StubMetadataFetcher::with_metadata(minimum_valid_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res = planner.plan_build(
-      &settings_testing::dummy_raze_settings(),
-      dummy_workspace_files(),
-    );
+    let planned_build_res =
+      planner.plan_build(&settings_testing::dummy_raze_settings(), dummy_workspace_files());
 
     println!("{:#?}", planned_build_res);
     assert!(planned_build_res.unwrap().crate_contexts.is_empty());
@@ -550,10 +554,8 @@ mod tests {
   fn test_plan_build_minimum_root_dependency() {
     let mut fetcher = StubMetadataFetcher::with_metadata(minimum_dependency_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res = planner.plan_build(
-      &settings_testing::dummy_raze_settings(),
-      dummy_workspace_files(),
-    );
+    let planned_build_res =
+      planner.plan_build(&settings_testing::dummy_raze_settings(), dummy_workspace_files());
 
     println!("{:#?}", planned_build_res);
     let planned_build = planned_build_res.unwrap();
@@ -571,6 +573,24 @@ mod tests {
     let mut fetcher = StubMetadataFetcher::with_metadata(minimum_dependency_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     let planned_build_res = planner.plan_build(&settings, dummy_workspace_files());
+
+    println!("{:#?}", planned_build_res);
+    assert!(planned_build_res.is_err());
+  }
+
+  #[test]
+  fn test_plan_build_verifies_cratesio_source_under_remote() {
+    // Remote doesn't currently support sources other than crates.io as it "cheats" when generating
+    // the crate download URLs
+
+    let mut dependency_metadata = minimum_dependency_metadata();
+    dependency_metadata.packages[DEP_IDX].source =
+      Some("registry+https://github.com/me/got.another-registry".to_owned());
+
+    let mut fetcher = StubMetadataFetcher::with_metadata(dependency_metadata);
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build_res =
+      planner.plan_build(&settings_testing::dummy_raze_settings(), dummy_workspace_files());
 
     println!("{:#?}", planned_build_res);
     assert!(planned_build_res.is_err());
