@@ -53,6 +53,7 @@ pub struct BuildPlannerImpl<'fetcher> {
 }
 
 /** A ready-to-be-rendered build, containing renderable context for each crate. */
+#[derive(Debug)]
 pub struct PlannedBuild {
   pub workspace_context: WorkspaceContext,
   pub crate_contexts: Vec<CrateContext>,
@@ -66,7 +67,7 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
   ) -> CargoResult<PlannedBuild> {
     let metadata = try!(self.metadata_fetcher.fetch_metadata(files));
     if settings.genmode == GenMode::Vendored {
-      self.assert_crates_vendored(&metadata);
+      try!(self.check_crates_vendored(&metadata));
     }
     let workspace_context = WorkspaceContext {
       workspace_path: settings.workspace_path.clone(),
@@ -90,7 +91,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
     }
   }
 
-  fn assert_crates_vendored(&self, metadata: &Metadata) {
+  fn check_crates_vendored(&self, metadata: &Metadata) -> CargoResult<()> {
     for package in metadata.packages.iter() {
       // Don't expect the root crate to be vendored
       if package.id == metadata.resolve.root {
@@ -101,12 +102,14 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let path = format!("./vendor/{}/", full_name);
 
       if fs::metadata(&path).is_err() {
-        panic!(format!(
+        return Err(CargoError::from(format!(
           "failed to find {}. Either switch to \"Remote\" genmode, or run `cargo vendor -x` first.",
           &path
-        ));
+        )));
       };
     }
+
+    Ok(())
   }
 
   fn get_root_deps(&self, metadata: &Metadata) -> CargoResult<Vec<PackageId>> {
@@ -122,7 +125,9 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       // UNWRAP: Guarded above
       root_resolve_node_opt.unwrap()
     } else {
-      return Err(CargoError::from("Finding root crate details"));
+      eprintln!("Resolve was: {:#?}", metadata.resolve);
+      eprintln!("root_id: {:?}", metadata.resolve.root);
+      return Err(CargoError::from("Resolve did not contain root crate!"));
     };
     Ok(root_resolve_node.dependencies.clone())
   }
@@ -335,13 +340,10 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
     let partial_path_byte_length = partial_path.as_bytes().len();
     let mut targets = Vec::new();
     for target in package.targets.iter() {
-      // TODO(acmcarther): Cite why package.manifest_path is guaranteed to be an absolute path
-      // ... which would justify the .parent().unwrap()
-      let crate_path_prefix = PathBuf::from(&package.manifest_path)
-        .parent()
-        .unwrap()
-        .display()
-        .to_string();
+      let manifest_pathbuf = PathBuf::from(&package.manifest_path);
+      assert!(manifest_pathbuf.is_absolute());
+
+      let crate_path_prefix = manifest_pathbuf.parent().unwrap().display().to_string();
 
       // Trim the manifest_path parent dir from the target path (to give us the crate-local path)
       let mut local_path_str = target
@@ -413,6 +415,58 @@ fn load_and_dedup_licenses(licenses: &str) -> Vec<LicenseData> {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use metadata::Metadata;
+  use metadata::MetadataFetcher;
+  use metadata::ResolveNode;
+  use metadata::testing::StubMetadataFetcher;
+  use metadata::testing as metadata_testing;
+  use settings::testing as settings_testing;
+  use hamcrest::core::expect;
+  use hamcrest::prelude::*;
+  use settings::RazeSettings;
+
+  const ROOT_NODE_IDX: usize = 0;
+
+  fn dummy_workspace_files() -> CargoWorkspaceFiles {
+    CargoWorkspaceFiles {
+      toml_path: PathBuf::from("/tmp/Cargo.toml"),
+      lock_path_opt: None,
+    }
+  }
+
+  fn minimum_valid_metadata() -> Metadata {
+    let mut metadata = metadata_testing::dummy_metadata();
+    metadata.resolve.root = "test_root_id".to_owned();
+    metadata.resolve.nodes.push(ResolveNode {
+      id: "test_root_id".to_owned(),
+      dependencies: Vec::new(),
+      features: None,
+    });
+    let mut test_package = metadata_testing::dummy_package();
+    test_package.name = "test_root".to_owned();
+    test_package.id = "test_root_id".to_owned();
+    metadata.packages.push(test_package);
+
+    metadata
+  }
+
+  fn minimum_dependency_metadata() -> Metadata {
+    let mut metadata = minimum_valid_metadata();
+    metadata.resolve.nodes[ROOT_NODE_IDX]
+      .dependencies
+      .push("test_dep_id".to_owned());
+    metadata.resolve.nodes.push(ResolveNode {
+      id: "test_dep_id".to_owned(),
+      dependencies: Vec::new(),
+      features: None,
+    });
+    let mut test_dep = metadata_testing::dummy_package();
+    test_dep.name = "test_dep".to_owned();
+    test_dep.id = "test_dep_id".to_owned();
+    test_dep.version = "test_version".to_owned();
+    metadata.packages.push(test_dep);
+    metadata
+  }
 
   #[test]
   fn test_license_loading_works_with_no_license() {
@@ -444,4 +498,88 @@ mod tests {
       ]
     );
   }
+
+  #[test]
+  fn test_plan_build_missing_resolve_fails() {
+    let mut fetcher = StubMetadataFetcher::with_metadata(metadata_testing::dummy_metadata());
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build_res = planner.plan_build(
+      &settings_testing::dummy_raze_settings(),
+      dummy_workspace_files(),
+    );
+
+    println!("{:#?}", planned_build_res);
+    assert!(planned_build_res.is_err());
+  }
+
+  #[test]
+  fn test_plan_build_missing_package_in_metadata() {
+    let mut metadata = metadata_testing::dummy_metadata();
+    metadata.resolve.root = "test_root".to_owned();
+    metadata.resolve.nodes.push(ResolveNode {
+      id: "test_root".to_owned(),
+      dependencies: Vec::new(),
+      features: None,
+    });
+
+    let mut fetcher = StubMetadataFetcher::with_metadata(metadata);
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build_res = planner.plan_build(
+      &settings_testing::dummy_raze_settings(),
+      dummy_workspace_files(),
+    );
+
+    println!("{:#?}", planned_build_res);
+    assert!(planned_build_res.is_err());
+  }
+
+  #[test]
+  fn test_plan_build_minimum_workspace() {
+    let mut fetcher = StubMetadataFetcher::with_metadata(minimum_valid_metadata());
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build_res = planner.plan_build(
+      &settings_testing::dummy_raze_settings(),
+      dummy_workspace_files(),
+    );
+
+    println!("{:#?}", planned_build_res);
+    assert!(planned_build_res.unwrap().crate_contexts.is_empty());
+  }
+
+  #[test]
+  fn test_plan_build_minimum_root_dependency() {
+    let mut fetcher = StubMetadataFetcher::with_metadata(minimum_dependency_metadata());
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build_res = planner.plan_build(
+      &settings_testing::dummy_raze_settings(),
+      dummy_workspace_files(),
+    );
+
+    println!("{:#?}", planned_build_res);
+    let planned_build = planned_build_res.unwrap();
+    assert_eq!(planned_build.crate_contexts.len(), 1);
+    let dep = planned_build.crate_contexts.get(0).unwrap();
+    assert_eq!(dep.pkg_name, "test_dep");
+    assert_eq!(dep.is_root_dependency, true);
+  }
+
+  #[test]
+  fn test_plan_build_verifies_vendored_state() {
+    let mut settings = settings_testing::dummy_raze_settings();
+    settings.genmode = GenMode::Vendored;
+
+    let mut fetcher = StubMetadataFetcher::with_metadata(minimum_dependency_metadata());
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build_res = planner.plan_build(&settings, dummy_workspace_files());
+
+    println!("{:#?}", planned_build_res);
+    assert!(planned_build_res.is_err());
+  }
+
+  // TODO(acmcarther): Add tests:
+  // TODO(acmcarther): Extra flags work
+  // TODO(acmcarther): Extra deps work
+  // TODO(acmcarther): Buildrs works
+  // TODO(acmcarther): Extra aliases work
+  // TODO(acmcarther): Skipped deps work
 }

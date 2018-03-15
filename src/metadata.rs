@@ -310,6 +310,38 @@ fn default_dependency_field_use_default_features() -> bool {
 pub mod testing {
   use super::*;
 
+  pub struct StubMetadataFetcher {
+    metadata: Metadata,
+  }
+
+  impl MetadataFetcher for StubMetadataFetcher {
+    fn fetch_metadata(&mut self, _: CargoWorkspaceFiles) -> CargoResult<Metadata> {
+      Ok(self.metadata.clone())
+    }
+  }
+
+  impl StubMetadataFetcher {
+    pub fn with_metadata(metadata: Metadata) -> StubMetadataFetcher {
+      StubMetadataFetcher { metadata: metadata }
+    }
+  }
+
+  pub fn dummy_package() -> Package {
+    Package {
+      name: String::new(),
+      version: String::new(),
+      id: String::new(),
+      license: None,
+      license_file: None,
+      description: None,
+      source: None,
+      dependencies: Vec::new(),
+      targets: Vec::new(),
+      features: HashMap::new(),
+      manifest_path: String::new(),
+    }
+  }
+
   pub fn dummy_metadata() -> Metadata {
     Metadata {
       packages: Vec::new(),

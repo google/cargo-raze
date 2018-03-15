@@ -27,7 +27,10 @@ pub struct CargoToml {
 /** The configuration settings for `cargo-raze`, included in Cargo.toml. */
 #[derive(Debug, Clone, Deserialize)]
 pub struct RazeSettings {
-  /** The path to the Cargo.toml working directory. */ pub workspace_path: String,
+  /**
+   * The path to the Cargo.toml working directory.
+   */
+  pub workspace_path: String,
 
   /**
    * The platform target to generate BUILD rules for.
@@ -128,6 +131,20 @@ pub struct CrateSettings {
 pub enum GenMode {
   Vendored,
   Remote,
+}
+
+pub mod testing {
+  use super::*;
+
+  pub fn dummy_raze_settings() -> RazeSettings {
+    RazeSettings {
+      workspace_path: "//cargo".to_owned(),
+      target: "x86_64-unknown-linux-gnu".to_owned(),
+      crates: HashMap::new(),
+      gen_workspace_prefix: "raze_test".to_owned(),
+      genmode: GenMode::Remote,
+    }
+  }
 }
 
 fn default_raze_settings_field_target() -> String {

@@ -218,8 +218,7 @@ impl BuildRenderer for BazelRenderer {
     for package in crate_contexts {
       let build_file_path = format!(
         "remote/{}-{}.BUILD",
-        &package.pkg_name,
-        &package.pkg_version
+        &package.pkg_name, &package.pkg_version
       );
       let rendered_crate_build_file = try!(
         self
@@ -260,13 +259,13 @@ impl BuildRenderer for BazelRenderer {
 
 #[cfg(test)]
 mod tests {
-  pub use super::*;
-  pub use context::*;
-  pub use hamcrest::core::expect;
-  pub use hamcrest::prelude::*;
-  pub use planning::PlannedBuild;
-  pub use rendering::FileOutputs;
-  pub use rendering::RenderDetails;
+  use super::*;
+  use context::*;
+  use hamcrest::core::expect;
+  use hamcrest::prelude::*;
+  use planning::PlannedBuild;
+  use rendering::FileOutputs;
+  use rendering::RenderDetails;
 
   fn dummy_render_details() -> RenderDetails {
     RenderDetails {
