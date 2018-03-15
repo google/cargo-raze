@@ -61,7 +61,8 @@ pub struct Resolve {
 pub struct ResolveNode {
   pub id: PackageId,
   pub dependencies: Vec<PackageId>,
-  pub features: Vec<String>,
+  // Optional due to recent feature addition in Cargo.
+  pub features: Option<Vec<String>>,
 }
 
 fn default_dependency_field_optional() -> bool {

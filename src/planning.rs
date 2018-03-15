@@ -63,6 +63,7 @@ pub trait MetadataFetcher {
   fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> CargoResult<Metadata>;
 }
 
+/** An entity that can produce an organized, planned build ready to be rendered. */
 pub trait BuildPlanner {
   fn plan_build(
     &mut self,
@@ -71,22 +72,27 @@ pub trait BuildPlanner {
   ) -> CargoResult<PlannedBuild>;
 }
 
+/** The local Cargo workspace files to be used for build planning .*/
 pub struct CargoWorkspaceFiles {
   pub toml_path: PathBuf,
   pub lock_path_opt: Option<PathBuf>,
 }
 
+/** The default implementation of a BuildPlanner. */
 pub struct BuildPlannerImpl<'fetcher> {
   metadata_fetcher: &'fetcher mut MetadataFetcher,
 }
 
+/** A ready-to-be-rendered build, containing renderable context for each crate. */
 pub struct PlannedBuild {
   pub workspace_context: WorkspaceContext,
   pub crate_contexts: Vec<CrateContext>,
 }
 
+/** A workspace metadata fetcher that uses the Cargo Metadata subcommand. */
 pub struct CargoSubcommandMetadataFetcher;
 
+/** A workspace metadata fetcher that uses Cargo's internals. */
 pub struct CargoInternalsMetadataFetcher<'config> {
   cargo_config: &'config Config,
 }
@@ -299,7 +305,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         pkg_name: own_package.name.clone(),
         pkg_version: own_package.version.clone(),
         licenses: licenses,
-        features: node.features.clone(),
+        features: node.features.clone().unwrap_or(Vec::new()),
         is_root_dependency: root_direct_deps.contains(&node.id),
         metadeps: Vec::new(), /* TODO(acmcarther) */
         dependencies: non_skipped_normal_deps,
@@ -444,7 +450,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
       resolve.nodes.push(ResolveNode {
         id: id.to_string(),
         dependencies: dependencies,
-        features: features,
+        features: Some(features),
       })
     }
 
