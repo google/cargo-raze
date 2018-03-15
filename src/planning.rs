@@ -82,13 +82,10 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
         eprintln!("Something bad happened: Full Metadata: {:#?}", metadata);
         Err(e)
       },
-      Ok(crate_contexts) => {
-        Ok(PlannedBuild {
-          // UNWRAP: Safe, guarded above.
-          crate_contexts: crate_contexts,
-          workspace_context: workspace_context,
-        })
-      },
+      Ok(crate_contexts) => Ok(PlannedBuild {
+        crate_contexts: crate_contexts,
+        workspace_context: workspace_context,
+      }),
     }
   }
 }
@@ -473,7 +470,7 @@ mod tests {
     test_dep.name = "test_dep".to_owned();
     test_dep.id = "test_dep_id".to_owned();
     test_dep.version = "test_version".to_owned();
-    test_dep.source = Some("registry+https://github.com/rust-lang/crates.io-index".to_owned());
+    test_dep.source = Some(CRATES_IO_SOURCE_ID.to_owned());
     metadata.packages.push(test_dep);
     metadata
   }
