@@ -13,197 +13,284 @@
 // limitations under the License.
 
 use cargo::CargoError;
-use cargo::core::Dependency;
-use cargo::core::Package as CargoPackage;
-use cargo::core::PackageId;
-use cargo::core::PackageSet;
-use cargo::core::Resolve;
-use cargo::core::SourceId;
-use cargo::core::Target;
-use cargo::core::Workspace;
-use cargo::core::dependency::Kind;
-use cargo::core::manifest::ManifestMetadata;
-use cargo::ops;
-use cargo::ops::Packages;
+use cargo::core::dependency::Platform;
 use cargo::util::CargoResult;
-use cargo::util::Cfg;
-use cargo::util::Config;
-use cargo::util::ToUrl;
 use context::BuildDependency;
 use context::BuildTarget;
 use context::CrateContext;
 use context::LicenseData;
 use context::WorkspaceContext;
 use license;
+use metadata::CargoWorkspaceFiles;
+use metadata::Metadata;
+use metadata::MetadataFetcher;
+use metadata::Package;
+use metadata::PackageId;
+use metadata::ResolveNode;
 use settings::CrateSettings;
 use settings::GenMode;
 use settings::RazeSettings;
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::env;
 use std::fs;
-use std::ops::Deref;
-use std::path::Path;
+use std::path::PathBuf;
 use std::str;
+use std::str::FromStr;
 use util;
 
-/**
- * A construct that has the nebulous responsibility of squeezing dependency planning info from
- * cargo.
- *
- * To be replaced by an integration that uses `cargo metadata`.
- */
-pub struct BuildPlanner<'a> {
-  settings: RazeSettings,
-  cargo_config: &'a Config,
-  platform_attrs: Vec<Cfg>,
-  registry: Option<SourceId>,
+/** An entity that can produce an organized, planned build ready to be rendered. */
+pub trait BuildPlanner {
+  fn plan_build(
+    &mut self,
+    settings: &RazeSettings,
+    files: CargoWorkspaceFiles,
+  ) -> CargoResult<PlannedBuild>;
 }
 
-/** The set of all included dependencies for Cargo's dependency categories. */
-pub struct PlannedDeps {
-  pub build_deps: Vec<BuildDependency>,
-  pub dev_deps: Vec<BuildDependency>,
-  pub normal_deps: Vec<BuildDependency>,
+/** The default implementation of a BuildPlanner. */
+pub struct BuildPlannerImpl<'fetcher> {
+  metadata_fetcher: &'fetcher mut MetadataFetcher,
 }
 
-/** A synthesized Cargo dependency resolution. */
-pub struct ResolvedPlan<'a> {
-  pub root_name: String,
-  pub packages: PackageSet<'a>,
-  pub resolve: Resolve,
-}
-
-/** The produced plan output ready to be passed into a BUILD renderer. */
+/** A ready-to-be-rendered build, containing renderable context for each crate. */
+#[derive(Debug)]
 pub struct PlannedBuild {
   pub workspace_context: WorkspaceContext,
   pub crate_contexts: Vec<CrateContext>,
 }
 
-impl<'a> BuildPlanner<'a> {
-  pub fn new(settings: RazeSettings, cargo_config: &'a Config) -> CargoResult<BuildPlanner<'a>> {
-    Ok(BuildPlanner {
-      platform_attrs: try!(util::fetch_attrs(&settings.target)),
-      cargo_config: cargo_config,
-      registry: None,
-      settings: settings,
-    })
-  }
-
-  pub fn set_registry_from_url(&mut self, host: String) -> CargoResult<()> {
-    match host.to_url().map(|url| SourceId::for_registry(&url)) {
-      Ok(registry_id) => {
-        self.registry = Some(registry_id);
-        Ok(())
-      },
-      Err(value) => Err(CargoError::from(value)),
+impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
+  fn plan_build(
+    &mut self,
+    settings: &RazeSettings,
+    files: CargoWorkspaceFiles,
+  ) -> CargoResult<PlannedBuild> {
+    let metadata = try!(self.metadata_fetcher.fetch_metadata(files));
+    if settings.genmode == GenMode::Vendored {
+      try!(self.check_crates_vendored(&metadata));
     }
-  }
-
-  pub fn plan_build(&self) -> CargoResult<PlannedBuild> {
-    let ResolvedPlan {
-      root_name,
-      packages,
-      resolve,
-    } = try!(ResolvedPlan::resolve_from_files(&self.cargo_config));
-
-    let root_package_id = try!(
-      resolve
-        .iter()
-        .filter(|dep| dep.name() == root_name)
-        .next()
-        .ok_or(CargoError::from("root crate should be in cargo resolve"))
-    );
-    let root_direct_deps = resolve.deps(&root_package_id).cloned().collect::<HashSet<_>>();
-
-    let mut crate_contexts = Vec::new();
-
-    let source_id = match self.registry.clone() {
-      Some(v) => v,
-      None => try!(SourceId::crates_io(&self.cargo_config)),
+    let workspace_context = WorkspaceContext {
+      workspace_path: settings.workspace_path.clone(),
+      platform_triple: settings.target.clone(),
+      gen_workspace_prefix: settings.gen_workspace_prefix.clone(),
     };
 
-    let package_ids = try!(find_all_package_ids(source_id, &resolve));
+    let crate_contexts = try!(self.produce_crate_contexts(&settings, &metadata));
+
+    Ok(PlannedBuild {
+      crate_contexts: crate_contexts,
+      workspace_context: workspace_context,
+    })
+  }
+}
+
+impl<'fetcher> BuildPlannerImpl<'fetcher> {
+  pub fn new(metadata_fetcher: &'fetcher mut MetadataFetcher) -> BuildPlannerImpl<'fetcher> {
+    BuildPlannerImpl {
+      metadata_fetcher: metadata_fetcher,
+    }
+  }
+
+  fn check_crates_vendored(&self, metadata: &Metadata) -> CargoResult<()> {
+    for package in metadata.packages.iter() {
+      // Don't expect the root crate to be vendored
+      if package.id == metadata.resolve.root {
+        continue;
+      }
+
+      let full_name = format!("{}-{}", package.name, package.version);
+      let path = format!("./vendor/{}/", full_name);
+
+      if fs::metadata(&path).is_err() {
+        return Err(CargoError::from(format!(
+          "failed to find {}. Either switch to \"Remote\" genmode, or run `cargo vendor -x` first.",
+          &path
+        )));
+      };
+    }
+
+    Ok(())
+  }
+
+  fn get_root_deps(&self, metadata: &Metadata) -> CargoResult<Vec<PackageId>> {
+    let root_resolve_node_opt = {
+      let root_id = &metadata.resolve.root;
+      metadata
+        .resolve
+        .nodes
+        .iter()
+        .find(|node| &node.id == root_id)
+    };
+    let root_resolve_node = if root_resolve_node_opt.is_some() {
+      // UNWRAP: Guarded above
+      root_resolve_node_opt.unwrap()
+    } else {
+      eprintln!("Resolve was: {:#?}", metadata.resolve);
+      eprintln!("root_id: {:?}", metadata.resolve.root);
+      return Err(CargoError::from("Resolve did not contain root crate!"));
+    };
+    Ok(root_resolve_node.dependencies.clone())
+  }
+
+  fn produce_crate_contexts(
+    &self,
+    settings: &RazeSettings,
+    metadata: &Metadata,
+  ) -> CargoResult<Vec<CrateContext>> {
+    let root_direct_deps = try!(self.get_root_deps(&metadata));
+    let packages_by_id = metadata
+      .packages
+      .iter()
+      .map(|p| (p.id.clone(), p.clone()))
+      .collect::<HashMap<PackageId, Package>>();
+
+    // Verify that all nodes are present in package list
+    {
+      let mut missing_nodes = Vec::new();
+      for node in metadata.resolve.nodes.iter() {
+        if !packages_by_id.contains_key(&node.id) {
+          missing_nodes.push(&node.id);
+        }
+      }
+      if !missing_nodes.is_empty() {
+        // This implies that we either have a mistaken understanding of Cargo resolution, or that
+        // it broke.
+        return Err(CargoError::from(format!(
+          "Metadata.packages list was missing keys: {:?}",
+          missing_nodes
+        )));
+      }
+    }
 
     // Verify that user settings are being used
-    let mut name_to_versions = HashMap::new();
-    for id in package_ids.iter() {
-      name_to_versions
-        .entry(id.name().to_owned())
-        .or_insert(HashSet::new())
-        .insert(id.version().to_string());
-    }
-    let empty_set = HashSet::new();
-    for (name, versions) in self.settings.crates.iter() {
-      for v in versions.keys() {
-        let alternatives = name_to_versions.get(name).unwrap_or(&empty_set);
-        if !alternatives.contains(v) {
-          let help = if alternatives.is_empty() {
-            "no alternatives found.".to_owned()
-          } else {
-            format!("did you mean one of {}-{:?}?", name, alternatives)
-          };
-          eprintln!("Found unused raze settings for {}-{}, {}", name, v, help);
+    {
+      let mut name_to_versions = HashMap::new();
+      for package in metadata.packages.iter() {
+        name_to_versions
+          .entry(package.name.clone())
+          .or_insert(HashSet::new())
+          .insert(package.version.clone());
+      }
+      let empty_set = HashSet::new();
+      for (name, versions) in settings.crates.iter() {
+        for v in versions.keys() {
+          let alternatives = name_to_versions.get(name).unwrap_or(&empty_set);
+          if !alternatives.contains(v) {
+            let help = if alternatives.is_empty() {
+              "no alternatives found.".to_owned()
+            } else {
+              format!("did you mean one of {}-{:?}?", name, alternatives)
+            };
+            eprintln!("Found unused raze settings for {}-{}, {}", name, v, help);
+          }
         }
       }
     }
 
-    for id in package_ids {
-      let package = packages.get(&id).unwrap().clone();
-      let mut features = resolve.features(&id).clone().into_iter().collect::<Vec<_>>();
-      features.sort();
-      let full_name = format!("{}-{}", id.name(), id.version());
-      let path = format!("./vendor/{}-{}/", id.name(), id.version());
+    let mut crate_contexts = Vec::new();
+    // TODO(acmcarther): handle unwrap
+    let platform_attrs = util::fetch_attrs(&settings.target).unwrap();
+    let mut sorted_nodes: Vec<&ResolveNode> = metadata.resolve.nodes.iter().collect();
+    sorted_nodes.sort_unstable_by_key(|n| &n.id);
+    for node in sorted_nodes.into_iter() {
+      let own_package = packages_by_id.get(&node.id).unwrap();
+      let full_name = format!("{}-{}", own_package.name, own_package.version);
+      let path = format!("./vendor/{}/", full_name);
 
-      // Verify that package is really vendored
-      if self.settings.genmode == GenMode::Vendored {
-        try!(fs::metadata(&path).map_err(|_| CargoError::from(format!(
-          "failed to find {}. Either switch to \"Remote\" genmode, or run `cargo vendor -x` first.",
-          &path
-        ))));
+      // Skip the root package (which is probably a junk package, by convention)
+      if own_package.id == metadata.resolve.root {
+        continue;
       }
 
-      // Identify all possible dependencies
-      let PlannedDeps {
-        mut build_deps,
-        mut dev_deps,
-        mut normal_deps,
-      } = PlannedDeps::find_all_deps(
-        &id,
-        &package,
-        &resolve,
-        &self.settings.target,
-        &self.platform_attrs,
-      );
+      // Resolve dependencies into types
+      let mut build_dep_names = Vec::new();
+      let mut dev_dep_names = Vec::new();
+      let mut normal_dep_names = Vec::new();
+      for dep in own_package.dependencies.iter() {
+        if dep.target.is_some() {
+          // UNWRAP: Safe from above check
+          let target_str = dep.target.as_ref().unwrap();
+          let platform = try!(Platform::from_str(target_str));
+
+          // Skip this dep if it doesn't match our platform attributes
+          if !platform.matches(&settings.target, Some(&platform_attrs)) {
+            continue;
+          }
+        }
+
+        match dep.kind.as_ref().map(|v| v.as_str()) {
+          None | Some("normal") => normal_dep_names.push(dep.name.clone()),
+          Some("dev") => dev_dep_names.push(dep.name.clone()),
+          Some("build") => build_dep_names.push(dep.name.clone()),
+          something_else => panic!(
+            "Unhandlable dependency type {:?} for {} on {} detected!",
+            something_else, own_package.name, dep.name
+          ),
+        }
+      }
+
+      let mut build_deps = Vec::new();
+      let mut dev_deps = Vec::new();
+      let mut normal_deps = Vec::new();
+      for dep_id in node.dependencies.iter() {
+        // UNWRAP: Safe from verification of packages_by_id
+        let dep_package = packages_by_id.get(dep_id.as_str()).unwrap();
+        let build_dependency = BuildDependency {
+          name: dep_package.name.clone(),
+          version: dep_package.version.clone(),
+        };
+        if build_dep_names.contains(&dep_package.name) {
+          build_deps.push(build_dependency.clone());
+        }
+
+        if dev_dep_names.contains(&dep_package.name) {
+          dev_deps.push(build_dependency.clone());
+        }
+
+        if normal_dep_names.contains(&dep_package.name) {
+          normal_deps.push(build_dependency);
+        }
+      }
       build_deps.sort();
       dev_deps.sort();
       normal_deps.sort();
 
-      let mut targets = try!(identify_targets(&full_name, package.targets()));
+      let mut targets = try!(self.produce_targets(&own_package));
       targets.sort();
 
-      let possible_crate_settings =
-        self.settings.crates.get(id.name()).and_then(|c| c.get(&id.version().to_string()));
+      let possible_crate_settings = settings
+        .crates
+        .get(&own_package.name)
+        .and_then(|c| c.get(&own_package.version));
 
-      let should_gen_buildrs =
-        possible_crate_settings.map(|s| s.gen_buildrs.clone()).unwrap_or(false);
+      let should_gen_buildrs = possible_crate_settings
+        .map(|s| s.gen_buildrs.clone())
+        .unwrap_or(false);
       let build_script_target = if should_gen_buildrs {
-        targets.iter().find(|t| t.kind.deref() == "custom-build").cloned()
+        targets
+          .iter()
+          .find(|t| t.kind.as_str() == "custom-build")
+          .cloned()
       } else {
         None
       };
 
-      let targets_sans_build_script =
-        targets.into_iter().filter(|t| t.kind.deref() != "custom-build").collect::<Vec<_>>();
+      let targets_sans_build_script = targets
+        .into_iter()
+        .filter(|t| t.kind.as_str() != "custom-build")
+        .collect::<Vec<_>>();
 
-      let additional_deps =
-        possible_crate_settings.map(|s| s.additional_deps.clone()).unwrap_or(Vec::new());
+      let additional_deps = possible_crate_settings
+        .map(|s| s.additional_deps.clone())
+        .unwrap_or(Vec::new());
 
-      let additional_flags =
-        possible_crate_settings.map(|s| s.additional_flags.clone()).unwrap_or(Vec::new());
+      let additional_flags = possible_crate_settings
+        .map(|s| s.additional_flags.clone())
+        .unwrap_or(Vec::new());
 
-      let extra_aliased_targets =
-        possible_crate_settings.map(|s| s.extra_aliased_targets.clone()).unwrap_or(Vec::new());
+      let extra_aliased_targets = possible_crate_settings
+        .map(|s| s.extra_aliased_targets.clone())
+        .unwrap_or(Vec::new());
 
       // Skip generated dependencies explicitly designated to be skipped (potentially due to
       // being replaced or customized as part of additional_deps)
@@ -214,16 +301,21 @@ impl<'a> BuildPlanner<'a> {
         .map(|s| prune_skipped_deps(&build_deps, s))
         .unwrap_or_else(|| build_deps);
 
-      let licenses = load_and_dedup_licenses(&package.manifest().metadata());
+      let license_str = own_package
+        .license
+        .as_ref()
+        .map(|s| s.as_str())
+        .unwrap_or("");
+      let licenses = load_and_dedup_licenses(license_str);
 
       let data_attr = possible_crate_settings.and_then(|s| s.data_attr.clone());
 
       crate_contexts.push(CrateContext {
-        pkg_name: id.name().to_owned(),
-        pkg_version: id.version().to_string(),
+        pkg_name: own_package.name.clone(),
+        pkg_version: own_package.version.clone(),
         licenses: licenses,
-        features: features,
-        is_root_dependency: root_direct_deps.contains(&id),
+        features: node.features.clone().unwrap_or(Vec::new()),
+        is_root_dependency: root_direct_deps.contains(&node.id),
         metadeps: Vec::new(), /* TODO(acmcarther) */
         dependencies: non_skipped_normal_deps,
         build_dependencies: non_skipped_build_deps,
@@ -231,7 +323,7 @@ impl<'a> BuildPlanner<'a> {
         path: path,
         build_script_target: build_script_target,
         targets: targets_sans_build_script,
-        platform_triple: self.settings.target.to_owned(),
+        platform_triple: settings.target.to_owned(),
         additional_deps: additional_deps,
         additional_flags: additional_flags,
         extra_aliased_targets: extra_aliased_targets,
@@ -239,139 +331,42 @@ impl<'a> BuildPlanner<'a> {
       })
     }
 
-    let workspace_context = WorkspaceContext {
-      workspace_path: self.settings.workspace_path.clone(),
-      platform_triple: self.settings.target.clone(),
-      gen_workspace_prefix: self.settings.gen_workspace_prefix.clone(),
-    };
-
-    crate_contexts.sort_by_key(|context| format!("{}-{}", context.pkg_name, context.pkg_version));
-
-    Ok(PlannedBuild {
-      workspace_context: workspace_context,
-      crate_contexts: crate_contexts,
-    })
+    Ok(crate_contexts)
   }
-}
 
-impl PlannedDeps {
-  /**
-   * Identifies the full set of cargo dependencies for the provided package id using cargo's
-   * resolution details.
-   */
-  pub fn find_all_deps(
-    id: &PackageId,
-    package: &CargoPackage,
-    resolve: &Resolve,
-    platform_triple: &str,
-    platform_attrs: &Vec<Cfg>,
-  ) -> PlannedDeps {
-    let platform_deps = package
-      .dependencies()
-      .iter()
-      .filter(|dep| {
-        dep.platform().map(|p| p.matches(&platform_triple, Some(&platform_attrs))).unwrap_or(true)
-      })
-      .cloned()
-      .collect::<Vec<Dependency>>();
-    let build_deps = util::take_kinded_dep_names(&platform_deps, Kind::Build);
-    let dev_deps = util::take_kinded_dep_names(&platform_deps, Kind::Development);
-    let normal_deps = util::take_kinded_dep_names(&platform_deps, Kind::Normal);
-    let resolved_deps = resolve
-      .deps(&id)
-      .into_iter()
-      .map(|dep| BuildDependency {
-        name: dep.name().to_owned(),
-        version: dep.version().to_string(),
-      })
-      .collect::<Vec<BuildDependency>>();
+  fn produce_targets(&self, package: &Package) -> CargoResult<Vec<BuildTarget>> {
+    let full_name = format!("{}-{}", package.name, package.version);
+    let partial_path = format!("{}/", full_name);
+    let partial_path_byte_length = partial_path.as_bytes().len();
+    let mut targets = Vec::new();
+    for target in package.targets.iter() {
+      let manifest_pathbuf = PathBuf::from(&package.manifest_path);
+      assert!(manifest_pathbuf.is_absolute());
 
-    PlannedDeps {
-      normal_deps: resolved_deps
-        .iter()
-        .filter(|d| normal_deps.contains(&d.name))
-        .cloned()
-        .collect(),
-      build_deps: resolved_deps.iter().filter(|d| build_deps.contains(&d.name)).cloned().collect(),
-      dev_deps: resolved_deps.into_iter().filter(|d| dev_deps.contains(&d.name)).collect(),
-    }
-  }
-}
+      let crate_path_prefix = manifest_pathbuf.parent().unwrap().display().to_string();
 
-impl<'a> ResolvedPlan<'a> {
-  /**
-   * Performs Cargo's own build plan resolution, yielding the root crate, the set of packages, and
-   * the resolution graph.
-   */
-  pub fn resolve_from_files(cargo_config: &Config) -> CargoResult<ResolvedPlan> {
-    let lockfile = Path::new("Cargo.lock");
-    let manifest_path = lockfile.parent().unwrap().join("Cargo.toml");
-    let manifest = env::current_dir().unwrap().join(&manifest_path);
-    let ws = try!(Workspace::new(&manifest, cargo_config));
-    let specs = Packages::All.into_package_id_specs(&ws)?;
-    let root_name = specs.iter().next().unwrap().name().to_owned();
+      // Trim the manifest_path parent dir from the target path (to give us the crate-local path)
+      let mut local_path_str = target
+        .src_path
+        .clone()
+        .split_off(crate_path_prefix.len() + 1);
 
-    let (packages, resolve) = ops::resolve_ws_precisely(&ws, None, &[], false, false, &specs)?;
+      // Some crates have a weird prefix, trim that.
+      if local_path_str.starts_with("./") {
+        local_path_str = local_path_str.split_off(2);
+      }
 
-    Ok(ResolvedPlan {
-      root_name: root_name,
-      packages: packages,
-      resolve: resolve,
-    })
-  }
-}
-
-/** Enumerates the set of all possibly relevant packages for the Cargo dependencies */
-fn find_all_package_ids(registry_id: SourceId, resolve: &Resolve) -> CargoResult<Vec<PackageId>> {
-  try!(fs::metadata("Cargo.lock").map_err(|_| CargoError::from(
-    "failed to find Cargo.lock. Please run `cargo generate-lockfile` first."
-  )));
-
-  let mut package_ids =
-    resolve.iter().filter(|id| *id.source_id() == registry_id).cloned().collect::<Vec<_>>();
-  package_ids.sort_by_key(|id| id.name().to_owned());
-  Ok(package_ids)
-}
-
-/** Derives target objects from Cargo's target information. */
-fn identify_targets(full_name: &str, cargo_targets: &[Target]) -> CargoResult<Vec<BuildTarget>> {
-  let partial_path = format!("{}/", full_name);
-  let partial_path_byte_length = partial_path.as_bytes().len();
-  let mut targets = Vec::new();
-
-  for target in cargo_targets.iter() {
-    let target_path_str = try!(target.src_path().to_str().ok_or(CargoError::from(format!(
-      "path for {}'s target {} wasn't unicode",
-      &full_name,
-      target.name()
-    )))).to_owned();
-    let crate_name_str_idx =
-      try!(target_path_str.find(&partial_path).ok_or(CargoError::from(format!(
-        "path for {}'s target {} should have been in vendor directory",
-        &full_name,
-        target.name()
-      ))));
-    let local_path_bytes = target_path_str
-      .bytes()
-      .skip(crate_name_str_idx + partial_path_byte_length)
-      .collect::<Vec<_>>();
-    let mut local_path_str = String::from_utf8(local_path_bytes).unwrap();
-
-    // Dot-slash for local path is OK in Cargo, but not OK in Bazel
-    if local_path_str.starts_with("./") {
-      local_path_str = local_path_str.split_off(2);
+      for kind in target.kind.iter() {
+        targets.push(BuildTarget {
+          name: target.name.clone(),
+          path: local_path_str.clone(),
+          kind: kind.clone(),
+        });
+      }
     }
 
-    for kind in util::kind_to_kinds(target.kind()) {
-      targets.push(BuildTarget {
-        name: target.name().to_owned(),
-        path: local_path_str.clone(),
-        kind: kind,
-      });
-    }
+    Ok(targets)
   }
-
-  Ok(targets)
 }
 
 fn prune_skipped_deps(
@@ -380,19 +375,18 @@ fn prune_skipped_deps(
 ) -> Vec<BuildDependency> {
   deps
     .iter()
-    .filter(|d| !crate_settings.skipped_deps.contains(&format!("{}-{}", d.name, d.version)))
+    .filter(|d| {
+      !crate_settings
+        .skipped_deps
+        .contains(&format!("{}-{}", d.name, d.version))
+    })
     .map(|dep| dep.clone())
     .collect::<Vec<_>>()
 }
 
-fn load_and_dedup_licenses(metadata: &ManifestMetadata) -> Vec<LicenseData> {
-  let mut cargo_license_string = String::new();
-  if let Some(ref l) = metadata.license {
-    cargo_license_string = l.clone();
-  }
-
+fn load_and_dedup_licenses(licenses: &str) -> Vec<LicenseData> {
   let mut rating_to_license_name = HashMap::new();
-  for (license_name, license_type) in license::get_available_licenses(&cargo_license_string) {
+  for (license_name, license_type) in license::get_available_licenses(licenses) {
     let rating = license_type.to_bazel_rating();
 
     if rating_to_license_name.contains_key(&rating) {
@@ -400,7 +394,7 @@ fn load_and_dedup_licenses(metadata: &ManifestMetadata) -> Vec<LicenseData> {
       license_names_str.push_str(",");
       license_names_str.push_str(&license_name);
     } else {
-      rating_to_license_name.insert(rating, license_name);
+      rating_to_license_name.insert(rating, license_name.to_owned());
     }
   }
 
@@ -421,30 +415,61 @@ fn load_and_dedup_licenses(metadata: &ManifestMetadata) -> Vec<LicenseData> {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use cargo::core::LibKind;
-  use cargo::core::Target;
-  use cargo::core::manifest::ManifestMetadata;
-  use std::collections::HashMap;
-  use std::path::PathBuf;
+  use metadata::Metadata;
+  use metadata::MetadataFetcher;
+  use metadata::ResolveNode;
+  use metadata::testing::StubMetadataFetcher;
+  use metadata::testing as metadata_testing;
+  use settings::testing as settings_testing;
+  use hamcrest::core::expect;
+  use hamcrest::prelude::*;
+  use settings::RazeSettings;
 
-  fn make_manifest_metadata(licenses: Option<String>) -> ManifestMetadata {
-    ManifestMetadata {
-      authors: Vec::new(),
-      keywords: Vec::new(),
-      categories: Vec::new(),
-      license: licenses,
-      license_file: None,
-      description: None,
-      readme: None,
-      homepage: None,
-      repository: None,
-      documentation: None,
-      badges: HashMap::new(),
+  const ROOT_NODE_IDX: usize = 0;
+
+  fn dummy_workspace_files() -> CargoWorkspaceFiles {
+    CargoWorkspaceFiles {
+      toml_path: PathBuf::from("/tmp/Cargo.toml"),
+      lock_path_opt: None,
     }
   }
 
+  fn minimum_valid_metadata() -> Metadata {
+    let mut metadata = metadata_testing::dummy_metadata();
+    metadata.resolve.root = "test_root_id".to_owned();
+    metadata.resolve.nodes.push(ResolveNode {
+      id: "test_root_id".to_owned(),
+      dependencies: Vec::new(),
+      features: None,
+    });
+    let mut test_package = metadata_testing::dummy_package();
+    test_package.name = "test_root".to_owned();
+    test_package.id = "test_root_id".to_owned();
+    metadata.packages.push(test_package);
+
+    metadata
+  }
+
+  fn minimum_dependency_metadata() -> Metadata {
+    let mut metadata = minimum_valid_metadata();
+    metadata.resolve.nodes[ROOT_NODE_IDX]
+      .dependencies
+      .push("test_dep_id".to_owned());
+    metadata.resolve.nodes.push(ResolveNode {
+      id: "test_dep_id".to_owned(),
+      dependencies: Vec::new(),
+      features: None,
+    });
+    let mut test_dep = metadata_testing::dummy_package();
+    test_dep.name = "test_dep".to_owned();
+    test_dep.id = "test_dep_id".to_owned();
+    test_dep.version = "test_version".to_owned();
+    metadata.packages.push(test_dep);
+    metadata
+  }
+
   #[test]
-  fn license_loading_works_with_no_license() {
+  fn test_license_loading_works_with_no_license() {
     let no_license_data = vec![
       LicenseData {
         name: "no license".to_owned(),
@@ -452,22 +477,15 @@ mod tests {
       },
     ];
 
-    let metadata = make_manifest_metadata(None /* licenses */);
-    assert_eq!(load_and_dedup_licenses(&metadata), no_license_data);
-
-    let metadata = make_manifest_metadata(Some("".to_owned()));
-    assert_eq!(load_and_dedup_licenses(&metadata), no_license_data);
-
-    let metadata = make_manifest_metadata(Some("///".to_owned()));
-    assert_eq!(load_and_dedup_licenses(&metadata), no_license_data);
+    assert_eq!(load_and_dedup_licenses(""), no_license_data);
+    assert_eq!(load_and_dedup_licenses("///"), no_license_data);
   }
 
   #[test]
-  fn license_loading_dedupes_equivalent_licenses() {
-    // WTFPL is "disallowed",but we map that down tothe same thing as GPL
-    let metadata = make_manifest_metadata(Some("Unlicense/ WTFPL /GPL-3.0".to_owned()));
+  fn test_license_loading_dedupes_equivalent_licenses() {
+    // WTFPL is "disallowed",but we map that down to the same thing as GPL
     assert_eq!(
-      load_and_dedup_licenses(&metadata),
+      load_and_dedup_licenses("Unlicense/ WTFPL /GPL-3.0"),
       vec![
         LicenseData {
           name: "GPL-3.0,WTFPL".to_owned(),
@@ -482,34 +500,86 @@ mod tests {
   }
 
   #[test]
-  fn test_identify_targets_handles_dot_slash() {
-    let normal_target = Target::lib_target(
-      "test_target",
-      vec![LibKind::Lib],
-      PathBuf::from("/some_local_path/test_target-0.0.1/arbitrary_subpath/lib.rs"),
-    );
-    let dotslash_target = Target::lib_target(
-      "test_target",
-      vec![LibKind::Lib],
-      PathBuf::from("/some_local_path/test_target-0.0.1/./arbitrary_subpath/lib.rs"),
+  fn test_plan_build_missing_resolve_fails() {
+    let mut fetcher = StubMetadataFetcher::with_metadata(metadata_testing::dummy_metadata());
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build_res = planner.plan_build(
+      &settings_testing::dummy_raze_settings(),
+      dummy_workspace_files(),
     );
 
-    let build_targets = identify_targets("test_target-0.0.1", &[normal_target, dotslash_target]);
-    assert!(build_targets.is_ok());
-    assert_eq!(
-      build_targets.unwrap(),
-      vec![
-        BuildTarget {
-          name: "test_target".to_owned(),
-          path: "arbitrary_subpath/lib.rs".to_owned(),
-          kind: "lib".to_owned(),
-        },
-        BuildTarget {
-          name: "test_target".to_owned(),
-          path: "arbitrary_subpath/lib.rs".to_owned(),
-          kind: "lib".to_owned(),
-        },
-      ]
-    );
+    println!("{:#?}", planned_build_res);
+    assert!(planned_build_res.is_err());
   }
+
+  #[test]
+  fn test_plan_build_missing_package_in_metadata() {
+    let mut metadata = metadata_testing::dummy_metadata();
+    metadata.resolve.root = "test_root".to_owned();
+    metadata.resolve.nodes.push(ResolveNode {
+      id: "test_root".to_owned(),
+      dependencies: Vec::new(),
+      features: None,
+    });
+
+    let mut fetcher = StubMetadataFetcher::with_metadata(metadata);
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build_res = planner.plan_build(
+      &settings_testing::dummy_raze_settings(),
+      dummy_workspace_files(),
+    );
+
+    println!("{:#?}", planned_build_res);
+    assert!(planned_build_res.is_err());
+  }
+
+  #[test]
+  fn test_plan_build_minimum_workspace() {
+    let mut fetcher = StubMetadataFetcher::with_metadata(minimum_valid_metadata());
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build_res = planner.plan_build(
+      &settings_testing::dummy_raze_settings(),
+      dummy_workspace_files(),
+    );
+
+    println!("{:#?}", planned_build_res);
+    assert!(planned_build_res.unwrap().crate_contexts.is_empty());
+  }
+
+  #[test]
+  fn test_plan_build_minimum_root_dependency() {
+    let mut fetcher = StubMetadataFetcher::with_metadata(minimum_dependency_metadata());
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build_res = planner.plan_build(
+      &settings_testing::dummy_raze_settings(),
+      dummy_workspace_files(),
+    );
+
+    println!("{:#?}", planned_build_res);
+    let planned_build = planned_build_res.unwrap();
+    assert_eq!(planned_build.crate_contexts.len(), 1);
+    let dep = planned_build.crate_contexts.get(0).unwrap();
+    assert_eq!(dep.pkg_name, "test_dep");
+    assert_eq!(dep.is_root_dependency, true);
+  }
+
+  #[test]
+  fn test_plan_build_verifies_vendored_state() {
+    let mut settings = settings_testing::dummy_raze_settings();
+    settings.genmode = GenMode::Vendored;
+
+    let mut fetcher = StubMetadataFetcher::with_metadata(minimum_dependency_metadata());
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build_res = planner.plan_build(&settings, dummy_workspace_files());
+
+    println!("{:#?}", planned_build_res);
+    assert!(planned_build_res.is_err());
+  }
+
+  // TODO(acmcarther): Add tests:
+  // TODO(acmcarther): Extra flags work
+  // TODO(acmcarther): Extra deps work
+  // TODO(acmcarther): Buildrs works
+  // TODO(acmcarther): Extra aliases work
+  // TODO(acmcarther): Skipped deps work
 }
