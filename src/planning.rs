@@ -33,6 +33,7 @@ use settings::RazeSettings;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
+use std::path::PathBuf;
 use std::str;
 use std::str::FromStr;
 use util;
@@ -334,24 +335,21 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
     let partial_path_byte_length = partial_path.as_bytes().len();
     let mut targets = Vec::new();
     for target in package.targets.iter() {
-      // N.B. This error is really weird, but it boils down to us not being able to find the crate's
-      // name as part of the complete path to the crate root.
-      // For example, "/some/long/path/crate-version/lib.rs" should contain crate-version in the path
-      // for crate at some version.
-      let crate_name_str_idx = try!(target.src_path.find(&partial_path).ok_or(CargoError::from(
-        format!(
-          "{} had a target {} whose crate root appeared to be outside of the crate.",
-          &full_name, target.name
-        )
-      )));
+      // TODO(acmcarther): Cite why package.manifest_path is guaranteed to be an absolute path
+      // ... which would justify the .parent().unwrap()
+      let crate_path_prefix = PathBuf::from(&package.manifest_path)
+        .parent()
+        .unwrap()
+        .display()
+        .to_string();
 
-      let local_path_bytes = target
+      // Trim the manifest_path parent dir from the target path (to give us the crate-local path)
+      let mut local_path_str = target
         .src_path
-        .bytes()
-        .skip(crate_name_str_idx + partial_path_byte_length)
-        .collect::<Vec<_>>();
-      // UNWRAP: Sliced from a known unicode string -- conversion is safe
-      let mut local_path_str = String::from_utf8(local_path_bytes).unwrap();
+        .clone()
+        .split_off(crate_path_prefix.len() + 1);
+
+      // Some crates have a weird prefix, trim that.
       if local_path_str.starts_with("./") {
         local_path_str = local_path_str.split_off(2);
       }
