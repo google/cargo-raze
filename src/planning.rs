@@ -13,51 +13,29 @@
 // limitations under the License.
 
 use cargo::CargoError;
-use cargo::core::Workspace;
-use cargo::core::dependency::Kind;
 use cargo::core::dependency::Platform;
-use cargo::ops;
-use cargo::ops::Packages;
 use cargo::util::CargoResult;
-use cargo::util::Config;
 use context::BuildDependency;
 use context::BuildTarget;
 use context::CrateContext;
 use context::LicenseData;
 use context::WorkspaceContext;
 use license;
-use metadata::Dependency;
+use metadata::CargoWorkspaceFiles;
 use metadata::Metadata;
+use metadata::MetadataFetcher;
 use metadata::Package;
 use metadata::PackageId;
-use metadata::Resolve;
 use metadata::ResolveNode;
-use metadata::Target;
-use serde_json;
 use settings::CrateSettings;
 use settings::GenMode;
 use settings::RazeSettings;
 use std::collections::HashMap;
-use std::env;
+use std::collections::HashSet;
 use std::fs;
-use std::path::PathBuf;
-use std::process::Command;
 use std::str;
 use std::str::FromStr;
-use tempdir::TempDir;
 use util;
-
-/**
- * An entity that can retrive deserialized metadata for a Cargo Workspace.
- *
- * The "CargoInternalsMetadataFetcher" is probably the one you want.
- *
- * Usage of ..Subcommand.. is waiting on a cargo release containing
- * https://github.com/rust-lang/cargo/pull/5122
- */
-pub trait MetadataFetcher {
-  fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> CargoResult<Metadata>;
-}
 
 /** An entity that can produce an organized, planned build ready to be rendered. */
 pub trait BuildPlanner {
@@ -66,12 +44,6 @@ pub trait BuildPlanner {
     settings: &RazeSettings,
     files: CargoWorkspaceFiles,
   ) -> CargoResult<PlannedBuild>;
-}
-
-/** The local Cargo workspace files to be used for build planning .*/
-pub struct CargoWorkspaceFiles {
-  pub toml_path: PathBuf,
-  pub lock_path_opt: Option<PathBuf>,
 }
 
 /** The default implementation of a BuildPlanner. */
@@ -83,21 +55,6 @@ pub struct BuildPlannerImpl<'fetcher> {
 pub struct PlannedBuild {
   pub workspace_context: WorkspaceContext,
   pub crate_contexts: Vec<CrateContext>,
-}
-
-/** A workspace metadata fetcher that uses the Cargo Metadata subcommand. */
-pub struct CargoSubcommandMetadataFetcher;
-
-/**
- * A workspace metadata fetcher that uses Cargo's internals.
- *
- * !DANGER DANGER!
- * This struct is very hard to test as it uses Cargo's stateful internals, please take care when
- * changing it.
- * !DANGER DANGER!
- */
-pub struct CargoInternalsMetadataFetcher<'config> {
-  cargo_config: &'config Config,
 }
 
 impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
@@ -154,7 +111,11 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
   fn get_root_deps(&self, metadata: &Metadata) -> CargoResult<Vec<PackageId>> {
     let root_resolve_node_opt = {
       let root_id = &metadata.resolve.root;
-      metadata.resolve.nodes.iter().find(|node| &node.id == root_id)
+      metadata
+        .resolve
+        .nodes
+        .iter()
+        .find(|node| &node.id == root_id)
     };
     let root_resolve_node = if root_resolve_node_opt.is_some() {
       // UNWRAP: Guarded above
@@ -192,6 +153,31 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
           "Metadata.packages list was missing keys: {:?}",
           missing_nodes
         )));
+      }
+    }
+
+    // Verify that user settings are being used
+    {
+      let mut name_to_versions = HashMap::new();
+      for package in metadata.packages.iter() {
+        name_to_versions
+          .entry(package.name.clone())
+          .or_insert(HashSet::new())
+          .insert(package.version.clone());
+      }
+      let empty_set = HashSet::new();
+      for (name, versions) in settings.crates.iter() {
+        for v in versions.keys() {
+          let alternatives = name_to_versions.get(name).unwrap_or(&empty_set);
+          if !alternatives.contains(v) {
+            let help = if alternatives.is_empty() {
+              "no alternatives found.".to_owned()
+            } else {
+              format!("did you mean one of {}-{:?}?", name, alternatives)
+            };
+            eprintln!("Found unused raze settings for {}-{}, {}", name, v, help);
+          }
+        }
       }
     }
 
@@ -266,28 +252,39 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let mut targets = try!(self.produce_targets(&own_package));
       targets.sort();
 
-      let possible_crate_settings =
-        settings.crates.get(&own_package.name).and_then(|c| c.get(&own_package.version));
+      let possible_crate_settings = settings
+        .crates
+        .get(&own_package.name)
+        .and_then(|c| c.get(&own_package.version));
 
-      let should_gen_buildrs =
-        possible_crate_settings.map(|s| s.gen_buildrs.clone()).unwrap_or(false);
+      let should_gen_buildrs = possible_crate_settings
+        .map(|s| s.gen_buildrs.clone())
+        .unwrap_or(false);
       let build_script_target = if should_gen_buildrs {
-        targets.iter().find(|t| t.kind.as_str() == "custom-build").cloned()
+        targets
+          .iter()
+          .find(|t| t.kind.as_str() == "custom-build")
+          .cloned()
       } else {
         None
       };
 
-      let targets_sans_build_script =
-        targets.into_iter().filter(|t| t.kind.as_str() != "custom-build").collect::<Vec<_>>();
+      let targets_sans_build_script = targets
+        .into_iter()
+        .filter(|t| t.kind.as_str() != "custom-build")
+        .collect::<Vec<_>>();
 
-      let additional_deps =
-        possible_crate_settings.map(|s| s.additional_deps.clone()).unwrap_or(Vec::new());
+      let additional_deps = possible_crate_settings
+        .map(|s| s.additional_deps.clone())
+        .unwrap_or(Vec::new());
 
-      let additional_flags =
-        possible_crate_settings.map(|s| s.additional_flags.clone()).unwrap_or(Vec::new());
+      let additional_flags = possible_crate_settings
+        .map(|s| s.additional_flags.clone())
+        .unwrap_or(Vec::new());
 
-      let extra_aliased_targets =
-        possible_crate_settings.map(|s| s.extra_aliased_targets.clone()).unwrap_or(Vec::new());
+      let extra_aliased_targets = possible_crate_settings
+        .map(|s| s.extra_aliased_targets.clone())
+        .unwrap_or(Vec::new());
 
       // Skip generated dependencies explicitly designated to be skipped (potentially due to
       // being replaced or customized as part of additional_deps)
@@ -298,7 +295,11 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         .map(|s| prune_skipped_deps(&build_deps, s))
         .unwrap_or_else(|| build_deps);
 
-      let license_str = own_package.license.as_ref().map(|s| s.as_str()).unwrap_or("");
+      let license_str = own_package
+        .license
+        .as_ref()
+        .map(|s| s.as_str())
+        .unwrap_or("");
       let licenses = load_and_dedup_licenses(license_str);
 
       let data_attr = possible_crate_settings.and_then(|s| s.data_attr.clone());
@@ -337,11 +338,12 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       // name as part of the complete path to the crate root.
       // For example, "/some/long/path/crate-version/lib.rs" should contain crate-version in the path
       // for crate at some version.
-      let crate_name_str_idx =
-        try!(target.src_path.find(&partial_path).ok_or(CargoError::from(format!(
+      let crate_name_str_idx = try!(target.src_path.find(&partial_path).ok_or(CargoError::from(
+        format!(
           "{} had a target {} whose crate root appeared to be outside of the crate.",
           &full_name, target.name
-        ))));
+        )
+      )));
 
       let local_path_bytes = target
         .src_path
@@ -367,176 +369,17 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
   }
 }
 
-impl MetadataFetcher for CargoSubcommandMetadataFetcher {
-  fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> CargoResult<Metadata> {
-    assert!(files.toml_path.is_file());
-    assert!(files.lock_path_opt.as_ref().map(|p| p.is_file()).unwrap_or(true));
-
-    // Copy files into a temp directory
-    // UNWRAP: Guarded by function assertion
-    let cargo_tempdir = {
-      let dir = try!(
-        TempDir::new("cargo_raze_metadata_dir").map_err(|_| CargoError::from("creating tempdir"))
-      );
-      {
-        let dir_path = dir.path();
-        let new_toml_path = dir_path.join(files.toml_path.file_name().unwrap());
-        try!(
-          fs::copy(files.toml_path, new_toml_path)
-            .map_err(|_| CargoError::from("copying cargo toml"))
-        );
-        if let Some(lock_path) = files.lock_path_opt {
-          let new_lock_path = dir_path.join(lock_path.file_name().unwrap());
-          try!(
-            fs::copy(lock_path, new_lock_path).map_err(|_| CargoError::from("copying cargo lock"))
-          );
-        }
-      }
-      dir
-    };
-
-    // Shell out to cargo
-    let exec_output = try!(
-      Command::new("cargo")
-        .current_dir(cargo_tempdir.path())
-        .args(&["metadata", "--format-version", "1"])
-        .output()
-        .map_err(|_| CargoError::from("running `cargo metadata`"))
-    );
-
-    // Handle command errs
-    let stdout_str =
-      String::from_utf8(exec_output.stdout).unwrap_or("[unparsable bytes]".to_owned());
-    if !exec_output.status.success() {
-      let stderr_str =
-        String::from_utf8(exec_output.stderr).unwrap_or("[unparsable bytes]".to_owned());
-      println!("`cargo metadata` failed. Inspect Cargo.toml for issues!");
-      println!("stdout: {}", stdout_str);
-      println!("stderr: {}", stderr_str);
-      return Err(CargoError::from("running `cargo metadata`"));
-    }
-
-    // Parse and yield metadata
-    serde_json::from_str::<Metadata>(&stdout_str)
-      .map_err(|_| CargoError::from("parsing `cargo metadata` output"))
-  }
-}
-
-impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
-  fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> CargoResult<Metadata> {
-    let manifest = env::current_dir().unwrap().join(&files.toml_path);
-    let ws = try!(Workspace::new(&manifest, &self.cargo_config));
-    let specs = Packages::All.into_package_id_specs(&ws)?;
-    let root_name = specs.iter().next().unwrap().name().to_owned();
-
-    let (resolved_packages, cargo_resolve) =
-      ops::resolve_ws_precisely(&ws, None, &[], false, false, &specs)?;
-
-    let root_package_id = try!(
-      cargo_resolve
-        .iter()
-        .filter(|dep| dep.name() == root_name)
-        .next()
-        .ok_or(CargoError::from("root crate should be in cargo resolve"))
-    ).to_string();
-
-    let mut packages = Vec::new();
-    let mut resolve = Resolve {
-      nodes: Vec::new(),
-      root: root_package_id,
-    };
-
-    for id in cargo_resolve.iter() {
-      let dependencies = cargo_resolve.deps(id).map(|p| p.to_string()).collect();
-      let features = cargo_resolve.features_sorted(id).iter().map(|s| s.to_string()).collect();
-      resolve.nodes.push(ResolveNode {
-        id: id.to_string(),
-        dependencies: dependencies,
-        features: Some(features),
-      })
-    }
-
-    for package_id in resolved_packages.package_ids() {
-      // TODO(acmcarther): Justify this unwrap
-      let package = resolved_packages.get(&package_id).unwrap().clone();
-      let manifest_metadata = package.manifest().metadata();
-
-      let mut dependencies = Vec::new();
-      for dependency in package.dependencies().iter() {
-        dependencies.push(Dependency {
-          name: dependency.name().to_string(),
-          source: dependency.source_id().to_string(),
-          req: dependency.version_req().to_string(),
-          kind: match dependency.kind() {
-            Kind::Normal => None,
-            Kind::Development => Some("dev".to_owned()),
-            Kind::Build => Some("build".to_owned()),
-          },
-          optional: dependency.is_optional(),
-          use_default_features: dependency.uses_default_features(),
-          features: dependency.features().iter().cloned().collect(),
-          target: dependency.platform().map(|p| p.to_string()),
-        });
-      }
-
-      let mut targets = Vec::new();
-      for target in package.targets().iter() {
-        let crate_types = target.rustc_crate_types().iter().map(|t| t.to_string()).collect();
-        targets.push(Target {
-          name: target.name().to_owned(),
-          kind: util::kind_to_kinds(target.kind()),
-          crate_types: crate_types,
-          src_path: target.src_path().display().to_string(),
-        });
-      }
-
-      let mut features = HashMap::new();
-      for (feature, features_or_dependencies) in package.summary().features().iter() {
-        features.insert(feature.clone(), features_or_dependencies.clone());
-      }
-
-      packages.push(Package {
-        name: package.name().to_string(),
-        version: package.version().to_string(),
-        id: package_id.to_string(),
-        license: manifest_metadata.license.clone(),
-        license_file: manifest_metadata.license_file.clone(),
-        description: manifest_metadata.description.clone(),
-        source: Some(package_id.source_id().to_string()),
-        dependencies: dependencies,
-        targets: targets,
-        features: features,
-        manifest_path: package.manifest_path().display().to_string(),
-      });
-    }
-
-    let workspace_members = ws.members().map(|pkg| pkg.package_id().to_string()).collect();
-
-    Ok(Metadata {
-      packages: packages,
-      resolve: resolve,
-      workspace_members: workspace_members,
-      target_directory: ws.target_dir().display().to_string(),
-      version: 0, /* not generated via subcomand */
-    })
-  }
-}
-
-impl<'config> CargoInternalsMetadataFetcher<'config> {
-  pub fn new(cargo_config: &'config Config) -> CargoInternalsMetadataFetcher<'config> {
-    CargoInternalsMetadataFetcher {
-      cargo_config: cargo_config,
-    }
-  }
-}
-
 fn prune_skipped_deps(
   deps: &Vec<BuildDependency>,
   crate_settings: &CrateSettings,
 ) -> Vec<BuildDependency> {
   deps
     .iter()
-    .filter(|d| !crate_settings.skipped_deps.contains(&format!("{}-{}", d.name, d.version)))
+    .filter(|d| {
+      !crate_settings
+        .skipped_deps
+        .contains(&format!("{}-{}", d.name, d.version))
+    })
     .map(|dep| dep.clone())
     .collect::<Vec<_>>()
 }

@@ -27,8 +27,7 @@ pub struct CargoToml {
 /** The configuration settings for `cargo-raze`, included in Cargo.toml. */
 #[derive(Debug, Clone, Deserialize)]
 pub struct RazeSettings {
-  /** The path to the Cargo.toml working directory. */
-  pub workspace_path: String,
+  /** The path to the Cargo.toml working directory. */ pub workspace_path: String,
 
   /**
    * The platform target to generate BUILD rules for.
