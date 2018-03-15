@@ -415,34 +415,6 @@ fn load_and_dedup_licenses(licenses: &str) -> Vec<LicenseData> {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use cargo::core::LibKind;
-  use cargo::core::Target;
-  use cargo::core::manifest::ManifestMetadata;
-  use std::collections::HashMap;
-  use std::fs::File;
-  use std::io::Write;
-  use std::path::PathBuf;
-
-  fn basic_toml() -> &'static str {
-    "
-[package]
-name = \"test\"
-version = \"0.0.1\"
-
-[lib]
-path = \"not_a_file.rs\"
-    "
-  }
-
-  fn basic_lock() -> &'static str {
-    "
-[[package]]
-name = \"test\"
-version = \"0.0.1\"
-dependencies = [
-]
-    "
-  }
 
   #[test]
   fn test_license_loading_works_with_no_license() {
@@ -473,64 +445,5 @@ dependencies = [
         },
       ]
     );
-  }
-
-  #[test]
-  fn test_cargo_subcommand_metadata_fetcher_works_without_lock() {
-    let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
-    let toml_path = dir.path().join("Cargo.toml");
-    let mut toml = File::create(&toml_path).unwrap();
-    toml.write_all(basic_toml().as_bytes()).unwrap();
-    let files = CargoWorkspaceFiles {
-      toml_path: toml_path,
-      lock_path_opt: None,
-    };
-
-    let mut fetcher = CargoSubcommandMetadataFetcher;
-
-    fetcher.fetch_metadata(files).unwrap();
-  }
-
-  #[test]
-  fn test_cargo_subcommand_metadata_fetcher_works_with_lock() {
-    let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
-    let toml_path = {
-      let path = dir.path().join("Cargo.toml");
-      let mut toml = File::create(&path).unwrap();
-      toml.write_all(basic_toml().as_bytes()).unwrap();
-      path
-    };
-    let lock_path = {
-      let path = dir.path().join("Cargo.lock");
-      let mut lock = File::create(&path).unwrap();
-      lock.write_all(basic_lock().as_bytes()).unwrap();
-      path
-    };
-    let files = CargoWorkspaceFiles {
-      toml_path: toml_path,
-      lock_path_opt: Some(lock_path),
-    };
-
-    let mut fetcher = CargoSubcommandMetadataFetcher;
-
-    fetcher.fetch_metadata(files).unwrap();
-  }
-
-  #[test]
-  fn test_cargo_subcommand_metadata_fetcher_handles_bad_files() {
-    let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
-    let toml_path = {
-      let path = dir.path().join("Cargo.toml");
-      let mut toml = File::create(&path).unwrap();
-      toml.write_all(b"hello").unwrap();
-      path
-    };
-    let files = CargoWorkspaceFiles {
-      toml_path: toml_path,
-      lock_path_opt: None,
-    };
-
-    let mut fetcher = CargoSubcommandMetadataFetcher;
-    assert!(fetcher.fetch_metadata(files).is_err());
   }
 }
