@@ -19,8 +19,6 @@ use cargo::core::dependency::Platform;
 use cargo::ops;
 use cargo::ops::Packages;
 use cargo::util::CargoResult;
-use cargo::util::Cfg;
-use cargo::util::CfgExpr;
 use cargo::util::Config;
 use context::BuildDependency;
 use context::BuildTarget;
@@ -35,7 +33,6 @@ use metadata::PackageId;
 use metadata::Resolve;
 use metadata::ResolveNode;
 use metadata::Target;
-use metadata::testing as metadata_testing;
 use serde_json;
 use settings::CrateSettings;
 use settings::GenMode;
@@ -43,7 +40,6 @@ use settings::RazeSettings;
 use std::collections::HashMap;
 use std::env;
 use std::fs;
-use std::ops::Deref;
 use std::path::PathBuf;
 use std::process::Command;
 use std::str;
@@ -92,7 +88,14 @@ pub struct PlannedBuild {
 /** A workspace metadata fetcher that uses the Cargo Metadata subcommand. */
 pub struct CargoSubcommandMetadataFetcher;
 
-/** A workspace metadata fetcher that uses Cargo's internals. */
+/**
+ * A workspace metadata fetcher that uses Cargo's internals.
+ *
+ * !DANGER DANGER!
+ * This struct is very hard to test as it uses Cargo's stateful internals, please take care when
+ * changing it.
+ * !DANGER DANGER!
+ */
 pub struct CargoInternalsMetadataFetcher<'config> {
   cargo_config: &'config Config,
 }
@@ -215,7 +218,6 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         if dep.target.is_some() {
           // UNWRAP: Safe from above check
           let target_str = dep.target.as_ref().unwrap();
-          println!("target_str: {}", target_str);
           let platform = try!(Platform::from_str(target_str));
 
           // Skip this dep if it doesn't match our platform attributes
@@ -570,8 +572,13 @@ fn load_and_dedup_licenses(licenses: &str) -> Vec<LicenseData> {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use cargo::core::LibKind;
+  use cargo::core::Target;
+  use cargo::core::manifest::ManifestMetadata;
+  use std::collections::HashMap;
   use std::fs::File;
   use std::io::Write;
+  use std::path::PathBuf;
 
   fn basic_toml() -> &'static str {
     "
@@ -592,6 +599,37 @@ version = \"0.0.1\"
 dependencies = [
 ]
     "
+  }
+
+  #[test]
+  fn test_license_loading_works_with_no_license() {
+    let no_license_data = vec![
+      LicenseData {
+        name: "no license".to_owned(),
+        rating: "restricted".to_owned(),
+      },
+    ];
+
+    assert_eq!(load_and_dedup_licenses(""), no_license_data);
+    assert_eq!(load_and_dedup_licenses("///"), no_license_data);
+  }
+
+  #[test]
+  fn test_license_loading_dedupes_equivalent_licenses() {
+    // WTFPL is "disallowed",but we map that down to the same thing as GPL
+    assert_eq!(
+      load_and_dedup_licenses("Unlicense/ WTFPL /GPL-3.0"),
+      vec![
+        LicenseData {
+          name: "GPL-3.0,WTFPL".to_owned(),
+          rating: "restricted".to_owned(),
+        },
+        LicenseData {
+          name: "Unlicense".to_owned(),
+          rating: "unencumbered".to_owned(),
+        },
+      ]
+    );
   }
 
   #[test]
