@@ -18,6 +18,8 @@ extern crate rustc_serialize;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
+extern crate serde_json;
+extern crate tempdir;
 extern crate tera;
 extern crate toml;
 
@@ -25,13 +27,14 @@ extern crate toml;
 #[macro_use]
 extern crate hamcrest;
 
+mod bazel;
 mod context;
+mod license;
+mod metadata;
 mod planning;
 mod rendering;
 mod settings;
 mod util;
-mod bazel;
-mod license;
 
 use bazel::BazelRenderer;
 use cargo::CargoError;
@@ -39,6 +42,9 @@ use cargo::CliResult;
 use cargo::util::CargoResult;
 use cargo::util::Config;
 use planning::BuildPlanner;
+use planning::BuildPlannerImpl;
+use planning::CargoInternalsMetadataFetcher;
+use planning::CargoWorkspaceFiles;
 use rendering::BuildRenderer;
 use rendering::FileOutputs;
 use rendering::RenderDetails;
@@ -50,6 +56,7 @@ use std::fs::File;
 use std::io::Read;
 use std::io::Write;
 use std::path::Path;
+use std::path::PathBuf;
 
 #[derive(Debug, RustcDecodable)]
 struct Options {
@@ -71,7 +78,6 @@ Usage:
 Options:
     -h, --help                Print this message
     -v, --verbose             Use verbose output
-    --host HOST               Registry index to sync with
     -q, --quiet               No output printed to stdout
     --color WHEN              Coloring: auto, always, never
     -d, --dryrun              Do not emit any files
@@ -100,13 +106,19 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
 
   try!(validate_settings(&mut settings));
 
-  let mut planner = try!(BuildPlanner::new(settings.clone(), cargo_config));
+  let mut metadata_fetcher = CargoInternalsMetadataFetcher::new(&cargo_config);
+  let mut planner = BuildPlannerImpl::new(&mut metadata_fetcher);
 
-  if let Some(host) = options.flag_host {
-    try!(planner.set_registry_from_url(host));
+  let toml_path = PathBuf::from("./Cargo.toml");
+  let mut lock_path_opt = None;
+  if fs::metadata("./Cargo.lock").is_ok() {
+    lock_path_opt = Some(PathBuf::from("./Cargo.lock"));
   }
-
-  let planned_build = try!(planner.plan_build());
+  let files = CargoWorkspaceFiles {
+    toml_path: toml_path,
+    lock_path_opt: lock_path_opt,
+  };
+  let planned_build = planner.plan_build(&settings, files).unwrap();
   let mut bazel_renderer = BazelRenderer::new();
   let render_details = RenderDetails {
     path_prefix: "./".to_owned(),
@@ -126,7 +138,11 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
   };
 
   let dry_run = options.flag_dryrun.unwrap_or(false);
-  for FileOutputs { path, contents } in bazel_file_outputs {
+  for FileOutputs {
+    path,
+    contents,
+  } in bazel_file_outputs
+  {
     if !dry_run {
       try!(write_to_file_loudly(&path, &contents));
     } else {

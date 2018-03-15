@@ -13,20 +13,12 @@
 // limitations under the License.
 
 use cargo::CargoError;
-use cargo::core::Dependency;
 use cargo::core::TargetKind;
-use cargo::core::dependency::Kind;
 use cargo::util::CargoResult;
 use cargo::util::Cfg;
-use std::collections::HashSet;
 use std::process::Command;
 use std::str;
 use std::str::FromStr;
-
-/** Extracts the dependencies that are of the provided kind. */
-pub fn take_kinded_dep_names(platform_deps: &Vec<Dependency>, kind: Kind) -> HashSet<String> {
-  platform_deps.iter().filter(|d| d.kind() == kind).map(|dep| dep.name().to_owned()).collect()
-}
 
 /**
  * Extracts consistently named Strings for the provided TargetKind.
