@@ -32,6 +32,7 @@ genrule(
     local = 1,
     cmd = "mkdir {{ crate_name_sanitized}}_out_dir_outputs/;"
         + " (export CARGO_MANIFEST_DIR=\"$$PWD/$$(dirname $(location :Cargo.toml))\";"
+        + " export RUSTC=\"$$PWD/$(location @rust_linux_x86_64//:rustc)\";"
         + " export TARGET='{{ crate.platform_triple }}';"
         + " export RUST_BACKTRACE=1;"
         {%- for feature in crate.features %}
