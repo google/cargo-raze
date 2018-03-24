@@ -1,0 +1,11 @@
+workspace(name = "io_bazel_rules_rust")
+
+git_repository(
+    name = "io_bazel_rules_rust",
+    commit = "ee61ddff0b97cfc36278902e5210d1929ba5b119",           
+    remote = "https://github.com/bazelbuild/rules_rust.git",
+)
+
+load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
+rust_repositories()
+

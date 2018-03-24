@@ -1,0 +1,11 @@
+[package]
+
+name = "conduit-mime-types"
+version = "0.7.3"
+authors = ["wycats@gmail.com"]
+license = "MIT"
+description = "MIME type definitions for conduit"
+repository = "https://github.com/conduit-rust/mime-types"
+
+[dependencies]
+rustc-serialize = "0.3"
