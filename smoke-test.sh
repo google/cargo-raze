@@ -32,10 +32,11 @@ rust_repositories()
 
 EOF
 
-for ex in $(ls $TEST_DIR/remote); do
+for ex in $(find $TEST_DIR/remote -maxdepth 1 -type d | tail -n+2); do
+    name="$(basename "$ex")"
     cat >> "$EXAMPLES_DIR/WORKSPACE" << EOF
-load("//remote/${ex}/cargo:crates.bzl", "${ex}_fetch_remote_crates")
-${ex}_fetch_remote_crates()
+load("//remote/${name}/cargo:crates.bzl", "${name}_fetch_remote_crates")
+${name}_fetch_remote_crates()
 
 EOF
 done
