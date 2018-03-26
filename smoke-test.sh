@@ -8,11 +8,11 @@ function command_exists {
 
 PWD="$(pwd)"
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "$DIR"
+REPO_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$REPO_ROOT"
 
-EXAMPLES_DIR="$DIR/examples"
-TEST_DIR="$DIR/smoke_test"
+EXAMPLES_DIR="$REPO_ROOT/examples"
+TEST_DIR="$REPO_ROOT/smoke_test"
 
 command_exists "cargo"
 command_exists "cargo-vendor"
@@ -54,10 +54,10 @@ for ex in $(find $EXAMPLES_DIR/vendored -maxdepth 1 -type d | tail -n+2); do
 done
 
 # Ensure Cargo Raze build is up-to-date
-cd "$DIR"
+cd "$REPO_ROOT"
 echo "Building local Cargo Raze"
 cargo build --quiet
-RAZE="$DIR/target/debug/cargo-raze raze"
+RAZE="$REPO_ROOT/target/debug/cargo-raze raze"
 for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
     echo "Running Cargo Raze for $(basename $ex)"
     cd "$ex/cargo"
