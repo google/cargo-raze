@@ -3,13 +3,7 @@
 set -eu
 
 function command_exists {
-    command -v "$0" >/dev/null 2>&1
-
-    if [[ $? -ne 0 ]]; then
-
-        echo "Command \`$0\` isn't available. Please install before continuing."
-        exit 1
-    fi
+    command -v "$1" >/dev/null 2>&1 || ( echo "Command \`$1\` isn't available. Please install before continuing."; exit 1 )
 }
 
 PWD="$(pwd)"
