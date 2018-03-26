@@ -2,6 +2,16 @@
 
 set -eu
 
+function command_exists {
+    command -v "$0" >/dev/null 2>&1
+
+    if [[ $? -ne 0 ]]; then
+
+        echo "Command \`$0\` isn't available. Please install before continuing."
+        exit 1
+    fi
+}
+
 PWD="$(pwd)"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -10,8 +20,9 @@ cd "$DIR"
 EXAMPLES_DIR="$DIR/examples"
 TEST_DIR="$DIR/smoke_test"
 
-command -v "cargo-vendor" >/dev/null 2>&1 || ( echo "Cargo Vendor doesn't exist. Please install with `cargo install cargo-vendor`."; exit 1 )
-command -v "bazel" >/dev/null 2>&1 || ( echo "Bazel doesn't exist. Please install using instructions at https://bazel.build/"; exit 1 )
+command_exists "cargo"
+command_exists "cargo-vendor"
+command_exists "bazel"
 
 # Clean the `examples` directory
 rm -rf "$EXAMPLES_DIR/remote" "$EXAMPLES_DIR/vendored"
