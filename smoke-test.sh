@@ -14,7 +14,7 @@ command -v "cargo-vendor" >/dev/null 2>&1 || ( echo "Cargo Vendor doesn't exist.
 command -v "bazel" >/dev/null 2>&1 || ( echo "Bazel doesn't exist. Please install using instructions at https://bazel.build/"; exit 1 )
 
 # Clean the `examples` directory
-rm -r "$EXAMPLES_DIR/remote" "$EXAMPLES_DIR/vendored"
+rm -rf "$EXAMPLES_DIR/remote" "$EXAMPLES_DIR/vendored"
 cp -r "$TEST_DIR/remote" "$TEST_DIR/vendored" "$EXAMPLES_DIR"
 
 # Set up the new WORKSPACE file
