@@ -1,0 +1,15 @@
+[package]
+name = "pulse"
+version = "0.5.3"
+authors = ["Colin Sherratt <colin.sherratt@gmail.com>"]
+license = "Apache-2.0"
+description = "A library for async wake signals"
+homepage = "https://github.com/csherratt/pulse"
+
+[dependencies]
+atom = "0.3"
+time = "0.1"
+
+[features]
+default = []
+callback = []

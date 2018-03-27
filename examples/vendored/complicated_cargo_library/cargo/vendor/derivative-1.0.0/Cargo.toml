@@ -1,0 +1,26 @@
+[package]
+name = "derivative"
+version = "1.0.0"
+authors = ["mcarton <cartonmartin+git@gmail.com>"]
+license = "MIT/Apache-2.0"
+documentation = "https://mcarton.github.io/rust-derivative/"
+repository = "https://github.com/mcarton/rust-derivative"
+description = "A set of alternative `derive` attributes for Rust"
+keywords = ["derive", "macro", "macro1-1", "plugin"]
+categories = ["rust-patterns"]
+
+[badges]
+travis-ci = { repository = "mcarton/rust-derivative" }
+appveyor = { repository = "mcarton/rust-derivative" }
+
+[lib]
+proc-macro = true
+
+[dependencies]
+itertools = "~0.5"
+quote = "^0.3"
+syn = { version = "0.10", features = ["aster", "full", "visit"] }
+compiletest_rs = { version = "^0.2", optional = true }
+
+[features]
+nightly = ["compiletest_rs"]
