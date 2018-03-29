@@ -16,6 +16,7 @@
 pub struct BuildDependency {
   pub name: String,
   pub version: String,
+  pub build_path: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
