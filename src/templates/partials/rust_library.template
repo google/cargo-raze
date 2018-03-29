@@ -13,7 +13,7 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     deps = [
         {%- for dependency in crate.dependencies %}
-        "{{dependency.build_path}}:{{dependency.name | replace(from="-", to="_") }}",
+        "{{dependency.build_path}}",
         {%- endfor %}
         {%- for dependency in crate.additional_deps %}
         "{{dependency}}",

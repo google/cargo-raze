@@ -8,7 +8,7 @@ rust_binary(
     {%- endif %}
     deps = [
       {%- for dependency in crate.build_dependencies %}
-        "{{dependency.build_path}}:{{dependency.name | replace(from="-", to="_") }}",
+        "{{dependency.build_path}}",
       {%- endfor %}
     ],
     rustc_flags = [

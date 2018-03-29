@@ -9,7 +9,7 @@ rust_binary(
         # Binaries get an implicit dependency on their lib
         ":{{crate.pkg_name | replace(from="-", to="_") }}",
         {%- for dependency in crate.dependencies %}
-        "{{dependency.build_path}}:{{dependency.name | replace(from="-", to="_") }}",
+        "{{dependency.build_path}}",
         {%- endfor %}
         {%- for dependency in crate.additional_deps %}
         "{{dependency}}",

@@ -144,18 +144,19 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let mut package_id_to_build_path = HashMap::new();
 
       for package in metadata.packages.iter() {
+        let sanitized_name = slug::slugify(&package.name).replace("-", "_");
         let build_path = match settings.genmode {
           GenMode::Remote => {
-            let sanitized_name = slug::slugify(&package.name).replace("-", "_");
             let sanitized_version = slug::slugify(&package.version).replace("-", "_");
             format!(
-              "@{}__{}__{}//",
-              settings.gen_workspace_prefix, sanitized_name, sanitized_version
+              "@{}__{}__{}//:{}",
+              settings.gen_workspace_prefix, sanitized_name, sanitized_version, sanitized_name
             )
           },
-          GenMode::Vendored => {
-            format!("{}/vendor/{}-{}", settings.workspace_path, package.name, package.version)
-          },
+          GenMode::Vendored => format!(
+            "{}/vendor/{}-{}:{}",
+            settings.workspace_path, package.name, package.version, sanitized_name
+          ),
         };
         package_id_to_build_path.insert(package.id.clone(), build_path);
       }
