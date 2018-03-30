@@ -47,10 +47,6 @@ impl BazelRenderer {
           include_str!("templates/partials/rust_library.template"),
         ),
         ("templates/workspace.BUILD.template", include_str!("templates/workspace.BUILD.template")),
-        (
-          "templates/remote_workspace.BUILD.template",
-          include_str!("templates/remote_workspace.BUILD.template"),
-        ),
         ("templates/crate.BUILD.template", include_str!("templates/crate.BUILD.template")),
         (
           "templates/remote_crates.bzl.template",

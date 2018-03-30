@@ -16,7 +16,7 @@
 pub struct BuildDependency {
   pub name: String,
   pub version: String,
-  pub build_path: String,
+  pub build_target: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -45,6 +45,7 @@ pub struct CrateContext {
   pub licenses: Vec<LicenseData>,
   pub features: Vec<String>,
   pub path: String,
+  pub build_path: String,
   pub dependencies: Vec<BuildDependency>,
   pub build_dependencies: Vec<BuildDependency>,
   pub dev_dependencies: Vec<BuildDependency>,

@@ -140,8 +140,9 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       .iter()
       .map(|p| (p.id.clone(), p.clone()))
       .collect::<HashMap<PackageId, Package>>();
-    let package_id_to_build_path = {
+    let (package_id_to_build_path, package_id_to_default_build_target) = {
       let mut package_id_to_build_path = HashMap::new();
+      let mut package_id_to_default_build_target = HashMap::new();
 
       for package in metadata.packages.iter() {
         let sanitized_name = slug::slugify(&package.name).replace("-", "_");
@@ -149,19 +150,20 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
           GenMode::Remote => {
             let sanitized_version = slug::slugify(&package.version).replace("-", "_");
             format!(
-              "@{}__{}__{}//:{}",
-              settings.gen_workspace_prefix, sanitized_name, sanitized_version, sanitized_name
+              "@{}__{}__{}//",
+              settings.gen_workspace_prefix, sanitized_name, sanitized_version
             )
           },
-          GenMode::Vendored => format!(
-            "{}/vendor/{}-{}:{}",
-            settings.workspace_path, package.name, package.version, sanitized_name
-          ),
+          GenMode::Vendored => {
+            format!("{}/vendor/{}-{}", settings.workspace_path, package.name, package.version)
+          },
         };
+        package_id_to_default_build_target
+          .insert(package.id.clone(), format!("{}:{}", build_path, sanitized_name));
         package_id_to_build_path.insert(package.id.clone(), build_path);
       }
 
-      package_id_to_build_path
+      (package_id_to_build_path, package_id_to_default_build_target)
     };
 
     // Verify that all nodes are present in package list
@@ -255,12 +257,12 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       for dep_id in node.dependencies.iter() {
         // UNWRAP(s): Safe from verification of packages_by_id
         let dep_package = packages_by_id.get(dep_id.as_str()).unwrap();
-        let build_path = package_id_to_build_path.get(dep_id).unwrap();
+        let build_target = package_id_to_default_build_target.get(dep_id).unwrap();
 
         let build_dependency = BuildDependency {
           name: dep_package.name.clone(),
           version: dep_package.version.clone(),
-          build_path: build_path.clone(),
+          build_target: build_target.clone(),
         };
         if build_dep_names.contains(&dep_package.name) {
           build_deps.push(build_dependency.clone());
@@ -329,6 +331,8 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         build_dependencies: non_skipped_build_deps,
         dev_dependencies: dev_deps,
         path: path,
+        // UNWRAP: Safe -- struct derived from package set
+        build_path: package_id_to_build_path.get(&own_package.id).unwrap().clone(),
         build_script_target: build_script_target,
         targets: targets_sans_build_script,
         platform_triple: settings.target.to_owned(),
