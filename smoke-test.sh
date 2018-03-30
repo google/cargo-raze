@@ -11,6 +11,7 @@ PWD="$(pwd)"
 REPO_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$REPO_ROOT"
 
+IMPL_DIR="$REPO_ROOT/impl"
 EXAMPLES_DIR="$REPO_ROOT/examples"
 TEST_DIR="$REPO_ROOT/smoke_test"
 
@@ -55,9 +56,9 @@ done
 
 # Ensure Cargo Raze build is up-to-date
 echo "Building local Cargo Raze"
-cd "$REPO_ROOT/impl"
+cd "$IMPL_DIR"
 cargo build --quiet
-RAZE="$REPO_ROOT/target/debug/cargo-raze raze"
+RAZE="$IMPL_DIR/target/debug/cargo-raze raze"
 for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
     echo "Running Cargo Raze for $(basename $ex)"
     cd "$ex/cargo"
