@@ -120,12 +120,12 @@ pub struct CrateSettings {
  * Describes how dependencies should be managed in tree. Options are {Remote, Vendored}.
  *
  * Remote:
- * This mode assumes that files are vendored (into vendor/), and generates BUILD files
- * accordingly
- *
- * Vendored:
  * This mode assumes that files are not locally vendored, and generates a workspace-level
  * function that can bring them in.
+ *
+ * Vendored:
+ * This mode assumes that files are vendored (into vendor/), and generates BUILD files
+ * accordingly
  */
 #[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
 pub enum GenMode {
