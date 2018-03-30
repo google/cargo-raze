@@ -309,6 +309,7 @@ mod tests {
       additional_flags: Vec::new(),
       extra_aliased_targets: Vec::new(),
       data_attr: None,
+      git_data: None,
     }
   }
 
@@ -337,6 +338,7 @@ mod tests {
       additional_flags: Vec::new(),
       extra_aliased_targets: Vec::new(),
       data_attr: None,
+      git_data: None,
     }
   }
 
