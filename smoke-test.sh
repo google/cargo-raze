@@ -54,8 +54,8 @@ for ex in $(find $EXAMPLES_DIR/vendored -maxdepth 1 -type d | tail -n+2); do
 done
 
 # Ensure Cargo Raze build is up-to-date
-cd "$REPO_ROOT"
 echo "Building local Cargo Raze"
+cd "$REPO_ROOT/impl"
 cargo build --quiet
 RAZE="$REPO_ROOT/target/debug/cargo-raze raze"
 for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
