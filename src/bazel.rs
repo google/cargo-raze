@@ -258,6 +258,7 @@ mod tests {
       build_dependencies: Vec::new(),
       dev_dependencies: Vec::new(),
       is_root_dependency: true,
+      build_path: "@raze__test_binary__1_1_1//".to_owned(),
       metadeps: Vec::new(),
       platform_triple: "irrelevant".to_owned(),
       targets: vec![
@@ -286,6 +287,7 @@ mod tests {
       build_dependencies: Vec::new(),
       dev_dependencies: Vec::new(),
       is_root_dependency: true,
+      build_path: "@raze__test_library__1_1_1//".to_owned(),
       metadeps: Vec::new(),
       platform_triple: "irrelevant".to_owned(),
       targets: vec![
