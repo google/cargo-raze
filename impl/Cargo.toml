@@ -5,9 +5,13 @@ authors = ["Alex McArther <acmcarther@google.com>"]
 readme = "README.md"
 keywords = ["subcommand"]
 license = "Apache-2.0"
+repository = "https://github.com/google/cargo-raze"
 description = """
 A Cargo subcommand to generate Bazel BUILD files
 """
+
+[badges]
+travis-ci = { repository = "google/cargo-raze", branch = "master" }
 
 [dependencies]
 rustc-serialize = "0.3"
