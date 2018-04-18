@@ -1,0 +1,6129 @@
+{
+  "packages": [
+    {
+      "name": "void",
+      "version": "1.0.2",
+      "id": "void 1.0.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT",
+      "license_file": null,
+      "description": "The uninhabited void type for use in statically impossible cases.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "void",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/void-1.0.2\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "std"
+        ],
+        "std": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/void-1.0.2\/Cargo.toml"
+    },
+    {
+      "name": "cfg-if",
+      "version": "0.1.2",
+      "id": "cfg-if 0.1.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "A macro to ergonomically define an item depending on a large number of #[cfg]\nparameters. Structured like an if-else chain, the first matching branch is the\nitem that gets emitted.\n",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "cfg-if",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/cfg-if-0.1.2\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "xcrate",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/cfg-if-0.1.2\/tests\/xcrate.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/cfg-if-0.1.2\/Cargo.toml"
+    },
+    {
+      "name": "shred",
+      "version": "0.5.2",
+      "id": "shred 0.5.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Dispatches systems in parallel which need read access to some resources,\nand write access to others.\n",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "arrayvec",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "fnv",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "mopa",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "pulse",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.5",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rayon",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.8",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "shred-derive",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "smallvec",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.4",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "cgmath",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.15",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "shred",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "generic_derive",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/generic_derive.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "thread_local",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/thread_local.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "seq_dispatch",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/seq_dispatch.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "custom_bundle",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/custom_bundle.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "par_seq",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/par_seq.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "derive_bundle",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/derive_bundle.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "fetch_opt",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/fetch_opt.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "basic_dispatch",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/basic_dispatch.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "dispatch",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/tests\/dispatch.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "bench",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/benches\/bench.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/Cargo.toml"
+    },
+    {
+      "name": "aho-corasick",
+      "version": "0.6.4",
+      "id": "aho-corasick 0.6.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "Unlicense\/MIT",
+      "license_file": null,
+      "description": "Fast multiple substring searching with finite state machines.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "memchr",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^2",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "csv",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.15",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "docopt",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.7",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "memmap",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.5",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "quickcheck",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.5",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rand",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rustc-serialize",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "aho_corasick",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "bin"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "aho-corasick-dot",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/src\/main.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "dict-search",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/examples\/dict-search.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "bench",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/benches\/bench.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/Cargo.toml"
+    },
+    {
+      "name": "rayon",
+      "version": "0.8.2",
+      "id": "rayon 0.8.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "Apache-2.0\/MIT",
+      "license_file": null,
+      "description": "Simple work-stealing parallelism for Rust",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "rayon-core",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.2",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rand",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rustc-serialize",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "compiletest_rs",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2.1",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "docopt",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.7",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "futures",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1.7",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "rayon",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-0.8.2\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "cpu_monitor",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-0.8.2\/examples\/cpu_monitor.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-0.8.2\/Cargo.toml"
+    },
+    {
+      "name": "winapi-i686-pc-windows-gnu",
+      "version": "0.4.0",
+      "id": "winapi-i686-pc-windows-gnu 0.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Import libraries for the i686-pc-windows-gnu target. Please don't use this crate directly, depend on winapi instead.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "winapi-i686-pc-windows-gnu",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-i686-pc-windows-gnu-0.4.0\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "custom-build"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "build-script-build",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-i686-pc-windows-gnu-0.4.0\/build.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-i686-pc-windows-gnu-0.4.0\/Cargo.toml"
+    },
+    {
+      "name": "specs",
+      "version": "0.10.0",
+      "id": "specs 0.10.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "Apache-2.0",
+      "license_file": null,
+      "description": "Specs is an Entity-Component System library written in Rust.\nUnlike most other ECS libraries out there, it provides\n\n* easy parallelism\n* high flexibility\n    * contains 5 different storages for components, which can be extended by the user\n    * it's types are mostly not coupled, so you can easily write some part yourself and\n      still use Specs\n    * `System`s may read from and write to components and resources, can depend on each\n      other and you can use barriers to force several stages in system execution\n* high performance for real-world applications\n",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "rayon",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.8.2",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "hibitset",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "shred",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.5.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "tuple_utils",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "mopa",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "fnv",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rudy",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "crossbeam",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "serde",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.0",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            "serde_derive"
+          ],
+          "target": null
+        },
+        {
+          "name": "shred-derive",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "futures",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "derivative",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rand",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "cgmath",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.14",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            "eders"
+          ],
+          "target": null
+        },
+        {
+          "name": "serde_json",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.0",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "specs",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "async",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/async.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "basic",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/basic.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "full",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/full.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "cluster_bomb",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/cluster_bomb.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "bitset",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/bitset.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "common",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/common.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "serialize",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/serialize.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "tests",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/tests\/tests.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "storage",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/benches\/storage.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "world",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/benches\/world.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "parallel",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/benches\/parallel.rs"
+        }
+      ],
+      "features": {
+        "common": [
+          "futures"
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/Cargo.toml"
+    },
+    {
+      "name": "crossbeam-utils",
+      "version": "0.2.2",
+      "id": "crossbeam-utils 0.2.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Utilities for concurrent programming",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "cfg-if",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "crossbeam-utils",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-utils-0.2.2\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "use_std"
+        ],
+        "nightly": [
+          
+        ],
+        "use_std": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-utils-0.2.2\/Cargo.toml"
+    },
+    {
+      "name": "regex",
+      "version": "0.2.6",
+      "id": "regex 0.2.6 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "An implementation of regular expressions for Rust. This implementation uses\nfinite automata and guarantees linear time matching on all inputs.\n",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "aho-corasick",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.6.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "memchr",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^2.0.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "regex-syntax",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.4.1",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "simd",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2.1",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "thread_local",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3.2",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "utf8-ranges",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.0.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "lazy_static",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "quickcheck",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.6",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rand",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.4",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "regex",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "shootout-regex-dna-bytes",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-bytes.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "shootout-regex-dna-single-cheat",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-single-cheat.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "shootout-regex-dna",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "shootout-regex-dna-replace",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-replace.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "shootout-regex-dna-single",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-single.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "shootout-regex-dna-cheat",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-cheat.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "default",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_default.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "default-bytes",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_default_bytes.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "nfa",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_nfa.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "nfa-utf8bytes",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_nfa_utf8bytes.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "nfa-bytes",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_nfa_bytes.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "backtrack",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_backtrack.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "backtrack-utf8bytes",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_backtrack_utf8bytes.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "backtrack-bytes",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_backtrack_bytes.rs"
+        }
+      ],
+      "features": {
+        "pattern": [
+          
+        ],
+        "simd-accel": [
+          "simd"
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/Cargo.toml"
+    },
+    {
+      "name": "time",
+      "version": "0.1.39",
+      "id": "time 0.1.39 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Utilities for working with time-related functions in Rust.\n",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "libc",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2.1",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rustc-serialize",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "log",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "winapi",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3.0",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            "std",
+            "processthreadsapi",
+            "winbase"
+          ],
+          "target": null
+        },
+        {
+          "name": "redox_syscall",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": "cfg(target_os = \"redox\")"
+        },
+        {
+          "name": "winapi",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            "std",
+            "minwinbase",
+            "minwindef",
+            "ntdef",
+            "profileapi",
+            "sysinfoapi",
+            "timezoneapi"
+          ],
+          "target": "cfg(windows)"
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "time",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/time-0.1.39\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "precise_time_ns",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/time-0.1.39\/benches\/precise_time_ns.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/time-0.1.39\/Cargo.toml"
+    },
+    {
+      "name": "hibitset",
+      "version": "0.3.2",
+      "id": "hibitset 0.3.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "Apache-2.0",
+      "license_file": null,
+      "description": "Hierarchical bit set structure",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "atom",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rayon",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.8.2",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rand",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "hibitset",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/hibitset-0.3.2\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "benches",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/hibitset-0.3.2\/benches\/benches.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "parallel"
+        ],
+        "parallel": [
+          "rayon"
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/hibitset-0.3.2\/Cargo.toml"
+    },
+    {
+      "name": "syn",
+      "version": "0.10.8",
+      "id": "syn 0.10.8 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Nom parser for Rust source code",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "quote",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3.0",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "clippy",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "0.*",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "unicode-xid",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.0.4",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "syntex_syntax",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.50.0",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "time",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1.35",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "syntex_syntax",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.50.0",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "syntex_pos",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.50.0",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "walkdir",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.0.1",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "tempdir",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3.5",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "syn",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/syn-0.10.8\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        "aster": [
+          
+        ],
+        "default": [
+          "parsing",
+          "printing"
+        ],
+        "expand": [
+          "full",
+          "parsing",
+          "printing"
+        ],
+        "full": [
+          
+        ],
+        "parsing": [
+          "unicode-xid"
+        ],
+        "pretty": [
+          "syntex_syntax"
+        ],
+        "printing": [
+          "quote"
+        ],
+        "visit": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/syn-0.10.8\/Cargo.toml"
+    },
+    {
+      "name": "arrayvec",
+      "version": "0.4.7",
+      "id": "arrayvec 0.4.7 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "A vector with fixed capacity, backed by an array (it can be stored on the stack too). Implements fixed capacity ArrayVec and ArrayString.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "nodrop",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1.12",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "serde",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.0",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "bencher",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1.4",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "matches",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "serde_test",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.0",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "arrayvec",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "tests",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/tests\/tests.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "serde",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/tests\/serde.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "extend",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/benches\/extend.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "arraystring",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/benches\/arraystring.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "std"
+        ],
+        "serde-1": [
+          "serde"
+        ],
+        "std": [
+          
+        ],
+        "use_union": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/Cargo.toml"
+    },
+    {
+      "name": "scopeguard",
+      "version": "0.3.3",
+      "id": "scopeguard 0.3.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "A RAII scope guard that will run a given closure when it goes out of scope,\neven if the code between panics (assuming unwinding panic).\n\nDefines the macros `defer!` and `defer_on_unwind!`; the latter only runs\nif the scope is extited through unwinding on panic.\n",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "scopeguard",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/scopeguard-0.3.3\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "readme",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/scopeguard-0.3.3\/examples\/readme.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "use_std"
+        ],
+        "use_std": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/scopeguard-0.3.3\/Cargo.toml"
+    },
+    {
+      "name": "winapi-x86_64-pc-windows-gnu",
+      "version": "0.4.0",
+      "id": "winapi-x86_64-pc-windows-gnu 0.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Import libraries for the x86_64-pc-windows-gnu target. Please don't use this crate directly, depend on winapi instead.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "winapi-x86_64-pc-windows-gnu",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-x86_64-pc-windows-gnu-0.4.0\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "custom-build"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "build-script-build",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-x86_64-pc-windows-gnu-0.4.0\/build.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-x86_64-pc-windows-gnu-0.4.0\/Cargo.toml"
+    },
+    {
+      "name": "crossbeam-deque",
+      "version": "0.2.0",
+      "id": "crossbeam-deque 0.2.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Concurrent work-stealing deque",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "crossbeam-epoch",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "crossbeam-utils",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2.1",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rand",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.4",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "crossbeam-deque",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-deque-0.2.0\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-deque-0.2.0\/Cargo.toml"
+    },
+    {
+      "name": "odds",
+      "version": "0.2.26",
+      "id": "odds 0.2.26 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Odds and ends \u2014 collection miscellania. Extra functionality for slices (`.find()`, `RevSlice`), strings and other things. Debug checked variants of `get_unchecked` and `slice_unchecked`, and extra methods for strings and vectors: `repeat`, `insert_str` and `splice`. Things in odds may move to more appropriate crates if we find them.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "itertools",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.5.1",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "lazy_static",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2.2",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "memchr",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1.11",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "odds",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "stride",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/tests\/stride.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "slice",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/tests\/slice.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "tests",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/tests\/tests.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "count_ones",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/benches\/count_ones.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "find",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/benches\/find.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "bench",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/benches\/bench.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "std"
+        ],
+        "std": [
+          
+        ],
+        "unstable": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/Cargo.toml"
+    },
+    {
+      "name": "libc",
+      "version": "0.2.36",
+      "id": "libc 0.2.36 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "A library for types and bindings to native C functions often found in libc or\nother common platform libraries.\n",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "libc",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/libc-0.2.36\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "use_std"
+        ],
+        "use_std": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/libc-0.2.36\/Cargo.toml"
+    },
+    {
+      "name": "arrayvec",
+      "version": "0.3.25",
+      "id": "arrayvec 0.3.25 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "A vector with a fixed capacity, it can be stored on the stack too. Implements fixed capacity ArrayVec and ArrayString.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "generic-array",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.5.1",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "nodrop",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1.8",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "odds",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2.23",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "arrayvec",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.3.25\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "generic_array",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.3.25\/tests\/generic_array.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "tests",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.3.25\/tests\/tests.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "std"
+        ],
+        "std": [
+          "odds\/std",
+          "nodrop\/std"
+        ],
+        "use_generic_array": [
+          "generic-array"
+        ],
+        "use_union": [
+          "nodrop\/use_union"
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.3.25\/Cargo.toml"
+    },
+    {
+      "name": "regex-syntax",
+      "version": "0.4.2",
+      "id": "regex-syntax 0.4.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "A regular expression parser.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "quickcheck",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.6",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rand",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.4",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "regex-syntax",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-syntax-0.4.2\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-syntax-0.4.2\/Cargo.toml"
+    },
+    {
+      "name": "num_cpus",
+      "version": "1.8.0",
+      "id": "num_cpus 1.8.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Get the number of CPUs on a machine.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "libc",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2.26",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "num_cpus",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/num_cpus-1.8.0\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/num_cpus-1.8.0\/Cargo.toml"
+    },
+    {
+      "name": "crossbeam",
+      "version": "0.3.2",
+      "id": "crossbeam 0.3.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "Apache-2.0\/MIT",
+      "license_file": null,
+      "description": "Support for lock-free data structures, synchronizers, and parallel programming",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "rand",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "crossbeam",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-0.3.2\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "bin"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "stress-msq",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-0.3.2\/src\/bin\/stress-msq.rs"
+        },
+        {
+          "kind": [
+            "bin"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "bench",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-0.3.2\/src\/bin\/bench.rs"
+        }
+      ],
+      "features": {
+        "nightly": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-0.3.2\/Cargo.toml"
+    },
+    {
+      "name": "utf8-ranges",
+      "version": "1.0.0",
+      "id": "utf8-ranges 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "Unlicense\/MIT",
+      "license_file": null,
+      "description": "Convert ranges of Unicode codepoints to UTF-8 byte ranges.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "quickcheck",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.4.1",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "utf8-ranges",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/utf8-ranges-1.0.0\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "bench",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/utf8-ranges-1.0.0\/benches\/bench.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/utf8-ranges-1.0.0\/Cargo.toml"
+    },
+    {
+      "name": "syn",
+      "version": "0.11.11",
+      "id": "syn 0.11.11 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Nom parser for Rust source code",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "quote",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3.7",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "synom",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.11",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "unicode-xid",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.0.4",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "tempdir",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3.5",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "syntex_pos",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.58",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "walkdir",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.0.1",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "syntex_syntax",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.58",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "syn",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/syn-0.11.11\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        "aster": [
+          
+        ],
+        "default": [
+          "parsing",
+          "printing"
+        ],
+        "fold": [
+          
+        ],
+        "full": [
+          
+        ],
+        "parsing": [
+          "unicode-xid",
+          "synom"
+        ],
+        "printing": [
+          "quote"
+        ],
+        "visit": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/syn-0.11.11\/Cargo.toml"
+    },
+    {
+      "name": "redox_syscall",
+      "version": "0.1.37",
+      "id": "redox_syscall 0.1.37 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT",
+      "license_file": null,
+      "description": "A Rust library to access raw Redox system calls",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "syscall",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/redox_syscall-0.1.37\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/redox_syscall-0.1.37\/Cargo.toml"
+    },
+    {
+      "name": "lazy_static",
+      "version": "0.2.11",
+      "id": "lazy_static 0.2.11 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "A macro for declaring lazily evaluated statics in Rust.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "compiletest_rs",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "spin",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.4.6",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "lazy_static",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "no_std",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/tests\/no_std.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "test",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/tests\/test.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "compile_tests",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/tests\/compile_tests.rs"
+        }
+      ],
+      "features": {
+        "compiletest": [
+          "compiletest_rs"
+        ],
+        "nightly": [
+          
+        ],
+        "spin_no_std": [
+          "nightly",
+          "spin"
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/Cargo.toml"
+    },
+    {
+      "name": "compile_with_bazel",
+      "version": "0.1.0",
+      "id": "compile_with_bazel 0.1.0 (path+file:\/\/\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo)",
+      "license": null,
+      "license_file": null,
+      "description": null,
+      "source": null,
+      "dependencies": [
+        {
+          "name": "regex",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2.5",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "specs",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.10.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "compile_with_bazel",
+          "src_path": "\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo\/fake_lib.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo\/Cargo.toml"
+    },
+    {
+      "name": "lazy_static",
+      "version": "1.0.0",
+      "id": "lazy_static 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "A macro for declaring lazily evaluated statics in Rust.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "compiletest_rs",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "spin",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.4.6",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "lazy_static",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "no_std",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/tests\/no_std.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "test",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/tests\/test.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "compile_tests",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/tests\/compile_tests.rs"
+        }
+      ],
+      "features": {
+        "compiletest": [
+          "compiletest_rs"
+        ],
+        "nightly": [
+          
+        ],
+        "spin_no_std": [
+          "nightly",
+          "spin"
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/Cargo.toml"
+    },
+    {
+      "name": "fuchsia-zircon-sys",
+      "version": "0.3.3",
+      "id": "fuchsia-zircon-sys 0.3.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "BSD-3-Clause",
+      "license_file": null,
+      "description": "Low-level Rust bindings for the Zircon kernel",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fuchsia-zircon-sys",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-sys-0.3.3\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "hello",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-sys-0.3.3\/examples\/hello.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-sys-0.3.3\/Cargo.toml"
+    },
+    {
+      "name": "shred-derive",
+      "version": "0.3.0",
+      "id": "shred-derive 0.3.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Custom derive for shred",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "syn",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.11",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "quote",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "proc-macro"
+          ],
+          "crate_types": [
+            "proc-macro"
+          ],
+          "name": "shred-derive",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-derive-0.3.0\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-derive-0.3.0\/Cargo.toml"
+    },
+    {
+      "name": "memchr",
+      "version": "2.0.1",
+      "id": "memchr 2.0.1 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "Unlicense\/MIT",
+      "license_file": null,
+      "description": "Safe interface to memchr.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "libc",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2.18",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "quickcheck",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.5",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "memchr",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memchr-2.0.1\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "bench",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memchr-2.0.1\/benches\/bench.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "use_std",
+          "libc"
+        ],
+        "use_std": [
+          "libc",
+          "libc\/use_std"
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memchr-2.0.1\/Cargo.toml"
+    },
+    {
+      "name": "crossbeam-epoch",
+      "version": "0.3.0",
+      "id": "crossbeam-epoch 0.3.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Epoch-based garbage collection",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "arrayvec",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.4",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "cfg-if",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "crossbeam-utils",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "lazy_static",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "memoffset",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "nodrop",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1.12",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "scopeguard",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rand",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "crossbeam-epoch",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "sanitize",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/examples\/sanitize.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "defer",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/benches\/defer.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "flush",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/benches\/flush.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "pin",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/benches\/pin.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "use_std"
+        ],
+        "nightly": [
+          "arrayvec\/use_union"
+        ],
+        "sanitize": [
+          
+        ],
+        "use_std": [
+          "lazy_static",
+          "crossbeam-utils\/use_std"
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/Cargo.toml"
+    },
+    {
+      "name": "either",
+      "version": "1.4.0",
+      "id": "either 1.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "The enum [`Either`] with variants `Left` and `Right` is a general purpose sum type with two cases.\n",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "serde",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.0",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            "derive"
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "either",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/either-1.4.0\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "use_std"
+        ],
+        "use_std": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/either-1.4.0\/Cargo.toml"
+    },
+    {
+      "name": "winapi",
+      "version": "0.3.4",
+      "id": "winapi 0.3.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Raw FFI bindings for all of Windows API.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "winapi-i686-pc-windows-gnu",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.4",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": "i686-pc-windows-gnu"
+        },
+        {
+          "name": "winapi-x86_64-pc-windows-gnu",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.4",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": "x86_64-pc-windows-gnu"
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "winapi",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-0.3.4\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "custom-build"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "build-script-build",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-0.3.4\/build.rs"
+        }
+      ],
+      "features": {
+        "activation": [
+          
+        ],
+        "audioclient": [
+          
+        ],
+        "audiosessiontypes": [
+          
+        ],
+        "avrt": [
+          
+        ],
+        "basetsd": [
+          
+        ],
+        "bcrypt": [
+          
+        ],
+        "bugcodes": [
+          
+        ],
+        "cderr": [
+          
+        ],
+        "cfg": [
+          
+        ],
+        "cfgmgr32": [
+          
+        ],
+        "cguid": [
+          
+        ],
+        "combaseapi": [
+          
+        ],
+        "coml2api": [
+          
+        ],
+        "commapi": [
+          
+        ],
+        "commctrl": [
+          
+        ],
+        "commdlg": [
+          
+        ],
+        "commoncontrols": [
+          
+        ],
+        "consoleapi": [
+          
+        ],
+        "corsym": [
+          
+        ],
+        "d2d1": [
+          
+        ],
+        "d2d1_1": [
+          
+        ],
+        "d2d1_2": [
+          
+        ],
+        "d2d1effectauthor": [
+          
+        ],
+        "d2d1effects": [
+          
+        ],
+        "d2d1effects_1": [
+          
+        ],
+        "d2d1effects_2": [
+          
+        ],
+        "d2dbasetypes": [
+          
+        ],
+        "d3d": [
+          
+        ],
+        "d3d10": [
+          
+        ],
+        "d3d10_1": [
+          
+        ],
+        "d3d10_1shader": [
+          
+        ],
+        "d3d10effect": [
+          
+        ],
+        "d3d10misc": [
+          
+        ],
+        "d3d10sdklayers": [
+          
+        ],
+        "d3d10shader": [
+          
+        ],
+        "d3d11": [
+          
+        ],
+        "d3d11_1": [
+          
+        ],
+        "d3d11_2": [
+          
+        ],
+        "d3d11_3": [
+          
+        ],
+        "d3d11_4": [
+          
+        ],
+        "d3d11on12": [
+          
+        ],
+        "d3d11sdklayers": [
+          
+        ],
+        "d3d11shader": [
+          
+        ],
+        "d3d12": [
+          
+        ],
+        "d3d12sdklayers": [
+          
+        ],
+        "d3d12shader": [
+          
+        ],
+        "d3d9": [
+          
+        ],
+        "d3d9caps": [
+          
+        ],
+        "d3d9types": [
+          
+        ],
+        "d3dcommon": [
+          
+        ],
+        "d3dcompiler": [
+          
+        ],
+        "d3dcsx": [
+          
+        ],
+        "d3dx10core": [
+          
+        ],
+        "d3dx10math": [
+          
+        ],
+        "d3dx10mesh": [
+          
+        ],
+        "datetimeapi": [
+          
+        ],
+        "davclnt": [
+          
+        ],
+        "dbghelp": [
+          
+        ],
+        "dcommon": [
+          
+        ],
+        "dcomp": [
+          
+        ],
+        "dcompanimation": [
+          
+        ],
+        "dcomptypes": [
+          
+        ],
+        "dde": [
+          
+        ],
+        "ddraw": [
+          
+        ],
+        "ddrawi": [
+          
+        ],
+        "ddrawint": [
+          
+        ],
+        "debug": [
+          
+        ],
+        "debugapi": [
+          
+        ],
+        "devguid": [
+          
+        ],
+        "devpkey": [
+          
+        ],
+        "devpropdef": [
+          
+        ],
+        "dinput": [
+          
+        ],
+        "dinputd": [
+          
+        ],
+        "dmksctl": [
+          
+        ],
+        "dmusicc": [
+          
+        ],
+        "docobj": [
+          
+        ],
+        "documenttarget": [
+          
+        ],
+        "dpa_dsa": [
+          
+        ],
+        "dpapi": [
+          
+        ],
+        "dsgetdc": [
+          
+        ],
+        "dsound": [
+          
+        ],
+        "dsrole": [
+          
+        ],
+        "dvp": [
+          
+        ],
+        "dwmapi": [
+          
+        ],
+        "dwrite": [
+          
+        ],
+        "dwrite_1": [
+          
+        ],
+        "dwrite_2": [
+          
+        ],
+        "dwrite_3": [
+          
+        ],
+        "dxdiag": [
+          
+        ],
+        "dxfile": [
+          
+        ],
+        "dxgi": [
+          
+        ],
+        "dxgi1_2": [
+          
+        ],
+        "dxgi1_3": [
+          
+        ],
+        "dxgi1_4": [
+          
+        ],
+        "dxgi1_5": [
+          
+        ],
+        "dxgidebug": [
+          
+        ],
+        "dxgiformat": [
+          
+        ],
+        "dxgitype": [
+          
+        ],
+        "errhandlingapi": [
+          
+        ],
+        "everything": [
+          
+        ],
+        "excpt": [
+          
+        ],
+        "fibersapi": [
+          
+        ],
+        "fileapi": [
+          
+        ],
+        "gl-gl": [
+          
+        ],
+        "guiddef": [
+          
+        ],
+        "handleapi": [
+          
+        ],
+        "heapapi": [
+          
+        ],
+        "hidclass": [
+          
+        ],
+        "hidpi": [
+          
+        ],
+        "hidsdi": [
+          
+        ],
+        "hidusage": [
+          
+        ],
+        "hstring": [
+          
+        ],
+        "http": [
+          
+        ],
+        "imm": [
+          
+        ],
+        "in6addr": [
+          
+        ],
+        "inaddr": [
+          
+        ],
+        "inspectable": [
+          
+        ],
+        "interlockedapi": [
+          
+        ],
+        "intsafe": [
+          
+        ],
+        "ioapiset": [
+          
+        ],
+        "jobapi": [
+          
+        ],
+        "jobapi2": [
+          
+        ],
+        "knownfolders": [
+          
+        ],
+        "ksmedia": [
+          
+        ],
+        "ktmtypes": [
+          
+        ],
+        "ktmw32": [
+          
+        ],
+        "libloaderapi": [
+          
+        ],
+        "limits": [
+          
+        ],
+        "lmaccess": [
+          
+        ],
+        "lmalert": [
+          
+        ],
+        "lmapibuf": [
+          
+        ],
+        "lmat": [
+          
+        ],
+        "lmcons": [
+          
+        ],
+        "lmdfs": [
+          
+        ],
+        "lmerrlog": [
+          
+        ],
+        "lmjoin": [
+          
+        ],
+        "lmmsg": [
+          
+        ],
+        "lmremutl": [
+          
+        ],
+        "lmrepl": [
+          
+        ],
+        "lmserver": [
+          
+        ],
+        "lmshare": [
+          
+        ],
+        "lmstats": [
+          
+        ],
+        "lmsvc": [
+          
+        ],
+        "lmuse": [
+          
+        ],
+        "lmwksta": [
+          
+        ],
+        "lsalookup": [
+          
+        ],
+        "memoryapi": [
+          
+        ],
+        "minschannel": [
+          
+        ],
+        "minwinbase": [
+          
+        ],
+        "minwindef": [
+          
+        ],
+        "mmdeviceapi": [
+          
+        ],
+        "mmeapi": [
+          
+        ],
+        "mmreg": [
+          
+        ],
+        "mmsystem": [
+          
+        ],
+        "msaatext": [
+          
+        ],
+        "mscat": [
+          
+        ],
+        "mssip": [
+          
+        ],
+        "mstcpip": [
+          
+        ],
+        "namedpipeapi": [
+          
+        ],
+        "namespaceapi": [
+          
+        ],
+        "nb30": [
+          
+        ],
+        "ncrypt": [
+          
+        ],
+        "ntddscsi": [
+          
+        ],
+        "ntddser": [
+          
+        ],
+        "ntdef": [
+          
+        ],
+        "ntsecapi": [
+          
+        ],
+        "ntstatus": [
+          
+        ],
+        "oaidl": [
+          
+        ],
+        "objbase": [
+          
+        ],
+        "objidl": [
+          
+        ],
+        "objidlbase": [
+          
+        ],
+        "ocidl": [
+          
+        ],
+        "oleauto": [
+          
+        ],
+        "olectl": [
+          
+        ],
+        "pdh": [
+          
+        ],
+        "playsoundapi": [
+          
+        ],
+        "powerbase": [
+          
+        ],
+        "powersetting": [
+          
+        ],
+        "powrprof": [
+          
+        ],
+        "processenv": [
+          
+        ],
+        "processsnapshot": [
+          
+        ],
+        "processthreadsapi": [
+          
+        ],
+        "processtopologyapi": [
+          
+        ],
+        "profileapi": [
+          
+        ],
+        "propidl": [
+          
+        ],
+        "propkeydef": [
+          
+        ],
+        "propsys": [
+          
+        ],
+        "prsht": [
+          
+        ],
+        "psapi": [
+          
+        ],
+        "qos": [
+          
+        ],
+        "realtimeapiset": [
+          
+        ],
+        "reason": [
+          
+        ],
+        "restrictederrorinfo": [
+          
+        ],
+        "rmxfguid": [
+          
+        ],
+        "roapi": [
+          
+        ],
+        "robuffer": [
+          
+        ],
+        "roerrorapi": [
+          
+        ],
+        "rpc": [
+          
+        ],
+        "rpcdce": [
+          
+        ],
+        "rpcndr": [
+          
+        ],
+        "sapi": [
+          
+        ],
+        "sapi51": [
+          
+        ],
+        "sapi53": [
+          
+        ],
+        "sapiddk": [
+          
+        ],
+        "sapiddk51": [
+          
+        ],
+        "schannel": [
+          
+        ],
+        "securityappcontainer": [
+          
+        ],
+        "securitybaseapi": [
+          
+        ],
+        "servprov": [
+          
+        ],
+        "setupapi": [
+          
+        ],
+        "shellapi": [
+          
+        ],
+        "shellscalingapi": [
+          
+        ],
+        "shlobj": [
+          
+        ],
+        "shobjidl": [
+          
+        ],
+        "shobjidl_core": [
+          
+        ],
+        "shtypes": [
+          
+        ],
+        "spapidef": [
+          
+        ],
+        "sporder": [
+          
+        ],
+        "sql": [
+          
+        ],
+        "sqlext": [
+          
+        ],
+        "sqltypes": [
+          
+        ],
+        "sqlucode": [
+          
+        ],
+        "sspi": [
+          
+        ],
+        "std": [
+          
+        ],
+        "stralign": [
+          
+        ],
+        "stringapiset": [
+          
+        ],
+        "strmif": [
+          
+        ],
+        "subauth": [
+          
+        ],
+        "synchapi": [
+          
+        ],
+        "sysinfoapi": [
+          
+        ],
+        "systemtopologyapi": [
+          
+        ],
+        "textstor": [
+          
+        ],
+        "threadpoolapiset": [
+          
+        ],
+        "threadpoollegacyapiset": [
+          
+        ],
+        "timeapi": [
+          
+        ],
+        "timezoneapi": [
+          
+        ],
+        "tlhelp32": [
+          
+        ],
+        "unknwnbase": [
+          
+        ],
+        "urlhist": [
+          
+        ],
+        "urlmon": [
+          
+        ],
+        "usb": [
+          
+        ],
+        "usbiodef": [
+          
+        ],
+        "usbspec": [
+          
+        ],
+        "userenv": [
+          
+        ],
+        "usp10": [
+          
+        ],
+        "utilapiset": [
+          
+        ],
+        "vadefs": [
+          
+        ],
+        "vcruntime": [
+          
+        ],
+        "vsbackup": [
+          
+        ],
+        "vss": [
+          
+        ],
+        "vsserror": [
+          
+        ],
+        "vswriter": [
+          
+        ],
+        "werapi": [
+          
+        ],
+        "winbase": [
+          
+        ],
+        "wincodec": [
+          
+        ],
+        "wincodecsdk": [
+          
+        ],
+        "wincon": [
+          
+        ],
+        "wincred": [
+          
+        ],
+        "wincrypt": [
+          
+        ],
+        "windef": [
+          
+        ],
+        "windowsceip": [
+          
+        ],
+        "windowsx": [
+          
+        ],
+        "winerror": [
+          
+        ],
+        "winevt": [
+          
+        ],
+        "wingdi": [
+          
+        ],
+        "winhttp": [
+          
+        ],
+        "wininet": [
+          
+        ],
+        "winineti": [
+          
+        ],
+        "winioctl": [
+          
+        ],
+        "winnetwk": [
+          
+        ],
+        "winnls": [
+          
+        ],
+        "winnt": [
+          
+        ],
+        "winreg": [
+          
+        ],
+        "winscard": [
+          
+        ],
+        "winsmcrd": [
+          
+        ],
+        "winsock2": [
+          
+        ],
+        "winspool": [
+          
+        ],
+        "winstring": [
+          
+        ],
+        "winsvc": [
+          
+        ],
+        "winusb": [
+          
+        ],
+        "winusbio": [
+          
+        ],
+        "winuser": [
+          
+        ],
+        "winver": [
+          
+        ],
+        "wnnc": [
+          
+        ],
+        "wow64apiset": [
+          
+        ],
+        "ws2def": [
+          
+        ],
+        "ws2ipdef": [
+          
+        ],
+        "ws2spi": [
+          
+        ],
+        "ws2tcpip": [
+          
+        ],
+        "wtypes": [
+          
+        ],
+        "wtypesbase": [
+          
+        ],
+        "xinput": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-0.3.4\/Cargo.toml"
+    },
+    {
+      "name": "unreachable",
+      "version": "1.0.0",
+      "id": "unreachable 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT \/ Apache-2.0",
+      "license_file": null,
+      "description": "An unreachable code optimization hint in stable rust.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "void",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "unreachable",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/unreachable-1.0.0\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/unreachable-1.0.0\/Cargo.toml"
+    },
+    {
+      "name": "quote",
+      "version": "0.3.15",
+      "id": "quote 0.3.15 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Quasi-quoting macro quote!(...)",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "quote",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/quote-0.3.15\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "test",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/quote-0.3.15\/tests\/test.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/quote-0.3.15\/Cargo.toml"
+    },
+    {
+      "name": "atom",
+      "version": "0.3.4",
+      "id": "atom 0.3.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "Apache-2.0",
+      "license_file": null,
+      "description": "A safe abstraction around AtomicPtr",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "atom",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "simple",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/examples\/simple.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "fifo",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/examples\/fifo.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "atom",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/tests\/atom.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/Cargo.toml"
+    },
+    {
+      "name": "synom",
+      "version": "0.11.3",
+      "id": "synom 0.11.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Stripped-down Nom parser used by Syn",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "unicode-xid",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.0.4",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "syn",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.11",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            "parsing",
+            "full"
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "synom",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/synom-0.11.3\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/synom-0.11.3\/Cargo.toml"
+    },
+    {
+      "name": "rayon-core",
+      "version": "1.4.0",
+      "id": "rayon-core 1.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "Apache-2.0\/MIT",
+      "license_file": null,
+      "description": "Core APIs for Rayon",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "crossbeam-deque",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "lazy_static",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "libc",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2.16",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "num_cpus",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.2",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "rand",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": ">= 0.3, < 0.5",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "rayon-core",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-core-1.4.0\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "custom-build"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "build-script-build",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-core-1.4.0\/build.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-core-1.4.0\/Cargo.toml"
+    },
+    {
+      "name": "memoffset",
+      "version": "0.2.1",
+      "id": "memoffset 0.2.1 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT",
+      "license_file": null,
+      "description": "offset_of functionality for Rust structs.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "memoffset",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memoffset-0.2.1\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memoffset-0.2.1\/Cargo.toml"
+    },
+    {
+      "name": "nodrop",
+      "version": "0.1.12",
+      "id": "nodrop 0.1.12 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "A wrapper type to inhibit drop (destructor). Use std::mem::ManuallyDrop instead!",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "nodrop-union",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1.8",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "nodrop",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/nodrop-0.1.12\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "std"
+        ],
+        "std": [
+          
+        ],
+        "use_needs_drop": [
+          
+        ],
+        "use_union": [
+          "nodrop-union"
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/nodrop-0.1.12\/Cargo.toml"
+    },
+    {
+      "name": "thread_local",
+      "version": "0.3.5",
+      "id": "thread_local 0.3.5 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "Apache-2.0\/MIT",
+      "license_file": null,
+      "description": "Per-object thread-local storage",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "lazy_static",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "unreachable",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "thread_local",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/thread_local-0.3.5\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "thread_local",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/thread_local-0.3.5\/benches\/thread_local.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/thread_local-0.3.5\/Cargo.toml"
+    },
+    {
+      "name": "fuchsia-zircon",
+      "version": "0.3.3",
+      "id": "fuchsia-zircon 0.3.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "BSD-3-Clause",
+      "license_file": null,
+      "description": "Rust bindings for the Zircon kernel",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "bitflags",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.0.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "fuchsia-zircon-sys",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3.3",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fuchsia-zircon",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-0.3.3\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-0.3.3\/Cargo.toml"
+    },
+    {
+      "name": "fnv",
+      "version": "1.0.6",
+      "id": "fnv 1.0.6 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "Apache-2.0 \/ MIT",
+      "license_file": null,
+      "description": "Fowler\u2013Noll\u2013Vo hash function",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "fnv",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fnv-1.0.6\/lib.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fnv-1.0.6\/Cargo.toml"
+    },
+    {
+      "name": "tuple_utils",
+      "version": "0.2.0",
+      "id": "tuple_utils 0.2.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "Apache-2.0\/MIT",
+      "license_file": null,
+      "description": "A set of utilities to enable higher level operations over tuples.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "tuple_utils",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/tuple_utils-0.2.0\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/tuple_utils-0.2.0\/Cargo.toml"
+    },
+    {
+      "name": "mopa",
+      "version": "0.2.2",
+      "id": "mopa 0.2.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "My Own Personal Any: get your own Any with additional functionality",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "mopa",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "no_std_or_alloc",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/examples\/no_std_or_alloc.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "no_std",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/examples\/no_std.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "simple",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/examples\/simple.rs"
+        }
+      ],
+      "features": {
+        "no_std": [
+          
+        ],
+        "no_std_examples": [
+          "no_std"
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/Cargo.toml"
+    },
+    {
+      "name": "pulse",
+      "version": "0.5.3",
+      "id": "pulse 0.5.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "Apache-2.0",
+      "license_file": null,
+      "description": "A library for async wake signals",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "time",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.1",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "atom",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "pulse",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "select",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/tests\/select.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "barrier",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/tests\/barrier.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "simple",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/tests\/simple.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "benches",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/benches\/benches.rs"
+        }
+      ],
+      "features": {
+        "callback": [
+          
+        ],
+        "default": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/Cargo.toml"
+    },
+    {
+      "name": "derivative",
+      "version": "1.0.0",
+      "id": "derivative 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "A set of alternative `derive` attributes for Rust",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "itertools",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "~0.5",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "quote",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "syn",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.10",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            "aster",
+            "full",
+            "visit"
+          ],
+          "target": null
+        },
+        {
+          "name": "compiletest_rs",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "proc-macro"
+          ],
+          "crate_types": [
+            "proc-macro"
+          ],
+          "name": "derivative",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-clone-tuple-struct",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-tuple-struct.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-class-implement-traits",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-class-implement-traits.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-32292",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-32292.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-19135",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-19135.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-28561",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-28561.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "derive-debug-generics",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-debug-generics.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "derive-partial-eq",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-partial-eq.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-29540",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-29540.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-12860",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-12860.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-21402",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-21402.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-bounds",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-bounds.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-in-fn",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-in-fn.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-show-2",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-show-2.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-default-box",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-default-box.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-via-extension-hash-struct",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-via-extension-hash-struct.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-19037",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-19037.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-3935",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-3935.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "derive-hash",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-hash.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-meta",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-meta.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-16530",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-16530.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-23649-3",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-23649-3.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "compile-test",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/compile-test.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-clone-array",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-array.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-24085",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-24085.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-show",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-show.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "derive-debug",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-debug.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-29710",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-29710.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-29030",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-29030.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-clone-enum",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-enum.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "derive-eq",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-eq.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-copyclone",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-copyclone.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "derive-default",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-default.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-hash",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-hash.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-zero-sized-btreemap-insert",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-zero-sized-btreemap-insert.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-clone-generic-enum",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-generic-enum.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-19358",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-19358.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-13434",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-13434.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "derive-default-bounds",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-default-bounds.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-meta-multiple",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-meta-multiple.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-25394",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-25394.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-clone-generic-tuple-struct",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-generic-tuple-struct.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-expr-copy",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-expr-copy.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-exterior",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-exterior.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-6341",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-6341.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-typeclasses-eq-example",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-typeclasses-eq-example.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-cmp-generic-enum",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-cmp-generic-enum.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "derive-debug-transparent",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-debug-transparent.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "derive-clone",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-clone.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-enum-single-variant",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-enum-single-variant.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-issue-19102",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-19102.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-clone-struct",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-struct.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-via-extension-type-params",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-via-extension-type-params.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustc-deriving-via-extension-hash-enum",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-via-extension-hash-enum.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "derive-debug-bounds",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-debug-bounds.rs"
+        }
+      ],
+      "features": {
+        "nightly": [
+          "compiletest_rs"
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/Cargo.toml"
+    },
+    {
+      "name": "smallvec",
+      "version": "0.4.4",
+      "id": "smallvec 0.4.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MPL-2.0",
+      "license_file": null,
+      "description": "'Small vector' optimization: store up to a small number of items on the stack",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "heapsize",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.4",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "serde",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "bincode",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.8",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "smallvec",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/smallvec-0.4.4\/lib.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "bench",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/smallvec-0.4.4\/benches\/bench.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "std"
+        ],
+        "heapsizeof": [
+          "heapsize",
+          "std"
+        ],
+        "std": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/smallvec-0.4.4\/Cargo.toml"
+    },
+    {
+      "name": "itertools",
+      "version": "0.5.10",
+      "id": "itertools 0.5.10 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Extra iterator adaptors, iterator methods, free functions, and macros.",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "either",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^1.0",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "quickcheck",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.4",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            
+          ],
+          "target": null
+        },
+        {
+          "name": "permutohedron",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2",
+          "kind": "dev",
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "itertools",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "iris",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/examples\/iris.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "quick",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/quick.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "peeking_take_while",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/peeking_take_while.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "tests",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/tests.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "tuples",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/tuples.rs"
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "zip",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/zip.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "tuple_combinations",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/benches\/tuple_combinations.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "bench1",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/benches\/bench1.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "tuples",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/benches\/tuples.rs"
+        }
+      ],
+      "features": {
+        
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/Cargo.toml"
+    },
+    {
+      "name": "rand",
+      "version": "0.4.2",
+      "id": "rand 0.4.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Random number generators and other randomness functionality.\n",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        {
+          "name": "fuchsia-zircon",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3.2",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": "cfg(target_os = \"fuchsia\")"
+        },
+        {
+          "name": "libc",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.2",
+          "kind": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            
+          ],
+          "target": "cfg(unix)"
+        },
+        {
+          "name": "winapi",
+          "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+          "req": "^0.3",
+          "kind": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [
+            "minwindef",
+            "ntsecapi",
+            "profileapi",
+            "winnt"
+          ],
+          "target": "cfg(windows)"
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "rand",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/src\/lib.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "generators",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/benches\/generators.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "misc",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/benches\/misc.rs"
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "bench",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/benches\/bench.rs"
+        }
+      ],
+      "features": {
+        "alloc": [
+          
+        ],
+        "default": [
+          "std"
+        ],
+        "i128_support": [
+          
+        ],
+        "nightly": [
+          "i128_support"
+        ],
+        "std": [
+          "libc"
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/Cargo.toml"
+    },
+    {
+      "name": "bitflags",
+      "version": "1.0.1",
+      "id": "bitflags 1.0.1 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "A macro to generate structures which behave like bitflags.\n",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "bitflags",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/bitflags-1.0.1\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        "default": [
+          "example_generated"
+        ],
+        "example_generated": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/bitflags-1.0.1\/Cargo.toml"
+    },
+    {
+      "name": "unicode-xid",
+      "version": "0.0.4",
+      "id": "unicode-xid 0.0.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+      "license": "MIT\/Apache-2.0",
+      "license_file": null,
+      "description": "Determine whether characters have the XID_Start\nor XID_Continue properties according to\nUnicode Standard Annex #31.\n",
+      "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
+      "dependencies": [
+        
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "unicode-xid",
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/unicode-xid-0.0.4\/src\/lib.rs"
+        }
+      ],
+      "features": {
+        "bench": [
+          
+        ],
+        "default": [
+          
+        ],
+        "no_std": [
+          
+        ]
+      },
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/unicode-xid-0.0.4\/Cargo.toml"
+    }
+  ],
+  "workspace_members": [
+    "compile_with_bazel 0.1.0 (path+file:\/\/\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo)"
+  ],
+  "resolve": {
+    "nodes": [
+      {
+        "id": "syn 0.11.11 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "unicode-xid 0.0.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "quote 0.3.15 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "synom 0.11.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "regex-syntax 0.4.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "nodrop 0.1.12 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "atom 0.3.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "crossbeam-utils 0.2.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "cfg-if 0.1.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "num_cpus 1.8.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "libc 0.2.36 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "thread_local 0.3.5 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "unreachable 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "lazy_static 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "winapi-x86_64-pc-windows-gnu 0.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "winapi-i686-pc-windows-gnu 0.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "syn 0.10.8 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "unicode-xid 0.0.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "quote 0.3.15 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "time 0.1.39 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "winapi 0.3.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "libc 0.2.36 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "redox_syscall 0.1.37 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "quote 0.3.15 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "arrayvec 0.4.7 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "nodrop 0.1.12 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "fuchsia-zircon-sys 0.3.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "tuple_utils 0.2.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "rayon-core 1.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "rand 0.4.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "lazy_static 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "num_cpus 1.8.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "libc 0.2.36 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "crossbeam-deque 0.2.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "bitflags 1.0.1 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "lazy_static 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "libc 0.2.36 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "winapi 0.3.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "winapi-x86_64-pc-windows-gnu 0.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "winapi-i686-pc-windows-gnu 0.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "scopeguard 0.3.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "derivative 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "syn 0.10.8 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "itertools 0.5.10 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "quote 0.3.15 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "compile_with_bazel 0.1.0 (path+file:\/\/\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo)",
+        "dependencies": [
+          "specs 0.10.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "regex 0.2.6 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "fnv 1.0.6 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "crossbeam-deque 0.2.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "crossbeam-epoch 0.3.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "crossbeam-utils 0.2.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "cfg-if 0.1.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "memoffset 0.2.1 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "rand 0.4.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "libc 0.2.36 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "winapi 0.3.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "fuchsia-zircon 0.3.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "odds 0.2.26 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "regex 0.2.6 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "utf8-ranges 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "memchr 2.0.1 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "aho-corasick 0.6.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "thread_local 0.3.5 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "regex-syntax 0.4.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "unreachable 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "void 1.0.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "memchr 2.0.1 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "libc 0.2.36 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "crossbeam-epoch 0.3.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "crossbeam-utils 0.2.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "memoffset 0.2.1 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "cfg-if 0.1.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "scopeguard 0.3.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "nodrop 0.1.12 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "arrayvec 0.4.7 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "lazy_static 0.2.11 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "synom 0.11.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "unicode-xid 0.0.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "void 1.0.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "shred 0.5.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "arrayvec 0.3.25 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "mopa 0.2.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "fnv 1.0.6 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "rayon 0.8.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "smallvec 0.4.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "pulse 0.5.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "shred-derive 0.3.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "rayon 0.8.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "rayon-core 1.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "pulse 0.5.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "atom 0.3.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "time 0.1.39 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "specs 0.10.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "crossbeam 0.3.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "rayon 0.8.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "tuple_utils 0.2.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "hibitset 0.3.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "derivative 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "fnv 1.0.6 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "shred-derive 0.3.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "mopa 0.2.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "shred 0.5.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "aho-corasick 0.6.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "memchr 2.0.1 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "lazy_static 0.2.11 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "crossbeam 0.3.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "unicode-xid 0.0.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "arrayvec 0.3.25 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "odds 0.2.26 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "nodrop 0.1.12 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "shred-derive 0.3.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "quote 0.3.15 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "syn 0.11.11 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "mopa 0.2.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "either 1.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "itertools 0.5.10 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "either 1.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "fuchsia-zircon 0.3.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "fuchsia-zircon-sys 0.3.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "bitflags 1.0.1 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      },
+      {
+        "id": "redox_syscall 0.1.37 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "utf8-ranges 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "smallvec 0.4.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          
+        ]
+      },
+      {
+        "id": "hibitset 0.3.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+        "dependencies": [
+          "rayon 0.8.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
+          "atom 0.3.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)"
+        ]
+      }
+    ],
+    "root": "compile_with_bazel 0.1.0 (path+file:\/\/\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo)"
+  },
+  "target_directory": "\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo\/target",
+  "version": 1
+}

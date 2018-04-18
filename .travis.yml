@@ -34,7 +34,9 @@ matrix:
     - rust: nightly
 
 script:
+  - cd impl
   - cargo build --verbose
   - cargo test --verbose
   - cargo install --debug -f
+  - cd ../
   - ./smoke-test.sh

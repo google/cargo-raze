@@ -1,0 +1,12 @@
+{
+    "root": "doc",
+    "title": "Derivative",
+    "language": "en",
+    "plugins": ["-search", "-sharing", "codesnippet", "edit-link", "anchors"],
+    "pluginsConfig": {
+        "edit-link": {
+            "base": "https://github.com/mcarton/rust-derivative/tree/master/doc",
+            "label": "Edit"
+        }
+    }
+}
