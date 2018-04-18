@@ -20,7 +20,7 @@ use context::BuildDependency;
 use context::BuildTarget;
 use context::CrateContext;
 use context::LicenseData;
-use context::GitData;
+use context::GitRepo;
 use context::WorkspaceContext;
 use license;
 use metadata::CargoWorkspaceFiles;
@@ -267,7 +267,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let git_data = if is_git {
         // UNWRAP: is_git true implies own_source_id exists
         let s = own_source_id.as_ref().unwrap();
-        Some(GitData {
+        Some(GitRepo {
           remote: s.url().to_string(),
           commit: s.precise().unwrap().to_owned(),
         })
@@ -364,7 +364,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let is_git = source_id.as_ref().map_or(false, SourceId::is_git);
       let local_root = match (settings.genmode.clone(), is_git) {
         // UNWRAP: We know from source_id that this is a git package, so it must have a repo root
-        (GenMode::Remote, true) => package_git_root(&manifest_pathbuf).unwrap().to_str().unwrap().to_owned(),
+        (GenMode::Remote, true) => try!(package_git_root(&manifest_pathbuf)).to_str().unwrap().to_owned(),
         _ => manifest_pathbuf.parent().unwrap().display().to_string(),
       };
 
@@ -447,6 +447,7 @@ fn package_git_root(manifest: &PathBuf) -> CargoResult<PathBuf> {
     }
   }
 
+  // Reached filesystem root and did not find Git repo
   Err(CargoError::from(format!("Unable to locate git repository root for manifest {:?}", manifest)))
 }
 
