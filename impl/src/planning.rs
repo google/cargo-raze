@@ -336,9 +336,6 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
   }
 
   fn produce_targets(&self, package: &Package) -> CargoResult<Vec<BuildTarget>> {
-    let full_name = format!("{}-{}", package.name, package.version);
-    let partial_path = format!("{}/", full_name);
-    let partial_path_byte_length = partial_path.as_bytes().len();
     let mut targets = Vec::new();
     for target in package.targets.iter() {
       let manifest_pathbuf = PathBuf::from(&package.manifest_path);
@@ -417,14 +414,10 @@ fn load_and_dedup_licenses(licenses: &str) -> Vec<LicenseData> {
 mod tests {
   use super::*;
   use metadata::Metadata;
-  use metadata::MetadataFetcher;
   use metadata::ResolveNode;
   use metadata::testing::StubMetadataFetcher;
   use metadata::testing as metadata_testing;
   use settings::testing as settings_testing;
-  use hamcrest::core::expect;
-  use hamcrest::prelude::*;
-  use settings::RazeSettings;
 
   const ROOT_NODE_IDX: usize = 0;
 

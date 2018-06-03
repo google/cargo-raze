@@ -326,6 +326,7 @@ fn default_dependency_field_use_default_features() -> bool {
   true
 }
 
+#[cfg(test)]
 pub mod testing {
   use super::*;
 

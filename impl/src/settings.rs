@@ -133,6 +133,7 @@ pub enum GenMode {
   Remote,
 }
 
+#[cfg(test)]
 pub mod testing {
   use super::*;
 
