@@ -21,6 +21,7 @@ rust_binary(
       {%- endfor %}
     ],
     data = glob(["*"]),
+    version = "{{ crate.pkg_version }}",
     visibility = ["//visibility:private"],
 )
 
