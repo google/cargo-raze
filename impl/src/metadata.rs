@@ -274,7 +274,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
       }
 
       // Cargo use SHA256 for checksum so we can use them directly
-      let sha256 = package.manifest().summary().checksum().and_then(|x| Some(x.to_string()));
+      let sha256 = package.manifest().summary().checksum().map(ToString::to_string);
 
       packages.push(Package {
         name: package.name().to_string(),
