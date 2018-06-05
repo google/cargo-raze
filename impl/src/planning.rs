@@ -309,7 +309,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let licenses = load_and_dedup_licenses(license_str);
 
       let data_attr = possible_crate_settings.and_then(|s| s.data_attr.clone());
-
+  
       crate_contexts.push(CrateContext {
         pkg_name: own_package.name.clone(),
         pkg_version: own_package.version.clone(),
@@ -328,6 +328,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         additional_flags: additional_flags,
         extra_aliased_targets: extra_aliased_targets,
         data_attr: data_attr,
+        sha256: own_package.sha256.clone(),
       })
     }
 
@@ -335,9 +336,6 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
   }
 
   fn produce_targets(&self, package: &Package) -> CargoResult<Vec<BuildTarget>> {
-    let full_name = format!("{}-{}", package.name, package.version);
-    let partial_path = format!("{}/", full_name);
-    let partial_path_byte_length = partial_path.as_bytes().len();
     let mut targets = Vec::new();
     for target in package.targets.iter() {
       let manifest_pathbuf = PathBuf::from(&package.manifest_path);
@@ -416,14 +414,10 @@ fn load_and_dedup_licenses(licenses: &str) -> Vec<LicenseData> {
 mod tests {
   use super::*;
   use metadata::Metadata;
-  use metadata::MetadataFetcher;
   use metadata::ResolveNode;
   use metadata::testing::StubMetadataFetcher;
   use metadata::testing as metadata_testing;
   use settings::testing as settings_testing;
-  use hamcrest::core::expect;
-  use hamcrest::prelude::*;
-  use settings::RazeSettings;
 
   const ROOT_NODE_IDX: usize = 0;
 

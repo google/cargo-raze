@@ -73,6 +73,7 @@ pub struct Package {
   pub targets: Vec<Target>,
   pub features: HashMap<String, Vec<FeatureOrDependency>>,
   pub manifest_path: String,
+  pub sha256: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
@@ -272,6 +273,9 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
         features.insert(feature.clone(), features_or_dependencies.clone());
       }
 
+      // Cargo use SHA256 for checksum so we can use them directly
+      let sha256 = package.manifest().summary().checksum().map(ToString::to_string);
+
       packages.push(Package {
         name: package.name().to_string(),
         version: package.version().to_string(),
@@ -284,6 +288,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
         targets: targets,
         features: features,
         manifest_path: package.manifest_path().display().to_string(),
+        sha256: sha256,
       });
     }
 
@@ -321,6 +326,7 @@ fn default_dependency_field_use_default_features() -> bool {
   true
 }
 
+#[cfg(test)]
 pub mod testing {
   use super::*;
 
@@ -353,6 +359,7 @@ pub mod testing {
       targets: Vec::new(),
       features: HashMap::new(),
       manifest_path: String::new(),
+      sha256: None,
     }
   }
 
