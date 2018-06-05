@@ -329,7 +329,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let licenses = load_and_dedup_licenses(license_str);
 
       let data_attr = possible_crate_settings.and_then(|s| s.data_attr.clone());
-
+  
       crate_contexts.push(CrateContext {
         pkg_name: own_package.name.clone(),
         pkg_version: own_package.version.clone(),
@@ -349,11 +349,13 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         extra_aliased_targets: extra_aliased_targets,
         data_attr: data_attr,
         git_data: git_data,
+        sha256: own_package.sha256.clone(),
       })
     }
 
     Ok(crate_contexts)
   }
+
 
   fn produce_targets(&self, package: &Package, source_id: &Option<SourceId>, settings: &RazeSettings) -> CargoResult<Vec<BuildTarget>> {
     let mut targets = Vec::new();
