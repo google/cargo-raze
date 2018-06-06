@@ -28,6 +28,7 @@ rust_binary(
     {%- if crate.data_attr %}
     data = {{crate.data_attr}},
     {%- endif %}
+    version = "{{ crate.pkg_version }}",
     crate_features = [
         {%- for feature in crate.features %}
         "{{feature}}",
