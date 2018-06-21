@@ -38,6 +38,12 @@ pub struct LicenseData {
   pub rating: String,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
+pub struct GitRepo {
+  pub remote: String,
+  pub commit: String,
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct CrateContext {
   pub pkg_name: String,
@@ -58,6 +64,7 @@ pub struct CrateContext {
   pub additional_flags: Vec<String>,
   pub extra_aliased_targets: Vec<String>,
   pub data_attr: Option<String>,
+  pub git_data: Option<GitRepo>,
   pub sha256: Option<String>,
 }
 

@@ -230,7 +230,8 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
       for dependency in package.dependencies().iter() {
         dependencies.push(Dependency {
           name: dependency.name().to_string(),
-          source: dependency.source_id().to_string(),
+          // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
+          source: serde_json::to_string(dependency.source_id()).unwrap(),
           req: dependency.version_req().to_string(),
           kind: match dependency.kind() {
             CargoKind::Normal => None,
@@ -260,6 +261,9 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
         features.insert(feature.clone(), features_or_dependencies.clone());
       }
 
+      // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
+      let pkg_source = serde_json::to_string(package_id.source_id()).unwrap();
+
       // Cargo use SHA256 for checksum so we can use them directly
       let sha256 = package.manifest().summary().checksum().map(ToString::to_string);
 
@@ -270,7 +274,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
         license: manifest_metadata.license.clone(),
         license_file: manifest_metadata.license_file.clone(),
         description: manifest_metadata.description.clone(),
-        source: Some(package_id.source_id().to_string()),
+        source: Some(pkg_source),
         dependencies: dependencies,
         targets: targets,
         features: features,
