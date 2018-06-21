@@ -9,7 +9,7 @@ rust_binary(
         # Binaries get an implicit dependency on their lib
         ":{{crate.pkg_name | replace(from="-", to="_") }}",
         {%- for dependency in crate.dependencies %}
-        "{{workspace.workspace_path}}/vendor/{{dependency.name}}-{{dependency.version}}:{{dependency.name | replace(from="-", to="_") }}",
+        "@{{workspace.gen_workspace_prefix}}__{{dependency.name | slugify | replace(from="-", to="_")}}__{{dependency.version | slugify | replace(from="-", to="_")}}//:{{dependency.name | replace(from="-", to="_") }}",
         {%- endfor %}
         {%- for dependency in crate.additional_deps %}
         "{{dependency}}",
@@ -28,6 +28,7 @@ rust_binary(
     {%- if crate.data_attr %}
     data = {{crate.data_attr}},
     {%- endif %}
+    version = "{{ crate.pkg_version }}",
     crate_features = [
         {%- for feature in crate.features %}
         "{{feature}}",

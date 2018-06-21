@@ -333,4 +333,4 @@ See these examples of providing crate configuration:
 - [complicated-example-remote](https://github.com/acmcarther/cargo-raze-examples/blob/master/bazel/complicated_cargo_library_remote/cargo/Cargo.toml)
 - [openssl-example](https://github.com/acmcarther/compile_openssl/blob/master/cargo/Cargo.toml)
 
-The [raze] section is derived from a struct declared in [src/settings.rs](./src/settings.rs).
+The [raze] section is derived from a struct declared in [impl/src/settings.rs](./impl/src/settings.rs).

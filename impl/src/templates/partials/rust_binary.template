@@ -1,17 +1,13 @@
 {%- set target_name_sanitized = target.name | replace(from="-", to="_") %}
-{%- if target_name_sanitized != crate_name_sanitized %}
-alias(
-  name = "{{ crate_name_sanitized }}",
-  actual = ":{{ target_name_sanitized }}",
-)
-{%- endif %}
-
-rust_library(
-    name = "{{ target_name_sanitized }}",
+rust_binary(
+    # Prefix bin name to disambiguate from (probable) collision with lib name
+    # N.B.: The exact form of this is subject to change.
+    name = "cargo_bin_{{ target_name_sanitized }}",
     crate_root = "{{ target.path }}",
-    crate_type = "{{ target.kind }}",
     srcs = glob(["**/*.rs"]),
     deps = [
+        # Binaries get an implicit dependency on their lib
+        ":{{crate.pkg_name | replace(from="-", to="_") }}",
         {%- for dependency in crate.dependencies %}
         "{{workspace.workspace_path}}/vendor/{{dependency.name}}-{{dependency.version}}:{{dependency.name | replace(from="-", to="_") }}",
         {%- endfor %}
@@ -32,6 +28,7 @@ rust_library(
     {%- if crate.data_attr %}
     data = {{crate.data_attr}},
     {%- endif %}
+    version = "{{ crate.pkg_version }}",
     crate_features = [
         {%- for feature in crate.features %}
         "{{feature}}",

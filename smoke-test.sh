@@ -11,6 +11,7 @@ PWD="$(pwd)"
 REPO_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$REPO_ROOT"
 
+IMPL_DIR="$REPO_ROOT/impl"
 EXAMPLES_DIR="$REPO_ROOT/examples"
 TEST_DIR="$REPO_ROOT/smoke_test"
 
@@ -28,7 +29,7 @@ workspace(name = "io_bazel_rules_rust")
 
 git_repository(
     name = "io_bazel_rules_rust",
-    commit = "ee61ddff0b97cfc36278902e5210d1929ba5b119",           
+    commit = "af9821bf3378b525ec3db0af3b1ca388920a8fb0",
     remote = "https://github.com/bazelbuild/rules_rust.git",
 )
 
@@ -54,10 +55,10 @@ for ex in $(find $EXAMPLES_DIR/vendored -maxdepth 1 -type d | tail -n+2); do
 done
 
 # Ensure Cargo Raze build is up-to-date
-cd "$REPO_ROOT"
 echo "Building local Cargo Raze"
+cd "$IMPL_DIR"
 cargo build --quiet
-RAZE="$REPO_ROOT/target/debug/cargo-raze raze"
+RAZE="$IMPL_DIR/target/debug/cargo-raze raze"
 for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
     echo "Running Cargo Raze for $(basename $ex)"
     cd "$ex/cargo"

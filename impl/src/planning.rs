@@ -14,11 +14,13 @@
 
 use cargo::CargoError;
 use cargo::core::dependency::Platform;
+use cargo::core::SourceId;
 use cargo::util::CargoResult;
 use context::BuildDependency;
 use context::BuildTarget;
 use context::CrateContext;
 use context::LicenseData;
+use context::GitRepo;
 use context::WorkspaceContext;
 use license;
 use metadata::CargoWorkspaceFiles;
@@ -30,6 +32,7 @@ use metadata::ResolveNode;
 use settings::CrateSettings;
 use settings::GenMode;
 use settings::RazeSettings;
+use serde_json;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
@@ -202,6 +205,11 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         continue;
       }
 
+      // UNWRAP: Safe given unwrap during serialize step of metadata
+      let own_source_id = own_package.source.as_ref()
+        .map(|s| serde_json::from_str::<SourceId>(&s).unwrap());
+
+
       // Resolve dependencies into types
       let mut build_dep_names = Vec::new();
       let mut dev_dep_names = Vec::new();
@@ -255,7 +263,19 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       dev_deps.sort();
       normal_deps.sort();
 
-      let mut targets = try!(self.produce_targets(&own_package));
+      let is_git = own_source_id.as_ref().map_or(false, SourceId::is_git);
+      let git_data = if is_git {
+        // UNWRAP: is_git true implies own_source_id exists
+        let s = own_source_id.as_ref().unwrap();
+        Some(GitRepo {
+          remote: s.url().to_string(),
+          commit: s.precise().unwrap().to_owned(),
+        })
+      } else {
+        None
+      };
+
+      let mut targets = try!(self.produce_targets(&own_package, &own_source_id, settings));
       targets.sort();
 
       let possible_crate_settings = settings
@@ -309,7 +329,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let licenses = load_and_dedup_licenses(license_str);
 
       let data_attr = possible_crate_settings.and_then(|s| s.data_attr.clone());
-
+  
       crate_contexts.push(CrateContext {
         pkg_name: own_package.name.clone(),
         pkg_version: own_package.version.clone(),
@@ -328,28 +348,33 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         additional_flags: additional_flags,
         extra_aliased_targets: extra_aliased_targets,
         data_attr: data_attr,
+        git_data: git_data,
+        sha256: own_package.sha256.clone(),
       })
     }
 
     Ok(crate_contexts)
   }
 
-  fn produce_targets(&self, package: &Package) -> CargoResult<Vec<BuildTarget>> {
-    let full_name = format!("{}-{}", package.name, package.version);
-    let partial_path = format!("{}/", full_name);
-    let partial_path_byte_length = partial_path.as_bytes().len();
+
+  fn produce_targets(&self, package: &Package, source_id: &Option<SourceId>, settings: &RazeSettings) -> CargoResult<Vec<BuildTarget>> {
     let mut targets = Vec::new();
     for target in package.targets.iter() {
       let manifest_pathbuf = PathBuf::from(&package.manifest_path);
       assert!(manifest_pathbuf.is_absolute());
 
-      let crate_path_prefix = manifest_pathbuf.parent().unwrap().display().to_string();
+      let is_git = source_id.as_ref().map_or(false, SourceId::is_git);
+      let local_root = match (settings.genmode.clone(), is_git) {
+        // UNWRAP: We know from source_id that this is a git package, so it must have a repo root
+        (GenMode::Remote, true) => try!(package_git_root(&manifest_pathbuf)).to_str().unwrap().to_owned(),
+        _ => manifest_pathbuf.parent().unwrap().display().to_string(),
+      };
 
       // Trim the manifest_path parent dir from the target path (to give us the crate-local path)
       let mut local_path_str = target
         .src_path
         .clone()
-        .split_off(crate_path_prefix.len() + 1);
+        .split_off(local_root.len() + 1);
 
       // Some crates have a weird prefix, trim that.
       if local_path_str.starts_with("./") {
@@ -412,18 +437,30 @@ fn load_and_dedup_licenses(licenses: &str) -> Vec<LicenseData> {
   license_data_list
 }
 
+fn package_git_root(manifest: &PathBuf) -> CargoResult<PathBuf> {
+  let cloned = manifest.clone();
+  let mut check_path = cloned.as_path();
+  while let Some(c) = check_path.parent() {
+    let joined = c.join(".git");
+    if joined.is_dir() {
+      return Ok(c.to_path_buf());
+    } else {
+      check_path = c;
+    }
+  }
+
+  // Reached filesystem root and did not find Git repo
+  Err(CargoError::from(format!("Unable to locate git repository root for manifest {:?}", manifest)))
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
   use metadata::Metadata;
-  use metadata::MetadataFetcher;
   use metadata::ResolveNode;
   use metadata::testing::StubMetadataFetcher;
   use metadata::testing as metadata_testing;
   use settings::testing as settings_testing;
-  use hamcrest::core::expect;
-  use hamcrest::prelude::*;
-  use settings::RazeSettings;
 
   const ROOT_NODE_IDX: usize = 0;
 

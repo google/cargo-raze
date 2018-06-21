@@ -1,3 +1,17 @@
+// Copyright 2018 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use cargo::CargoError;
 use cargo::core::Workspace;
 use cargo::core::dependency::Kind as CargoKind;
@@ -59,6 +73,7 @@ pub struct Package {
   pub targets: Vec<Target>,
   pub features: HashMap<String, Vec<FeatureOrDependency>>,
   pub manifest_path: String,
+  pub sha256: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
@@ -224,7 +239,8 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
       for dependency in package.dependencies().iter() {
         dependencies.push(Dependency {
           name: dependency.name().to_string(),
-          source: dependency.source_id().to_string(),
+          // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
+          source: serde_json::to_string(dependency.source_id()).unwrap(),
           req: dependency.version_req().to_string(),
           kind: match dependency.kind() {
             CargoKind::Normal => None,
@@ -258,6 +274,12 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
         features.insert(feature.clone(), features_or_dependencies.clone());
       }
 
+      // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
+      let pkg_source = serde_json::to_string(package_id.source_id()).unwrap();
+
+      // Cargo use SHA256 for checksum so we can use them directly
+      let sha256 = package.manifest().summary().checksum().map(ToString::to_string);
+
       packages.push(Package {
         name: package.name().to_string(),
         version: package.version().to_string(),
@@ -265,11 +287,12 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
         license: manifest_metadata.license.clone(),
         license_file: manifest_metadata.license_file.clone(),
         description: manifest_metadata.description.clone(),
-        source: Some(package_id.source_id().to_string()),
+        source: Some(pkg_source),
         dependencies: dependencies,
         targets: targets,
         features: features,
         manifest_path: package.manifest_path().display().to_string(),
+        sha256: sha256,
       });
     }
 
@@ -307,6 +330,7 @@ fn default_dependency_field_use_default_features() -> bool {
   true
 }
 
+#[cfg(test)]
 pub mod testing {
   use super::*;
 
@@ -339,6 +363,7 @@ pub mod testing {
       targets: Vec::new(),
       features: HashMap::new(),
       manifest_path: String::new(),
+      sha256: None,
     }
   }
 
