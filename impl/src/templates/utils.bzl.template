@@ -1,0 +1,34 @@
+"""
+cargo-raze internal repository functions
+
+Changes to this file will be infrequent and its API may be used externally.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+
+WORKSPACE_PREFIX = "{{workspace.gen_workspace_prefix}}"
+
+def mandatory_flags():
+    return [
+        # Do not warn or error on third party lints
+        "--cap-lints allow",
+    ]
+
+def crate_workspace_name(slug_name, slug_version):
+    return "{}__{}__{}".format(
+        WORKSPACE_PREFIX,
+        slug_name,
+        slug_version,
+    )
+
+def crate_target(slug_name, slug_version, target = None):
+    if not target:
+        target = slug_name
+
+    return "@{}//:{}".format(
+        crate_workspace_name(slug_name, slug_version),
+        target,
+    )
+
+def workspace_prefix():
+  return WORKSPACE_PREFIX

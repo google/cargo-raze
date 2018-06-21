@@ -1,0 +1,145 @@
+
+"""
+cargo-raze internal repository functions
+
+This file not intended to be used externally and may change at any time.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+
+# NOTE: If you're trying to add more supported triples here, you're looking
+# in the wrong place -- this is not the source of truth. Add them to your
+# Cargo.toml instead and re-run raze.
+#
+# TODO(acmcarther): Actually generate this list.
+CONFIGURED_TRIPLES = [
+    "x86_64-unknown-linux-gnu",
+]
+
+# Consider editing the call in root BUILD instead of editing this.
+DEFAULT_EXTENDED_PLATFORM_DETAILS = {
+    "cpu_arch_to_platform_constraints": {},
+    "vendor_to_platform_constraints": {},
+    "system_to_platform_constraints": {},
+    "abi_to_platform_constraints": {},
+}
+
+CPU_ARCH_TO_BUILTIN_PLAT_SUFFIX = {
+    "x86_64": "x86_64",
+    "powerpc": "ppc",
+    "powerpc64": "ppc",
+    "powerpc64le": "ppc",
+    "aarch64": "arm",
+    "arm": "arm",
+    "armv7": "arm",
+    "armv7s": "arm",
+    "i386": "x86_32",
+    "i586": "x86_32",
+    "i686": "x86_32",
+    "asmjs": None,
+    "le32": None,
+    "mips": None,
+    "mipsel": None,
+}
+
+SYSTEM_TO_BUILTIN_SYS_SUFFIX = {
+    "freebsd": "freebsd",
+    "linux": "linux",
+    "darwin": "osx",
+    "windows": "windows",
+    "ios": None,
+    "android": None,
+    "androideabi": None,
+    "emscripten": None,
+    "nacl": None,
+    "bitrig": None,
+    "dragonfly": None,
+    "netbsd": None,
+    "openbsd": None,
+    "solaris": None,
+}
+
+def _cpu_arch_to_constraints(cpu_arch, extended_platform_details):
+    plat_suffix = CPU_ARCH_TO_BUILTIN_PLAT_SUFFIX[cpu_arch]
+    extended_constraints = []
+    if extended_platform_details:
+        extended_constraints = extended_constraints.cpu_arch_to_platform_constraints[cpu_arch]
+
+    if not plat_suffix and not extended_constraints:
+        fail("CPU architecture \"{}\" is not supported by rules_rust".format(cpu_arch))
+
+    return ["@bazel_tools//platforms:{}".format(plat_suffix)] + extended_constraints
+
+def _vendor_to_constraints(vendor, extended_platform_details):
+    extended_constraints = []
+    if extended_platform_details:
+        extended_constraints = extended_constraints.vendor_to_platform_constraints[vendor]
+
+    # TODO(acmcarther): Review:
+    #
+    # My current understanding is that vendors can't have a material impact on
+    # constraint sets.
+    return extended_constraints
+
+def _system_to_constraints(system, extended_platform_details):
+    sys_suffix = SYSTEM_TO_BUILTIN_SYS_SUFFIX[system]
+    extended_constraints = []
+    if extended_platform_details:
+        extended_constraints = extended_constraints.system_to_platform_constraints[sys_suffix]
+
+    if not sys_suffix and not extended_constraints:
+        fail("System \"{}\" is not supported by rules_rust".format(sys_suffix))
+
+    return ["@bazel_tools//platforms:{}".format(sys_suffix)] + extended_constraints
+
+def _abi_to_constraints(abi, extended_platform_details):
+    extended_constraints = []
+    if extended_platform_details:
+        extended_constraints = extended_constraints.abi_to_platform_constraints[abi]
+
+    # TODO(acmcarther): Review:
+    #
+    # The ABI (gnu, musl, etc) can have an impact, but it's not clear how to
+    # apply it in a Bazel context.
+    return extended_constraints
+
+def triple_to_constraint_set(triple, extended_platform_details):
+    component_parts = triple.split("-")
+    if len(component_parts) < 3:
+        fail("Expected target triple to contain at least three sections separated by '-'")
+
+    cpu_arch = component_parts[0]
+    vendor = component_parts[1]
+    system = component_parts[2]
+    abi = None
+
+    if len(component_parts) == 4:
+        abi = component_parts[3]
+
+    constraint_set = []
+    constraint_set += _cpu_arch_to_constraints(
+        cpu_arch,
+        extended_platform_details,
+    )
+    constraint_set += _vendor_to_constraints(
+        vendor,
+        extended_platform_details,
+    )
+    constraint_set += _system_to_constraints(
+        system,
+        extended_platform_details,
+    )
+    constraint_set += _abi_to_constraints(
+        abi,
+        extended_platform_details,
+    )
+
+    return constraint_set
+
+def gen_config_settings_for_targets(extended_platform_details = DEFAULT_EXTENDED_PLATFORM_DETAILS):
+    for target_triple in CONFIGURED_TRIPLES:
+        native.config_setting(
+            name = target_triple,
+            constraint_values = triple_to_constraint_set(target_triple),
+        )
+

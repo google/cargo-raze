@@ -9,6 +9,13 @@ licenses([
   "notice" # See individual crates for specific licenses
 ])
 
+load(":internal.bzl", "gen_config_settings_for_triple")
+
+# NOTE: Despite what the header says, you might want to edit this if you want to
+# support more targets than what is built in. Consult
+# internal.bzl:DEFAULT_EXTENDED_PLATFORM_DETAILS.
+gen_config_settings_for_targets()
+
 {%- for crate in crates %}
 {%- if crate.is_root_dependency %}
 {%- set crate_name_sanitized = crate.pkg_name | replace(from="-", to="_") %}
