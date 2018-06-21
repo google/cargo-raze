@@ -19,6 +19,7 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
+extern crate slug;
 extern crate tempdir;
 extern crate tera;
 extern crate toml;
@@ -138,7 +139,11 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
   };
 
   let dry_run = options.flag_dryrun.unwrap_or(false);
-  for FileOutputs { path, contents } in bazel_file_outputs {
+  for FileOutputs {
+    path,
+    contents,
+  } in bazel_file_outputs
+  {
     if !dry_run {
       try!(write_to_file_loudly(&path, &contents));
     } else {

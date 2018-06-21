@@ -21,8 +21,8 @@ use cargo::util::CargoResult;
 use cargo::util::Config;
 use serde_json;
 use std::collections::HashMap;
-use std::fs;
 use std::env;
+use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 use tempdir::TempDir;
@@ -82,7 +82,8 @@ pub struct Dependency {
   pub source: String,
   pub req: String,
   pub kind: Option<Kind>,
-  #[serde(default = "default_dependency_field_optional")] pub optional: bool,
+  #[serde(default = "default_dependency_field_optional")]
+  pub optional: bool,
   #[serde(default = "default_dependency_field_use_default_features")]
   pub use_default_features: bool,
   pub features: Vec<FeatureOrDependency>,
@@ -130,13 +131,7 @@ pub struct CargoInternalsMetadataFetcher<'config> {
 impl MetadataFetcher for CargoSubcommandMetadataFetcher {
   fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> CargoResult<Metadata> {
     assert!(files.toml_path.is_file());
-    assert!(
-      files
-        .lock_path_opt
-        .as_ref()
-        .map(|p| p.is_file())
-        .unwrap_or(true)
-    );
+    assert!(files.lock_path_opt.as_ref().map(|p| p.is_file()).unwrap_or(true));
 
     // Copy files into a temp directory
     // UNWRAP: Guarded by function assertion
@@ -218,11 +213,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
 
     for id in cargo_resolve.iter() {
       let dependencies = cargo_resolve.deps(id).map(|p| p.to_string()).collect();
-      let features = cargo_resolve
-        .features_sorted(id)
-        .iter()
-        .map(|s| s.to_string())
-        .collect();
+      let features = cargo_resolve.features_sorted(id).iter().map(|s| s.to_string()).collect();
       resolve.nodes.push(ResolveNode {
         id: id.to_string(),
         dependencies: dependencies,
@@ -256,11 +247,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
 
       let mut targets = Vec::new();
       for target in package.targets().iter() {
-        let crate_types = target
-          .rustc_crate_types()
-          .iter()
-          .map(|t| t.to_string())
-          .collect();
+        let crate_types = target.rustc_crate_types().iter().map(|t| t.to_string()).collect();
         targets.push(Target {
           name: target.name().to_owned(),
           kind: util::kind_to_kinds(target.kind()),
@@ -296,9 +283,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
       });
     }
 
-    let workspace_members = ws.members()
-      .map(|pkg| pkg.package_id().to_string())
-      .collect();
+    let workspace_members = ws.members().map(|pkg| pkg.package_id().to_string()).collect();
 
     Ok(Metadata {
       packages: packages,
@@ -346,7 +331,9 @@ pub mod testing {
 
   impl StubMetadataFetcher {
     pub fn with_metadata(metadata: Metadata) -> StubMetadataFetcher {
-      StubMetadataFetcher { metadata: metadata }
+      StubMetadataFetcher {
+        metadata: metadata,
+      }
     }
   }
 

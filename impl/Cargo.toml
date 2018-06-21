@@ -17,6 +17,7 @@ travis-ci = { repository = "google/cargo-raze", branch = "master" }
 rustc-serialize = "0.3"
 cargo = "0.20.0"
 itertools = "0.6.0"
+slug = "0.1.2"
 tera = "0.11.0-beta.4"
 serde_derive = "1.0.11"
 serde = "1.0.11"

@@ -32,6 +32,7 @@ use metadata::ResolveNode;
 use settings::CrateSettings;
 use settings::GenMode;
 use settings::RazeSettings;
+use slug;
 use serde_json;
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -118,11 +119,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
   fn get_root_deps(&self, metadata: &Metadata) -> CargoResult<Vec<PackageId>> {
     let root_resolve_node_opt = {
       let root_id = &metadata.resolve.root;
-      metadata
-        .resolve
-        .nodes
-        .iter()
-        .find(|node| &node.id == root_id)
+      metadata.resolve.nodes.iter().find(|node| &node.id == root_id)
     };
     let root_resolve_node = if root_resolve_node_opt.is_some() {
       // UNWRAP: Guarded above
@@ -146,6 +143,31 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       .iter()
       .map(|p| (p.id.clone(), p.clone()))
       .collect::<HashMap<PackageId, Package>>();
+    let (package_id_to_build_path, package_id_to_default_build_target) = {
+      let mut package_id_to_build_path = HashMap::new();
+      let mut package_id_to_default_build_target = HashMap::new();
+
+      for package in metadata.packages.iter() {
+        let sanitized_name = slug::slugify(&package.name).replace("-", "_");
+        let build_path = match settings.genmode {
+          GenMode::Remote => {
+            let sanitized_version = slug::slugify(&package.version).replace("-", "_");
+            format!(
+              "@{}__{}__{}//",
+              settings.gen_workspace_prefix, sanitized_name, sanitized_version
+            )
+          },
+          GenMode::Vendored => {
+            format!("{}/vendor/{}-{}", settings.workspace_path, package.name, package.version)
+          },
+        };
+        package_id_to_default_build_target
+          .insert(package.id.clone(), format!("{}:{}", build_path, sanitized_name));
+        package_id_to_build_path.insert(package.id.clone(), build_path);
+      }
+
+      (package_id_to_build_path, package_id_to_default_build_target)
+    };
 
     // Verify that all nodes are present in package list
     {
@@ -209,7 +231,6 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let own_source_id = own_package.source.as_ref()
         .map(|s| serde_json::from_str::<SourceId>(&s).unwrap());
 
-
       // Resolve dependencies into types
       let mut build_dep_names = Vec::new();
       let mut dev_dep_names = Vec::new();
@@ -241,11 +262,14 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let mut dev_deps = Vec::new();
       let mut normal_deps = Vec::new();
       for dep_id in node.dependencies.iter() {
-        // UNWRAP: Safe from verification of packages_by_id
+        // UNWRAP(s): Safe from verification of packages_by_id
         let dep_package = packages_by_id.get(dep_id.as_str()).unwrap();
+        let build_target = package_id_to_default_build_target.get(dep_id).unwrap();
+
         let build_dependency = BuildDependency {
           name: dep_package.name.clone(),
           version: dep_package.version.clone(),
+          build_target: build_target.clone(),
         };
         if build_dep_names.contains(&dep_package.name) {
           build_deps.push(build_dependency.clone());
@@ -278,39 +302,28 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let mut targets = try!(self.produce_targets(&own_package, &own_source_id, settings));
       targets.sort();
 
-      let possible_crate_settings = settings
-        .crates
-        .get(&own_package.name)
-        .and_then(|c| c.get(&own_package.version));
+      let possible_crate_settings =
+        settings.crates.get(&own_package.name).and_then(|c| c.get(&own_package.version));
 
-      let should_gen_buildrs = possible_crate_settings
-        .map(|s| s.gen_buildrs.clone())
-        .unwrap_or(false);
+      let should_gen_buildrs =
+        possible_crate_settings.map(|s| s.gen_buildrs.clone()).unwrap_or(false);
       let build_script_target = if should_gen_buildrs {
-        targets
-          .iter()
-          .find(|t| t.kind.as_str() == "custom-build")
-          .cloned()
+        targets.iter().find(|t| t.kind.as_str() == "custom-build").cloned()
       } else {
         None
       };
 
-      let targets_sans_build_script = targets
-        .into_iter()
-        .filter(|t| t.kind.as_str() != "custom-build")
-        .collect::<Vec<_>>();
+      let targets_sans_build_script =
+        targets.into_iter().filter(|t| t.kind.as_str() != "custom-build").collect::<Vec<_>>();
 
-      let additional_deps = possible_crate_settings
-        .map(|s| s.additional_deps.clone())
-        .unwrap_or(Vec::new());
+      let additional_deps =
+        possible_crate_settings.map(|s| s.additional_deps.clone()).unwrap_or(Vec::new());
 
-      let additional_flags = possible_crate_settings
-        .map(|s| s.additional_flags.clone())
-        .unwrap_or(Vec::new());
+      let additional_flags =
+        possible_crate_settings.map(|s| s.additional_flags.clone()).unwrap_or(Vec::new());
 
-      let extra_aliased_targets = possible_crate_settings
-        .map(|s| s.extra_aliased_targets.clone())
-        .unwrap_or(Vec::new());
+      let extra_aliased_targets =
+        possible_crate_settings.map(|s| s.extra_aliased_targets.clone()).unwrap_or(Vec::new());
 
       // Skip generated dependencies explicitly designated to be skipped (potentially due to
       // being replaced or customized as part of additional_deps)
@@ -321,11 +334,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         .map(|s| prune_skipped_deps(&build_deps, s))
         .unwrap_or_else(|| build_deps);
 
-      let license_str = own_package
-        .license
-        .as_ref()
-        .map(|s| s.as_str())
-        .unwrap_or("");
+      let license_str = own_package.license.as_ref().map(|s| s.as_str()).unwrap_or("");
       let licenses = load_and_dedup_licenses(license_str);
 
       let data_attr = possible_crate_settings.and_then(|s| s.data_attr.clone());
@@ -341,6 +350,8 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         build_dependencies: non_skipped_build_deps,
         dev_dependencies: dev_deps,
         path: path,
+        // UNWRAP: Safe -- struct derived from package set
+        build_path: package_id_to_build_path.get(&own_package.id).unwrap().clone(),
         build_script_target: build_script_target,
         targets: targets_sans_build_script,
         platform_triple: settings.target.to_owned(),
@@ -400,11 +411,7 @@ fn prune_skipped_deps(
 ) -> Vec<BuildDependency> {
   deps
     .iter()
-    .filter(|d| {
-      !crate_settings
-        .skipped_deps
-        .contains(&format!("{}-{}", d.name, d.version))
-    })
+    .filter(|d| !crate_settings.skipped_deps.contains(&format!("{}-{}", d.name, d.version)))
     .map(|dep| dep.clone())
     .collect::<Vec<_>>()
 }
@@ -458,8 +465,8 @@ mod tests {
   use super::*;
   use metadata::Metadata;
   use metadata::ResolveNode;
-  use metadata::testing::StubMetadataFetcher;
   use metadata::testing as metadata_testing;
+  use metadata::testing::StubMetadataFetcher;
   use settings::testing as settings_testing;
 
   const ROOT_NODE_IDX: usize = 0;
@@ -489,9 +496,7 @@ mod tests {
 
   fn minimum_dependency_metadata() -> Metadata {
     let mut metadata = minimum_valid_metadata();
-    metadata.resolve.nodes[ROOT_NODE_IDX]
-      .dependencies
-      .push("test_dep_id".to_owned());
+    metadata.resolve.nodes[ROOT_NODE_IDX].dependencies.push("test_dep_id".to_owned());
     metadata.resolve.nodes.push(ResolveNode {
       id: "test_dep_id".to_owned(),
       dependencies: Vec::new(),
@@ -540,10 +545,8 @@ mod tests {
   fn test_plan_build_missing_resolve_fails() {
     let mut fetcher = StubMetadataFetcher::with_metadata(metadata_testing::dummy_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res = planner.plan_build(
-      &settings_testing::dummy_raze_settings(),
-      dummy_workspace_files(),
-    );
+    let planned_build_res =
+      planner.plan_build(&settings_testing::dummy_raze_settings(), dummy_workspace_files());
 
     println!("{:#?}", planned_build_res);
     assert!(planned_build_res.is_err());
@@ -561,10 +564,8 @@ mod tests {
 
     let mut fetcher = StubMetadataFetcher::with_metadata(metadata);
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res = planner.plan_build(
-      &settings_testing::dummy_raze_settings(),
-      dummy_workspace_files(),
-    );
+    let planned_build_res =
+      planner.plan_build(&settings_testing::dummy_raze_settings(), dummy_workspace_files());
 
     println!("{:#?}", planned_build_res);
     assert!(planned_build_res.is_err());
@@ -574,10 +575,8 @@ mod tests {
   fn test_plan_build_minimum_workspace() {
     let mut fetcher = StubMetadataFetcher::with_metadata(minimum_valid_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res = planner.plan_build(
-      &settings_testing::dummy_raze_settings(),
-      dummy_workspace_files(),
-    );
+    let planned_build_res =
+      planner.plan_build(&settings_testing::dummy_raze_settings(), dummy_workspace_files());
 
     println!("{:#?}", planned_build_res);
     assert!(planned_build_res.unwrap().crate_contexts.is_empty());
@@ -587,10 +586,8 @@ mod tests {
   fn test_plan_build_minimum_root_dependency() {
     let mut fetcher = StubMetadataFetcher::with_metadata(minimum_dependency_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res = planner.plan_build(
-      &settings_testing::dummy_raze_settings(),
-      dummy_workspace_files(),
-    );
+    let planned_build_res =
+      planner.plan_build(&settings_testing::dummy_raze_settings(), dummy_workspace_files());
 
     println!("{:#?}", planned_build_res);
     let planned_build = planned_build_res.unwrap();

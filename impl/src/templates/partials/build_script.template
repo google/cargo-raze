@@ -8,7 +8,7 @@ rust_binary(
     {%- endif %}
     deps = [
       {%- for dependency in crate.build_dependencies %}
-        "{{workspace.workspace_path}}/vendor/{{dependency.name}}-{{dependency.version}}:{{dependency.name | replace(from="-", to="_") }}",
+        "{{dependency.build_target}}",
       {%- endfor %}
     ],
     rustc_flags = [
@@ -33,8 +33,8 @@ genrule(
       ":{{ crate_name_sanitized  }}_build_script",
     ],
     local = 1,
-    cmd = "mkdir {{ crate_name_sanitized}}_out_dir_outputs/;"
-        + " (export CARGO_MANIFEST_DIR=\"$$PWD/{{ workspace.workspace_path | replace(from="//", to="") }}/vendor/{{ crate.pkg_name }}-{{ crate.pkg_version }}\";"
+    cmd = "mkdir -p {{ crate_name_sanitized}}_out_dir_outputs/;"
+        + " (export CARGO_MANIFEST_DIR=\"$$PWD/$$(dirname $(location :Cargo.toml))\";"
         + " export TARGET='{{ crate.platform_triple }}';"
         + " export RUST_BACKTRACE=1;"
         {%- for feature in crate.features %}

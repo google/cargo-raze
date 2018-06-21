@@ -14,7 +14,7 @@ licenses([
 {%- set crate_name_sanitized = crate.pkg_name | replace(from="-", to="_") %}
 alias(
     name = "{{crate_name_sanitized}}",
-    actual = "{{workspace.workspace_path}}/vendor/{{crate.pkg_name}}-{{crate.pkg_version}}:{{crate_name_sanitized}}",
+    actual = "{{crate.build_path}}:{{crate_name_sanitized}}",
 )
 {%- endif %}
 {%- for aliased_target in crate.extra_aliased_targets %}
@@ -22,7 +22,7 @@ alias(
     # Extra aliased target, from raze configuration
     # N.B.: The exact form of this is subject to change.
     name = "{{aliased_target}}",
-    actual = "{{workspace.workspace_path}}/vendor/{{crate.pkg_name}}-{{crate.pkg_version}}:{{aliased_target}}",
+    actual = "{{crate.build_path}}:{{aliased_target}}",
 )
 {%- endfor %}
 {%- endfor %}
