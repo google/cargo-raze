@@ -18,6 +18,7 @@ use std::collections::HashMap;
 pub struct BuildDependency {
   pub name: String,
   pub version: String,
+  pub build_target: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -67,6 +68,7 @@ pub struct CrateContext {
   // ... But Cargo doesn't do this correctly either, so ¯\_(ツ)_/¯
   pub features: Vec<String>,
   pub path: String,
+  pub build_path: String,
   pub dependencies: Vec<BuildDependency>,
   pub build_dependencies: Vec<BuildDependency>,
   pub dev_dependencies: Vec<BuildDependency>,

@@ -62,6 +62,12 @@ pub struct PlannedBuild {
   pub crate_contexts: Vec<CrateContext>,
 }
 
+#[derive(Debug)]
+enum TargetForDep {
+  All,
+  OneOrMore(Vec<String>)
+}
+
 impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
   fn plan_build(
     &mut self,
@@ -192,15 +198,15 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
     }
 
     let mut crate_contexts = Vec::new();
-    // TODO(acmcarther): I'm computing this twice, stop that.
-    for target in util::unique_targets_ordered(&settings.target, &settings.targets).into_iter() {
-      let platform_attrs = util::fetch_attrs(&target).unwrap();
-    }
-
-    // TODO(acmcarther): handle unwrap
-    let platform_attrs = util::fetch_attrs(&settings.target).unwrap();
     let mut sorted_nodes: Vec<&ResolveNode> = metadata.resolve.nodes.iter().collect();
     sorted_nodes.sort_unstable_by_key(|n| &n.id);
+    // TODO(acmcarther): I'm computing this twice, stop that.
+    let all_target_attr_pairs = util::unique_targets_ordered(&settings.target, &settings.targets)
+      .into_iter()
+      // TODO(acmcarther): handle unwrap
+      .map(|target| (target, util::fetch_attrs(&target).unwrap()))
+      .collect::<Vec<_>>()
+
     for node in sorted_nodes.into_iter() {
       let own_package = packages_by_id.get(&node.id).unwrap();
       let full_name = format!("{}-{}", own_package.name, own_package.version);
@@ -215,21 +221,48 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       let own_source_id = own_package.source.as_ref()
         .map(|s| serde_json::from_str::<SourceId>(&s).unwrap());
 
+      let is_git = own_source_id.as_ref().map_or(false, SourceId::is_git);
+      let git_data = if is_git {
+        // UNWRAP: is_git true implies own_source_id exists
+        let s = own_source_id.as_ref().unwrap();
+        Some(GitRepo {
+          remote: s.url().to_string(),
+          commit: s.precise().unwrap().to_owned(),
+        })
+      } else {
+        None
+      };
 
       // Resolve dependencies into types
-      let mut build_dep_names = Vec::new();
-      let mut dev_dep_names = Vec::new();
-      let mut normal_dep_names = Vec::new();
+      let mut build_dep_names: Vec<String> = Vec::new();
+      let mut dev_dep_names: Vec<String> = Vec::new();
+      let mut normal_dep_names: Vec<String> = Vec::new();
+      let mut dep_to_targets: HashMap<String, TargetForDep> = HashMap::new();
       for dep in own_package.dependencies.iter() {
-        if dep.target.is_some() {
-          // UNWRAP: Safe from above check
-          let target_str = dep.target.as_ref().unwrap();
-          let platform = try!(Platform::from_str(target_str));
+        // Establish which targets this dep is required for.
+        if dep.target.is_none() {
+          dep_to_targets.insert(dep.name.clone(), TargetForDep::All);
+        } else {
+          let mut target_triples: = HashSet::new();
 
-          // Skip this dep if it doesn't match our platform attributes
-          if !platform.matches(&settings.target, Some(&platform_attrs)) {
+          // UNWRAP: Safe from above check
+          for &(target_triple, target_triple_attrs) in all_target_attr_pairs.iter() {
+            let dep_target_str = dep.target.as_ref().unwrap();
+            let dep_platform = try!(Platform::from_str(dep_target_str));
+
+            // Skip this dep if it doesn't match our platform attributes
+            if dep_platform.matches(&target_triple, Some(&target_triple_attrs)) {
+              matched_at_least_one = true;
+
+              target_triples.insert(target_triple.clone());
+            }
+          }
+
+          // This dependency isn't used for any declared target. Rm.
+          if target_triples.is_empty() {
             continue;
           }
+          dep_to_targets.insert(dep.name.clone(), TargetForDep::OneOrMore(target_triples));
         }
 
         match dep.kind.as_ref().map(|v| v.as_str()) {
@@ -269,17 +302,34 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       dev_deps.sort();
       normal_deps.sort();
 
-      let is_git = own_source_id.as_ref().map_or(false, SourceId::is_git);
-      let git_data = if is_git {
-        // UNWRAP: is_git true implies own_source_id exists
-        let s = own_source_id.as_ref().unwrap();
-        Some(GitRepo {
-          remote: s.url().to_string(),
-          commit: s.precise().unwrap().to_owned(),
-        })
-      } else {
-        None
-      };
+      // Skip generated dependencies explicitly designated to be skipped (potentially due to
+      // being replaced or customized as part of additional_deps)
+      let non_skipped_normal_deps = possible_crate_settings
+        .map(|s| prune_skipped_deps(&normal_deps, s))
+        .unwrap_or_else(|| normal_deps);
+      let non_skipped_build_deps = possible_crate_settings
+        .map(|s| prune_skipped_deps(&build_deps, s))
+        .unwrap_or_else(|| build_deps);
+
+
+      let mut common_build_deps = Vec::new();
+      let mut common_normal_deps = Vec::new();
+      let mut per_target_contexts = Vec::new();
+      /*
+       * WORKING AREA
+      for dep in build_deps.into_iter() {
+        if !settings.skipped_deps.contains(&format!("{}-{}", d.name, d.version) {
+          // Bail on this dep
+          continue
+        }
+
+        PerTargetContext {
+          dependencies: 
+          build_dependencies: 
+        }
+      }*/
+
+
 
       let mut targets = try!(self.produce_targets(&own_package, &own_source_id, settings));
       targets.sort();
@@ -318,15 +368,6 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         .map(|s| s.extra_aliased_targets.clone())
         .unwrap_or(Vec::new());
 
-      // Skip generated dependencies explicitly designated to be skipped (potentially due to
-      // being replaced or customized as part of additional_deps)
-      let non_skipped_normal_deps = possible_crate_settings
-        .map(|s| prune_skipped_deps(&normal_deps, s))
-        .unwrap_or_else(|| normal_deps);
-      let non_skipped_build_deps = possible_crate_settings
-        .map(|s| prune_skipped_deps(&build_deps, s))
-        .unwrap_or_else(|| build_deps);
-
       let license_str = own_package
         .license
         .as_ref()
@@ -340,6 +381,8 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         pkg_name: own_package.name.clone(),
         pkg_version: own_package.version.clone(),
         licenses: licenses,
+        // TODO(issues/53): This needs to be refined on a per-target basis
+        // ... But Cargo doesn't do this correctly either, so ¯\_(ツ)_/¯
         features: node.features.clone().unwrap_or(Vec::new()),
         is_root_dependency: root_direct_deps.contains(&node.id),
         metadeps: Vec::new(), /* TODO(acmcarther) */

@@ -55,12 +55,9 @@ pub fn kind_to_kinds(kind: &TargetKind) -> Vec<String> {
 pub fn fetch_attrs(target: &str) -> CargoResult<Vec<Cfg>> {
   let args = vec![format!("--target={}", target), "--print=cfg".to_owned()];
 
-  let output = try!(Command::new("rustc").args(&args).output().map_err(|_| {
-    CargoError::from(format!(
-      "could not run rustc to fetch attrs for target {}",
-      target
-    ))
-  }));
+  let output = try!(Command::new("rustc").args(&args).output().map_err(|_| CargoError::from(
+    format!("could not run rustc to fetch attrs for target {}", target)
+  )));
 
   if !output.status.success() {
     panic!(format!(
@@ -79,9 +76,7 @@ pub fn fetch_attrs(target: &str) -> CargoResult<Vec<Cfg>> {
     attr_str
       .lines()
       .map(Cfg::from_str)
-      .map(|cfg| {
-        cfg.expect("attrs from rustc should be parsable into Cargo Cfg")
-      })
+      .map(|cfg| cfg.expect("attrs from rustc should be parsable into Cargo Cfg"))
       .collect(),
   )
 }
