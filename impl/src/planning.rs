@@ -72,9 +72,10 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
     if settings.genmode == GenMode::Vendored {
       try!(self.check_crates_vendored(&metadata));
     }
+    let unique_targets = util::unique_targets_ordered(&settings.target, &settings.targets);
     let workspace_context = WorkspaceContext {
       workspace_path: settings.workspace_path.clone(),
-      platform_triple: settings.target.clone(),
+      platform_triples: settings.targets.clone(),
       gen_workspace_prefix: settings.gen_workspace_prefix.clone(),
     };
 
@@ -191,6 +192,11 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
     }
 
     let mut crate_contexts = Vec::new();
+    // TODO(acmcarther): I'm computing this twice, stop that.
+    for target in util::unique_targets_ordered(&settings.target, &settings.targets).into_iter() {
+      let platform_attrs = util::fetch_attrs(&target).unwrap();
+    }
+
     // TODO(acmcarther): handle unwrap
     let platform_attrs = util::fetch_attrs(&settings.target).unwrap();
     let mut sorted_nodes: Vec<&ResolveNode> = metadata.resolve.nodes.iter().collect();
@@ -343,13 +349,13 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
         path: path,
         build_script_target: build_script_target,
         targets: targets_sans_build_script,
-        platform_triple: settings.target.to_owned(),
         additional_deps: additional_deps,
         additional_flags: additional_flags,
         extra_aliased_targets: extra_aliased_targets,
         data_attr: data_attr,
         git_data: git_data,
         sha256: own_package.sha256.clone(),
+        per_target_contexts: HashMap::new(),
       })
     }
 

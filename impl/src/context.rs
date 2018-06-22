@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::HashMap;
+
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildDependency {
   pub name: String,
@@ -44,10 +46,25 @@ pub struct GitRepo {
 }
 
 #[derive(Debug, Clone, Serialize)]
+pub struct PerTargetContext {
+  pub dependencies: Vec<BuildDependency>,
+  pub build_dependencies: Vec<BuildDependency>,
+  // TODO(acmcarther): Include dev dependencies.
+  // ... They're currently not used for anything, so I didn't bother with them.
+  //pub dev_dependencies: Vec<BuildDependency>,
+  // TODO(issues/53): This needs to be refined on a per-target basis
+  // ... But Cargo doesn't do this correctly either, so ¯\_(ツ)_/¯
+  //pub features: Vec<String>,
+}
+
+// TODO(acmcarther): Revisit introducing common deps back into this to shrink the build file.
+#[derive(Debug, Clone, Serialize)]
 pub struct CrateContext {
   pub pkg_name: String,
   pub pkg_version: String,
   pub licenses: Vec<LicenseData>,
+  // TODO(issues/53): This needs to be refined on a per-target basis
+  // ... But Cargo doesn't do this correctly either, so ¯\_(ツ)_/¯
   pub features: Vec<String>,
   pub path: String,
   pub dependencies: Vec<BuildDependency>,
@@ -55,7 +72,7 @@ pub struct CrateContext {
   pub dev_dependencies: Vec<BuildDependency>,
   pub is_root_dependency: bool,
   pub metadeps: Vec<Metadep>,
-  pub platform_triple: String,
+  //pub platform_triple: String,
   pub targets: Vec<BuildTarget>,
   pub build_script_target: Option<BuildTarget>,
   pub additional_deps: Vec<String>,
@@ -64,6 +81,7 @@ pub struct CrateContext {
   pub data_attr: Option<String>,
   pub git_data: Option<GitRepo>,
   pub sha256: Option<String>,
+  pub per_target_contexts: HashMap<String, PerTargetContext>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -76,7 +94,7 @@ pub struct WorkspaceContext {
   /**
    * The compilation target triple.
    */
-  pub platform_triple: String,
+  pub platform_triples: Vec<String>,
 
   /**
    * The generated new_http_library Bazel workspace prefix.

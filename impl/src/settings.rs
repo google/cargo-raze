@@ -36,9 +36,20 @@ pub struct RazeSettings {
    * The platform target to generate BUILD rules for.
    *
    * This comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
+   *
+   * Prefer to use `targets`.
    */
   #[serde(default = "default_raze_settings_field_target")]
-  pub target: String,
+  #[deprecated(since="0.0.25", note = "please use `targets` instead")]
+  pub target: Option<String>,
+
+  /**
+   * The platform targets to generate BUILD rules for.
+   *
+   * This comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
+   */
+  #[serde(default = "default_raze_settings_field_targets")]
+  pub targets: Vec<String>,
 
   /** Any crate-specific configuration. See CrateSetings for details. */
   #[serde(default)]
@@ -140,7 +151,8 @@ pub mod testing {
   pub fn dummy_raze_settings() -> RazeSettings {
     RazeSettings {
       workspace_path: "//cargo".to_owned(),
-      target: "x86_64-unknown-linux-gnu".to_owned(),
+      target: None,
+      targets: vec!["x86_64-unknown-linux-gnu".to_owned()],
       crates: HashMap::new(),
       gen_workspace_prefix: "raze_test".to_owned(),
       genmode: GenMode::Remote,
@@ -148,8 +160,12 @@ pub mod testing {
   }
 }
 
-fn default_raze_settings_field_target() -> String {
-  "x86_64-unknown-linux-gnu".to_owned()
+fn default_raze_settings_field_target() -> Option<String> {
+  None
+}
+
+fn default_raze_settings_field_targets() -> Vec<String> {
+  vec!["x86_64-unknown-linux-gnu".to_owned()]
 }
 
 fn default_raze_settings_field_gen_workspace_prefix() -> String {

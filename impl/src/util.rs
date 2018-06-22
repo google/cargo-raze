@@ -17,8 +17,23 @@ use cargo::core::TargetKind;
 use cargo::util::CargoResult;
 use cargo::util::Cfg;
 use std::process::Command;
+use std::collections::HashSet;
 use std::str;
 use std::str::FromStr;
+use std::hash::Hash;
+
+pub fn unique_targets_ordered(opt_item: &Option<String>, items: &Vec<String>) -> Vec<String> {
+  let mut items_set = HashSet::new();
+  for item in items.iter() {
+    items_set.insert(item.clone());
+  }
+  if opt_item.is_some() {
+    items_set.insert(opt_item.as_ref().unwrap().clone());
+  }
+  let mut items = items_set.into_iter().collect::<Vec<_>>();
+  items.sort();
+  items
+}
 
 /**
  * Extracts consistently named Strings for the provided TargetKind.
