@@ -16,9 +16,55 @@ use cargo::CargoError;
 use cargo::core::TargetKind;
 use cargo::util::CargoResult;
 use cargo::util::Cfg;
+use slug;
 use std::process::Command;
 use std::str;
 use std::str::FromStr;
+use std::iter::Iterator;
+use std::fmt;
+
+pub struct LimitedResults<T> {
+  pub items: Vec<T>,
+  pub count_extras: usize,
+}
+
+impl <T> LimitedResults<T> {
+  pub fn is_empty(&self) -> bool {
+    self.items.is_empty()
+  }
+}
+
+impl <T: fmt::Debug> fmt::Debug for LimitedResults<T> {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    if self.count_extras > 0 {
+      write!(f, "{:?} and {} others", &self.items, self.count_extras)
+    } else {
+      write!(f, "{:?}", &self.items)
+    }
+  }
+}
+
+pub fn collect_up_to<T, U: Iterator<Item=T>>(max: usize, iter: U) -> LimitedResults<T> {
+  let mut items = Vec::new();
+  let mut count_extras = 0;
+  for item in iter {
+    // Spill extra crates into a counter to avoid overflowing terminal
+    if items.len() < max {
+      items.push(item);
+    } else {
+      count_extras += 1;
+    }
+  }
+
+  LimitedResults {
+    items: items,
+    count_extras: count_extras
+  }
+}
+
+pub fn sanitize_ident(ident: &str) -> String {
+  slug::slugify(&ident).replace("-", "_")
+}
 
 /**
  * Extracts consistently named Strings for the provided TargetKind.

@@ -42,6 +42,18 @@ use std::str;
 use std::str::FromStr;
 use util;
 
+pub const VENDOR_DIR: &'static str = "vendor/";
+
+pub struct PrototypePackage {
+  pub package: Package,
+  // The name of the package sanitized for use within Bazel
+  pub sanitized_name: String,
+  // The version of the package sanitized for use within Bazel
+  pub sanitized_version: String,
+  // A unique identifier for the package derived from Cargo usage of the form {name}-{version}
+  pub package_ident: String
+}
+
 /** An entity that can produce an organized, planned build ready to be rendered. */
 pub trait BuildPlanner {
   fn plan_build(
@@ -63,6 +75,41 @@ pub struct PlannedBuild {
   pub crate_contexts: Vec<CrateContext>,
 }
 
+impl <'a> From<&'a Package> for PrototypePackage {
+  fn from(package: &'a Package) -> PrototypePackage {
+    let sanitized_name = util::sanitize_ident(&package.name);
+    let sanitized_version = util::sanitize_ident(&package.version);
+
+    PrototypePackage {
+      package: package.clone(),
+      sanitized_name: sanitized_name,
+      sanitized_version: sanitized_version,
+      package_ident: format!("{}-{}", &package.name, &package.version)
+    }
+  }
+}
+
+impl PrototypePackage {
+  // Returns the packages expected path during current execution
+  pub fn expected_vendored_path(&self) -> String {
+    format!("./{}{}", VENDOR_DIR, &self.package_ident)
+  }
+
+  // Returns the packages path as a remote workspace
+  pub fn expected_remote_workspace_path(&self, settings: &RazeSettings) -> String {
+    format!(
+      "@{}__{}__{}//",
+      &settings.gen_workspace_prefix, &self.sanitized_name, &self.sanitized_version
+    )
+  }
+
+  // Returns the packages expected path as workspace-relative
+  pub fn expected_vendored_workspace_path(&self, settings: &RazeSettings) -> String {
+    format!("{}/vendor/{}", &settings.workspace_path, &self.package_ident)
+  }
+}
+
+
 impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
   fn plan_build(
     &mut self,
@@ -73,6 +120,7 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
     if settings.genmode == GenMode::Vendored {
       try!(self.check_crates_vendored(&metadata));
     }
+
     let workspace_context = WorkspaceContext {
       workspace_path: settings.workspace_path.clone(),
       platform_triple: settings.target.clone(),
@@ -137,12 +185,22 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
     settings: &RazeSettings,
     metadata: &Metadata,
   ) -> CargoResult<Vec<CrateContext>> {
+    checks::check_resolve_matches_packages(&metadata);
+    let prototype_packages = metadata.packages.iter()
+      .map(PrototypePackage::from)
+      .collect::<Vec<_>>();
+    if settings.genmode == GenMode::Vendored {
+      checks::check_all_vendored(&prototype_packages);
+    }
+    checks::warn_unused_settings(&settings.crates, &metadata.packages);
+
     let root_direct_deps = try!(self.get_root_deps(&metadata));
     let packages_by_id = metadata
       .packages
       .iter()
       .map(|p| (p.id.clone(), p.clone()))
       .collect::<HashMap<PackageId, Package>>();
+
     let (package_id_to_build_path, package_id_to_default_build_target) = {
       let mut package_id_to_build_path = HashMap::new();
       let mut package_id_to_default_build_target = HashMap::new();
@@ -168,6 +226,8 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
 
       (package_id_to_build_path, package_id_to_default_build_target)
     };
+
+
 
     // Verify that all nodes are present in package list
     {
@@ -458,6 +518,106 @@ fn package_git_root(manifest: &PathBuf) -> CargoResult<PathBuf> {
 
   // Reached filesystem root and did not find Git repo
   Err(CargoError::from(format!("Unable to locate git repository root for manifest {:?}", manifest)))
+}
+
+mod checks {
+  use cargo::CargoError;
+  use cargo::util::CargoResult;
+  use metadata::Metadata;
+  use metadata::Package;
+  use metadata::PackageId;
+  use planning::PrototypePackage;
+  use planning::VENDOR_DIR;
+  use settings::CrateSettingsPerVersion;
+  use std::collections::HashMap;
+  use std::collections::HashSet;
+  use std::env;
+  use std::fs;
+  use util::LimitedResults;
+  use util::collect_up_to;
+
+  // TODO(acmcarther): Consider including a switch to disable limiting
+  const MAX_DISPLAYED_MISSING_VENDORED_CRATES: usize = 5;
+  const MAX_DISPLAYED_MISSING_RESOLVE_PACKAGES: usize = 5;
+  const PLEASE_FILE_A_BUG: &'static str = "Please file an issue at github.com/google/cargo-raze with details.";
+
+  // Verifies that all provided packages are vendored (in VENDOR_DIR relative to CWD)
+  pub fn check_all_vendored(prototype_packages: &Vec<PrototypePackage>) -> CargoResult<()> {
+    let missing_package_ident_iter =
+      prototype_packages.iter()
+        .filter(|p| fs::metadata(p.expected_vendored_path()).is_ok())
+        .map(|p| p.package_ident.clone());
+
+    let limited_missing_crates = collect_up_to(MAX_DISPLAYED_MISSING_VENDORED_CRATES,
+                                               missing_package_ident_iter);
+
+    if limited_missing_crates.is_empty() {
+      return Ok(())
+    }
+
+    // Oops, missing some crates. Yield a nice message
+    let expected_full_path =
+        env::current_dir().unwrap().join(format!("./{}", VENDOR_DIR));
+    return Err(CargoError::from(format!(
+      "Failed to find expected vendored crates in {:?}: {:?}. Did you forget to run cargo-vendor?",
+      expected_full_path.to_str(),
+      limited_missing_crates)));
+  }
+
+  pub fn check_resolve_matches_packages(metadata: &Metadata) -> CargoResult<()> {
+    let known_package_ids = metadata.packages
+      .iter()
+      .map(|p| p.id.clone())
+      .collect::<HashSet<PackageId>>();
+
+    let node_ids_missing_package_decl_iter =
+      metadata.resolve.nodes.iter()
+        .filter(|n| known_package_ids.contains(&n.id))
+        .map(|n| n.id.clone());
+    let limited_missing_node_ids = collect_up_to(MAX_DISPLAYED_MISSING_VENDORED_CRATES,
+                                                 node_ids_missing_package_decl_iter);
+
+    if limited_missing_node_ids.is_empty() {
+      return Ok(())
+    }
+
+    // Oops, missing some package metadata. Yield a nice message
+    return Err(CargoError::from(format!(
+      "Failed to find metadata.packages which were expected from metadata.resolve {:?}. {}",
+      limited_missing_node_ids,
+      PLEASE_FILE_A_BUG)));
+  }
+
+  pub fn warn_unused_settings(all_crate_settings: &HashMap<String, CrateSettingsPerVersion>,
+                              all_packages: &Vec<Package>) {
+    let mut known_versions_per_crate = HashMap::new();
+    for &Package{ref name, ref version, ..} in all_packages.iter() {
+      known_versions_per_crate
+        .entry(name.clone())
+        .or_insert(HashSet::new())
+        .insert(version.clone());
+    }
+
+
+    for (name, settings_per_version) in all_crate_settings.iter() {
+      if !known_versions_per_crate.contains_key(name) {
+        eprintln!("Found unused raze settings for all of {}-{:?}", name,
+                  settings_per_version.keys());
+        // No version introspection needed -- no known version of this crate
+        continue
+      }
+
+      // UNWRAP: Guarded above
+      let all_known_versions = known_versions_per_crate.get(name).unwrap();
+
+      for version in settings_per_version.keys() {
+        if !all_known_versions.contains(version) {
+          eprintln!("Found unused raze settings for {}-{}, but {:?} were known", name, version,
+                    all_known_versions)
+        }
+      }
+    }
+  }
 }
 
 #[cfg(test)]

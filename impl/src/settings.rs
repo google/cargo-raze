@@ -14,6 +14,8 @@
 
 use std::collections::HashMap;
 
+pub type CrateSettingsPerVersion = HashMap<String, CrateSettings>;
+
 /**
  * A "deserializable struct" for the whole Cargo.toml
  *
@@ -42,7 +44,7 @@ pub struct RazeSettings {
 
   /** Any crate-specific configuration. See CrateSetings for details. */
   #[serde(default)]
-  pub crates: HashMap<String, HashMap<String, CrateSettings>>,
+  pub crates: HashMap<String, CrateSettingsPerVersion>,
 
   /**
    * Prefix for generated Bazel workspaces (from workspace_rules)
