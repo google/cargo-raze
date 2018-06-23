@@ -337,4 +337,7 @@ See these examples of providing crate configuration:
 - [complicated-example](https://github.com/google/cargo-raze/tree/master/examples/remote/complicated_cargo_library)
 - [non-cratesio](https://github.com/google/cargo-raze/tree/master/examples/remote/non_cratesio)
 
+**Compiling OpenSSL**:
+- [openssl](https://github.com/acmcarther/compile_openssl)
+
 The [raze] section is derived from a struct declared in [impl/src/settings.rs](./impl/src/settings.rs).
