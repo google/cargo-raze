@@ -90,6 +90,10 @@ impl <'a> From<&'a Package> for PrototypePackage {
 }
 
 impl PrototypePackage {
+  pub fn default_build_target(&self) -> &str {
+    &self.sanitized_name
+  }
+
   // Returns the packages expected path during current execution
   pub fn expected_vendored_path(&self) -> String {
     format!("./{}{}", VENDOR_DIR, &self.package_ident)
@@ -201,6 +205,9 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       .map(|p| (p.id.clone(), p.clone()))
       .collect::<HashMap<PackageId, Package>>();
 
+    /**
+     * NEXT UP: Delete this
+     */
     let (package_id_to_build_path, package_id_to_default_build_target) = {
       let mut package_id_to_build_path = HashMap::new();
       let mut package_id_to_default_build_target = HashMap::new();
@@ -226,51 +233,6 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
 
       (package_id_to_build_path, package_id_to_default_build_target)
     };
-
-
-
-    // Verify that all nodes are present in package list
-    {
-      let mut missing_nodes = Vec::new();
-      for node in metadata.resolve.nodes.iter() {
-        if !packages_by_id.contains_key(&node.id) {
-          missing_nodes.push(&node.id);
-        }
-      }
-      if !missing_nodes.is_empty() {
-        // This implies that we either have a mistaken understanding of Cargo resolution, or that
-        // it broke.
-        return Err(CargoError::from(format!(
-          "Metadata.packages list was missing keys: {:?}",
-          missing_nodes
-        )));
-      }
-    }
-
-    // Verify that user settings are being used
-    {
-      let mut name_to_versions = HashMap::new();
-      for package in metadata.packages.iter() {
-        name_to_versions
-          .entry(package.name.clone())
-          .or_insert(HashSet::new())
-          .insert(package.version.clone());
-      }
-      let empty_set = HashSet::new();
-      for (name, versions) in settings.crates.iter() {
-        for v in versions.keys() {
-          let alternatives = name_to_versions.get(name).unwrap_or(&empty_set);
-          if !alternatives.contains(v) {
-            let help = if alternatives.is_empty() {
-              "no alternatives found.".to_owned()
-            } else {
-              format!("did you mean one of {}-{:?}?", name, alternatives)
-            };
-            eprintln!("Found unused raze settings for {}-{}, {}", name, v, help);
-          }
-        }
-      }
-    }
 
     let mut crate_contexts = Vec::new();
     // TODO(acmcarther): handle unwrap
