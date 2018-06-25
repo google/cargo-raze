@@ -15,14 +15,14 @@
 use settings::CrateSettings;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
-pub struct BuildDependency {
+pub struct BuildableDependency {
   pub name: String,
   pub version: String,
-  pub build_target: String,
+  pub buildable_target: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
-pub struct BuildTarget {
+pub struct BuildableTarget {
   pub name: String,
   pub kind: String,
   pub path: String,
@@ -59,33 +59,32 @@ pub struct CrateContext {
   pub licenses: Vec<LicenseData>,
   pub features: Vec<String>,
   pub build_path: String,
-  pub dependencies: Vec<BuildDependency>,
-  pub build_dependencies: Vec<BuildDependency>,
-  pub dev_dependencies: Vec<BuildDependency>,
+  pub dependencies: Vec<BuildableDependency>,
+  pub build_dependencies: Vec<BuildableDependency>,
+  pub dev_dependencies: Vec<BuildableDependency>,
   pub is_root_dependency: bool,
-  pub targets: Vec<BuildTarget>,
-  pub build_script_target: Option<BuildTarget>,
+  pub targets: Vec<BuildableTarget>,
+  pub build_script_target: Option<BuildableTarget>,
   pub source_details: SourceDetails,
-  pub path: String,
   pub sha256: Option<String>,
+  // TODO(acmcarther): This is used internally by renderer to know where to put the build file. It
+  // probably should live somewhere else. Renderer params (separate from context) should live
+  // somewhere more explicit.
+  //
+  // I'm punting on this now because this requires a more serious look at the renderer code.
+  pub path: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct WorkspaceContext {
-  /**
-   * The bazel path prefix to the vendor directory
-   */
+  // The bazel path prefix to the vendor directory
   pub workspace_path: String,
 
-  /**
-   * The compilation target triple.
-   */
+  // The compilation target triple.
   pub platform_triple: String,
 
-  /**
-   * The generated new_http_library Bazel workspace prefix.
-   *
-   * This has no effect unless the GenMode setting is Remote.
-   */
+  // The generated new_http_library Bazel workspace prefix.
+  //
+  // This has no effect unless the GenMode setting is Remote.
   pub gen_workspace_prefix: String,
 }

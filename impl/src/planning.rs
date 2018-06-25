@@ -13,15 +13,15 @@
 // limitations under the License.
 
 use cargo::CargoError;
-use cargo::core::dependency::Platform;
 use cargo::core::SourceId;
+use cargo::core::dependency::Platform;
 use cargo::util::CargoResult;
-use context::BuildDependency;
-use context::BuildTarget;
-use context::SourceDetails;
+use context::BuildableDependency;
+use context::BuildableTarget;
 use context::CrateContext;
-use context::LicenseData;
 use context::GitRepo;
+use context::LicenseData;
+use context::SourceDetails;
 use context::WorkspaceContext;
 use license;
 use metadata::CargoWorkspaceFiles;
@@ -30,28 +30,60 @@ use metadata::MetadataFetcher;
 use metadata::Package;
 use metadata::PackageId;
 use metadata::ResolveNode;
+use serde_json;
 use settings::CrateSettings;
 use settings::GenMode;
 use settings::RazeSettings;
-use serde_json;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::PathBuf;
-use std::str;
 use std::str::FromStr;
-use util;
+use std::str;
 use util::PlatformDetails;
+use util;
 
 pub const VENDOR_DIR: &'static str = "vendor/";
+pub const PLEASE_FILE_A_BUG: &'static str =
+  "Please file an issue at github.com/google/cargo-raze with details.";
 
-// TODO(acmcarther): Remove this struct -- move it into CrateContext.
-struct DependencySet {
-  normal_deps: Vec<BuildDependency>,
-  build_deps: Vec<BuildDependency>,
-  dev_deps: Vec<BuildDependency>,
+/** An entity that can produce an organized, planned build ready to be rendered. */
+pub trait BuildPlanner {
+  /**
+   * A function that returns a completely planned build using internally generated metadata, along
+   * with settings, platform specifications, and critical file locations.
+   */
+  fn plan_build(
+    &mut self,
+    settings: &RazeSettings,
+    files: CargoWorkspaceFiles,
+    platform_details: PlatformDetails,
+  ) -> CargoResult<PlannedBuild>;
 }
 
+/** A set of named dependencies (without version) derived from a package manifest. */
+struct DependencyNames {
+  // Dependencies that are required for all buildable targets of this crate
+  normal_dep_names: Vec<String>,
+  // Dependencies that are required for build script only
+  build_dep_names: Vec<String>,
+  // Dependencies that are required for tests
+  dev_dep_names: Vec<String>,
+}
+
+// TODO(acmcarther): Remove this struct -- move it into CrateContext.
+/** A set of dependencies that a crate has broken down by type. */
+struct DependencySet {
+  // Dependencies that are required for all buildable targets of this crate
+  normal_deps: Vec<BuildableDependency>,
+  // Dependencies that are required for build script only
+  build_deps: Vec<BuildableDependency>,
+  // Dependencies that are required for tests
+  dev_deps: Vec<BuildableDependency>,
+}
+
+/** An entry in the Crate catalog for a single crate. */
 pub struct CrateCatalogEntry {
+  // The package metadata for the crate
   package: Package,
   // The name of the package sanitized for use within Bazel
   sanitized_name: String,
@@ -65,16 +97,6 @@ pub struct CrateCatalogEntry {
 pub struct CrateCatalog {
   entries: Vec<CrateCatalogEntry>,
   package_id_to_entries_idx: HashMap<String, usize>,
-}
-
-/** An entity that can produce an organized, planned build ready to be rendered. */
-pub trait BuildPlanner {
-  fn plan_build(
-    &mut self,
-    settings: &RazeSettings,
-    files: CargoWorkspaceFiles,
-    platform_details: PlatformDetails,
-  ) -> CargoResult<PlannedBuild>;
 }
 
 /** The default implementation of a BuildPlanner. */
@@ -140,7 +162,7 @@ impl CrateCatalogEntry {
   /**
    * Returns the packages expected path during current execution.
    *
-   * Not for use or storage except during planning as path is local.
+   * Not for use except during planning as path is local to run location.
    */
   pub fn expected_vendored_path(&self) -> String {
     format!("./{}{}", VENDOR_DIR, &self.package_ident)
@@ -274,49 +296,47 @@ impl<'planner> WorkspaceSubplanner<'planner> {
   fn produce_crate_contexts(&self) -> CargoResult<Vec<CrateContext>> {
     let root_direct_deps = try!(self.get_root_deps());
 
+    let mut sorted_nodes: Vec<&ResolveNode> = self.metadata.resolve.nodes.iter().collect();
+    sorted_nodes.sort_unstable_by_key(|n| &n.id);
+
     let mut crate_contexts = Vec::new();
-    {
-      // TODO(acmcarther): handle unwrap
-      let mut sorted_nodes: Vec<&ResolveNode> = self.metadata.resolve.nodes.iter().collect();
-      sorted_nodes.sort_unstable_by_key(|n| &n.id);
-      for node in sorted_nodes.into_iter() {
-        // UNWRAP: Node packages guaranteed to exist by guard in `produce_planned_build`
-        let own_crate_catalog_entry = self.crate_catalog.entry_for_package_id(&node.id).unwrap();
-        let own_package = own_crate_catalog_entry.package();
+    for node in sorted_nodes.into_iter() {
+      // UNWRAP: Node packages guaranteed to exist by guard in `produce_planned_build`
+      let own_crate_catalog_entry = self.crate_catalog.entry_for_package_id(&node.id).unwrap();
+      let own_package = own_crate_catalog_entry.package();
 
-        // Skip the root package (which is probably a junk package, by convention)
-        if own_package.id == self.metadata.resolve.root {
-          continue;
-        }
-
-        let crate_settings = self
-          .settings
-          .crates
-          .get(&own_package.name)
-          .and_then(|c| c.get(&own_package.version))
-          .cloned()
-          .unwrap_or_else(CrateSettings::default);
-
-        // UNWRAP: Safe given unwrap during serialize step of metadata
-        let own_source_id = own_package
-          .source
-          .as_ref()
-          .map(|s| serde_json::from_str::<SourceId>(&s).unwrap());
-
-        let crate_subplanner = CrateSubplanner {
-          crate_catalog: &self.crate_catalog,
-          settings: self.settings,
-          platform_details: self.platform_details,
-          crate_catalog_entry: &own_crate_catalog_entry,
-          source_id: &own_source_id,
-          node: &node,
-          crate_settings: &crate_settings,
-          is_root_dependency: root_direct_deps.contains(&node.id),
-        };
-
-        let crate_context = try!(crate_subplanner.produce_context());
-        crate_contexts.push(crate_context);
+      // Skip the root package (which is probably a junk package, by convention)
+      if own_package.id == self.metadata.resolve.root {
+        continue;
       }
+
+      let crate_settings = self
+        .settings
+        .crates
+        .get(&own_package.name)
+        .and_then(|c| c.get(&own_package.version))
+        .cloned()
+        .unwrap_or_else(CrateSettings::default);
+
+      // UNWRAP: Safe given unwrap during serialize step of metadata
+      let own_source_id = own_package
+        .source
+        .as_ref()
+        .map(|s| serde_json::from_str::<SourceId>(&s).unwrap());
+
+      let crate_subplanner = CrateSubplanner {
+        crate_catalog: &self.crate_catalog,
+        settings: self.settings,
+        platform_details: self.platform_details,
+        crate_catalog_entry: &own_crate_catalog_entry,
+        source_id: &own_source_id,
+        node: &node,
+        crate_settings: &crate_settings,
+        is_root_dependency: root_direct_deps.contains(&node.id),
+      };
+
+      let crate_context = try!(crate_subplanner.produce_context());
+      crate_contexts.push(crate_context);
     }
 
     Ok(crate_contexts)
@@ -355,7 +375,6 @@ impl<'planner> CrateSubplanner<'planner> {
     } = try!(self.produce_deps());
 
     let mut targets = try!(self.produce_targets());
-    targets.sort();
     let build_script_target_opt = self.take_build_script_target(&mut targets);
 
     let package = self.crate_catalog_entry.package();
@@ -368,7 +387,6 @@ impl<'planner> CrateSubplanner<'planner> {
       dependencies: normal_deps,
       build_dependencies: build_deps,
       dev_dependencies: dev_deps,
-      // UNWRAP: Safe -- struct derived from package set
       build_path: self
         .crate_catalog_entry
         .workspace_path_and_default_target(&self.settings),
@@ -395,34 +413,11 @@ impl<'planner> CrateSubplanner<'planner> {
 
   /** Generates the set of dependencies for the contained crate. */
   fn produce_deps(&self) -> CargoResult<DependencySet> {
-    // Resolve dependencies into types
-    let mut build_dep_names = Vec::new();
-    let mut dev_dep_names = Vec::new();
-    let mut normal_dep_names = Vec::new();
-    let platform_attrs = self.platform_details.attrs();
-    let package = self.crate_catalog_entry.package();
-    for dep in package.dependencies.iter() {
-      if dep.target.is_some() {
-        // UNWRAP: Safe from above check
-        let target_str = dep.target.as_ref().unwrap();
-        let platform = try!(Platform::from_str(target_str));
-
-        // Skip this dep if it doesn't match our platform attributes
-        if !platform.matches(&self.settings.target, Some(&platform_attrs)) {
-          continue;
-        }
-      }
-
-      match dep.kind.as_ref().map(|v| v.as_str()) {
-        None | Some("normal") => normal_dep_names.push(dep.name.clone()),
-        Some("dev") => dev_dep_names.push(dep.name.clone()),
-        Some("build") => build_dep_names.push(dep.name.clone()),
-        something_else => panic!(
-          "Unhandlable dependency type {:?} for {} on {} detected!",
-          something_else, package.name, dep.name
-        ),
-      }
-    }
+    let DependencyNames {
+      build_dep_names,
+      dev_dep_names,
+      normal_dep_names,
+    } = try!(self.identify_named_deps());
 
     let mut build_deps = Vec::new();
     let mut dev_deps = Vec::new();
@@ -447,27 +442,27 @@ impl<'planner> CrateSubplanner<'planner> {
       }
 
       // UNWRAP: Guaranteed to exist by checks in WorkspaceSubplanner#produce_build_plan
-      let build_target = self
+      let buildable_target = self
         .crate_catalog
         .entry_for_package_id(dep_id)
         .unwrap()
         .workspace_path_and_default_target(&self.settings);
 
-      let build_dependency = BuildDependency {
+      let buildable_dependency = BuildableDependency {
         name: dep_package.name.clone(),
         version: dep_package.version.clone(),
-        build_target: build_target,
+        buildable_target: buildable_target,
       };
       if build_dep_names.contains(&dep_package.name) {
-        build_deps.push(build_dependency.clone());
+        build_deps.push(buildable_dependency.clone());
       }
 
       if dev_dep_names.contains(&dep_package.name) {
-        dev_deps.push(build_dependency.clone());
+        dev_deps.push(buildable_dependency.clone());
       }
 
       if normal_dep_names.contains(&dep_package.name) {
-        normal_deps.push(build_dependency);
+        normal_deps.push(buildable_dependency);
       }
     }
 
@@ -482,25 +477,77 @@ impl<'planner> CrateSubplanner<'planner> {
     })
   }
 
+  /** Yields the list of dependencies as described by the manifest (without version). */
+  fn identify_named_deps(&self) -> CargoResult<DependencyNames> {
+    // Resolve dependencies into types
+    let mut build_dep_names = Vec::new();
+    let mut dev_dep_names = Vec::new();
+    let mut normal_dep_names = Vec::new();
+
+    let platform_attrs = self.platform_details.attrs();
+    let package = self.crate_catalog_entry.package();
+    for dep in package.dependencies.iter() {
+      if dep.target.is_some() {
+        // UNWRAP: Safe from above check
+        let target_str = dep.target.as_ref().unwrap();
+        let platform = try!(Platform::from_str(target_str));
+
+        // Skip this dep if it doesn't match our platform attributes
+        if !platform.matches(&self.settings.target, Some(&platform_attrs)) {
+          continue;
+        }
+      }
+
+      match dep.kind.as_ref().map(|v| v.as_str()) {
+        None | Some("normal") => normal_dep_names.push(dep.name.clone()),
+        Some("dev") => dev_dep_names.push(dep.name.clone()),
+        Some("build") => build_dep_names.push(dep.name.clone()),
+        something_else => {
+          return Err(CargoError::from(format!(
+            "Unhandlable dependency type {:?} for {} on {} detected! {}",
+            something_else, package.name, dep.name, PLEASE_FILE_A_BUG
+          )))
+        }
+      }
+    }
+
+    Ok(DependencyNames {
+      build_dep_names: build_dep_names,
+      dev_dep_names: dev_dep_names,
+      normal_dep_names: normal_dep_names,
+    })
+  }
+
   /** Generates source details for internal crate. */
   fn produce_source_details(&self) -> SourceDetails {
-    let is_git_source = self.source_id.as_ref().map_or(false, SourceId::is_git);
-    if !is_git_source {
+    if self.source_id.is_none() {
       return SourceDetails { git_data: None };
     }
 
-    // UNWRAP: is_git true implies own_source_id exists
-    let source = self.source_id.as_ref().unwrap();
+    // UNWRAP: Guarded above
+    let source_id = self.source_id.as_ref().unwrap();
+    if !source_id.is_git() {
+      return SourceDetails { git_data: None };
+    }
+
     SourceDetails {
       git_data: Some(GitRepo {
-        remote: source.url().to_string(),
-        commit: source.precise().unwrap().to_owned(),
+        remote: source_id.url().to_string(),
+        commit: source_id.precise().unwrap().to_owned(),
       }),
     }
   }
 
-  /** Extracts the (one and only) build script target from the provided set of build targets. */
-  fn take_build_script_target(&self, all_targets: &mut Vec<BuildTarget>) -> Option<BuildTarget> {
+  /**
+   * Extracts the (one and only) build script target from the provided set of build targets.
+   *
+   * This function mutates the provided list of build arguments. It removes the first (and usually,
+   * only) found build script target.
+   */
+  fn take_build_script_target(
+    &self,
+    all_targets: &mut Vec<BuildableTarget>,
+  ) -> Option<BuildableTarget> {
     if !self.crate_settings.gen_buildrs {
       return None;
     }
@@ -520,8 +567,13 @@ impl<'planner> CrateSubplanner<'planner> {
     build_script_target_opt
   }
 
-  /** Produces the complete set of build targets specified by this crate. */
-  fn produce_targets(&self) -> CargoResult<Vec<BuildTarget>> {
+  /**
+   * Produces the complete set of build targets specified by this crate.
+   *
+   * This function may access the file system. See #find_package_root_for_manifest for more
+   * details.
+   */
+  fn produce_targets(&self) -> CargoResult<Vec<BuildableTarget>> {
     let mut targets = Vec::new();
     let package = self.crate_catalog_entry.package();
     for target in package.targets.iter() {
@@ -544,7 +596,7 @@ impl<'planner> CrateSubplanner<'planner> {
       }
 
       for kind in target.kind.iter() {
-        targets.push(BuildTarget {
+        targets.push(BuildableTarget {
           name: target.name.clone(),
           path: package_root_path_str.clone(),
           kind: kind.clone(),
@@ -552,13 +604,17 @@ impl<'planner> CrateSubplanner<'planner> {
       }
     }
 
+    targets.sort();
     Ok(targets)
   }
 
   /**
    * Finds the root of a contained git package.
    *
-   * N.B. This inspects the filesystem, so it isn't totally self contained....
+   * This function needs to access the file system if the dependency is a git dependency in order
+   * to find the true filesystem root of the dependency. The root cause is that git dependencies
+   * often aren't solely the crate of interest, but rather a repository that contains the crate of
+   * interest among others.
    */
   fn find_package_root_for_manifest(&self, manifest_path: PathBuf) -> CargoResult<PathBuf> {
     let has_git_repo_root = {
@@ -589,8 +645,8 @@ impl<'planner> CrateSubplanner<'planner> {
 
       // Reached filesystem root and did not find Git repo
       Err(CargoError::from(format!(
-        "Unable to locate git repository root for manifest at {:?}",
-        manifest_path
+        "Unable to locate git repository root for manifest at {:?}. {}",
+        manifest_path, PLEASE_FILE_A_BUG
       )))
     }
   }
@@ -642,8 +698,6 @@ mod checks {
   // TODO(acmcarther): Consider including a switch to disable limiting
   const MAX_DISPLAYED_MISSING_VENDORED_CRATES: usize = 5;
   const MAX_DISPLAYED_MISSING_RESOLVE_PACKAGES: usize = 5;
-  const PLEASE_FILE_A_BUG: &'static str =
-    "Please file an issue at github.com/google/cargo-raze with details.";
 
   // Verifies that all provided packages are vendored (in VENDOR_DIR relative to CWD)
   pub fn check_all_vendored(crate_catalog_entries: &Vec<CrateCatalogEntry>) -> CargoResult<()> {
@@ -697,7 +751,8 @@ mod checks {
     // Oops, missing some package metadata. Yield a nice message
     return Err(CargoError::from(format!(
       "Failed to find metadata.packages which were expected from metadata.resolve {:?}. {}",
-      limited_missing_node_ids, PLEASE_FILE_A_BUG
+      limited_missing_node_ids,
+      ::planning::PLEASE_FILE_A_BUG
     )));
   }
 

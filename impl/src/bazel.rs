@@ -20,9 +20,9 @@ use planning::PlannedBuild;
 use rendering::BuildRenderer;
 use rendering::FileOutputs;
 use rendering::RenderDetails;
-use tera;
 use tera::Context;
 use tera::Tera;
+use tera;
 
 pub struct BazelRenderer {
   internal_renderer: Tera,
@@ -279,7 +279,7 @@ mod tests {
       is_root_dependency: true,
       build_path: "@raze__test_binary__1_1_1//".to_owned(),
       targets: vec![
-        BuildTarget {
+        BuildableTarget {
           name: "some_binary".to_owned(),
           kind: "bin".to_owned(),
           path: "bin/main.rs".to_owned(),
@@ -305,7 +305,7 @@ mod tests {
       is_root_dependency: true,
       build_path: "@raze__test_library__1_1_1//".to_owned(),
       targets: vec![
-        BuildTarget {
+        BuildableTarget {
           name: "some_library".to_owned(),
           kind: "lib".to_owned(),
           path: "path/lib.rs".to_owned(),

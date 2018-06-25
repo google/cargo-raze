@@ -17,11 +17,11 @@ use cargo::core::TargetKind;
 use cargo::util::CargoResult;
 use cargo::util::Cfg;
 use slug;
-use std::process::Command;
-use std::str;
-use std::str::FromStr;
-use std::iter::Iterator;
 use std::fmt;
+use std::iter::Iterator;
+use std::process::Command;
+use std::str::FromStr;
+use std::str;
 
 pub struct PlatformDetails {
   target_triple: String,

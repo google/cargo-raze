@@ -51,14 +51,14 @@ use rendering::FileOutputs;
 use rendering::RenderDetails;
 use settings::GenMode;
 use settings::RazeSettings;
-use util::PlatformDetails;
 use std::env;
-use std::fs;
 use std::fs::File;
+use std::fs;
 use std::io::Read;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
+use util::PlatformDetails;
 
 #[derive(Debug, RustcDecodable)]
 struct Options {
