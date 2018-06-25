@@ -28,7 +28,6 @@ use metadata::CargoWorkspaceFiles;
 use metadata::Metadata;
 use metadata::MetadataFetcher;
 use metadata::Package;
-use metadata::PackageId;
 use metadata::ResolveNode;
 use serde_json;
 use settings::CrateSettings;
@@ -91,6 +90,10 @@ pub struct CrateCatalogEntry {
   sanitized_version: String,
   // A unique identifier for the package derived from Cargo usage of the form {name}-{version}
   package_ident: String,
+  // Is this the root crate in the whole catalog?
+  is_root: bool,
+  // Is this a dependency of the catalog root crate?
+  is_root_dep: bool,
 }
 
 /** An intermediate structure that contains details about all crates in the workspace. */
@@ -123,7 +126,6 @@ struct CrateSubplanner<'planner> {
   source_id: &'planner Option<SourceId>,
   node: &'planner ResolveNode,
   crate_settings: &'planner CrateSettings,
-  is_root_dependency: bool,
 }
 
 /** A ready-to-be-rendered build, containing renderable context for each crate. */
@@ -133,8 +135,9 @@ pub struct PlannedBuild {
   pub crate_contexts: Vec<CrateContext>,
 }
 
-impl<'a> From<&'a Package> for CrateCatalogEntry {
-  fn from(package: &'a Package) -> CrateCatalogEntry {
+impl CrateCatalogEntry {
+
+  pub fn new(package: &Package, is_root: bool, is_root_dep: bool) -> CrateCatalogEntry {
     let sanitized_name = util::sanitize_ident(&package.name);
     let sanitized_version = util::sanitize_ident(&package.version);
 
@@ -143,11 +146,11 @@ impl<'a> From<&'a Package> for CrateCatalogEntry {
       sanitized_name: sanitized_name,
       sanitized_version: sanitized_version,
       package_ident: format!("{}-{}", &package.name, &package.version),
+      is_root: is_root,
+      is_root_dep: is_root_dep,
     }
   }
-}
 
-impl CrateCatalogEntry {
   /** Yields the name of the default target for this crate (sanitized). */
   #[allow(dead_code)]
   pub fn default_build_target_name(&self) -> &str {
@@ -157,6 +160,16 @@ impl CrateCatalogEntry {
   /** Returns a reference to the contained package. */
   pub fn package(&self) -> &Package {
     &self.package
+  }
+
+  /** Returns whether or not this is the root crate in the workspace. */
+  pub fn is_root(&self) -> bool {
+    self.is_root
+  }
+
+  /** Returns whether or not this is a dependency of the workspace root crate.*/
+  pub fn is_root_dep(&self) -> bool {
+    self.is_root_dep
   }
 
   /**
@@ -204,10 +217,34 @@ impl CrateCatalogEntry {
 impl CrateCatalog {
   /** Produces a CrateCatalog using the package entries from a metadata blob.*/
   pub fn new(metadata: &Metadata) -> CrateCatalog {
+    let root_resolve_node = {
+      let root_resolve_node_opt = {
+        let root_id = &metadata.resolve.root;
+        metadata
+          .resolve
+          .nodes
+          .iter()
+          .find(|node| &node.id == root_id)
+      };
+
+      if root_resolve_node_opt.is_none() {
+        eprintln!("Resolve was: {:#?}", metadata.resolve);
+        eprintln!("root_id: {:?}", metadata.resolve.root);
+        panic!("Resolve did not contain root crate!");
+      }
+
+      // UNWRAP: Guarded above
+      root_resolve_node_opt.unwrap()
+    };
+    let root_direct_deps =
+      root_resolve_node.dependencies.iter().cloned().collect::<HashSet<_>>();
+
     let crate_catalog_entries = metadata
       .packages
       .iter()
-      .map(CrateCatalogEntry::from)
+      .map(|package| CrateCatalogEntry::new(package,
+                                            root_resolve_node.id == package.id,
+                                            root_direct_deps.contains(&package.id)))
       .collect::<Vec<_>>();
 
     let mut package_id_to_entries_idx = HashMap::new();
@@ -293,8 +330,6 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
   /** Produces a crate context for each declared crate and dependency. */
   fn produce_crate_contexts(&self) -> CargoResult<Vec<CrateContext>> {
-    let root_direct_deps = try!(self.get_root_deps());
-
     let mut sorted_nodes: Vec<&ResolveNode> = self.metadata.resolve.nodes.iter().collect();
     sorted_nodes.sort_unstable_by_key(|n| &n.id);
 
@@ -331,7 +366,6 @@ impl<'planner> WorkspaceSubplanner<'planner> {
         source_id: &own_source_id,
         node: &node,
         crate_settings: &crate_settings,
-        is_root_dependency: root_direct_deps.contains(&node.id),
       };
 
       let crate_context = try!(crate_subplanner.produce_context());
@@ -339,28 +373,6 @@ impl<'planner> WorkspaceSubplanner<'planner> {
     }
 
     Ok(crate_contexts)
-  }
-
-  /** Enumerates the root crate depenencies. */
-  fn get_root_deps(&self) -> CargoResult<Vec<PackageId>> {
-    let root_resolve_node_opt = {
-      let root_id = &self.metadata.resolve.root;
-      self
-        .metadata
-        .resolve
-        .nodes
-        .iter()
-        .find(|node| &node.id == root_id)
-    };
-    let root_resolve_node = if root_resolve_node_opt.is_some() {
-      // UNWRAP: Guarded above
-      root_resolve_node_opt.unwrap()
-    } else {
-      eprintln!("Resolve was: {:#?}", self.metadata.resolve);
-      eprintln!("root_id: {:?}", self.metadata.resolve.root);
-      return Err(CargoError::from("Resolve did not contain root crate!"));
-    };
-    Ok(root_resolve_node.dependencies.clone())
   }
 }
 
@@ -382,7 +394,7 @@ impl<'planner> CrateSubplanner<'planner> {
       pkg_version: package.version.clone(),
       licenses: self.produce_licenses(),
       features: self.node.features.clone().unwrap_or(Vec::new()),
-      is_root_dependency: self.is_root_dependency,
+      is_root_dependency: self.crate_catalog_entry.is_root_dep(),
       dependencies: normal_deps,
       build_dependencies: build_deps,
       dev_dependencies: dev_deps,
@@ -702,6 +714,8 @@ mod checks {
   pub fn check_all_vendored(crate_catalog_entries: &Vec<CrateCatalogEntry>) -> CargoResult<()> {
     let missing_package_ident_iter = crate_catalog_entries
       .iter()
+      // Root does not need to be vendored -- usually it is a wrapper package.
+      .filter(|p| !p.is_root())
       .filter(|p| !fs::metadata(p.expected_vendored_path()).is_ok())
       .map(|p| p.package_ident.clone());
 
