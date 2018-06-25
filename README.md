@@ -328,9 +328,16 @@ https://github.com/acmcarther/cargo-raze-crater
 
 See these examples of providing crate configuration:
 
-- [basic-example](https://github.com/acmcarther/cargo-raze-examples/blob/master/bazel/hello_cargo_library/cargo/Cargo.toml)
-- [complicated-example](https://github.com/acmcarther/cargo-raze-examples/blob/master/bazel/complicated_cargo_library/cargo/Cargo.toml)
-- [complicated-example-remote](https://github.com/acmcarther/cargo-raze-examples/blob/master/bazel/complicated_cargo_library_remote/cargo/Cargo.toml)
-- [openssl-example](https://github.com/acmcarther/compile_openssl/blob/master/cargo/Cargo.toml)
+**Using vendored mode**:
+- [hello-cargo-library](https://github.com/google/cargo-raze/tree/master/examples/vendored/hello_cargo_library)
+- [complicated-cargo-library](https://github.com/google/cargo-raze/tree/master/examples/vendored/complicated_cargo_library)
+- [non-cratesio](https://github.com/google/cargo-raze/tree/master/examples/vendored/non_cratesio_library)
+
+**Using remote mode**:
+- [complicated-example](https://github.com/google/cargo-raze/tree/master/examples/remote/complicated_cargo_library)
+- [non-cratesio](https://github.com/google/cargo-raze/tree/master/examples/remote/non_cratesio)
+
+**Compiling OpenSSL**:
+- [openssl](https://github.com/acmcarther/compile_openssl)
 
 The [raze] section is derived from a struct declared in [impl/src/settings.rs](./impl/src/settings.rs).
