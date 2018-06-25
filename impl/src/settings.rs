@@ -64,7 +64,7 @@ pub struct RazeSettings {
 }
 
 /** Override settings for individual crates (as part of RazeSettings). */
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CrateSettings {
   /**
    * Dependencies to be added to a crate.
@@ -133,6 +133,19 @@ pub struct CrateSettings {
 pub enum GenMode {
   Vendored,
   Remote,
+}
+
+impl Default for CrateSettings {
+  fn default() -> CrateSettings {
+    CrateSettings {
+      additional_deps: Vec::new(),
+      skipped_deps: Vec::new(),
+      extra_aliased_targets: Vec::new(),
+      additional_flags: Vec::new(),
+      gen_buildrs: default_crate_settings_field_gen_buildrs(),
+      data_attr: default_crate_settings_field_data_attr(),
+    }
+  }
 }
 
 #[cfg(test)]

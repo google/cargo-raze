@@ -18,6 +18,7 @@ use cargo::core::SourceId;
 use cargo::util::CargoResult;
 use context::BuildDependency;
 use context::BuildTarget;
+use context::SourceDetails;
 use context::CrateContext;
 use context::LicenseData;
 use context::GitRepo;
@@ -32,26 +33,38 @@ use metadata::ResolveNode;
 use settings::CrateSettings;
 use settings::GenMode;
 use settings::RazeSettings;
-use slug;
 use serde_json;
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::fs;
 use std::path::PathBuf;
 use std::str;
 use std::str::FromStr;
 use util;
+use util::PlatformDetails;
 
 pub const VENDOR_DIR: &'static str = "vendor/";
 
-pub struct PrototypePackage {
-  pub package: Package,
+// TODO(acmcarther): Remove this struct -- move it into CrateContext.
+struct DependencySet {
+  normal_deps: Vec<BuildDependency>,
+  build_deps: Vec<BuildDependency>,
+  dev_deps: Vec<BuildDependency>,
+}
+
+pub struct CrateCatalogEntry {
+  package: Package,
   // The name of the package sanitized for use within Bazel
-  pub sanitized_name: String,
+  sanitized_name: String,
   // The version of the package sanitized for use within Bazel
-  pub sanitized_version: String,
+  sanitized_version: String,
   // A unique identifier for the package derived from Cargo usage of the form {name}-{version}
-  pub package_ident: String
+  package_ident: String,
+}
+
+/** An intermediate structure that contains details about all crates in the workspace. */
+pub struct CrateCatalog {
+  entries: Vec<CrateCatalogEntry>,
+  package_id_to_entries_idx: HashMap<String, usize>,
 }
 
 /** An entity that can produce an organized, planned build ready to be rendered. */
@@ -60,12 +73,35 @@ pub trait BuildPlanner {
     &mut self,
     settings: &RazeSettings,
     files: CargoWorkspaceFiles,
+    platform_details: PlatformDetails,
   ) -> CargoResult<PlannedBuild>;
 }
 
 /** The default implementation of a BuildPlanner. */
 pub struct BuildPlannerImpl<'fetcher> {
   metadata_fetcher: &'fetcher mut MetadataFetcher,
+}
+
+/** An internal working planner for generating context for a whole workspace. */
+struct WorkspaceSubplanner<'planner> {
+  metadata: &'planner Metadata,
+  settings: &'planner RazeSettings,
+  platform_details: &'planner PlatformDetails,
+  crate_catalog: &'planner CrateCatalog,
+}
+
+/** An internal working planner for generating context for an individual crate. */
+struct CrateSubplanner<'planner> {
+  // Workspace-Wide details
+  settings: &'planner RazeSettings,
+  platform_details: &'planner PlatformDetails,
+  crate_catalog: &'planner CrateCatalog,
+  // Crate specific content
+  crate_catalog_entry: &'planner CrateCatalogEntry,
+  source_id: &'planner Option<SourceId>,
+  node: &'planner ResolveNode,
+  crate_settings: &'planner CrateSettings,
+  is_root_dependency: bool,
 }
 
 /** A ready-to-be-rendered build, containing renderable context for each crate. */
@@ -75,68 +111,129 @@ pub struct PlannedBuild {
   pub crate_contexts: Vec<CrateContext>,
 }
 
-impl <'a> From<&'a Package> for PrototypePackage {
-  fn from(package: &'a Package) -> PrototypePackage {
+impl<'a> From<&'a Package> for CrateCatalogEntry {
+  fn from(package: &'a Package) -> CrateCatalogEntry {
     let sanitized_name = util::sanitize_ident(&package.name);
     let sanitized_version = util::sanitize_ident(&package.version);
 
-    PrototypePackage {
+    CrateCatalogEntry {
       package: package.clone(),
       sanitized_name: sanitized_name,
       sanitized_version: sanitized_version,
-      package_ident: format!("{}-{}", &package.name, &package.version)
+      package_ident: format!("{}-{}", &package.name, &package.version),
     }
   }
 }
 
-impl PrototypePackage {
-  pub fn default_build_target(&self) -> &str {
+impl CrateCatalogEntry {
+  /** Yields the name of the default target for this crate (sanitized). */
+  #[allow(dead_code)]
+  pub fn default_build_target_name(&self) -> &str {
     &self.sanitized_name
   }
 
-  // Returns the packages expected path during current execution
+  /** Returns a reference to the contained package. */
+  pub fn package(&self) -> &Package {
+    &self.package
+  }
+
+  /**
+   * Returns the packages expected path during current execution.
+   *
+   * Not for use or storage except during planning as path is local.
+   */
   pub fn expected_vendored_path(&self) -> String {
     format!("./{}{}", VENDOR_DIR, &self.package_ident)
   }
 
-  // Returns the packages path as a remote workspace
-  pub fn expected_remote_workspace_path(&self, settings: &RazeSettings) -> String {
-    format!(
-      "@{}__{}__{}//",
-      &settings.gen_workspace_prefix, &self.sanitized_name, &self.sanitized_version
-    )
+  /** Yields the precise path to this dependency for the provided settings. */
+  #[allow(dead_code)]
+  pub fn workspace_path(&self, settings: &RazeSettings) -> String {
+    match settings.genmode {
+      GenMode::Remote => format!(
+        "@{}__{}__{}//",
+        &settings.gen_workspace_prefix, &self.sanitized_name, &self.sanitized_version
+      ),
+      GenMode::Vendored => format!(
+        "{}/vendor/{}",
+        &settings.workspace_path, &self.package_ident
+      ),
+    }
   }
 
-  // Returns the packages expected path as workspace-relative
-  pub fn expected_vendored_workspace_path(&self, settings: &RazeSettings) -> String {
-    format!("{}/vendor/{}", &settings.workspace_path, &self.package_ident)
+  /** Emits a complete path to this dependency and default target using the given settings. */
+  pub fn workspace_path_and_default_target(&self, settings: &RazeSettings) -> String {
+    match settings.genmode {
+      GenMode::Remote => format!(
+        "@{}__{}__{}//:{}",
+        &settings.gen_workspace_prefix,
+        &self.sanitized_name,
+        &self.sanitized_version,
+        &self.sanitized_name
+      ),
+      GenMode::Vendored => format!(
+        "{}/vendor/{}:{}",
+        &settings.workspace_path, &self.package_ident, &self.sanitized_name
+      ),
+    }
   }
 }
 
+impl CrateCatalog {
+  /** Produces a CrateCatalog using the package entries from a metadata blob.*/
+  pub fn new(metadata: &Metadata) -> CrateCatalog {
+    let crate_catalog_entries = metadata
+      .packages
+      .iter()
+      .map(CrateCatalogEntry::from)
+      .collect::<Vec<_>>();
+
+    let mut package_id_to_entries_idx = HashMap::new();
+
+    for (idx, crate_catalog_entry) in crate_catalog_entries.iter().enumerate() {
+      debug_assert!(
+        None == package_id_to_entries_idx.insert(crate_catalog_entry.package.id.clone(), idx)
+      );
+    }
+
+    CrateCatalog {
+      entries: crate_catalog_entries,
+      package_id_to_entries_idx: package_id_to_entries_idx,
+    }
+  }
+
+  /** Yields the internally contained entry set. */
+  pub fn entries(&self) -> &Vec<CrateCatalogEntry> {
+    &self.entries
+  }
+
+  /** Finds and returns the catalog entry with the given package id if present. */
+  pub fn entry_for_package_id(&self, package_id: &String) -> Option<&CrateCatalogEntry> {
+    self.package_id_to_entries_idx.get(package_id)
+      // UNWRAP: Indexes guaranteed to be valid -- structure is immutable
+      .map(|entry_idx| self.entries.get(*entry_idx).unwrap())
+  }
+}
 
 impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
+  /** Retrieves metadata for local workspace and produces a build plan. */
   fn plan_build(
     &mut self,
     settings: &RazeSettings,
     files: CargoWorkspaceFiles,
+    platform_details: PlatformDetails,
   ) -> CargoResult<PlannedBuild> {
     let metadata = try!(self.metadata_fetcher.fetch_metadata(files));
-    if settings.genmode == GenMode::Vendored {
-      try!(self.check_crates_vendored(&metadata));
-    }
+    let crate_catalog = CrateCatalog::new(&metadata);
 
-    let workspace_context = WorkspaceContext {
-      workspace_path: settings.workspace_path.clone(),
-      platform_triple: settings.target.clone(),
-      gen_workspace_prefix: settings.gen_workspace_prefix.clone(),
+    let workspace_subplanner = WorkspaceSubplanner {
+      crate_catalog: &crate_catalog,
+      metadata: &metadata,
+      settings: &settings,
+      platform_details: &platform_details,
     };
 
-    let crate_contexts = try!(self.produce_crate_contexts(&settings, &metadata));
-
-    Ok(PlannedBuild {
-      crate_contexts: crate_contexts,
-      workspace_context: workspace_context,
-    })
+    workspace_subplanner.produce_planned_build()
   }
 }
 
@@ -146,278 +243,310 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
       metadata_fetcher: metadata_fetcher,
     }
   }
+}
 
-  fn check_crates_vendored(&self, metadata: &Metadata) -> CargoResult<()> {
-    for package in metadata.packages.iter() {
-      // Don't expect the root crate to be vendored
-      if package.id == metadata.resolve.root {
-        continue;
-      }
-
-      let full_name = format!("{}-{}", package.name, package.version);
-      let path = format!("./vendor/{}/", full_name);
-
-      if fs::metadata(&path).is_err() {
-        return Err(CargoError::from(format!(
-          "failed to find {}. Either switch to \"Remote\" genmode, or run `cargo vendor -x` first.",
-          &path
-        )));
-      };
+impl<'planner> WorkspaceSubplanner<'planner> {
+  /** Produces a planned build using internal state. */
+  pub fn produce_planned_build(&self) -> CargoResult<PlannedBuild> {
+    try!(checks::check_resolve_matches_packages(&self.metadata));
+    if self.settings.genmode == GenMode::Vendored {
+      try!(checks::check_all_vendored(self.crate_catalog.entries()));
     }
+    checks::warn_unused_settings(&self.settings.crates, &self.metadata.packages);
 
-    Ok(())
+    let crate_contexts = try!(self.produce_crate_contexts());
+    Ok(PlannedBuild {
+      workspace_context: self.produce_workspace_context(),
+      crate_contexts: crate_contexts,
+    })
   }
 
-  fn get_root_deps(&self, metadata: &Metadata) -> CargoResult<Vec<PackageId>> {
-    let root_resolve_node_opt = {
-      let root_id = &metadata.resolve.root;
-      metadata.resolve.nodes.iter().find(|node| &node.id == root_id)
-    };
-    let root_resolve_node = if root_resolve_node_opt.is_some() {
-      // UNWRAP: Guarded above
-      root_resolve_node_opt.unwrap()
-    } else {
-      eprintln!("Resolve was: {:#?}", metadata.resolve);
-      eprintln!("root_id: {:?}", metadata.resolve.root);
-      return Err(CargoError::from("Resolve did not contain root crate!"));
-    };
-    Ok(root_resolve_node.dependencies.clone())
+  /** Constructs a workspace context from settings. */
+  fn produce_workspace_context(&self) -> WorkspaceContext {
+    WorkspaceContext {
+      workspace_path: self.settings.workspace_path.clone(),
+      platform_triple: self.settings.target.clone(),
+      gen_workspace_prefix: self.settings.gen_workspace_prefix.clone(),
+    }
   }
 
-  fn produce_crate_contexts(
-    &self,
-    settings: &RazeSettings,
-    metadata: &Metadata,
-  ) -> CargoResult<Vec<CrateContext>> {
-    checks::check_resolve_matches_packages(&metadata);
-    let prototype_packages = metadata.packages.iter()
-      .map(PrototypePackage::from)
-      .collect::<Vec<_>>();
-    if settings.genmode == GenMode::Vendored {
-      checks::check_all_vendored(&prototype_packages);
-    }
-    checks::warn_unused_settings(&settings.crates, &metadata.packages);
-
-    let root_direct_deps = try!(self.get_root_deps(&metadata));
-    let packages_by_id = metadata
-      .packages
-      .iter()
-      .map(|p| (p.id.clone(), p.clone()))
-      .collect::<HashMap<PackageId, Package>>();
-
-    /**
-     * NEXT UP: Delete this
-     */
-    let (package_id_to_build_path, package_id_to_default_build_target) = {
-      let mut package_id_to_build_path = HashMap::new();
-      let mut package_id_to_default_build_target = HashMap::new();
-
-      for package in metadata.packages.iter() {
-        let sanitized_name = slug::slugify(&package.name).replace("-", "_");
-        let build_path = match settings.genmode {
-          GenMode::Remote => {
-            let sanitized_version = slug::slugify(&package.version).replace("-", "_");
-            format!(
-              "@{}__{}__{}//",
-              settings.gen_workspace_prefix, sanitized_name, sanitized_version
-            )
-          },
-          GenMode::Vendored => {
-            format!("{}/vendor/{}-{}", settings.workspace_path, package.name, package.version)
-          },
-        };
-        package_id_to_default_build_target
-          .insert(package.id.clone(), format!("{}:{}", build_path, sanitized_name));
-        package_id_to_build_path.insert(package.id.clone(), build_path);
-      }
-
-      (package_id_to_build_path, package_id_to_default_build_target)
-    };
+  /** Produces a crate context for each declared crate and dependency. */
+  fn produce_crate_contexts(&self) -> CargoResult<Vec<CrateContext>> {
+    let root_direct_deps = try!(self.get_root_deps());
 
     let mut crate_contexts = Vec::new();
-    // TODO(acmcarther): handle unwrap
-    let platform_attrs = util::fetch_attrs(&settings.target).unwrap();
-    let mut sorted_nodes: Vec<&ResolveNode> = metadata.resolve.nodes.iter().collect();
-    sorted_nodes.sort_unstable_by_key(|n| &n.id);
-    for node in sorted_nodes.into_iter() {
-      let own_package = packages_by_id.get(&node.id).unwrap();
-      let full_name = format!("{}-{}", own_package.name, own_package.version);
-      let path = format!("./vendor/{}/", full_name);
+    {
+      // TODO(acmcarther): handle unwrap
+      let mut sorted_nodes: Vec<&ResolveNode> = self.metadata.resolve.nodes.iter().collect();
+      sorted_nodes.sort_unstable_by_key(|n| &n.id);
+      for node in sorted_nodes.into_iter() {
+        // UNWRAP: Node packages guaranteed to exist by guard in `produce_planned_build`
+        let own_crate_catalog_entry = self.crate_catalog.entry_for_package_id(&node.id).unwrap();
+        let own_package = own_crate_catalog_entry.package();
 
-      // Skip the root package (which is probably a junk package, by convention)
-      if own_package.id == metadata.resolve.root {
-        continue;
-      }
-
-      // UNWRAP: Safe given unwrap during serialize step of metadata
-      let own_source_id = own_package.source.as_ref()
-        .map(|s| serde_json::from_str::<SourceId>(&s).unwrap());
-
-      // Resolve dependencies into types
-      let mut build_dep_names = Vec::new();
-      let mut dev_dep_names = Vec::new();
-      let mut normal_dep_names = Vec::new();
-      for dep in own_package.dependencies.iter() {
-        if dep.target.is_some() {
-          // UNWRAP: Safe from above check
-          let target_str = dep.target.as_ref().unwrap();
-          let platform = try!(Platform::from_str(target_str));
-
-          // Skip this dep if it doesn't match our platform attributes
-          if !platform.matches(&settings.target, Some(&platform_attrs)) {
-            continue;
-          }
+        // Skip the root package (which is probably a junk package, by convention)
+        if own_package.id == self.metadata.resolve.root {
+          continue;
         }
 
-        match dep.kind.as_ref().map(|v| v.as_str()) {
-          None | Some("normal") => normal_dep_names.push(dep.name.clone()),
-          Some("dev") => dev_dep_names.push(dep.name.clone()),
-          Some("build") => build_dep_names.push(dep.name.clone()),
-          something_else => panic!(
-            "Unhandlable dependency type {:?} for {} on {} detected!",
-            something_else, own_package.name, dep.name
-          ),
-        }
-      }
+        let crate_settings = self
+          .settings
+          .crates
+          .get(&own_package.name)
+          .and_then(|c| c.get(&own_package.version))
+          .cloned()
+          .unwrap_or_else(CrateSettings::default);
 
-      let mut build_deps = Vec::new();
-      let mut dev_deps = Vec::new();
-      let mut normal_deps = Vec::new();
-      for dep_id in node.dependencies.iter() {
-        // UNWRAP(s): Safe from verification of packages_by_id
-        let dep_package = packages_by_id.get(dep_id.as_str()).unwrap();
-        let build_target = package_id_to_default_build_target.get(dep_id).unwrap();
+        // UNWRAP: Safe given unwrap during serialize step of metadata
+        let own_source_id = own_package
+          .source
+          .as_ref()
+          .map(|s| serde_json::from_str::<SourceId>(&s).unwrap());
 
-        let build_dependency = BuildDependency {
-          name: dep_package.name.clone(),
-          version: dep_package.version.clone(),
-          build_target: build_target.clone(),
+        let crate_subplanner = CrateSubplanner {
+          crate_catalog: &self.crate_catalog,
+          settings: self.settings,
+          platform_details: self.platform_details,
+          crate_catalog_entry: &own_crate_catalog_entry,
+          source_id: &own_source_id,
+          node: &node,
+          crate_settings: &crate_settings,
+          is_root_dependency: root_direct_deps.contains(&node.id),
         };
-        if build_dep_names.contains(&dep_package.name) {
-          build_deps.push(build_dependency.clone());
-        }
 
-        if dev_dep_names.contains(&dep_package.name) {
-          dev_deps.push(build_dependency.clone());
-        }
-
-        if normal_dep_names.contains(&dep_package.name) {
-          normal_deps.push(build_dependency);
-        }
+        let crate_context = try!(crate_subplanner.produce_context());
+        crate_contexts.push(crate_context);
       }
-      build_deps.sort();
-      dev_deps.sort();
-      normal_deps.sort();
-
-      let is_git = own_source_id.as_ref().map_or(false, SourceId::is_git);
-      let git_data = if is_git {
-        // UNWRAP: is_git true implies own_source_id exists
-        let s = own_source_id.as_ref().unwrap();
-        Some(GitRepo {
-          remote: s.url().to_string(),
-          commit: s.precise().unwrap().to_owned(),
-        })
-      } else {
-        None
-      };
-
-      let mut targets = try!(self.produce_targets(&own_package, &own_source_id, settings));
-      targets.sort();
-
-      let possible_crate_settings =
-        settings.crates.get(&own_package.name).and_then(|c| c.get(&own_package.version));
-
-      let should_gen_buildrs =
-        possible_crate_settings.map(|s| s.gen_buildrs.clone()).unwrap_or(false);
-      let build_script_target = if should_gen_buildrs {
-        targets.iter().find(|t| t.kind.as_str() == "custom-build").cloned()
-      } else {
-        None
-      };
-
-      let targets_sans_build_script =
-        targets.into_iter().filter(|t| t.kind.as_str() != "custom-build").collect::<Vec<_>>();
-
-      let additional_deps =
-        possible_crate_settings.map(|s| s.additional_deps.clone()).unwrap_or(Vec::new());
-
-      let additional_flags =
-        possible_crate_settings.map(|s| s.additional_flags.clone()).unwrap_or(Vec::new());
-
-      let extra_aliased_targets =
-        possible_crate_settings.map(|s| s.extra_aliased_targets.clone()).unwrap_or(Vec::new());
-
-      // Skip generated dependencies explicitly designated to be skipped (potentially due to
-      // being replaced or customized as part of additional_deps)
-      let non_skipped_normal_deps = possible_crate_settings
-        .map(|s| prune_skipped_deps(&normal_deps, s))
-        .unwrap_or_else(|| normal_deps);
-      let non_skipped_build_deps = possible_crate_settings
-        .map(|s| prune_skipped_deps(&build_deps, s))
-        .unwrap_or_else(|| build_deps);
-
-      let license_str = own_package.license.as_ref().map(|s| s.as_str()).unwrap_or("");
-      let licenses = load_and_dedup_licenses(license_str);
-
-      let data_attr = possible_crate_settings.and_then(|s| s.data_attr.clone());
-  
-      crate_contexts.push(CrateContext {
-        pkg_name: own_package.name.clone(),
-        pkg_version: own_package.version.clone(),
-        licenses: licenses,
-        features: node.features.clone().unwrap_or(Vec::new()),
-        is_root_dependency: root_direct_deps.contains(&node.id),
-        metadeps: Vec::new(), /* TODO(acmcarther) */
-        dependencies: non_skipped_normal_deps,
-        build_dependencies: non_skipped_build_deps,
-        dev_dependencies: dev_deps,
-        path: path,
-        // UNWRAP: Safe -- struct derived from package set
-        build_path: package_id_to_build_path.get(&own_package.id).unwrap().clone(),
-        build_script_target: build_script_target,
-        targets: targets_sans_build_script,
-        platform_triple: settings.target.to_owned(),
-        additional_deps: additional_deps,
-        additional_flags: additional_flags,
-        extra_aliased_targets: extra_aliased_targets,
-        data_attr: data_attr,
-        git_data: git_data,
-        sha256: own_package.sha256.clone(),
-      })
     }
 
     Ok(crate_contexts)
   }
 
+  /** Enumerates the root crate depenencies. */
+  fn get_root_deps(&self) -> CargoResult<Vec<PackageId>> {
+    let root_resolve_node_opt = {
+      let root_id = &self.metadata.resolve.root;
+      self
+        .metadata
+        .resolve
+        .nodes
+        .iter()
+        .find(|node| &node.id == root_id)
+    };
+    let root_resolve_node = if root_resolve_node_opt.is_some() {
+      // UNWRAP: Guarded above
+      root_resolve_node_opt.unwrap()
+    } else {
+      eprintln!("Resolve was: {:#?}", self.metadata.resolve);
+      eprintln!("root_id: {:?}", self.metadata.resolve.root);
+      return Err(CargoError::from("Resolve did not contain root crate!"));
+    };
+    Ok(root_resolve_node.dependencies.clone())
+  }
+}
 
-  fn produce_targets(&self, package: &Package, source_id: &Option<SourceId>, settings: &RazeSettings) -> CargoResult<Vec<BuildTarget>> {
-    let mut targets = Vec::new();
-    for target in package.targets.iter() {
-      let manifest_pathbuf = PathBuf::from(&package.manifest_path);
-      assert!(manifest_pathbuf.is_absolute());
+impl<'planner> CrateSubplanner<'planner> {
+  /** Builds a crate context from internal state. */
+  fn produce_context(&self) -> CargoResult<CrateContext> {
+    let DependencySet {
+      build_deps,
+      dev_deps,
+      normal_deps,
+    } = try!(self.produce_deps());
 
-      let is_git = source_id.as_ref().map_or(false, SourceId::is_git);
-      let local_root = match (settings.genmode.clone(), is_git) {
-        // UNWRAP: We know from source_id that this is a git package, so it must have a repo root
-        (GenMode::Remote, true) => try!(package_git_root(&manifest_pathbuf)).to_str().unwrap().to_owned(),
-        _ => manifest_pathbuf.parent().unwrap().display().to_string(),
+    let mut targets = try!(self.produce_targets());
+    targets.sort();
+    let build_script_target_opt = self.take_build_script_target(&mut targets);
+
+    let package = self.crate_catalog_entry.package();
+    Ok(CrateContext {
+      pkg_name: package.name.clone(),
+      pkg_version: package.version.clone(),
+      licenses: self.produce_licenses(),
+      features: self.node.features.clone().unwrap_or(Vec::new()),
+      is_root_dependency: self.is_root_dependency,
+      dependencies: normal_deps,
+      build_dependencies: build_deps,
+      dev_dependencies: dev_deps,
+      // UNWRAP: Safe -- struct derived from package set
+      build_path: self
+        .crate_catalog_entry
+        .workspace_path_and_default_target(&self.settings),
+      build_script_target: build_script_target_opt,
+      targets: targets,
+      raze_settings: self.crate_settings.clone(),
+      source_details: self.produce_source_details(),
+      path: format!("./vendor/{}-{}", package.name, package.version),
+      sha256: package.sha256.clone(),
+    })
+  }
+
+  /** Generates license data from internal crate details. */
+  fn produce_licenses(&self) -> Vec<LicenseData> {
+    let licenses_str = self
+      .crate_catalog_entry
+      .package()
+      .license
+      .as_ref()
+      .map(String::as_str)
+      .unwrap_or("");
+    load_and_dedup_licenses(licenses_str)
+  }
+
+  /** Generates the set of dependencies for the contained crate. */
+  fn produce_deps(&self) -> CargoResult<DependencySet> {
+    // Resolve dependencies into types
+    let mut build_dep_names = Vec::new();
+    let mut dev_dep_names = Vec::new();
+    let mut normal_dep_names = Vec::new();
+    let platform_attrs = self.platform_details.attrs();
+    let package = self.crate_catalog_entry.package();
+    for dep in package.dependencies.iter() {
+      if dep.target.is_some() {
+        // UNWRAP: Safe from above check
+        let target_str = dep.target.as_ref().unwrap();
+        let platform = try!(Platform::from_str(target_str));
+
+        // Skip this dep if it doesn't match our platform attributes
+        if !platform.matches(&self.settings.target, Some(&platform_attrs)) {
+          continue;
+        }
+      }
+
+      match dep.kind.as_ref().map(|v| v.as_str()) {
+        None | Some("normal") => normal_dep_names.push(dep.name.clone()),
+        Some("dev") => dev_dep_names.push(dep.name.clone()),
+        Some("build") => build_dep_names.push(dep.name.clone()),
+        something_else => panic!(
+          "Unhandlable dependency type {:?} for {} on {} detected!",
+          something_else, package.name, dep.name
+        ),
+      }
+    }
+
+    let mut build_deps = Vec::new();
+    let mut dev_deps = Vec::new();
+    let mut normal_deps = Vec::new();
+    let all_skipped_deps = self
+      .crate_settings
+      .skipped_deps
+      .iter()
+      .cloned()
+      .collect::<HashSet<_>>();
+    for dep_id in self.node.dependencies.iter() {
+      // UNWRAP(s): Safe from verification of packages_by_id
+      let dep_package = self
+        .crate_catalog
+        .entry_for_package_id(&dep_id)
+        .unwrap()
+        .package();
+
+      // Skip settings-indicated deps to skip
+      if all_skipped_deps.contains(&format!("{}-{}", dep_package.name, dep_package.version)) {
+        continue;
+      }
+
+      // UNWRAP: Guaranteed to exist by checks in WorkspaceSubplanner#produce_build_plan
+      let build_target = self
+        .crate_catalog
+        .entry_for_package_id(dep_id)
+        .unwrap()
+        .workspace_path_and_default_target(&self.settings);
+
+      let build_dependency = BuildDependency {
+        name: dep_package.name.clone(),
+        version: dep_package.version.clone(),
+        build_target: build_target,
       };
+      if build_dep_names.contains(&dep_package.name) {
+        build_deps.push(build_dependency.clone());
+      }
 
-      // Trim the manifest_path parent dir from the target path (to give us the crate-local path)
-      let mut local_path_str = target
+      if dev_dep_names.contains(&dep_package.name) {
+        dev_deps.push(build_dependency.clone());
+      }
+
+      if normal_dep_names.contains(&dep_package.name) {
+        normal_deps.push(build_dependency);
+      }
+    }
+
+    build_deps.sort();
+    dev_deps.sort();
+    normal_deps.sort();
+
+    Ok(DependencySet {
+      build_deps: build_deps,
+      dev_deps: dev_deps,
+      normal_deps: normal_deps,
+    })
+  }
+
+  /** Generates source details for internal crate. */
+  fn produce_source_details(&self) -> SourceDetails {
+    let is_git_source = self.source_id.as_ref().map_or(false, SourceId::is_git);
+    if !is_git_source {
+      return SourceDetails { git_data: None };
+    }
+
+    // UNWRAP: is_git true implies own_source_id exists
+    let source = self.source_id.as_ref().unwrap();
+    SourceDetails {
+      git_data: Some(GitRepo {
+        remote: source.url().to_string(),
+        commit: source.precise().unwrap().to_owned(),
+      }),
+    }
+  }
+
+  /** Extracts the (one and only) build script target from the provided set of build targets. */
+  fn take_build_script_target(&self, all_targets: &mut Vec<BuildTarget>) -> Option<BuildTarget> {
+    if !self.crate_settings.gen_buildrs {
+      return None;
+    }
+
+    let build_script_target_idx_opt = all_targets
+      .iter()
+      .enumerate()
+      .find(|&(_idx, t)| t.kind.as_str() == "custom-build")
+      .map(|(idx, _t)| idx);
+
+    let build_script_target_opt = build_script_target_idx_opt.map(|idx| all_targets.remove(idx));
+
+    if !self.crate_settings.gen_buildrs {
+      return None;
+    }
+
+    build_script_target_opt
+  }
+
+  /** Produces the complete set of build targets specified by this crate. */
+  fn produce_targets(&self) -> CargoResult<Vec<BuildTarget>> {
+    let mut targets = Vec::new();
+    let package = self.crate_catalog_entry.package();
+    for target in package.targets.iter() {
+      let manifest_path = PathBuf::from(&package.manifest_path);
+      assert!(manifest_path.is_absolute());
+
+      let package_root_path = try!(self.find_package_root_for_manifest(manifest_path));
+
+      // Trim the manifest_path parent dir from the target path (to give us the crate-local path)j
+      let mut package_root_path_str = target
         .src_path
         .clone()
-        .split_off(local_root.len() + 1);
+        // TODO(acmcarther): Is this even guaranteed to work? I don't think the `display` output
+        // can be guaranteed....
+        .split_off(package_root_path.display().to_string().len() + 1);
 
       // Some crates have a weird prefix, trim that.
-      if local_path_str.starts_with("./") {
-        local_path_str = local_path_str.split_off(2);
+      if package_root_path_str.starts_with("./") {
+        package_root_path_str = package_root_path_str.split_off(2);
       }
 
       for kind in target.kind.iter() {
         targets.push(BuildTarget {
           name: target.name.clone(),
-          path: local_path_str.clone(),
+          path: package_root_path_str.clone(),
           kind: kind.clone(),
         });
       }
@@ -425,17 +554,46 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
 
     Ok(targets)
   }
-}
 
-fn prune_skipped_deps(
-  deps: &Vec<BuildDependency>,
-  crate_settings: &CrateSettings,
-) -> Vec<BuildDependency> {
-  deps
-    .iter()
-    .filter(|d| !crate_settings.skipped_deps.contains(&format!("{}-{}", d.name, d.version)))
-    .map(|dep| dep.clone())
-    .collect::<Vec<_>>()
+  /**
+   * Finds the root of a contained git package.
+   *
+   * N.B. This inspects the filesystem, so it isn't totally self contained....
+   */
+  fn find_package_root_for_manifest(&self, manifest_path: PathBuf) -> CargoResult<PathBuf> {
+    let has_git_repo_root = {
+      let is_git = self.source_id.as_ref().map_or(false, SourceId::is_git);
+      is_git && self.settings.genmode == GenMode::Remote
+    };
+
+    // Return manifest path itself if not git
+    if !has_git_repo_root {
+      // TODO(acmcarther): How do we know parent is valid here?
+      // UNWRAP: Pathbuf guaranteed to succeed from Path
+      return Ok(PathBuf::from(manifest_path.parent().unwrap()));
+    }
+
+    // If package is git package it may be nested under a parent repository. We need to find the
+    // package root.
+    {
+      let mut check_path = manifest_path.as_path();
+      while let Some(c) = check_path.parent() {
+        let joined = c.join(".git");
+        if joined.is_dir() {
+          // UNWRAP: Pathbuf guaranteed to succeed from Path
+          return Ok(PathBuf::from(c));
+        } else {
+          check_path = c;
+        }
+      }
+
+      // Reached filesystem root and did not find Git repo
+      Err(CargoError::from(format!(
+        "Unable to locate git repository root for manifest at {:?}",
+        manifest_path
+      )))
+    }
+  }
 }
 
 fn load_and_dedup_licenses(licenses: &str) -> Vec<LicenseData> {
@@ -466,107 +624,109 @@ fn load_and_dedup_licenses(licenses: &str) -> Vec<LicenseData> {
   license_data_list
 }
 
-fn package_git_root(manifest: &PathBuf) -> CargoResult<PathBuf> {
-  let cloned = manifest.clone();
-  let mut check_path = cloned.as_path();
-  while let Some(c) = check_path.parent() {
-    let joined = c.join(".git");
-    if joined.is_dir() {
-      return Ok(c.to_path_buf());
-    } else {
-      check_path = c;
-    }
-  }
-
-  // Reached filesystem root and did not find Git repo
-  Err(CargoError::from(format!("Unable to locate git repository root for manifest {:?}", manifest)))
-}
-
 mod checks {
   use cargo::CargoError;
   use cargo::util::CargoResult;
   use metadata::Metadata;
   use metadata::Package;
   use metadata::PackageId;
-  use planning::PrototypePackage;
+  use planning::CrateCatalogEntry;
   use planning::VENDOR_DIR;
   use settings::CrateSettingsPerVersion;
   use std::collections::HashMap;
   use std::collections::HashSet;
   use std::env;
   use std::fs;
-  use util::LimitedResults;
   use util::collect_up_to;
 
   // TODO(acmcarther): Consider including a switch to disable limiting
   const MAX_DISPLAYED_MISSING_VENDORED_CRATES: usize = 5;
   const MAX_DISPLAYED_MISSING_RESOLVE_PACKAGES: usize = 5;
-  const PLEASE_FILE_A_BUG: &'static str = "Please file an issue at github.com/google/cargo-raze with details.";
+  const PLEASE_FILE_A_BUG: &'static str =
+    "Please file an issue at github.com/google/cargo-raze with details.";
 
   // Verifies that all provided packages are vendored (in VENDOR_DIR relative to CWD)
-  pub fn check_all_vendored(prototype_packages: &Vec<PrototypePackage>) -> CargoResult<()> {
-    let missing_package_ident_iter =
-      prototype_packages.iter()
-        .filter(|p| fs::metadata(p.expected_vendored_path()).is_ok())
-        .map(|p| p.package_ident.clone());
+  pub fn check_all_vendored(crate_catalog_entries: &Vec<CrateCatalogEntry>) -> CargoResult<()> {
+    let missing_package_ident_iter = crate_catalog_entries
+      .iter()
+      .filter(|p| !fs::metadata(p.expected_vendored_path()).is_ok())
+      .map(|p| p.package_ident.clone());
 
-    let limited_missing_crates = collect_up_to(MAX_DISPLAYED_MISSING_VENDORED_CRATES,
-                                               missing_package_ident_iter);
+    let limited_missing_crates = collect_up_to(
+      MAX_DISPLAYED_MISSING_VENDORED_CRATES,
+      missing_package_ident_iter,
+    );
 
     if limited_missing_crates.is_empty() {
-      return Ok(())
+      return Ok(());
     }
 
     // Oops, missing some crates. Yield a nice message
-    let expected_full_path =
-        env::current_dir().unwrap().join(format!("./{}", VENDOR_DIR));
+    let expected_full_path = env::current_dir()
+      .unwrap()
+      .join(format!("./{}", VENDOR_DIR));
     return Err(CargoError::from(format!(
       "Failed to find expected vendored crates in {:?}: {:?}. Did you forget to run cargo-vendor?",
       expected_full_path.to_str(),
-      limited_missing_crates)));
+      limited_missing_crates
+    )));
   }
 
   pub fn check_resolve_matches_packages(metadata: &Metadata) -> CargoResult<()> {
-    let known_package_ids = metadata.packages
+    let known_package_ids = metadata
+      .packages
       .iter()
       .map(|p| p.id.clone())
       .collect::<HashSet<PackageId>>();
 
-    let node_ids_missing_package_decl_iter =
-      metadata.resolve.nodes.iter()
-        .filter(|n| known_package_ids.contains(&n.id))
-        .map(|n| n.id.clone());
-    let limited_missing_node_ids = collect_up_to(MAX_DISPLAYED_MISSING_VENDORED_CRATES,
-                                                 node_ids_missing_package_decl_iter);
+    let node_ids_missing_package_decl_iter = metadata
+      .resolve
+      .nodes
+      .iter()
+      .filter(|n| !known_package_ids.contains(&n.id))
+      .map(|n| n.id.clone());
+    let limited_missing_node_ids = collect_up_to(
+      MAX_DISPLAYED_MISSING_RESOLVE_PACKAGES,
+      node_ids_missing_package_decl_iter,
+    );
 
     if limited_missing_node_ids.is_empty() {
-      return Ok(())
+      return Ok(());
     }
 
     // Oops, missing some package metadata. Yield a nice message
     return Err(CargoError::from(format!(
       "Failed to find metadata.packages which were expected from metadata.resolve {:?}. {}",
-      limited_missing_node_ids,
-      PLEASE_FILE_A_BUG)));
+      limited_missing_node_ids, PLEASE_FILE_A_BUG
+    )));
   }
 
-  pub fn warn_unused_settings(all_crate_settings: &HashMap<String, CrateSettingsPerVersion>,
-                              all_packages: &Vec<Package>) {
+  pub fn warn_unused_settings(
+    all_crate_settings: &HashMap<String, CrateSettingsPerVersion>,
+    all_packages: &Vec<Package>,
+  ) {
     let mut known_versions_per_crate = HashMap::new();
-    for &Package{ref name, ref version, ..} in all_packages.iter() {
+    for &Package {
+      ref name,
+      ref version,
+      ..
+    } in all_packages.iter()
+    {
       known_versions_per_crate
         .entry(name.clone())
         .or_insert(HashSet::new())
         .insert(version.clone());
     }
 
-
     for (name, settings_per_version) in all_crate_settings.iter() {
       if !known_versions_per_crate.contains_key(name) {
-        eprintln!("Found unused raze settings for all of {}-{:?}", name,
-                  settings_per_version.keys());
+        eprintln!(
+          "Found unused raze settings for all of {}-{:?}",
+          name,
+          settings_per_version.keys()
+        );
         // No version introspection needed -- no known version of this crate
-        continue
+        continue;
       }
 
       // UNWRAP: Guarded above
@@ -574,8 +734,10 @@ mod checks {
 
       for version in settings_per_version.keys() {
         if !all_known_versions.contains(version) {
-          eprintln!("Found unused raze settings for {}-{}, but {:?} were known", name, version,
-                    all_known_versions)
+          eprintln!(
+            "Found unused raze settings for {}-{}, but {:?} were known",
+            name, version, all_known_versions
+          )
         }
       }
     }
@@ -590,6 +752,7 @@ mod tests {
   use metadata::testing as metadata_testing;
   use metadata::testing::StubMetadataFetcher;
   use settings::testing as settings_testing;
+  use planning::checks;
 
   const ROOT_NODE_IDX: usize = 0;
 
@@ -618,7 +781,9 @@ mod tests {
 
   fn minimum_dependency_metadata() -> Metadata {
     let mut metadata = minimum_valid_metadata();
-    metadata.resolve.nodes[ROOT_NODE_IDX].dependencies.push("test_dep_id".to_owned());
+    metadata.resolve.nodes[ROOT_NODE_IDX]
+      .dependencies
+      .push("test_dep_id".to_owned());
     metadata.resolve.nodes.push(ResolveNode {
       id: "test_dep_id".to_owned(),
       dependencies: Vec::new(),
@@ -630,6 +795,21 @@ mod tests {
     test_dep.version = "test_version".to_owned();
     metadata.packages.push(test_dep);
     metadata
+  }
+
+  #[test]
+  #[allow(non_snake_case)]
+  fn test__checks__check_resolve_matches_packages_fails_correctly() {
+    let mut mangled_metadata = minimum_valid_metadata();
+    mangled_metadata.packages = Vec::new();
+    assert!(checks::check_resolve_matches_packages(&mangled_metadata).is_err());
+  }
+
+  #[test]
+  #[allow(non_snake_case)]
+  fn test__checks__check_resolve_matches_packages_works_correctly() {
+    // Should not panic
+    checks::check_resolve_matches_packages(&minimum_valid_metadata()).unwrap();
   }
 
   #[test]
@@ -667,8 +847,11 @@ mod tests {
   fn test_plan_build_missing_resolve_fails() {
     let mut fetcher = StubMetadataFetcher::with_metadata(metadata_testing::dummy_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res =
-      planner.plan_build(&settings_testing::dummy_raze_settings(), dummy_workspace_files());
+    let planned_build_res = planner.plan_build(
+      &settings_testing::dummy_raze_settings(),
+      dummy_workspace_files(),
+      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+    );
 
     println!("{:#?}", planned_build_res);
     assert!(planned_build_res.is_err());
@@ -686,8 +869,11 @@ mod tests {
 
     let mut fetcher = StubMetadataFetcher::with_metadata(metadata);
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res =
-      planner.plan_build(&settings_testing::dummy_raze_settings(), dummy_workspace_files());
+    let planned_build_res = planner.plan_build(
+      &settings_testing::dummy_raze_settings(),
+      dummy_workspace_files(),
+      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+    );
 
     println!("{:#?}", planned_build_res);
     assert!(planned_build_res.is_err());
@@ -697,8 +883,11 @@ mod tests {
   fn test_plan_build_minimum_workspace() {
     let mut fetcher = StubMetadataFetcher::with_metadata(minimum_valid_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res =
-      planner.plan_build(&settings_testing::dummy_raze_settings(), dummy_workspace_files());
+    let planned_build_res = planner.plan_build(
+      &settings_testing::dummy_raze_settings(),
+      dummy_workspace_files(),
+      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+    );
 
     println!("{:#?}", planned_build_res);
     assert!(planned_build_res.unwrap().crate_contexts.is_empty());
@@ -708,8 +897,11 @@ mod tests {
   fn test_plan_build_minimum_root_dependency() {
     let mut fetcher = StubMetadataFetcher::with_metadata(minimum_dependency_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res =
-      planner.plan_build(&settings_testing::dummy_raze_settings(), dummy_workspace_files());
+    let planned_build_res = planner.plan_build(
+      &settings_testing::dummy_raze_settings(),
+      dummy_workspace_files(),
+      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+    );
 
     println!("{:#?}", planned_build_res);
     let planned_build = planned_build_res.unwrap();
@@ -726,7 +918,11 @@ mod tests {
 
     let mut fetcher = StubMetadataFetcher::with_metadata(minimum_dependency_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res = planner.plan_build(&settings, dummy_workspace_files());
+    let planned_build_res = planner.plan_build(
+      &settings,
+      dummy_workspace_files(),
+      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+    );
 
     println!("{:#?}", planned_build_res);
     assert!(planned_build_res.is_err());

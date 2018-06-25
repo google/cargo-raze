@@ -11,14 +11,14 @@ rust_binary(
         {%- for dependency in crate.dependencies %}
         "{{dependency.build_target}}",
         {%- endfor %}
-        {%- for dependency in crate.additional_deps %}
+        {%- for dependency in crate.raze_settings.additional_deps %}
         "{{dependency}}",
         {%- endfor %}
     ],
     rustc_flags = [
         "--cap-lints allow",
-        "--target={{crate.platform_triple}}",
-        {%- for flag in crate.additional_flags %}
+        "--target={{workspace.platform_triple}}",
+        {%- for flag in crate.raze_settings.additional_flags %}
         "{{flag}}",
         {%- endfor %}
     ],

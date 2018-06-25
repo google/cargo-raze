@@ -17,7 +17,7 @@ alias(
     actual = "{{crate.build_path}}:{{crate_name_sanitized}}",
 )
 {%- endif %}
-{%- for aliased_target in crate.extra_aliased_targets %}
+{%- for aliased_target in crate.raze_settings.extra_aliased_targets %}
 alias(
     # Extra aliased target, from raze configuration
     # N.B.: The exact form of this is subject to change.

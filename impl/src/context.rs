@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use settings::CrateSettings;
+
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildDependency {
   pub name: String,
@@ -45,26 +47,26 @@ pub struct GitRepo {
 }
 
 #[derive(Debug, Clone, Serialize)]
+pub struct SourceDetails {
+  pub git_data: Option<GitRepo>,
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct CrateContext {
   pub pkg_name: String,
   pub pkg_version: String,
+  pub raze_settings: CrateSettings,
   pub licenses: Vec<LicenseData>,
   pub features: Vec<String>,
-  pub path: String,
   pub build_path: String,
   pub dependencies: Vec<BuildDependency>,
   pub build_dependencies: Vec<BuildDependency>,
   pub dev_dependencies: Vec<BuildDependency>,
   pub is_root_dependency: bool,
-  pub metadeps: Vec<Metadep>,
-  pub platform_triple: String,
   pub targets: Vec<BuildTarget>,
   pub build_script_target: Option<BuildTarget>,
-  pub additional_deps: Vec<String>,
-  pub additional_flags: Vec<String>,
-  pub extra_aliased_targets: Vec<String>,
-  pub data_attr: Option<String>,
-  pub git_data: Option<GitRepo>,
+  pub source_details: SourceDetails,
+  pub path: String,
   pub sha256: Option<String>,
 }
 

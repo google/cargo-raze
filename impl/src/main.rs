@@ -51,6 +51,7 @@ use rendering::FileOutputs;
 use rendering::RenderDetails;
 use settings::GenMode;
 use settings::RazeSettings;
+use util::PlatformDetails;
 use std::env;
 use std::fs;
 use std::fs::File;
@@ -119,7 +120,10 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
     toml_path: toml_path,
     lock_path_opt: lock_path_opt,
   };
-  let planned_build = planner.plan_build(&settings, files).unwrap();
+  let platform_details = try!(PlatformDetails::new_using_rustc(&settings.target));
+  let planned_build = planner
+    .plan_build(&settings, files, platform_details)
+    .unwrap();
   let mut bazel_renderer = BazelRenderer::new();
   let render_details = RenderDetails {
     path_prefix: "./".to_owned(),
@@ -134,16 +138,11 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
       }
 
       try!(bazel_renderer.render_remote_planned_build(&render_details, &planned_build))
-    },
-    /* exhaustive, we control the definition */
+    } /* exhaustive, we control the definition */
   };
 
   let dry_run = options.flag_dryrun.unwrap_or(false);
-  for FileOutputs {
-    path,
-    contents,
-  } in bazel_file_outputs
-  {
+  for FileOutputs { path, contents } in bazel_file_outputs {
     if !dry_run {
       try!(write_to_file_loudly(&path, &contents));
     } else {

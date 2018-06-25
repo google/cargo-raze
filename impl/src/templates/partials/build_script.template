@@ -13,7 +13,7 @@ rust_binary(
     ],
     rustc_flags = [
         "--cap-lints allow",
-        "--target={{crate.platform_triple}}",
+        "--target={{workspace.platform_triple}}",
     ],
     crate_features = [
       {%- for feature in crate.features %}
@@ -35,7 +35,7 @@ genrule(
     local = 1,
     cmd = "mkdir -p {{ crate_name_sanitized}}_out_dir_outputs/;"
         + " (export CARGO_MANIFEST_DIR=\"$$PWD/$$(dirname $(location :Cargo.toml))\";"
-        + " export TARGET='{{ crate.platform_triple }}';"
+        + " export TARGET='{{ workspace.platform_triple }}';"
         + " export RUST_BACKTRACE=1;"
         {%- for feature in crate.features %}
         + " export CARGO_FEATURE_{{ feature | upper | replace(from="-", to="_") }}=1;"

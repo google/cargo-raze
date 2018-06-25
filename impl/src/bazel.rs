@@ -46,8 +46,14 @@ impl BazelRenderer {
           "templates/partials/rust_library.template",
           include_str!("templates/partials/rust_library.template"),
         ),
-        ("templates/workspace.BUILD.template", include_str!("templates/workspace.BUILD.template")),
-        ("templates/crate.BUILD.template", include_str!("templates/crate.BUILD.template")),
+        (
+          "templates/workspace.BUILD.template",
+          include_str!("templates/workspace.BUILD.template"),
+        ),
+        (
+          "templates/crate.BUILD.template",
+          include_str!("templates/crate.BUILD.template"),
+        ),
         (
           "templates/remote_crates.bzl.template",
           include_str!("templates/remote_crates.bzl.template"),
@@ -68,7 +74,9 @@ impl BazelRenderer {
     let mut context = Context::new();
     context.add("workspace", &workspace_context);
     context.add("crate", &package);
-    self.internal_renderer.render("templates/crate.BUILD.template", &context)
+    self
+      .internal_renderer
+      .render("templates/crate.BUILD.template", &context)
   }
 
   pub fn render_aliases(
@@ -79,7 +87,9 @@ impl BazelRenderer {
     let mut context = Context::new();
     context.add("workspace", &workspace_context);
     context.add("crates", &all_packages);
-    self.internal_renderer.render("templates/workspace.BUILD.template", &context)
+    self
+      .internal_renderer
+      .render("templates/workspace.BUILD.template", &context)
   }
 
   pub fn render_remote_crate(
@@ -90,7 +100,9 @@ impl BazelRenderer {
     let mut context = Context::new();
     context.add("workspace", &workspace_context);
     context.add("crate", &package);
-    self.internal_renderer.render("templates/crate.BUILD.template", &context)
+    self
+      .internal_renderer
+      .render("templates/crate.BUILD.template", &context)
   }
 
   pub fn render_remote_aliases(
@@ -101,7 +113,9 @@ impl BazelRenderer {
     let mut context = Context::new();
     context.add("workspace", &workspace_context);
     context.add("crates", &all_packages);
-    self.internal_renderer.render("templates/workspace.BUILD.template", &context)
+    self
+      .internal_renderer
+      .render("templates/workspace.BUILD.template", &context)
   }
 
   pub fn render_bzl_fetch(
@@ -112,7 +126,9 @@ impl BazelRenderer {
     let mut context = Context::new();
     context.add("workspace", &workspace_context);
     context.add("crates", &all_packages);
-    self.internal_renderer.render("templates/remote_crates.bzl.template", &context)
+    self
+      .internal_renderer
+      .render("templates/remote_crates.bzl.template", &context)
   }
 }
 
@@ -123,8 +139,7 @@ impl BuildRenderer for BazelRenderer {
     planned_build: &PlannedBuild,
   ) -> CargoResult<Vec<FileOutputs>> {
     let &RenderDetails {
-      ref path_prefix,
-      ..
+      ref path_prefix, ..
     } = render_details;
     let &PlannedBuild {
       ref workspace_context,
@@ -165,8 +180,7 @@ impl BuildRenderer for BazelRenderer {
     planned_build: &PlannedBuild,
   ) -> CargoResult<Vec<FileOutputs>> {
     let &RenderDetails {
-      ref path_prefix,
-      ..
+      ref path_prefix, ..
     } = render_details;
     let &PlannedBuild {
       ref workspace_context,
@@ -182,7 +196,10 @@ impl BuildRenderer for BazelRenderer {
     });
 
     for package in crate_contexts {
-      let build_file_path = format!("remote/{}-{}.BUILD", &package.pkg_name, &package.pkg_version);
+      let build_file_path = format!(
+        "remote/{}-{}.BUILD",
+        &package.pkg_name, &package.pkg_version
+      );
       let rendered_crate_build_file = try!(
         self
           .render_remote_crate(&workspace_context, &package)
@@ -227,6 +244,7 @@ mod tests {
   use hamcrest::core::expect;
   use hamcrest::prelude::*;
   use planning::PlannedBuild;
+  use settings::CrateSettings;
   use rendering::FileOutputs;
   use rendering::RenderDetails;
 
@@ -254,13 +272,12 @@ mod tests {
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
       path: "vendor/test-binary-1.1.1/".to_owned(),
       licenses: Vec::new(),
+      raze_settings: CrateSettings::default(),
       dependencies: Vec::new(),
       build_dependencies: Vec::new(),
       dev_dependencies: Vec::new(),
       is_root_dependency: true,
       build_path: "@raze__test_binary__1_1_1//".to_owned(),
-      metadeps: Vec::new(),
-      platform_triple: "irrelevant".to_owned(),
       targets: vec![
         BuildTarget {
           name: "some_binary".to_owned(),
@@ -269,11 +286,7 @@ mod tests {
         },
       ],
       build_script_target: None,
-      additional_deps: Vec::new(),
-      additional_flags: Vec::new(),
-      extra_aliased_targets: Vec::new(),
-      data_attr: None,
-      git_data: None,
+      source_details: SourceDetails { git_data: None },
       sha256: None,
     }
   }
@@ -283,6 +296,7 @@ mod tests {
       pkg_name: "test-library".to_owned(),
       pkg_version: "1.1.1".to_owned(),
       licenses: Vec::new(),
+      raze_settings: CrateSettings::default(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
       path: "vendor/test-library-1.1.1/".to_owned(),
       dependencies: Vec::new(),
@@ -290,8 +304,6 @@ mod tests {
       dev_dependencies: Vec::new(),
       is_root_dependency: true,
       build_path: "@raze__test_library__1_1_1//".to_owned(),
-      metadeps: Vec::new(),
-      platform_triple: "irrelevant".to_owned(),
       targets: vec![
         BuildTarget {
           name: "some_library".to_owned(),
@@ -300,11 +312,7 @@ mod tests {
         },
       ],
       build_script_target: None,
-      additional_deps: Vec::new(),
-      additional_flags: Vec::new(),
-      extra_aliased_targets: Vec::new(),
-      data_attr: None,
-      git_data: None,
+      source_details: SourceDetails { git_data: None },
       sha256: None,
     }
   }
@@ -330,15 +338,24 @@ mod tests {
   #[test]
   fn all_plans_contain_root_build_file() {
     let file_outputs = render_crates_for_test(Vec::new());
-    let file_names = file_outputs.iter().map(|output| output.path.as_ref()).collect::<Vec<&str>>();
+    let file_names = file_outputs
+      .iter()
+      .map(|output| output.path.as_ref())
+      .collect::<Vec<&str>>();
 
-    assert_that!(&file_names, contains(vec!["./some_render_prefix/BUILD"]).exactly());
+    assert_that!(
+      &file_names,
+      contains(vec!["./some_render_prefix/BUILD"]).exactly()
+    );
   }
 
   #[test]
   fn crates_generate_build_files() {
     let file_outputs = render_crates_for_test(vec![dummy_library_crate()]);
-    let file_names = file_outputs.iter().map(|output| output.path.as_ref()).collect::<Vec<&str>>();
+    let file_names = file_outputs
+      .iter()
+      .map(|output| output.path.as_ref())
+      .collect::<Vec<&str>>();
 
     assert_that!(
       &file_names,
