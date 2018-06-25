@@ -13,7 +13,7 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     deps = [
         {%- for dependency in crate.dependencies %}
-        "{{dependency.build_target}}",
+        "{{dependency.buildable_target}}",
         {%- endfor %}
         {%- for dependency in crate.raze_settings.additional_deps %}
         "{{dependency}}",
@@ -29,8 +29,8 @@ rust_library(
     {%- if crate.build_script_target %}
     out_dir_tar = ":{{ crate.pkg_name | replace(from="-", to="_")}}_build_script_executor",
     {%- endif %}
-    {%- if crate.data_attr %}
-    data = {{crate.data_attr}},
+    {%- if crate.raze_settings.data_attr %}
+    data = {{crate.raze_settings.data_attr}},
     {%- endif %}
     version = "{{ crate.pkg_version }}",
     crate_features = [

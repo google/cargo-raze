@@ -213,9 +213,8 @@ impl CrateCatalog {
     let mut package_id_to_entries_idx = HashMap::new();
 
     for (idx, crate_catalog_entry) in crate_catalog_entries.iter().enumerate() {
-      debug_assert!(
-        None == package_id_to_entries_idx.insert(crate_catalog_entry.package.id.clone(), idx)
-      );
+      let existing_value = package_id_to_entries_idx.insert(crate_catalog_entry.package.id.clone(), idx);
+      assert!(None == existing_value);
     }
 
     CrateCatalog {

@@ -121,9 +121,8 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
     lock_path_opt: lock_path_opt,
   };
   let platform_details = try!(PlatformDetails::new_using_rustc(&settings.target));
-  let planned_build = planner
-    .plan_build(&settings, files, platform_details)
-    .unwrap();
+  let planned_build = try!(planner
+    .plan_build(&settings, files, platform_details));
   let mut bazel_renderer = BazelRenderer::new();
   let render_details = RenderDetails {
     path_prefix: "./".to_owned(),
