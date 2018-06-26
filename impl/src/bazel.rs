@@ -155,7 +155,7 @@ impl BuildRenderer for BazelRenderer {
           .map_err(|e| CargoError::from(e.to_string()))
       );
       file_outputs.push(FileOutputs {
-        path: package.path.clone(),
+        path: format!("{}/{}", path_prefix, package.expected_build_path),
         contents: rendered_crate_build_file,
       })
     }
@@ -201,7 +201,7 @@ impl BuildRenderer for BazelRenderer {
           .map_err(|e| CargoError::from(e.to_string()))
       );
       file_outputs.push(FileOutputs {
-        path: package.path.clone(),
+        path: format!("{}/{}", path_prefix, package.expected_build_path),
         contents: rendered_crate_build_file,
       })
     }
@@ -265,14 +265,14 @@ mod tests {
       pkg_name: "test-binary".to_owned(),
       pkg_version: "1.1.1".to_owned(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
-      path: "vendor/test-binary-1.1.1/".to_owned(),
+      expected_build_path: "vendor/test-binary-1.1.1/BUILD".to_owned(),
       licenses: Vec::new(),
       raze_settings: CrateSettings::default(),
       dependencies: Vec::new(),
       build_dependencies: Vec::new(),
       dev_dependencies: Vec::new(),
       is_root_dependency: true,
-      build_path: "@raze__test_binary__1_1_1//".to_owned(),
+      workspace_path_to_crate: "@raze__test_binary__1_1_1//".to_owned(),
       targets: vec![
         BuildableTarget {
           name: "some_binary".to_owned(),
@@ -293,12 +293,12 @@ mod tests {
       licenses: Vec::new(),
       raze_settings: CrateSettings::default(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
-      path: "vendor/test-library-1.1.1/".to_owned(),
+      expected_build_path: "vendor/test-library-1.1.1/BUILD".to_owned(),
       dependencies: Vec::new(),
       build_dependencies: Vec::new(),
       dev_dependencies: Vec::new(),
       is_root_dependency: true,
-      build_path: "@raze__test_library__1_1_1//".to_owned(),
+      workspace_path_to_crate: "@raze__test_library__1_1_1//".to_owned(),
       targets: vec![
         BuildableTarget {
           name: "some_library".to_owned(),

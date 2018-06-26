@@ -412,14 +412,14 @@ impl<'planner> CrateSubplanner<'planner> {
       dependencies: normal_deps,
       build_dependencies: build_deps,
       dev_dependencies: dev_deps,
-      build_path: self
+      workspace_path_to_crate: self
         .crate_catalog_entry
         .workspace_path(&self.settings),
       build_script_target: build_script_target_opt,
       targets: targets,
       raze_settings: self.crate_settings.clone(),
       source_details: self.produce_source_details(),
-      path: self
+      expected_build_path: self
         .crate_catalog_entry
         .local_build_path(&self.settings),
       sha256: package.sha256.clone(),
@@ -932,7 +932,7 @@ mod tests {
   fn test_plan_build_missing_resolve_panics() {
     let mut fetcher = StubMetadataFetcher::with_metadata(metadata_testing::dummy_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let planned_build_res = planner.plan_build(
+    let _ = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
       dummy_workspace_files(),
       PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),

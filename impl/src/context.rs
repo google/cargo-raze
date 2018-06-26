@@ -58,7 +58,7 @@ pub struct CrateContext {
   pub raze_settings: CrateSettings,
   pub licenses: Vec<LicenseData>,
   pub features: Vec<String>,
-  pub build_path: String,
+  pub workspace_path_to_crate: String,
   pub dependencies: Vec<BuildableDependency>,
   pub build_dependencies: Vec<BuildableDependency>,
   pub dev_dependencies: Vec<BuildableDependency>,
@@ -72,7 +72,7 @@ pub struct CrateContext {
   // somewhere more explicit.
   //
   // I'm punting on this now because this requires a more serious look at the renderer code.
-  pub path: String,
+  pub expected_build_path: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
