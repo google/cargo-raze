@@ -400,7 +400,7 @@ impl<'planner> CrateSubplanner<'planner> {
       dev_dependencies: dev_deps,
       build_path: self
         .crate_catalog_entry
-        .workspace_path_and_default_target(&self.settings),
+        .workspace_path(&self.settings),
       build_script_target: build_script_target_opt,
       targets: targets,
       raze_settings: self.crate_settings.clone(),
@@ -912,7 +912,8 @@ mod tests {
   }
 
   #[test]
-  fn test_plan_build_missing_resolve_fails() {
+  #[should_panic]
+  fn test_plan_build_missing_resolve_panics() {
     let mut fetcher = StubMetadataFetcher::with_metadata(metadata_testing::dummy_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     let planned_build_res = planner.plan_build(
@@ -920,9 +921,6 @@ mod tests {
       dummy_workspace_files(),
       PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
     );
-
-    println!("{:#?}", planned_build_res);
-    assert!(planned_build_res.is_err());
   }
 
   #[test]
