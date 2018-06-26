@@ -20,9 +20,9 @@ use planning::PlannedBuild;
 use rendering::BuildRenderer;
 use rendering::FileOutputs;
 use rendering::RenderDetails;
-use tera;
 use tera::Context;
 use tera::Tera;
+use tera;
 
 pub struct BazelRenderer {
   internal_renderer: Tera,
@@ -149,14 +149,13 @@ impl BuildRenderer for BazelRenderer {
     let mut file_outputs = Vec::new();
 
     for package in crate_contexts {
-      let build_file_path = format!("{}/{}BUILD", &path_prefix, &package.path);
       let rendered_crate_build_file = try!(
         self
           .render_crate(&workspace_context, &package)
           .map_err(|e| CargoError::from(e.to_string()))
       );
       file_outputs.push(FileOutputs {
-        path: build_file_path,
+        path: format!("{}/{}", path_prefix, package.expected_build_path),
         contents: rendered_crate_build_file,
       })
     }
@@ -196,17 +195,13 @@ impl BuildRenderer for BazelRenderer {
     });
 
     for package in crate_contexts {
-      let build_file_path = format!(
-        "remote/{}-{}.BUILD",
-        &package.pkg_name, &package.pkg_version
-      );
       let rendered_crate_build_file = try!(
         self
           .render_remote_crate(&workspace_context, &package)
           .map_err(|e| CargoError::from(e.to_string()))
       );
       file_outputs.push(FileOutputs {
-        path: build_file_path,
+        path: format!("{}/{}", path_prefix, package.expected_build_path),
         contents: rendered_crate_build_file,
       })
     }
@@ -244,6 +239,7 @@ mod tests {
   use hamcrest::core::expect;
   use hamcrest::prelude::*;
   use planning::PlannedBuild;
+  use settings::CrateSettings;
   use rendering::FileOutputs;
   use rendering::RenderDetails;
 
@@ -269,28 +265,23 @@ mod tests {
       pkg_name: "test-binary".to_owned(),
       pkg_version: "1.1.1".to_owned(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
-      path: "vendor/test-binary-1.1.1/".to_owned(),
+      expected_build_path: "vendor/test-binary-1.1.1/BUILD".to_owned(),
       licenses: Vec::new(),
+      raze_settings: CrateSettings::default(),
       dependencies: Vec::new(),
       build_dependencies: Vec::new(),
       dev_dependencies: Vec::new(),
       is_root_dependency: true,
-      build_path: "@raze__test_binary__1_1_1//".to_owned(),
-      metadeps: Vec::new(),
-      platform_triple: "irrelevant".to_owned(),
+      workspace_path_to_crate: "@raze__test_binary__1_1_1//".to_owned(),
       targets: vec![
-        BuildTarget {
+        BuildableTarget {
           name: "some_binary".to_owned(),
           kind: "bin".to_owned(),
           path: "bin/main.rs".to_owned(),
         },
       ],
       build_script_target: None,
-      additional_deps: Vec::new(),
-      additional_flags: Vec::new(),
-      extra_aliased_targets: Vec::new(),
-      data_attr: None,
-      git_data: None,
+      source_details: SourceDetails { git_data: None },
       sha256: None,
     }
   }
@@ -300,28 +291,23 @@ mod tests {
       pkg_name: "test-library".to_owned(),
       pkg_version: "1.1.1".to_owned(),
       licenses: Vec::new(),
+      raze_settings: CrateSettings::default(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
-      path: "vendor/test-library-1.1.1/".to_owned(),
+      expected_build_path: "vendor/test-library-1.1.1/BUILD".to_owned(),
       dependencies: Vec::new(),
       build_dependencies: Vec::new(),
       dev_dependencies: Vec::new(),
       is_root_dependency: true,
-      build_path: "@raze__test_library__1_1_1//".to_owned(),
-      metadeps: Vec::new(),
-      platform_triple: "irrelevant".to_owned(),
+      workspace_path_to_crate: "@raze__test_library__1_1_1//".to_owned(),
       targets: vec![
-        BuildTarget {
+        BuildableTarget {
           name: "some_library".to_owned(),
           kind: "lib".to_owned(),
           path: "path/lib.rs".to_owned(),
         },
       ],
       build_script_target: None,
-      additional_deps: Vec::new(),
-      additional_flags: Vec::new(),
-      extra_aliased_targets: Vec::new(),
-      data_attr: None,
-      git_data: None,
+      source_details: SourceDetails { git_data: None },
       sha256: None,
     }
   }

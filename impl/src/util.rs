@@ -16,9 +16,84 @@ use cargo::CargoError;
 use cargo::core::TargetKind;
 use cargo::util::CargoResult;
 use cargo::util::Cfg;
+use slug;
+use std::fmt;
+use std::iter::Iterator;
 use std::process::Command;
-use std::str;
 use std::str::FromStr;
+use std::str;
+
+pub struct PlatformDetails {
+  target_triple: String,
+  attrs: Vec<Cfg>,
+}
+
+pub struct LimitedResults<T> {
+  pub items: Vec<T>,
+  pub count_extras: usize,
+}
+
+impl PlatformDetails {
+  pub fn new_using_rustc(target_triple: &str) -> CargoResult<PlatformDetails> {
+    let attrs = try!(fetch_attrs(target_triple));
+
+    Ok(PlatformDetails::new(target_triple.to_owned(), attrs))
+  }
+
+  pub fn new(target_triple: String, attrs: Vec<Cfg>) -> PlatformDetails {
+    PlatformDetails {
+      target_triple: target_triple,
+      attrs: attrs,
+    }
+  }
+
+  #[allow(dead_code)]
+  pub fn target_triple(&self) -> &str {
+    &self.target_triple
+  }
+
+  pub fn attrs(&self) -> &Vec<Cfg> {
+    &self.attrs
+  }
+}
+
+impl<T> LimitedResults<T> {
+  pub fn is_empty(&self) -> bool {
+    self.items.is_empty()
+  }
+}
+
+impl<T: fmt::Debug> fmt::Debug for LimitedResults<T> {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    if self.count_extras > 0 {
+      write!(f, "{:?} and {} others", &self.items, self.count_extras)
+    } else {
+      write!(f, "{:?}", &self.items)
+    }
+  }
+}
+
+pub fn collect_up_to<T, U: Iterator<Item = T>>(max: usize, iter: U) -> LimitedResults<T> {
+  let mut items = Vec::new();
+  let mut count_extras = 0;
+  for item in iter {
+    // Spill extra crates into a counter to avoid overflowing terminal
+    if items.len() < max {
+      items.push(item);
+    } else {
+      count_extras += 1;
+    }
+  }
+
+  LimitedResults {
+    items: items,
+    count_extras: count_extras,
+  }
+}
+
+pub fn sanitize_ident(ident: &str) -> String {
+  slug::slugify(&ident).replace("-", "_")
+}
 
 /**
  * Extracts consistently named Strings for the provided TargetKind.
@@ -37,7 +112,7 @@ pub fn kind_to_kinds(kind: &TargetKind) -> Vec<String> {
 }
 
 /** Gets the proper system attributes for the provided platform triple using rustc. */
-pub fn fetch_attrs(target: &str) -> CargoResult<Vec<Cfg>> {
+fn fetch_attrs(target: &str) -> CargoResult<Vec<Cfg>> {
   let args = vec![format!("--target={}", target), "--print=cfg".to_owned()];
 
   let output = try!(
@@ -70,4 +145,33 @@ pub fn fetch_attrs(target: &str) -> CargoResult<Vec<Cfg>> {
       .map(|cfg| cfg.expect("attrs from rustc should be parsable into Cargo Cfg"))
       .collect(),
   )
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn test_collect_up_to_works_for_zero() {
+    let test_items: Vec<u32> = Vec::new();
+    let results = collect_up_to(10, test_items.iter());
+    assert!(results.is_empty());
+  }
+
+  #[test]
+  fn test_collect_up_to_works_for_one() {
+    let test_items = vec![1];
+    let results = collect_up_to(10, test_items.iter());
+    assert_eq!(results.items, vec![&1]);
+    assert!(!results.is_empty());
+  }
+
+  #[test]
+  fn test_collect_up_to_works_for_others_and_bounds_correctly() {
+    let test_items = vec![1, 2, 3];
+    let results = collect_up_to(2, test_items.iter());
+    assert_eq!(results.items, vec![&1, &2]);
+    assert_eq!(results.count_extras, 1);
+    assert!(!results.is_empty());
+  }
 }

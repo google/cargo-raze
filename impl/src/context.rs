@@ -12,15 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use settings::CrateSettings;
+
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
-pub struct BuildDependency {
+pub struct BuildableDependency {
   pub name: String,
   pub version: String,
-  pub build_target: String,
+  pub buildable_target: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
-pub struct BuildTarget {
+pub struct BuildableTarget {
   pub name: String,
   pub kind: String,
   pub path: String,
@@ -45,45 +47,44 @@ pub struct GitRepo {
 }
 
 #[derive(Debug, Clone, Serialize)]
+pub struct SourceDetails {
+  pub git_data: Option<GitRepo>,
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct CrateContext {
   pub pkg_name: String,
   pub pkg_version: String,
+  pub raze_settings: CrateSettings,
   pub licenses: Vec<LicenseData>,
   pub features: Vec<String>,
-  pub path: String,
-  pub build_path: String,
-  pub dependencies: Vec<BuildDependency>,
-  pub build_dependencies: Vec<BuildDependency>,
-  pub dev_dependencies: Vec<BuildDependency>,
+  pub workspace_path_to_crate: String,
+  pub dependencies: Vec<BuildableDependency>,
+  pub build_dependencies: Vec<BuildableDependency>,
+  pub dev_dependencies: Vec<BuildableDependency>,
   pub is_root_dependency: bool,
-  pub metadeps: Vec<Metadep>,
-  pub platform_triple: String,
-  pub targets: Vec<BuildTarget>,
-  pub build_script_target: Option<BuildTarget>,
-  pub additional_deps: Vec<String>,
-  pub additional_flags: Vec<String>,
-  pub extra_aliased_targets: Vec<String>,
-  pub data_attr: Option<String>,
-  pub git_data: Option<GitRepo>,
+  pub targets: Vec<BuildableTarget>,
+  pub build_script_target: Option<BuildableTarget>,
+  pub source_details: SourceDetails,
   pub sha256: Option<String>,
+  // TODO(acmcarther): This is used internally by renderer to know where to put the build file. It
+  // probably should live somewhere else. Renderer params (separate from context) should live
+  // somewhere more explicit.
+  //
+  // I'm punting on this now because this requires a more serious look at the renderer code.
+  pub expected_build_path: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct WorkspaceContext {
-  /**
-   * The bazel path prefix to the vendor directory
-   */
+  // The bazel path prefix to the vendor directory
   pub workspace_path: String,
 
-  /**
-   * The compilation target triple.
-   */
+  // The compilation target triple.
   pub platform_triple: String,
 
-  /**
-   * The generated new_http_library Bazel workspace prefix.
-   *
-   * This has no effect unless the GenMode setting is Remote.
-   */
+  // The generated new_http_library Bazel workspace prefix.
+  //
+  // This has no effect unless the GenMode setting is Remote.
   pub gen_workspace_prefix: String,
 }
