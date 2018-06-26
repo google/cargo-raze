@@ -181,6 +181,20 @@ impl CrateCatalogEntry {
     format!("./{}{}", VENDOR_DIR, &self.package_ident)
   }
 
+  /** Yields the expected location of the build file (relative to execution path). */
+  pub fn local_build_path(&self, settings: &RazeSettings) -> String {
+    match settings.genmode {
+      GenMode::Remote => format!(
+        "remote/{}.BUILD",
+        &self.package_ident
+      ),
+      GenMode::Vendored => format!(
+        "vendor/{}/BUILD",
+        &self.package_ident
+      ),
+    }
+  }
+
   /** Yields the precise path to this dependency for the provided settings. */
   #[allow(dead_code)]
   pub fn workspace_path(&self, settings: &RazeSettings) -> String {
@@ -405,7 +419,9 @@ impl<'planner> CrateSubplanner<'planner> {
       targets: targets,
       raze_settings: self.crate_settings.clone(),
       source_details: self.produce_source_details(),
-      path: format!("./vendor/{}-{}", package.name, package.version),
+      path: self
+        .crate_catalog_entry
+        .local_build_path(&self.settings),
       sha256: package.sha256.clone(),
     })
   }

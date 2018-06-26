@@ -149,14 +149,13 @@ impl BuildRenderer for BazelRenderer {
     let mut file_outputs = Vec::new();
 
     for package in crate_contexts {
-      let build_file_path = format!("{}/{}BUILD", &path_prefix, &package.path);
       let rendered_crate_build_file = try!(
         self
           .render_crate(&workspace_context, &package)
           .map_err(|e| CargoError::from(e.to_string()))
       );
       file_outputs.push(FileOutputs {
-        path: build_file_path,
+        path: package.path.clone(),
         contents: rendered_crate_build_file,
       })
     }
@@ -196,17 +195,13 @@ impl BuildRenderer for BazelRenderer {
     });
 
     for package in crate_contexts {
-      let build_file_path = format!(
-        "remote/{}-{}.BUILD",
-        &package.pkg_name, &package.pkg_version
-      );
       let rendered_crate_build_file = try!(
         self
           .render_remote_crate(&workspace_context, &package)
           .map_err(|e| CargoError::from(e.to_string()))
       );
       file_outputs.push(FileOutputs {
-        path: build_file_path,
+        path: package.path.clone(),
         contents: rendered_crate_build_file,
       })
     }
