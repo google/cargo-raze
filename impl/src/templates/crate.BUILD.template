@@ -22,7 +22,6 @@ load(
     "rust_library",
     "rust_binary",
     "rust_test",
-    "rust_bench_test",
 )
 
 {% set crate_name_sanitized = crate.pkg_name | replace(from="-", to="_") %}
