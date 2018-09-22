@@ -72,8 +72,8 @@ impl BazelRenderer {
     package: &CrateContext,
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
-    context.add("workspace", &workspace_context);
-    context.add("crate", &package);
+    context.insert("workspace", &workspace_context);
+    context.insert("crate", &package);
     self
       .internal_renderer
       .render("templates/crate.BUILD.template", &context)
@@ -85,8 +85,8 @@ impl BazelRenderer {
     all_packages: &Vec<CrateContext>,
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
-    context.add("workspace", &workspace_context);
-    context.add("crates", &all_packages);
+    context.insert("workspace", &workspace_context);
+    context.insert("crates", &all_packages);
     self
       .internal_renderer
       .render("templates/workspace.BUILD.template", &context)
@@ -98,8 +98,8 @@ impl BazelRenderer {
     package: &CrateContext,
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
-    context.add("workspace", &workspace_context);
-    context.add("crate", &package);
+    context.insert("workspace", &workspace_context);
+    context.insert("crate", &package);
     self
       .internal_renderer
       .render("templates/crate.BUILD.template", &context)
@@ -111,8 +111,8 @@ impl BazelRenderer {
     all_packages: &Vec<CrateContext>,
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
-    context.add("workspace", &workspace_context);
-    context.add("crates", &all_packages);
+    context.insert("workspace", &workspace_context);
+    context.insert("crates", &all_packages);
     self
       .internal_renderer
       .render("templates/workspace.BUILD.template", &context)
@@ -124,8 +124,8 @@ impl BazelRenderer {
     all_packages: &Vec<CrateContext>,
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
-    context.add("workspace", &workspace_context);
-    context.add("crates", &all_packages);
+    context.insert("workspace", &workspace_context);
+    context.insert("crates", &all_packages);
     self
       .internal_renderer
       .render("templates/remote_crates.bzl.template", &context)
