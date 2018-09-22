@@ -8,8 +8,6 @@ package(default_visibility = ["//visibility:public"])
 licenses([
   "notice" # See individual crates for specific licenses
 ])
-
-
 alias(
     name = "env_logger",
     actual = "@non_cratesio__env_logger__0_5_5//:env_logger",

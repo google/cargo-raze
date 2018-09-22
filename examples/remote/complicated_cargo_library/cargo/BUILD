@@ -8,8 +8,6 @@ package(default_visibility = ["//visibility:public"])
 licenses([
   "notice" # See individual crates for specific licenses
 ])
-
-
 alias(
     name = "regex",
     actual = "@complicated_cargo_library__regex__0_2_6//:regex",
