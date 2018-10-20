@@ -39,11 +39,11 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use std::str;
 use util::PlatformDetails;
+use util::RazeError;
+use util::PLEASE_FILE_A_BUG;
 use util;
 
 pub const VENDOR_DIR: &'static str = "vendor/";
-pub const PLEASE_FILE_A_BUG: &'static str =
-  "Please file an issue at github.com/google/cargo-raze with details.";
 
 /** An entity that can produce an organized, planned build ready to be rendered. */
 pub trait BuildPlanner {
@@ -530,10 +530,14 @@ impl<'planner> CrateSubplanner<'planner> {
         Some("dev") => dev_dep_names.push(dep.name.clone()),
         Some("build") => build_dep_names.push(dep.name.clone()),
         something_else => {
-          return Err(CargoError::from(format!(
-            "Unhandlable dependency type {:?} for {} on {} detected! {}",
-            something_else, package.name, dep.name, PLEASE_FILE_A_BUG
-          )))
+          return Err(CargoError::from(RazeError::Planning {
+            dependency_name_opt: Some(package.name.to_string()),
+            message: format!(
+              "Unhandlable dependency type {:?} on {} detected! {}",
+              something_else,
+              dep.name,
+              PLEASE_FILE_A_BUG)
+          }))
         }
       }
     }
@@ -671,10 +675,10 @@ impl<'planner> CrateSubplanner<'planner> {
       }
 
       // Reached filesystem root and did not find Git repo
-      Err(CargoError::from(format!(
+      Err(CargoError::from(RazeError::Generic(format!(
         "Unable to locate git repository root for manifest at {:?}. {}",
         manifest_path, PLEASE_FILE_A_BUG
-      )))
+      ))))
     }
   }
 }
@@ -721,6 +725,7 @@ mod checks {
   use std::env;
   use std::fs;
   use util::collect_up_to;
+  use util::RazeError;
 
   // TODO(acmcarther): Consider including a switch to disable limiting
   const MAX_DISPLAYED_MISSING_VENDORED_CRATES: usize = 5;
@@ -748,11 +753,13 @@ mod checks {
     let expected_full_path = env::current_dir()
       .unwrap()
       .join(format!("./{}", VENDOR_DIR));
-    return Err(CargoError::from(format!(
-      "Failed to find expected vendored crates in {:?}: {:?}. Did you forget to run cargo-vendor?",
-      expected_full_path.to_str(),
-      limited_missing_crates
-    )));
+    return Err(CargoError::from(RazeError::Planning {
+          dependency_name_opt: None,
+          message: format!(
+            "Failed to find expected vendored crates in {:?}: {:?}. Did you forget to run cargo-vendor?",
+            expected_full_path.to_str(),
+            limited_missing_crates)
+    }));
   }
 
   pub fn check_resolve_matches_packages(metadata: &Metadata) -> CargoResult<()> {
@@ -778,11 +785,13 @@ mod checks {
     }
 
     // Oops, missing some package metadata. Yield a nice message
-    return Err(CargoError::from(format!(
-      "Failed to find metadata.packages which were expected from metadata.resolve {:?}. {}",
-      limited_missing_node_ids,
-      ::planning::PLEASE_FILE_A_BUG
-    )));
+    return Err(CargoError::from(RazeError::Planning {
+      dependency_name_opt: None,
+      message: format!(
+        "Failed to find metadata.packages which were expected from metadata.resolve {:?}. {}",
+        limited_missing_node_ids,
+        ::util::PLEASE_FILE_A_BUG)
+    }));
   }
 
   pub fn warn_unused_settings(

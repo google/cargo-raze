@@ -20,6 +20,7 @@ use planning::PlannedBuild;
 use rendering::BuildRenderer;
 use rendering::FileOutputs;
 use rendering::RenderDetails;
+use util::RazeError;
 use tera::Context;
 use tera::Tera;
 use tera;
@@ -152,7 +153,10 @@ impl BuildRenderer for BazelRenderer {
       let rendered_crate_build_file = try!(
         self
           .render_crate(&workspace_context, &package)
-          .map_err(|e| CargoError::from(e.to_string()))
+          .map_err(|e| CargoError::from(RazeError::Rendering {
+            crate_name_opt: None,
+            message: e.to_string(),
+          }))
       );
       file_outputs.push(FileOutputs {
         path: format!("{}/{}", path_prefix, package.expected_build_path),
@@ -164,7 +168,10 @@ impl BuildRenderer for BazelRenderer {
     let rendered_alias_build_file = try!(
       self
         .render_aliases(&workspace_context, &crate_contexts)
-        .map_err(|e| CargoError::from(e.to_string()))
+        .map_err(|e| CargoError::from(RazeError::Rendering {
+          crate_name_opt: None,
+          message: e.to_string(),
+        }))
     );
     file_outputs.push(FileOutputs {
       path: build_file_path,
@@ -198,7 +205,10 @@ impl BuildRenderer for BazelRenderer {
       let rendered_crate_build_file = try!(
         self
           .render_remote_crate(&workspace_context, &package)
-          .map_err(|e| CargoError::from(e.to_string()))
+          .map_err(|e| CargoError::from(RazeError::Rendering {
+            crate_name_opt: Some(package.pkg_name.to_owned()),
+            message: e.to_string(),
+          }))
       );
       file_outputs.push(FileOutputs {
         path: format!("{}/{}", path_prefix, package.expected_build_path),
@@ -210,7 +220,10 @@ impl BuildRenderer for BazelRenderer {
     let rendered_alias_build_file = try!(
       self
         .render_remote_aliases(&workspace_context, &crate_contexts)
-        .map_err(|e| CargoError::from(e.to_string()))
+        .map_err(|e| CargoError::from(RazeError::Rendering {
+          crate_name_opt: None,
+          message: e.to_string(),
+        }))
     );
     file_outputs.push(FileOutputs {
       path: alias_file_path,
@@ -221,7 +234,10 @@ impl BuildRenderer for BazelRenderer {
     let rendered_bzl_fetch_file = try!(
       self
         .render_bzl_fetch(&workspace_context, &crate_contexts)
-        .map_err(|e| CargoError::from(e.to_string()))
+        .map_err(|e| CargoError::from(RazeError::Rendering {
+          crate_name_opt: None,
+          message: e.to_string(),
+        }))
     );
     file_outputs.push(FileOutputs {
       path: bzl_fetch_file_path,
