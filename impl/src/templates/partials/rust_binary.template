@@ -17,7 +17,6 @@ rust_binary(
     ],
     rustc_flags = [
         "--cap-lints allow",
-        "--target={{workspace.platform_triple}}",
         {%- for flag in crate.raze_settings.additional_flags %}
         "{{flag}}",
         {%- endfor %}
