@@ -22,6 +22,65 @@ use std::iter::Iterator;
 use std::process::Command;
 use std::str::FromStr;
 use std::str;
+use std::error::Error as StdError;
+use failure::Error;
+use failure::Fail;
+use failure::Context;
+
+pub const PLEASE_FILE_A_BUG: &'static str =
+  "Please file an issue at github.com/google/cargo-raze with details.";
+
+#[derive(Debug)]
+pub enum RazeError {
+  Generic(String),
+  Internal(String),
+  Rendering {
+    crate_name_opt: Option<String>,
+    message: String,
+  },
+  Planning {
+    dependency_name_opt: Option<String>,
+    message: String,
+  },
+  Config {
+    field_path_opt: Option<String>,
+    message: String,
+  },
+}
+
+impl StdError for RazeError {
+}
+
+impl fmt::Display for RazeError {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    match &self {
+      RazeError::Generic(s) => {
+        write!(f, "Raze failed with cause: \"{}\"", s)
+      },
+      RazeError::Internal(s) => {
+        write!(f, "Raze failed unexpectedly with cause: \"{}\". {}", s, PLEASE_FILE_A_BUG)
+      },
+      RazeError::Config { field_path_opt, message } => {
+        match field_path_opt {
+          Some(path) => write!(f, "Raze config problem in field \"{}\" with cause: \"{}\"", path, message),
+          None => write!(f, "Raze config problem with cause: \"{}\"", message),
+        }
+      },
+      RazeError::Rendering { crate_name_opt, message } => {
+        match crate_name_opt {
+          Some(name) => write!(f, "Raze failed to render crate \"{}\" with cause: \"{}\"", name, message),
+          None => write!(f, "Raze failed to render with cause: \"{}\"", message),
+        }
+      },
+      RazeError::Planning { dependency_name_opt, message } => {
+        match dependency_name_opt {
+          Some(dep_name) => write!(f, "Raze failed to plan crate \"{}\" with cause: \"{}\"", dep_name, message),
+          None => write!(f, "Raze failed to render with cause: \"{}\"", message),
+        }
+      }
+    }
+  }
+}
 
 pub struct PlatformDetails {
   target_triple: String,
@@ -119,10 +178,7 @@ fn fetch_attrs(target: &str) -> CargoResult<Vec<Cfg>> {
     Command::new("rustc")
       .args(&args)
       .output()
-      .map_err(|_| CargoError::from(format!(
-        "could not run rustc to fetch attrs for target {}",
-        target
-      )))
+      .map_err(CargoError::from)
   );
 
   if !output.status.success() {

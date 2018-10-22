@@ -14,6 +14,7 @@
 
 use cargo::CargoError;
 use cargo::core::Workspace;
+use cargo::core::summary::FeatureValue as CargoFeatureValue;
 use cargo::core::dependency::Kind as CargoKind;
 use cargo::ops::Packages;
 use cargo::ops;
@@ -26,10 +27,10 @@ use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 use tempdir::TempDir;
+use util::RazeError;
 use util;
 
 pub type PackageId = String;
-pub type FeatureOrDependency = String;
 pub type Kind = String;
 pub type TargetSpec = String;
 
@@ -85,7 +86,7 @@ pub struct Package {
   pub source: Option<String>,
   pub dependencies: Vec<Dependency>,
   pub targets: Vec<Target>,
-  pub features: HashMap<String, Vec<FeatureOrDependency>>,
+  pub features: HashMap<String, Vec<String>>,
   pub manifest_path: String,
   pub sha256: Option<String>,
 }
@@ -106,7 +107,7 @@ pub struct Dependency {
   #[serde(default = "default_dependency_field_optional")] pub optional: bool,
   #[serde(default = "default_dependency_field_uses_default_features")]
   pub uses_default_features: bool,
-  pub features: Vec<FeatureOrDependency>,
+  pub features: Vec<String>,
   pub target: Option<TargetSpec>,
 }
 
@@ -184,20 +185,15 @@ impl MetadataFetcher for CargoSubcommandMetadataFetcher {
     // UNWRAP: Guarded by function assertion
     let cargo_tempdir = {
       let dir = try!(
-        TempDir::new("cargo_raze_metadata_dir").map_err(|_| CargoError::from("creating tempdir"))
+        TempDir::new("cargo_raze_metadata_dir").map_err(CargoError::from)
       );
       {
         let dir_path = dir.path();
         let new_toml_path = dir_path.join(files.toml_path.file_name().unwrap());
-        try!(
-          fs::copy(files.toml_path, new_toml_path)
-            .map_err(|_| CargoError::from("copying cargo toml"))
-        );
+        try!(fs::copy(files.toml_path, new_toml_path).map_err(CargoError::from));
         if let Some(lock_path) = files.lock_path_opt {
           let new_lock_path = dir_path.join(lock_path.file_name().unwrap());
-          try!(
-            fs::copy(lock_path, new_lock_path).map_err(|_| CargoError::from("copying cargo lock"))
-          );
+          try!(fs::copy(lock_path, new_lock_path).map_err(CargoError::from));
         }
       }
       dir
@@ -209,7 +205,7 @@ impl MetadataFetcher for CargoSubcommandMetadataFetcher {
         .current_dir(cargo_tempdir.path())
         .args(&["metadata", "--format-version", "1"])
         .output()
-        .map_err(|_| CargoError::from("running `cargo metadata`"))
+        .map_err(CargoError::from)
     );
 
     // Handle command errs
@@ -221,12 +217,12 @@ impl MetadataFetcher for CargoSubcommandMetadataFetcher {
       println!("`cargo metadata` failed. Inspect Cargo.toml for issues!");
       println!("stdout: {}", stdout_str);
       println!("stderr: {}", stderr_str);
-      return Err(CargoError::from("running `cargo metadata`"));
+      return Err(CargoError::from(RazeError::Generic("Failed to run `cargo metadata`".to_owned())))
     }
 
     // Parse and yield metadata
     serde_json::from_str::<Metadata>(&stdout_str)
-      .map_err(|_| CargoError::from("parsing `cargo metadata` output"))
+      .map_err(CargoError::from)
   }
 }
 
@@ -238,7 +234,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
       files.toml_path
     };
     let ws = try!(Workspace::new(&manifest, &self.cargo_config));
-    let specs = Packages::All.into_package_id_specs(&ws)?;
+    let specs = Packages::All.to_package_id_specs(&ws)?;
     let root_name = specs.iter().next().unwrap().name().to_owned();
 
     let (resolved_packages, cargo_resolve) =
@@ -247,9 +243,9 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
     let root_package_id = try!(
       cargo_resolve
         .iter()
-        .filter(|dep| dep.name() == root_name)
+        .filter(|dep| dep.name().as_str() == root_name)
         .next()
-        .ok_or(CargoError::from("root crate should be in cargo resolve"))
+        .ok_or(CargoError::from(RazeError::Internal("root crate should be in cargo resolve".to_owned())))
     ).to_string();
 
     let mut packages = Vec::new();
@@ -259,7 +255,9 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
     };
 
     for id in cargo_resolve.iter() {
-      let dependencies = cargo_resolve.deps(id).map(|p| p.to_string()).collect();
+      let dependencies = cargo_resolve.deps(id)
+        .map(|(p, _)| p.to_string())
+        .collect();
       let features = cargo_resolve
         .features_sorted(id)
         .iter()
@@ -280,7 +278,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
       let mut dependencies = Vec::new();
       for dependency in package.dependencies().iter() {
         dependencies.push(Dependency {
-          name: dependency.name().to_string(),
+          name: dependency.package_name().to_string(),
           // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
           source: serde_json::to_string(dependency.source_id()).unwrap(),
           req: dependency.version_req().to_string(),
@@ -291,7 +289,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
           },
           optional: dependency.is_optional(),
           uses_default_features: dependency.uses_default_features(),
-          features: dependency.features().iter().cloned().collect(),
+          features: dependency.features().iter().map(|s| s.to_string()).collect(),
           target: dependency.platform().map(|p| p.to_string()),
         });
       }
@@ -312,8 +310,24 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
       }
 
       let mut features = HashMap::new();
-      for (feature, features_or_dependencies) in package.summary().features().iter() {
-        features.insert(feature.clone(), features_or_dependencies.clone());
+      for (feature, feature_values) in package.summary().features().iter() {
+        let mut our_feature_values = Vec::new();
+        for feature_value in feature_values {
+          let our_feature_value = {
+            match feature_value {
+              CargoFeatureValue::Feature(feature_name) =>
+                feature_name.to_string(),
+              CargoFeatureValue::Crate(crate_name) =>
+                crate_name.to_string(),
+              // This matches the current Serialize impl for CargoFeatureValue
+              CargoFeatureValue::CrateFeature(crate_name, feature_name) =>
+                format!("{}/{}", crate_name.as_str(), feature_name.as_str()),
+            }
+          };
+          our_feature_values.push(our_feature_value);
+        }
+        features.insert(feature.to_string(),
+                        our_feature_values);
       }
 
       // UNWRAP: It's cargo's responsibility to ensure a serializable source_id

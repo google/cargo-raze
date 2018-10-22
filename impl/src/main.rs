@@ -14,7 +14,6 @@
 
 extern crate cargo;
 extern crate itertools;
-extern crate rustc_serialize;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -23,6 +22,8 @@ extern crate slug;
 extern crate tempdir;
 extern crate tera;
 extern crate toml;
+extern crate docopt;
+extern crate failure;
 
 #[cfg(test)]
 #[macro_use]
@@ -59,8 +60,10 @@ use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 use util::PlatformDetails;
+use util::RazeError;
+use docopt::Docopt;
 
-#[derive(Debug, RustcDecodable)]
+#[derive(Debug, Deserialize)]
 struct Options {
   arg_buildprefix: Option<String>,
   flag_verbose: u32,
@@ -86,22 +89,28 @@ Options:
 "#;
 
 fn main() {
-  let cargo_config = Config::default().unwrap();
-  let args = env::args().collect::<Vec<_>>();
-  let result = cargo::call_main_without_stdin(real_main, &cargo_config, USAGE, &args, false);
+  let mut config = Config::default().unwrap();
+
+  let options = Docopt::new(USAGE)
+    .and_then(|d| d.deserialize())
+    .unwrap_or_else(|e| e.exit());
+
+  let result = real_main(options, &mut config);
 
   if let Err(e) = result {
-    cargo::exit_with_error(e, &mut *cargo_config.shell());
+    cargo::exit_with_error(e, &mut *config.shell());
   }
 }
 
-fn real_main(options: Options, cargo_config: &Config) -> CliResult {
+fn real_main(options: Options, cargo_config: &mut Config) -> CliResult {
   try!(cargo_config.configure(
     options.flag_verbose,
     options.flag_quiet,
     &options.flag_color,
     /* frozen = */ false,
-    /* locked = */ false
+    /* locked = */ false,
+    /* target_dir = */ &None,
+    &[]
   ));
   let mut settings = try!(load_settings("Cargo.toml"));
   println!("Loaded override settings: {:#?}", settings);
@@ -133,7 +142,7 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
     GenMode::Remote => {
       // Create "remote/" if it doesn't exist
       if fs::metadata("remote/").is_err() {
-        try!(fs::create_dir("remote/").map_err(|e| CargoError::from(e.to_string())));
+        try!(fs::create_dir("remote/").map_err(|e| CargoError::from(e)));
       }
 
       try!(bazel_renderer.render_remote_planned_build(&render_details, &planned_build))
@@ -155,17 +164,20 @@ fn real_main(options: Options, cargo_config: &Config) -> CliResult {
 /** Verifies that the provided settings make sense. */
 fn validate_settings(settings: &mut RazeSettings) -> CargoResult<()> {
   if !settings.workspace_path.starts_with("//") {
-    return Err(CargoError::from(
-      "raze.workspace_path must start with \"//\". Paths into local repositories (such as \
-       @local//path) are currently unsupported.",
-    ));
+    return Err(CargoError::from(RazeError::Config {
+          field_path_opt: Some("raze.workspace_path".to_owned()),
+          message: format!("Path must start with \"//\". Paths into local repositories (such as \
+                           @local//path) are currently unsupported.")
+    }));
   }
 
   if settings.workspace_path == "//" {
-    return Err(CargoError::from(
-      "raze.workspace_path must not be '//' (it is currently unsupported). Its probably not what \
-       you want anyway, as this would vendor the crates directly into //vendor.",
-    ));
+    return Err(CargoError::from(RazeError::Config {
+          field_path_opt: Some("raze.workspace_path".to_owned()),
+          message: format!("Path must must not be '//' (it is currently unsupported). \
+                            Its probably not what you want anyway, as this would vendor the \
+                            crates directly into //vendor.")
+    }));
   }
 
   if settings.workspace_path.ends_with("/") {
@@ -179,27 +191,17 @@ fn write_to_file_loudly(path: &str, contents: &str) -> CargoResult<()> {
   try!(
     File::create(&path)
       .and_then(|mut f| f.write_all(contents.as_bytes()))
-      .map_err(|_| CargoError::from(format!("failed to create {}", path)))
-  );
+      .map_err(CargoError::from));
   println!("Generated {} successfully", path);
   Ok(())
 }
 
 fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings, CargoError> {
   let path = cargo_toml_path.as_ref();
-  let mut toml = try!(File::open(path).map_err(|e| {
-    println!("{:?}", e);
-    CargoError::from(format!("Could not load {:?}", path))
-  }));
+  let mut toml = try!(File::open(path).map_err(CargoError::from));
   let mut toml_contents = String::new();
-  try!(toml.read_to_string(&mut toml_contents).map_err(|e| {
-    println!("{:?}", e);
-    CargoError::from(format!("failed to read {:?}", path))
-  }));
+  try!(toml.read_to_string(&mut toml_contents).map_err(CargoError::from));
   toml::from_str::<settings::CargoToml>(&toml_contents)
-    .map_err(|e| {
-      println!("{:?}", e);
-      CargoError::from(format!("failed to parse {:?}", path))
-    })
+    .map_err(CargoError::from)
     .map(|toml| toml.raze)
 }
