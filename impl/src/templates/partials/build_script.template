@@ -13,7 +13,6 @@ rust_binary(
     ],
     rustc_flags = [
         "--cap-lints allow",
-        "--target={{workspace.platform_triple}}",
     ],
     crate_features = [
       {%- for feature in crate.features %}

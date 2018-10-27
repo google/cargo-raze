@@ -37,7 +37,6 @@ rust_binary(
     ],
     rustc_flags = [
         "--cap-lints allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.6.4",
     crate_features = [
@@ -55,7 +54,6 @@ rust_library(
     ],
     rustc_flags = [
         "--cap-lints allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.6.4",
     crate_features = [
