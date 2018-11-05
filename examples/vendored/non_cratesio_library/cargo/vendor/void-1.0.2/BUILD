@@ -33,7 +33,6 @@ rust_library(
     ],
     rustc_flags = [
         "--cap-lints allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "1.0.2",
     crate_features = [

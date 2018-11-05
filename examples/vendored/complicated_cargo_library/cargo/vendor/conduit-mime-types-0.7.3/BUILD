@@ -34,7 +34,6 @@ rust_library(
     ],
     rustc_flags = [
         "--cap-lints allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     data = glob(["data/**"]),
     version = "0.7.3",
