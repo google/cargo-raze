@@ -152,6 +152,8 @@ raze_fetch_remote_crates()
 This tells Bazel where to get the dependencies from, and how to build them:
 using the files generated into //cargo.
 
+*Note that this method's name depends on your `gen_workspace_prefix` setting*.
+
 You can depend on any *explicit* dependencies in any Rust rule by depending on
 `//cargo:your_dependency_name`.
 
