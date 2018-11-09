@@ -33,7 +33,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/rustc-serialize-0.3.24:rustc_serialize",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     data = glob(["data/**"]),
     version = "0.7.3",

@@ -36,7 +36,7 @@ rust_binary(
         "//vendored/non_cratesio_library/cargo/vendor/memchr-2.0.1:memchr",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.6.4",
     crate_features = [
@@ -53,7 +53,7 @@ rust_library(
         "//vendored/non_cratesio_library/cargo/vendor/memchr-2.0.1:memchr",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.6.4",
     crate_features = [

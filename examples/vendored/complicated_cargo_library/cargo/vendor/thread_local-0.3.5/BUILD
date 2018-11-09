@@ -35,7 +35,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/unreachable-1.0.0:unreachable",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.3.5",
     crate_features = [

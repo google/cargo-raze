@@ -36,7 +36,7 @@ rust_library(
         "//vendored/non_cratesio_library/cargo/vendor/num_cpus-1.8.0:num_cpus",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.2.0-alpha",
     crate_features = [

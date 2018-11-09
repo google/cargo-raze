@@ -35,7 +35,7 @@ rust_library(
         "@complicated_cargo_library__unicode_xid__0_0_4//:unicode_xid",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.11.11",

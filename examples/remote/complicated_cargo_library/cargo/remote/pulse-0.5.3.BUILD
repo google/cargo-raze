@@ -36,7 +36,7 @@ rust_library(
         "@complicated_cargo_library__time__0_1_39//:time",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.5.3",

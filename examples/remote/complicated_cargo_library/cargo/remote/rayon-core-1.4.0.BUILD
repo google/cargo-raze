@@ -38,7 +38,7 @@ rust_library(
         "@complicated_cargo_library__rand__0_4_2//:rand",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "1.4.0",

@@ -35,7 +35,7 @@ rust_library(
         "//vendored/non_cratesio_library/cargo/vendor/quick-error-1.2.1:quick_error",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "1.1.1",
     crate_features = [

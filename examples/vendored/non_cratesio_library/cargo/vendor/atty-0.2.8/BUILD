@@ -34,7 +34,7 @@ rust_library(
         "//vendored/non_cratesio_library/cargo/vendor/libc-0.2.39:libc",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.2.8",
     crate_features = [

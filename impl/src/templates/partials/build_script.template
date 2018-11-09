@@ -12,7 +12,7 @@ rust_binary(
       {%- endfor %}
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     crate_features = [
       {%- for feature in crate.features %}

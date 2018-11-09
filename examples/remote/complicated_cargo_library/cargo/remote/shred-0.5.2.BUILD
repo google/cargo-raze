@@ -48,7 +48,7 @@ rust_library(
         "@complicated_cargo_library__smallvec__0_4_4//:smallvec",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.5.2",

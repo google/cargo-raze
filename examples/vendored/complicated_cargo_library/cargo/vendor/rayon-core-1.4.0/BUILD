@@ -38,7 +38,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/rand-0.4.2:rand",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "1.4.0",
     crate_features = [

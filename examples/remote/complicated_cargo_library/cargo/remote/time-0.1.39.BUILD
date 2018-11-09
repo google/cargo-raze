@@ -34,7 +34,7 @@ rust_library(
         "@complicated_cargo_library__libc__0_2_36//:libc",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.1.39",

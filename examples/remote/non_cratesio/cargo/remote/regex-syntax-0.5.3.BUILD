@@ -34,7 +34,7 @@ rust_library(
         "@non_cratesio__ucd_util__0_1_1//:ucd_util",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.5.3",

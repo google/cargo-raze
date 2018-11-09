@@ -38,7 +38,7 @@ rust_library(
         "//vendored/non_cratesio_library/cargo/vendor/futures-sink-0.2.0-alpha:futures_sink",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.2.0-alpha",
     crate_features = [

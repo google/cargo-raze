@@ -35,7 +35,7 @@ rust_library(
         "//vendored/non_cratesio_library/cargo/vendor/pin-api-0.1.3:pin_api",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.2.0-alpha",
     crate_features = [

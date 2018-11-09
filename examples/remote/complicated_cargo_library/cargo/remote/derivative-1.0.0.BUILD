@@ -36,7 +36,7 @@ rust_library(
         "@complicated_cargo_library__syn__0_10_8//:syn",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "1.0.0",

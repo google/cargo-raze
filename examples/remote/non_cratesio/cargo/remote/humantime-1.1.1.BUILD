@@ -35,7 +35,7 @@ rust_library(
         "@non_cratesio__quick_error__1_2_1//:quick_error",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "1.1.1",

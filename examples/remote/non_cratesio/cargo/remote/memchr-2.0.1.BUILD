@@ -35,7 +35,7 @@ rust_library(
         "@non_cratesio__libc__0_2_39//:libc",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "2.0.1",

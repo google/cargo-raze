@@ -34,7 +34,7 @@ rust_library(
         "//vendored/non_cratesio_library/cargo/vendor/winapi-0.3.4:winapi",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.1.6",
     crate_features = [
