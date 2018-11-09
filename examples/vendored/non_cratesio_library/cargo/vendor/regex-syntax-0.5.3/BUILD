@@ -34,7 +34,7 @@ rust_library(
         "//vendored/non_cratesio_library/cargo/vendor/ucd-util-0.1.1:ucd_util",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.5.3",
     crate_features = [

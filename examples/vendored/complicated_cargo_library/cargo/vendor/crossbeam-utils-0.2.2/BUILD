@@ -33,7 +33,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/cfg-if-0.1.2:cfg_if",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.2.2",
     crate_features = [

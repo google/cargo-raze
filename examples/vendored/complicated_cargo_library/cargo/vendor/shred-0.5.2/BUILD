@@ -48,7 +48,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/smallvec-0.4.4:smallvec",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.5.2",
     crate_features = [

@@ -49,7 +49,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/tuple_utils-0.2.0:tuple_utils",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.10.0",
     crate_features = [

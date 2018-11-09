@@ -46,7 +46,7 @@ rust_library(
         "//vendored/non_cratesio_library/cargo/vendor/utf8-ranges-1.0.0:utf8_ranges",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.2.9",
     crate_features = [

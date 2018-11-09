@@ -35,7 +35,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/unicode-xid-0.0.4:unicode_xid",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.11.11",
     crate_features = [

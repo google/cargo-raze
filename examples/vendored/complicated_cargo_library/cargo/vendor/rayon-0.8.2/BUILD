@@ -34,7 +34,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/rayon-core-1.4.0:rayon_core",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.8.2",
     crate_features = [

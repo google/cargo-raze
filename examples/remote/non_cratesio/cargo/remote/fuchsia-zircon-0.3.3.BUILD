@@ -34,7 +34,7 @@ rust_library(
         "@non_cratesio__fuchsia_zircon_sys__0_3_3//:fuchsia_zircon_sys",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.3.3",

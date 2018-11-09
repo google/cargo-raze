@@ -39,7 +39,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/scopeguard-0.3.3:scopeguard",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.3.0",
     crate_features = [

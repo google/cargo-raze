@@ -36,7 +36,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/time-0.1.39:time",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.5.3",
     crate_features = [

@@ -34,7 +34,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/odds-0.2.26:odds",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.3.25",
     crate_features = [

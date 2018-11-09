@@ -36,7 +36,7 @@ rust_binary(
         "@complicated_cargo_library__memchr__2_0_1//:memchr",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.6.4",
@@ -54,7 +54,7 @@ rust_library(
         "@complicated_cargo_library__memchr__2_0_1//:memchr",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.6.4",

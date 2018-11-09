@@ -34,7 +34,7 @@ rust_binary(
         ":crossbeam",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.3.2",
     crate_features = [
@@ -50,7 +50,7 @@ rust_library(
     deps = [
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.3.2",
     crate_features = [
@@ -68,7 +68,7 @@ rust_binary(
         ":crossbeam",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.3.2",
     crate_features = [

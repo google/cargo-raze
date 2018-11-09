@@ -46,7 +46,7 @@ rust_library(
         "@non_cratesio__utf8_ranges__1_0_0//:utf8_ranges",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.2.9",

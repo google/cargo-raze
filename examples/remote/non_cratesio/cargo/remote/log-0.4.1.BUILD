@@ -34,7 +34,7 @@ rust_library(
         "@non_cratesio__cfg_if__0_1_2//:cfg_if",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.4.1",

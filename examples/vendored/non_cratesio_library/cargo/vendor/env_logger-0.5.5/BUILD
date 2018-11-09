@@ -42,7 +42,7 @@ rust_library(
         "//vendored/non_cratesio_library/cargo/vendor/termcolor-0.3.5:termcolor",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.5.5",
     crate_features = [

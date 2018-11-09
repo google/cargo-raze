@@ -33,7 +33,7 @@ rust_library(
     deps = [
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.2.11",
     crate_features = [

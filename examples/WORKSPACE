@@ -2,7 +2,7 @@ workspace(name = "io_bazel_rules_rust")
 
 git_repository(
     name = "io_bazel_rules_rust",
-    commit = "4a9d0e0b6c66f1e98d15cbd3cccc8100a0454fc9",
+    commit = "9a3de26b92e8f4e050d21bc126fc6c373e0acc35",
     remote = "https://github.com/bazelbuild/rules_rust.git",
 )
 

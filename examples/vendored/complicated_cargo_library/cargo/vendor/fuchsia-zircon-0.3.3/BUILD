@@ -34,7 +34,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/fuchsia-zircon-sys-0.3.3:fuchsia_zircon_sys",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.3.3",
     crate_features = [

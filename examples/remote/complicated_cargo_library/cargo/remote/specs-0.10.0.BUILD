@@ -49,7 +49,7 @@ rust_library(
         "@complicated_cargo_library__tuple_utils__0_2_0//:tuple_utils",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.10.0",

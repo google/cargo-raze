@@ -34,7 +34,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/nodrop-0.1.12:nodrop",
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
     ],
     version = "0.4.7",
     crate_features = [

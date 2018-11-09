@@ -20,7 +20,7 @@ rust_library(
         {%- endfor %}
     ],
     rustc_flags = [
-        "--cap-lints allow",
+        "--cap-lints=allow",
         {%- for flag in crate.raze_settings.additional_flags %}
         "{{flag}}",
         {%- endfor %}
