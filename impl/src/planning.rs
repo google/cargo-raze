@@ -406,6 +406,7 @@ impl<'planner> CrateSubplanner<'planner> {
     Ok(CrateContext {
       pkg_name: package.name.clone(),
       pkg_version: package.version.clone(),
+      edition: package.edition.clone(),
       licenses: self.produce_licenses(),
       features: self.node.features.clone().unwrap_or(Vec::new()),
       is_root_dependency: self.crate_catalog_entry.is_root_dep(),
@@ -631,6 +632,7 @@ impl<'planner> CrateSubplanner<'planner> {
           name: target.name.clone(),
           path: package_root_path_str.clone(),
           kind: kind.clone(),
+          edition: target.edition.clone()
         });
       }
     }

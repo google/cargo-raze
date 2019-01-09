@@ -6,6 +6,7 @@ rust_binary(
     {%- else %}
     crate_root = "build.rs",
     {%- endif %}
+    edition = "{{ crate.edition }}",
     deps = [
       {%- for dependency in crate.build_dependencies %}
         "{{dependency.buildable_target}}",

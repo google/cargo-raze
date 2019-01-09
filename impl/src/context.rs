@@ -26,6 +26,7 @@ pub struct BuildableTarget {
   pub name: String,
   pub kind: String,
   pub path: String,
+  pub edition: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -55,6 +56,7 @@ pub struct SourceDetails {
 pub struct CrateContext {
   pub pkg_name: String,
   pub pkg_version: String,
+  pub edition: String,
   pub raze_settings: CrateSettings,
   pub licenses: Vec<LicenseData>,
   pub features: Vec<String>,

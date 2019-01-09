@@ -280,6 +280,7 @@ mod tests {
     CrateContext {
       pkg_name: "test-binary".to_owned(),
       pkg_version: "1.1.1".to_owned(),
+      edition: "2015".to_owned(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
       expected_build_path: "vendor/test-binary-1.1.1/BUILD".to_owned(),
       licenses: Vec::new(),
@@ -294,6 +295,7 @@ mod tests {
           name: "some_binary".to_owned(),
           kind: "bin".to_owned(),
           path: "bin/main.rs".to_owned(),
+          edition: "2015".to_owned(),
         },
       ],
       build_script_target: None,
@@ -306,6 +308,7 @@ mod tests {
     CrateContext {
       pkg_name: "test-library".to_owned(),
       pkg_version: "1.1.1".to_owned(),
+      edition: "2015".to_owned(),
       licenses: Vec::new(),
       raze_settings: CrateSettings::default(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
@@ -320,6 +323,7 @@ mod tests {
           name: "some_library".to_owned(),
           kind: "lib".to_owned(),
           path: "path/lib.rs".to_owned(),
+          edition: "2015".to_owned(),
         },
       ],
       build_script_target: None,
