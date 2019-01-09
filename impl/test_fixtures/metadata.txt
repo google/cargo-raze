@@ -9,7 +9,7 @@
       "description": "The uninhabited void type for use in statically impossible cases.",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -20,7 +20,8 @@
             "lib"
           ],
           "name": "void",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/void-1.0.2\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/void-1.0.2\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -28,10 +29,11 @@
           "std"
         ],
         "std": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/void-1.0.2\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/void-1.0.2\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "cfg-if",
@@ -42,7 +44,7 @@
       "description": "A macro to ergonomically define an item depending on a large number of #[cfg]\nparameters. Structured like an if-else chain, the first matching branch is the\nitem that gets emitted.\n",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -53,7 +55,8 @@
             "lib"
           ],
           "name": "cfg-if",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/cfg-if-0.1.2\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/cfg-if-0.1.2\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -63,13 +66,15 @@
             "bin"
           ],
           "name": "xcrate",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/cfg-if-0.1.2\/tests\/xcrate.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/cfg-if-0.1.2\/tests\/xcrate.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/cfg-if-0.1.2\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/cfg-if-0.1.2\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "shred",
@@ -88,7 +93,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -100,7 +105,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -112,7 +117,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -124,7 +129,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -136,7 +141,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -148,7 +153,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -160,7 +165,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -172,7 +177,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -186,7 +191,8 @@
             "lib"
           ],
           "name": "shred",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -196,7 +202,8 @@
             "bin"
           ],
           "name": "generic_derive",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/generic_derive.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/generic_derive.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -206,7 +213,8 @@
             "bin"
           ],
           "name": "thread_local",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/thread_local.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/thread_local.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -216,7 +224,8 @@
             "bin"
           ],
           "name": "seq_dispatch",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/seq_dispatch.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/seq_dispatch.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -226,7 +235,8 @@
             "bin"
           ],
           "name": "custom_bundle",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/custom_bundle.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/custom_bundle.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -236,7 +246,8 @@
             "bin"
           ],
           "name": "par_seq",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/par_seq.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/par_seq.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -246,7 +257,8 @@
             "bin"
           ],
           "name": "derive_bundle",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/derive_bundle.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/derive_bundle.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -256,7 +268,8 @@
             "bin"
           ],
           "name": "fetch_opt",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/fetch_opt.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/fetch_opt.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -266,7 +279,8 @@
             "bin"
           ],
           "name": "basic_dispatch",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/basic_dispatch.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/examples\/basic_dispatch.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -276,7 +290,8 @@
             "bin"
           ],
           "name": "dispatch",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/tests\/dispatch.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/tests\/dispatch.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -286,13 +301,15 @@
             "bin"
           ],
           "name": "bench",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/benches\/bench.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/benches\/bench.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-0.5.2\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "aho-corasick",
@@ -311,7 +328,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -323,7 +340,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -335,7 +352,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -347,7 +364,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -359,7 +376,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -371,7 +388,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -383,7 +400,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -397,7 +414,8 @@
             "lib"
           ],
           "name": "aho_corasick",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -407,7 +425,8 @@
             "bin"
           ],
           "name": "aho-corasick-dot",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/src\/main.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/src\/main.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -417,7 +436,8 @@
             "bin"
           ],
           "name": "dict-search",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/examples\/dict-search.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/examples\/dict-search.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -427,13 +447,15 @@
             "bin"
           ],
           "name": "bench",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/benches\/bench.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/benches\/bench.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/aho-corasick-0.6.4\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "rayon",
@@ -452,7 +474,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -464,7 +486,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -476,7 +498,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -488,7 +510,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -500,7 +522,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -512,7 +534,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -526,7 +548,8 @@
             "lib"
           ],
           "name": "rayon",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-0.8.2\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-0.8.2\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -536,13 +559,15 @@
             "bin"
           ],
           "name": "cpu_monitor",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-0.8.2\/examples\/cpu_monitor.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-0.8.2\/examples\/cpu_monitor.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-0.8.2\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-0.8.2\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "winapi-i686-pc-windows-gnu",
@@ -553,7 +578,7 @@
       "description": "Import libraries for the i686-pc-windows-gnu target. Please don't use this crate directly, depend on winapi instead.",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -564,7 +589,8 @@
             "lib"
           ],
           "name": "winapi-i686-pc-windows-gnu",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-i686-pc-windows-gnu-0.4.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-i686-pc-windows-gnu-0.4.0\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -574,13 +600,15 @@
             "bin"
           ],
           "name": "build-script-build",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-i686-pc-windows-gnu-0.4.0\/build.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-i686-pc-windows-gnu-0.4.0\/build.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-i686-pc-windows-gnu-0.4.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-i686-pc-windows-gnu-0.4.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "specs",
@@ -599,7 +627,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -611,7 +639,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -623,7 +651,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -635,7 +663,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -647,7 +675,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -659,7 +687,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -671,7 +699,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -683,7 +711,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -707,7 +735,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -719,7 +747,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -731,7 +759,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -743,7 +771,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -767,7 +795,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -781,7 +809,8 @@
             "lib"
           ],
           "name": "specs",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -791,7 +820,8 @@
             "bin"
           ],
           "name": "async",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/async.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/async.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -801,7 +831,8 @@
             "bin"
           ],
           "name": "basic",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/basic.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/basic.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -811,7 +842,8 @@
             "bin"
           ],
           "name": "full",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/full.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/full.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -821,7 +853,8 @@
             "bin"
           ],
           "name": "cluster_bomb",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/cluster_bomb.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/cluster_bomb.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -831,7 +864,8 @@
             "bin"
           ],
           "name": "bitset",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/bitset.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/bitset.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -841,7 +875,8 @@
             "bin"
           ],
           "name": "common",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/common.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/common.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -851,7 +886,8 @@
             "bin"
           ],
           "name": "serialize",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/serialize.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/examples\/serialize.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -861,7 +897,8 @@
             "bin"
           ],
           "name": "tests",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/tests\/tests.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/tests\/tests.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -871,7 +908,8 @@
             "bin"
           ],
           "name": "storage",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/benches\/storage.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/benches\/storage.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -881,7 +919,8 @@
             "bin"
           ],
           "name": "world",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/benches\/world.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/benches\/world.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -891,7 +930,8 @@
             "bin"
           ],
           "name": "parallel",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/benches\/parallel.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/benches\/parallel.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -899,7 +939,8 @@
           "futures"
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/specs-0.10.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "crossbeam-utils",
@@ -918,7 +959,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -932,7 +973,8 @@
             "lib"
           ],
           "name": "crossbeam-utils",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-utils-0.2.2\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-utils-0.2.2\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -940,13 +982,14 @@
           "use_std"
         ],
         "nightly": [
-          
+
         ],
         "use_std": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-utils-0.2.2\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-utils-0.2.2\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "regex",
@@ -965,7 +1008,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -977,7 +1020,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -989,7 +1032,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1001,7 +1044,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1013,7 +1056,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1025,7 +1068,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1037,7 +1080,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1049,7 +1092,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1061,7 +1104,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -1075,7 +1118,8 @@
             "lib"
           ],
           "name": "regex",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1085,7 +1129,8 @@
             "bin"
           ],
           "name": "shootout-regex-dna-bytes",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-bytes.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-bytes.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1095,7 +1140,8 @@
             "bin"
           ],
           "name": "shootout-regex-dna-single-cheat",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-single-cheat.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-single-cheat.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1105,7 +1151,8 @@
             "bin"
           ],
           "name": "shootout-regex-dna",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1115,7 +1162,8 @@
             "bin"
           ],
           "name": "shootout-regex-dna-replace",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-replace.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-replace.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1125,7 +1173,8 @@
             "bin"
           ],
           "name": "shootout-regex-dna-single",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-single.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-single.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1135,7 +1184,8 @@
             "bin"
           ],
           "name": "shootout-regex-dna-cheat",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-cheat.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/examples\/shootout-regex-dna-cheat.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1145,7 +1195,8 @@
             "bin"
           ],
           "name": "default",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_default.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_default.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1155,7 +1206,8 @@
             "bin"
           ],
           "name": "default-bytes",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_default_bytes.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_default_bytes.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1165,7 +1217,8 @@
             "bin"
           ],
           "name": "nfa",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_nfa.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_nfa.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1175,7 +1228,8 @@
             "bin"
           ],
           "name": "nfa-utf8bytes",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_nfa_utf8bytes.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_nfa_utf8bytes.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1185,7 +1239,8 @@
             "bin"
           ],
           "name": "nfa-bytes",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_nfa_bytes.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_nfa_bytes.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1195,7 +1250,8 @@
             "bin"
           ],
           "name": "backtrack",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_backtrack.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_backtrack.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1205,7 +1261,8 @@
             "bin"
           ],
           "name": "backtrack-utf8bytes",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_backtrack_utf8bytes.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_backtrack_utf8bytes.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1215,18 +1272,20 @@
             "bin"
           ],
           "name": "backtrack-bytes",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_backtrack_bytes.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/tests\/test_backtrack_bytes.rs",
+          "edition": "2018"
         }
       ],
       "features": {
         "pattern": [
-          
+
         ],
         "simd-accel": [
           "simd"
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-0.2.6\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "time",
@@ -1245,7 +1304,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1257,7 +1316,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1269,7 +1328,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1295,7 +1354,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": "cfg(target_os = \"redox\")"
         },
@@ -1327,7 +1386,8 @@
             "lib"
           ],
           "name": "time",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/time-0.1.39\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/time-0.1.39\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1337,13 +1397,15 @@
             "bin"
           ],
           "name": "precise_time_ns",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/time-0.1.39\/benches\/precise_time_ns.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/time-0.1.39\/benches\/precise_time_ns.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/time-0.1.39\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/time-0.1.39\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "hibitset",
@@ -1362,7 +1424,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1374,7 +1436,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1386,7 +1448,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -1400,7 +1462,8 @@
             "lib"
           ],
           "name": "hibitset",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/hibitset-0.3.2\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/hibitset-0.3.2\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1410,7 +1473,8 @@
             "bin"
           ],
           "name": "benches",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/hibitset-0.3.2\/benches\/benches.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/hibitset-0.3.2\/benches\/benches.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -1421,7 +1485,8 @@
           "rayon"
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/hibitset-0.3.2\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/hibitset-0.3.2\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "syn",
@@ -1440,7 +1505,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1452,7 +1517,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1464,7 +1529,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1476,7 +1541,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1488,7 +1553,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1500,7 +1565,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1512,7 +1577,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1524,7 +1589,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1536,7 +1601,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -1550,12 +1615,13 @@
             "lib"
           ],
           "name": "syn",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/syn-0.10.8\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/syn-0.10.8\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
         "aster": [
-          
+
         ],
         "default": [
           "parsing",
@@ -1567,7 +1633,7 @@
           "printing"
         ],
         "full": [
-          
+
         ],
         "parsing": [
           "unicode-xid"
@@ -1579,10 +1645,11 @@
           "quote"
         ],
         "visit": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/syn-0.10.8\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/syn-0.10.8\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "arrayvec",
@@ -1601,7 +1668,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1613,7 +1680,7 @@
           "optional": true,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1625,7 +1692,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1637,7 +1704,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1649,7 +1716,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -1663,7 +1730,8 @@
             "lib"
           ],
           "name": "arrayvec",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1673,7 +1741,8 @@
             "bin"
           ],
           "name": "tests",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/tests\/tests.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/tests\/tests.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1683,7 +1752,8 @@
             "bin"
           ],
           "name": "serde",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/tests\/serde.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/tests\/serde.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1693,7 +1763,8 @@
             "bin"
           ],
           "name": "extend",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/benches\/extend.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/benches\/extend.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1703,7 +1774,8 @@
             "bin"
           ],
           "name": "arraystring",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/benches\/arraystring.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/benches\/arraystring.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -1714,13 +1786,14 @@
           "serde"
         ],
         "std": [
-          
+
         ],
         "use_union": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.4.7\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "scopeguard",
@@ -1731,7 +1804,7 @@
       "description": "A RAII scope guard that will run a given closure when it goes out of scope,\neven if the code between panics (assuming unwinding panic).\n\nDefines the macros `defer!` and `defer_on_unwind!`; the latter only runs\nif the scope is extited through unwinding on panic.\n",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -1742,7 +1815,8 @@
             "lib"
           ],
           "name": "scopeguard",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/scopeguard-0.3.3\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/scopeguard-0.3.3\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1752,7 +1826,8 @@
             "bin"
           ],
           "name": "readme",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/scopeguard-0.3.3\/examples\/readme.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/scopeguard-0.3.3\/examples\/readme.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -1760,10 +1835,11 @@
           "use_std"
         ],
         "use_std": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/scopeguard-0.3.3\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/scopeguard-0.3.3\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "winapi-x86_64-pc-windows-gnu",
@@ -1774,7 +1850,7 @@
       "description": "Import libraries for the x86_64-pc-windows-gnu target. Please don't use this crate directly, depend on winapi instead.",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -1785,7 +1861,8 @@
             "lib"
           ],
           "name": "winapi-x86_64-pc-windows-gnu",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-x86_64-pc-windows-gnu-0.4.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-x86_64-pc-windows-gnu-0.4.0\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1795,13 +1872,15 @@
             "bin"
           ],
           "name": "build-script-build",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-x86_64-pc-windows-gnu-0.4.0\/build.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-x86_64-pc-windows-gnu-0.4.0\/build.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-x86_64-pc-windows-gnu-0.4.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-x86_64-pc-windows-gnu-0.4.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "crossbeam-deque",
@@ -1820,7 +1899,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1832,7 +1911,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1844,7 +1923,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -1858,13 +1937,15 @@
             "lib"
           ],
           "name": "crossbeam-deque",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-deque-0.2.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-deque-0.2.0\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-deque-0.2.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-deque-0.2.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "odds",
@@ -1883,7 +1964,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1895,7 +1976,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -1907,7 +1988,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -1921,7 +2002,8 @@
             "lib"
           ],
           "name": "odds",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1931,7 +2013,8 @@
             "bin"
           ],
           "name": "stride",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/tests\/stride.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/tests\/stride.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1941,7 +2024,8 @@
             "bin"
           ],
           "name": "slice",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/tests\/slice.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/tests\/slice.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1951,7 +2035,8 @@
             "bin"
           ],
           "name": "tests",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/tests\/tests.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/tests\/tests.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1961,7 +2046,8 @@
             "bin"
           ],
           "name": "count_ones",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/benches\/count_ones.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/benches\/count_ones.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1971,7 +2057,8 @@
             "bin"
           ],
           "name": "find",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/benches\/find.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/benches\/find.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -1981,7 +2068,8 @@
             "bin"
           ],
           "name": "bench",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/benches\/bench.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/benches\/bench.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -1989,13 +2077,14 @@
           "std"
         ],
         "std": [
-          
+
         ],
         "unstable": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/odds-0.2.26\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "libc",
@@ -2006,7 +2095,7 @@
       "description": "A library for types and bindings to native C functions often found in libc or\nother common platform libraries.\n",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -2017,7 +2106,8 @@
             "lib"
           ],
           "name": "libc",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/libc-0.2.36\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/libc-0.2.36\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -2025,10 +2115,11 @@
           "use_std"
         ],
         "use_std": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/libc-0.2.36\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/libc-0.2.36\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "arrayvec",
@@ -2047,7 +2138,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2059,7 +2150,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2071,7 +2162,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -2085,7 +2176,8 @@
             "lib"
           ],
           "name": "arrayvec",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.3.25\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.3.25\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2095,7 +2187,8 @@
             "bin"
           ],
           "name": "generic_array",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.3.25\/tests\/generic_array.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.3.25\/tests\/generic_array.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2105,7 +2198,8 @@
             "bin"
           ],
           "name": "tests",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.3.25\/tests\/tests.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.3.25\/tests\/tests.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -2123,7 +2217,8 @@
           "nodrop\/use_union"
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.3.25\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/arrayvec-0.3.25\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "regex-syntax",
@@ -2142,7 +2237,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2154,7 +2249,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -2168,13 +2263,15 @@
             "lib"
           ],
           "name": "regex-syntax",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-syntax-0.4.2\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-syntax-0.4.2\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-syntax-0.4.2\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/regex-syntax-0.4.2\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "num_cpus",
@@ -2193,7 +2290,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -2207,13 +2304,15 @@
             "lib"
           ],
           "name": "num_cpus",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/num_cpus-1.8.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/num_cpus-1.8.0\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/num_cpus-1.8.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/num_cpus-1.8.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "crossbeam",
@@ -2232,7 +2331,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -2246,7 +2345,8 @@
             "lib"
           ],
           "name": "crossbeam",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-0.3.2\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-0.3.2\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2256,7 +2356,8 @@
             "bin"
           ],
           "name": "stress-msq",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-0.3.2\/src\/bin\/stress-msq.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-0.3.2\/src\/bin\/stress-msq.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2266,15 +2367,17 @@
             "bin"
           ],
           "name": "bench",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-0.3.2\/src\/bin\/bench.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-0.3.2\/src\/bin\/bench.rs",
+          "edition": "2018"
         }
       ],
       "features": {
         "nightly": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-0.3.2\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-0.3.2\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "utf8-ranges",
@@ -2293,7 +2396,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -2307,7 +2410,8 @@
             "lib"
           ],
           "name": "utf8-ranges",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/utf8-ranges-1.0.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/utf8-ranges-1.0.0\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2317,13 +2421,15 @@
             "bin"
           ],
           "name": "bench",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/utf8-ranges-1.0.0\/benches\/bench.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/utf8-ranges-1.0.0\/benches\/bench.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/utf8-ranges-1.0.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/utf8-ranges-1.0.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "syn",
@@ -2342,7 +2448,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2354,7 +2460,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2366,7 +2472,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2378,7 +2484,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2390,7 +2496,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2402,7 +2508,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2414,7 +2520,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -2428,22 +2534,23 @@
             "lib"
           ],
           "name": "syn",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/syn-0.11.11\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/syn-0.11.11\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
         "aster": [
-          
+
         ],
         "default": [
           "parsing",
           "printing"
         ],
         "fold": [
-          
+
         ],
         "full": [
-          
+
         ],
         "parsing": [
           "unicode-xid",
@@ -2453,10 +2560,11 @@
           "quote"
         ],
         "visit": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/syn-0.11.11\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/syn-0.11.11\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "redox_syscall",
@@ -2467,7 +2575,7 @@
       "description": "A Rust library to access raw Redox system calls",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -2478,13 +2586,15 @@
             "lib"
           ],
           "name": "syscall",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/redox_syscall-0.1.37\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/redox_syscall-0.1.37\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/redox_syscall-0.1.37\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/redox_syscall-0.1.37\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "lazy_static",
@@ -2503,7 +2613,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2515,7 +2625,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -2529,7 +2639,8 @@
             "lib"
           ],
           "name": "lazy_static",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2539,7 +2650,8 @@
             "bin"
           ],
           "name": "no_std",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/tests\/no_std.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/tests\/no_std.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2549,7 +2661,8 @@
             "bin"
           ],
           "name": "test",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/tests\/test.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/tests\/test.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2559,7 +2672,8 @@
             "bin"
           ],
           "name": "compile_tests",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/tests\/compile_tests.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/tests\/compile_tests.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -2567,14 +2681,15 @@
           "compiletest_rs"
         ],
         "nightly": [
-          
+
         ],
         "spin_no_std": [
           "nightly",
           "spin"
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-0.2.11\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "compile_with_bazel",
@@ -2593,7 +2708,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2605,7 +2720,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -2619,13 +2734,15 @@
             "lib"
           ],
           "name": "compile_with_bazel",
-          "src_path": "\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo\/fake_lib.rs"
+          "src_path": "\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo\/fake_lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "lazy_static",
@@ -2644,7 +2761,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2656,7 +2773,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -2670,7 +2787,8 @@
             "lib"
           ],
           "name": "lazy_static",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2680,7 +2798,8 @@
             "bin"
           ],
           "name": "no_std",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/tests\/no_std.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/tests\/no_std.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2690,7 +2809,8 @@
             "bin"
           ],
           "name": "test",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/tests\/test.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/tests\/test.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2700,7 +2820,8 @@
             "bin"
           ],
           "name": "compile_tests",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/tests\/compile_tests.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/tests\/compile_tests.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -2708,14 +2829,15 @@
           "compiletest_rs"
         ],
         "nightly": [
-          
+
         ],
         "spin_no_std": [
           "nightly",
           "spin"
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/lazy_static-1.0.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "fuchsia-zircon-sys",
@@ -2726,7 +2848,7 @@
       "description": "Low-level Rust bindings for the Zircon kernel",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -2737,7 +2859,8 @@
             "lib"
           ],
           "name": "fuchsia-zircon-sys",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-sys-0.3.3\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-sys-0.3.3\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2747,13 +2870,15 @@
             "bin"
           ],
           "name": "hello",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-sys-0.3.3\/examples\/hello.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-sys-0.3.3\/examples\/hello.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-sys-0.3.3\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-sys-0.3.3\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "shred-derive",
@@ -2772,7 +2897,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2784,7 +2909,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -2798,13 +2923,15 @@
             "proc-macro"
           ],
           "name": "shred-derive",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-derive-0.3.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-derive-0.3.0\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-derive-0.3.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/shred-derive-0.3.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "memchr",
@@ -2823,7 +2950,7 @@
           "optional": true,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2835,7 +2962,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -2849,7 +2976,8 @@
             "lib"
           ],
           "name": "memchr",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memchr-2.0.1\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memchr-2.0.1\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2859,7 +2987,8 @@
             "bin"
           ],
           "name": "bench",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memchr-2.0.1\/benches\/bench.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memchr-2.0.1\/benches\/bench.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -2872,7 +3001,8 @@
           "libc\/use_std"
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memchr-2.0.1\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memchr-2.0.1\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "crossbeam-epoch",
@@ -2891,7 +3021,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2903,7 +3033,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2915,7 +3045,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2927,7 +3057,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2939,7 +3069,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2951,7 +3081,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2963,7 +3093,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -2975,7 +3105,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -2989,7 +3119,8 @@
             "lib"
           ],
           "name": "crossbeam-epoch",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -2999,7 +3130,8 @@
             "bin"
           ],
           "name": "sanitize",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/examples\/sanitize.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/examples\/sanitize.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -3009,7 +3141,8 @@
             "bin"
           ],
           "name": "defer",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/benches\/defer.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/benches\/defer.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -3019,7 +3152,8 @@
             "bin"
           ],
           "name": "flush",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/benches\/flush.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/benches\/flush.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -3029,7 +3163,8 @@
             "bin"
           ],
           "name": "pin",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/benches\/pin.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/benches\/pin.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -3040,14 +3175,15 @@
           "arrayvec\/use_union"
         ],
         "sanitize": [
-          
+
         ],
         "use_std": [
           "lazy_static",
           "crossbeam-utils\/use_std"
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/crossbeam-epoch-0.3.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "either",
@@ -3080,7 +3216,8 @@
             "lib"
           ],
           "name": "either",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/either-1.4.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/either-1.4.0\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -3088,10 +3225,11 @@
           "use_std"
         ],
         "use_std": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/either-1.4.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/either-1.4.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "winapi",
@@ -3110,7 +3248,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": "i686-pc-windows-gnu"
         },
@@ -3122,7 +3260,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": "x86_64-pc-windows-gnu"
         }
@@ -3136,7 +3274,8 @@
             "lib"
           ],
           "name": "winapi",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-0.3.4\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-0.3.4\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -3146,888 +3285,890 @@
             "bin"
           ],
           "name": "build-script-build",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-0.3.4\/build.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-0.3.4\/build.rs",
+          "edition": "2018"
         }
       ],
       "features": {
         "activation": [
-          
+
         ],
         "audioclient": [
-          
+
         ],
         "audiosessiontypes": [
-          
+
         ],
         "avrt": [
-          
+
         ],
         "basetsd": [
-          
+
         ],
         "bcrypt": [
-          
+
         ],
         "bugcodes": [
-          
+
         ],
         "cderr": [
-          
+
         ],
         "cfg": [
-          
+
         ],
         "cfgmgr32": [
-          
+
         ],
         "cguid": [
-          
+
         ],
         "combaseapi": [
-          
+
         ],
         "coml2api": [
-          
+
         ],
         "commapi": [
-          
+
         ],
         "commctrl": [
-          
+
         ],
         "commdlg": [
-          
+
         ],
         "commoncontrols": [
-          
+
         ],
         "consoleapi": [
-          
+
         ],
         "corsym": [
-          
+
         ],
         "d2d1": [
-          
+
         ],
         "d2d1_1": [
-          
+
         ],
         "d2d1_2": [
-          
+
         ],
         "d2d1effectauthor": [
-          
+
         ],
         "d2d1effects": [
-          
+
         ],
         "d2d1effects_1": [
-          
+
         ],
         "d2d1effects_2": [
-          
+
         ],
         "d2dbasetypes": [
-          
+
         ],
         "d3d": [
-          
+
         ],
         "d3d10": [
-          
+
         ],
         "d3d10_1": [
-          
+
         ],
         "d3d10_1shader": [
-          
+
         ],
         "d3d10effect": [
-          
+
         ],
         "d3d10misc": [
-          
+
         ],
         "d3d10sdklayers": [
-          
+
         ],
         "d3d10shader": [
-          
+
         ],
         "d3d11": [
-          
+
         ],
         "d3d11_1": [
-          
+
         ],
         "d3d11_2": [
-          
+
         ],
         "d3d11_3": [
-          
+
         ],
         "d3d11_4": [
-          
+
         ],
         "d3d11on12": [
-          
+
         ],
         "d3d11sdklayers": [
-          
+
         ],
         "d3d11shader": [
-          
+
         ],
         "d3d12": [
-          
+
         ],
         "d3d12sdklayers": [
-          
+
         ],
         "d3d12shader": [
-          
+
         ],
         "d3d9": [
-          
+
         ],
         "d3d9caps": [
-          
+
         ],
         "d3d9types": [
-          
+
         ],
         "d3dcommon": [
-          
+
         ],
         "d3dcompiler": [
-          
+
         ],
         "d3dcsx": [
-          
+
         ],
         "d3dx10core": [
-          
+
         ],
         "d3dx10math": [
-          
+
         ],
         "d3dx10mesh": [
-          
+
         ],
         "datetimeapi": [
-          
+
         ],
         "davclnt": [
-          
+
         ],
         "dbghelp": [
-          
+
         ],
         "dcommon": [
-          
+
         ],
         "dcomp": [
-          
+
         ],
         "dcompanimation": [
-          
+
         ],
         "dcomptypes": [
-          
+
         ],
         "dde": [
-          
+
         ],
         "ddraw": [
-          
+
         ],
         "ddrawi": [
-          
+
         ],
         "ddrawint": [
-          
+
         ],
         "debug": [
-          
+
         ],
         "debugapi": [
-          
+
         ],
         "devguid": [
-          
+
         ],
         "devpkey": [
-          
+
         ],
         "devpropdef": [
-          
+
         ],
         "dinput": [
-          
+
         ],
         "dinputd": [
-          
+
         ],
         "dmksctl": [
-          
+
         ],
         "dmusicc": [
-          
+
         ],
         "docobj": [
-          
+
         ],
         "documenttarget": [
-          
+
         ],
         "dpa_dsa": [
-          
+
         ],
         "dpapi": [
-          
+
         ],
         "dsgetdc": [
-          
+
         ],
         "dsound": [
-          
+
         ],
         "dsrole": [
-          
+
         ],
         "dvp": [
-          
+
         ],
         "dwmapi": [
-          
+
         ],
         "dwrite": [
-          
+
         ],
         "dwrite_1": [
-          
+
         ],
         "dwrite_2": [
-          
+
         ],
         "dwrite_3": [
-          
+
         ],
         "dxdiag": [
-          
+
         ],
         "dxfile": [
-          
+
         ],
         "dxgi": [
-          
+
         ],
         "dxgi1_2": [
-          
+
         ],
         "dxgi1_3": [
-          
+
         ],
         "dxgi1_4": [
-          
+
         ],
         "dxgi1_5": [
-          
+
         ],
         "dxgidebug": [
-          
+
         ],
         "dxgiformat": [
-          
+
         ],
         "dxgitype": [
-          
+
         ],
         "errhandlingapi": [
-          
+
         ],
         "everything": [
-          
+
         ],
         "excpt": [
-          
+
         ],
         "fibersapi": [
-          
+
         ],
         "fileapi": [
-          
+
         ],
         "gl-gl": [
-          
+
         ],
         "guiddef": [
-          
+
         ],
         "handleapi": [
-          
+
         ],
         "heapapi": [
-          
+
         ],
         "hidclass": [
-          
+
         ],
         "hidpi": [
-          
+
         ],
         "hidsdi": [
-          
+
         ],
         "hidusage": [
-          
+
         ],
         "hstring": [
-          
+
         ],
         "http": [
-          
+
         ],
         "imm": [
-          
+
         ],
         "in6addr": [
-          
+
         ],
         "inaddr": [
-          
+
         ],
         "inspectable": [
-          
+
         ],
         "interlockedapi": [
-          
+
         ],
         "intsafe": [
-          
+
         ],
         "ioapiset": [
-          
+
         ],
         "jobapi": [
-          
+
         ],
         "jobapi2": [
-          
+
         ],
         "knownfolders": [
-          
+
         ],
         "ksmedia": [
-          
+
         ],
         "ktmtypes": [
-          
+
         ],
         "ktmw32": [
-          
+
         ],
         "libloaderapi": [
-          
+
         ],
         "limits": [
-          
+
         ],
         "lmaccess": [
-          
+
         ],
         "lmalert": [
-          
+
         ],
         "lmapibuf": [
-          
+
         ],
         "lmat": [
-          
+
         ],
         "lmcons": [
-          
+
         ],
         "lmdfs": [
-          
+
         ],
         "lmerrlog": [
-          
+
         ],
         "lmjoin": [
-          
+
         ],
         "lmmsg": [
-          
+
         ],
         "lmremutl": [
-          
+
         ],
         "lmrepl": [
-          
+
         ],
         "lmserver": [
-          
+
         ],
         "lmshare": [
-          
+
         ],
         "lmstats": [
-          
+
         ],
         "lmsvc": [
-          
+
         ],
         "lmuse": [
-          
+
         ],
         "lmwksta": [
-          
+
         ],
         "lsalookup": [
-          
+
         ],
         "memoryapi": [
-          
+
         ],
         "minschannel": [
-          
+
         ],
         "minwinbase": [
-          
+
         ],
         "minwindef": [
-          
+
         ],
         "mmdeviceapi": [
-          
+
         ],
         "mmeapi": [
-          
+
         ],
         "mmreg": [
-          
+
         ],
         "mmsystem": [
-          
+
         ],
         "msaatext": [
-          
+
         ],
         "mscat": [
-          
+
         ],
         "mssip": [
-          
+
         ],
         "mstcpip": [
-          
+
         ],
         "namedpipeapi": [
-          
+
         ],
         "namespaceapi": [
-          
+
         ],
         "nb30": [
-          
+
         ],
         "ncrypt": [
-          
+
         ],
         "ntddscsi": [
-          
+
         ],
         "ntddser": [
-          
+
         ],
         "ntdef": [
-          
+
         ],
         "ntsecapi": [
-          
+
         ],
         "ntstatus": [
-          
+
         ],
         "oaidl": [
-          
+
         ],
         "objbase": [
-          
+
         ],
         "objidl": [
-          
+
         ],
         "objidlbase": [
-          
+
         ],
         "ocidl": [
-          
+
         ],
         "oleauto": [
-          
+
         ],
         "olectl": [
-          
+
         ],
         "pdh": [
-          
+
         ],
         "playsoundapi": [
-          
+
         ],
         "powerbase": [
-          
+
         ],
         "powersetting": [
-          
+
         ],
         "powrprof": [
-          
+
         ],
         "processenv": [
-          
+
         ],
         "processsnapshot": [
-          
+
         ],
         "processthreadsapi": [
-          
+
         ],
         "processtopologyapi": [
-          
+
         ],
         "profileapi": [
-          
+
         ],
         "propidl": [
-          
+
         ],
         "propkeydef": [
-          
+
         ],
         "propsys": [
-          
+
         ],
         "prsht": [
-          
+
         ],
         "psapi": [
-          
+
         ],
         "qos": [
-          
+
         ],
         "realtimeapiset": [
-          
+
         ],
         "reason": [
-          
+
         ],
         "restrictederrorinfo": [
-          
+
         ],
         "rmxfguid": [
-          
+
         ],
         "roapi": [
-          
+
         ],
         "robuffer": [
-          
+
         ],
         "roerrorapi": [
-          
+
         ],
         "rpc": [
-          
+
         ],
         "rpcdce": [
-          
+
         ],
         "rpcndr": [
-          
+
         ],
         "sapi": [
-          
+
         ],
         "sapi51": [
-          
+
         ],
         "sapi53": [
-          
+
         ],
         "sapiddk": [
-          
+
         ],
         "sapiddk51": [
-          
+
         ],
         "schannel": [
-          
+
         ],
         "securityappcontainer": [
-          
+
         ],
         "securitybaseapi": [
-          
+
         ],
         "servprov": [
-          
+
         ],
         "setupapi": [
-          
+
         ],
         "shellapi": [
-          
+
         ],
         "shellscalingapi": [
-          
+
         ],
         "shlobj": [
-          
+
         ],
         "shobjidl": [
-          
+
         ],
         "shobjidl_core": [
-          
+
         ],
         "shtypes": [
-          
+
         ],
         "spapidef": [
-          
+
         ],
         "sporder": [
-          
+
         ],
         "sql": [
-          
+
         ],
         "sqlext": [
-          
+
         ],
         "sqltypes": [
-          
+
         ],
         "sqlucode": [
-          
+
         ],
         "sspi": [
-          
+
         ],
         "std": [
-          
+
         ],
         "stralign": [
-          
+
         ],
         "stringapiset": [
-          
+
         ],
         "strmif": [
-          
+
         ],
         "subauth": [
-          
+
         ],
         "synchapi": [
-          
+
         ],
         "sysinfoapi": [
-          
+
         ],
         "systemtopologyapi": [
-          
+
         ],
         "textstor": [
-          
+
         ],
         "threadpoolapiset": [
-          
+
         ],
         "threadpoollegacyapiset": [
-          
+
         ],
         "timeapi": [
-          
+
         ],
         "timezoneapi": [
-          
+
         ],
         "tlhelp32": [
-          
+
         ],
         "unknwnbase": [
-          
+
         ],
         "urlhist": [
-          
+
         ],
         "urlmon": [
-          
+
         ],
         "usb": [
-          
+
         ],
         "usbiodef": [
-          
+
         ],
         "usbspec": [
-          
+
         ],
         "userenv": [
-          
+
         ],
         "usp10": [
-          
+
         ],
         "utilapiset": [
-          
+
         ],
         "vadefs": [
-          
+
         ],
         "vcruntime": [
-          
+
         ],
         "vsbackup": [
-          
+
         ],
         "vss": [
-          
+
         ],
         "vsserror": [
-          
+
         ],
         "vswriter": [
-          
+
         ],
         "werapi": [
-          
+
         ],
         "winbase": [
-          
+
         ],
         "wincodec": [
-          
+
         ],
         "wincodecsdk": [
-          
+
         ],
         "wincon": [
-          
+
         ],
         "wincred": [
-          
+
         ],
         "wincrypt": [
-          
+
         ],
         "windef": [
-          
+
         ],
         "windowsceip": [
-          
+
         ],
         "windowsx": [
-          
+
         ],
         "winerror": [
-          
+
         ],
         "winevt": [
-          
+
         ],
         "wingdi": [
-          
+
         ],
         "winhttp": [
-          
+
         ],
         "wininet": [
-          
+
         ],
         "winineti": [
-          
+
         ],
         "winioctl": [
-          
+
         ],
         "winnetwk": [
-          
+
         ],
         "winnls": [
-          
+
         ],
         "winnt": [
-          
+
         ],
         "winreg": [
-          
+
         ],
         "winscard": [
-          
+
         ],
         "winsmcrd": [
-          
+
         ],
         "winsock2": [
-          
+
         ],
         "winspool": [
-          
+
         ],
         "winstring": [
-          
+
         ],
         "winsvc": [
-          
+
         ],
         "winusb": [
-          
+
         ],
         "winusbio": [
-          
+
         ],
         "winuser": [
-          
+
         ],
         "winver": [
-          
+
         ],
         "wnnc": [
-          
+
         ],
         "wow64apiset": [
-          
+
         ],
         "ws2def": [
-          
+
         ],
         "ws2ipdef": [
-          
+
         ],
         "ws2spi": [
-          
+
         ],
         "ws2tcpip": [
-          
+
         ],
         "wtypes": [
-          
+
         ],
         "wtypesbase": [
-          
+
         ],
         "xinput": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-0.3.4\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/winapi-0.3.4\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "unreachable",
@@ -4046,7 +4187,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -4060,13 +4201,15 @@
             "lib"
           ],
           "name": "unreachable",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/unreachable-1.0.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/unreachable-1.0.0\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/unreachable-1.0.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/unreachable-1.0.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "quote",
@@ -4077,7 +4220,7 @@
       "description": "Quasi-quoting macro quote!(...)",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -4088,7 +4231,8 @@
             "lib"
           ],
           "name": "quote",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/quote-0.3.15\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/quote-0.3.15\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4098,13 +4242,15 @@
             "bin"
           ],
           "name": "test",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/quote-0.3.15\/tests\/test.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/quote-0.3.15\/tests\/test.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/quote-0.3.15\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/quote-0.3.15\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "atom",
@@ -4115,7 +4261,7 @@
       "description": "A safe abstraction around AtomicPtr",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -4126,7 +4272,8 @@
             "lib"
           ],
           "name": "atom",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4136,7 +4283,8 @@
             "bin"
           ],
           "name": "simple",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/examples\/simple.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/examples\/simple.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4146,7 +4294,8 @@
             "bin"
           ],
           "name": "fifo",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/examples\/fifo.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/examples\/fifo.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4156,13 +4305,15 @@
             "bin"
           ],
           "name": "atom",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/tests\/atom.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/tests\/atom.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/atom-0.3.4\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "synom",
@@ -4181,7 +4332,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -4208,13 +4359,15 @@
             "lib"
           ],
           "name": "synom",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/synom-0.11.3\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/synom-0.11.3\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/synom-0.11.3\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/synom-0.11.3\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "rayon-core",
@@ -4233,7 +4386,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -4245,7 +4398,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -4257,7 +4410,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -4269,7 +4422,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -4281,7 +4434,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -4295,7 +4448,8 @@
             "lib"
           ],
           "name": "rayon-core",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-core-1.4.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-core-1.4.0\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4305,13 +4459,15 @@
             "bin"
           ],
           "name": "build-script-build",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-core-1.4.0\/build.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-core-1.4.0\/build.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-core-1.4.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rayon-core-1.4.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "memoffset",
@@ -4322,7 +4478,7 @@
       "description": "offset_of functionality for Rust structs.",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -4333,13 +4489,15 @@
             "lib"
           ],
           "name": "memoffset",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memoffset-0.2.1\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memoffset-0.2.1\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memoffset-0.2.1\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/memoffset-0.2.1\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "nodrop",
@@ -4358,7 +4516,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -4372,7 +4530,8 @@
             "lib"
           ],
           "name": "nodrop",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/nodrop-0.1.12\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/nodrop-0.1.12\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -4380,16 +4539,17 @@
           "std"
         ],
         "std": [
-          
+
         ],
         "use_needs_drop": [
-          
+
         ],
         "use_union": [
           "nodrop-union"
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/nodrop-0.1.12\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/nodrop-0.1.12\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "thread_local",
@@ -4408,7 +4568,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -4420,7 +4580,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -4434,7 +4594,8 @@
             "lib"
           ],
           "name": "thread_local",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/thread_local-0.3.5\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/thread_local-0.3.5\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4444,13 +4605,15 @@
             "bin"
           ],
           "name": "thread_local",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/thread_local-0.3.5\/benches\/thread_local.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/thread_local-0.3.5\/benches\/thread_local.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/thread_local-0.3.5\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/thread_local-0.3.5\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "fuchsia-zircon",
@@ -4469,7 +4632,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -4481,7 +4644,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -4495,13 +4658,15 @@
             "lib"
           ],
           "name": "fuchsia-zircon",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-0.3.3\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-0.3.3\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-0.3.3\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fuchsia-zircon-0.3.3\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "fnv",
@@ -4512,7 +4677,7 @@
       "description": "Fowler\u2013Noll\u2013Vo hash function",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -4523,13 +4688,15 @@
             "lib"
           ],
           "name": "fnv",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fnv-1.0.6\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fnv-1.0.6\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fnv-1.0.6\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/fnv-1.0.6\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "tuple_utils",
@@ -4540,7 +4707,7 @@
       "description": "A set of utilities to enable higher level operations over tuples.",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -4551,13 +4718,15 @@
             "lib"
           ],
           "name": "tuple_utils",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/tuple_utils-0.2.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/tuple_utils-0.2.0\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/tuple_utils-0.2.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/tuple_utils-0.2.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "mopa",
@@ -4568,7 +4737,7 @@
       "description": "My Own Personal Any: get your own Any with additional functionality",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -4579,7 +4748,8 @@
             "lib"
           ],
           "name": "mopa",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4589,7 +4759,8 @@
             "bin"
           ],
           "name": "no_std_or_alloc",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/examples\/no_std_or_alloc.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/examples\/no_std_or_alloc.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4599,7 +4770,8 @@
             "bin"
           ],
           "name": "no_std",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/examples\/no_std.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/examples\/no_std.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4609,18 +4781,20 @@
             "bin"
           ],
           "name": "simple",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/examples\/simple.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/examples\/simple.rs",
+          "edition": "2018"
         }
       ],
       "features": {
         "no_std": [
-          
+
         ],
         "no_std_examples": [
           "no_std"
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/mopa-0.2.2\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "pulse",
@@ -4639,7 +4813,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -4651,7 +4825,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -4665,7 +4839,8 @@
             "lib"
           ],
           "name": "pulse",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4675,7 +4850,8 @@
             "bin"
           ],
           "name": "select",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/tests\/select.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/tests\/select.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4685,7 +4861,8 @@
             "bin"
           ],
           "name": "barrier",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/tests\/barrier.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/tests\/barrier.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4695,7 +4872,8 @@
             "bin"
           ],
           "name": "simple",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/tests\/simple.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/tests\/simple.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4705,18 +4883,20 @@
             "bin"
           ],
           "name": "benches",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/benches\/benches.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/benches\/benches.rs",
+          "edition": "2018"
         }
       ],
       "features": {
         "callback": [
-          
+
         ],
         "default": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/pulse-0.5.3\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "derivative",
@@ -4735,7 +4915,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -4747,7 +4927,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -4773,7 +4953,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -4787,7 +4967,8 @@
             "proc-macro"
           ],
           "name": "derivative",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4797,7 +4978,8 @@
             "bin"
           ],
           "name": "rustc-deriving-clone-tuple-struct",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-tuple-struct.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-tuple-struct.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4807,7 +4989,8 @@
             "bin"
           ],
           "name": "rustc-class-implement-traits",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-class-implement-traits.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-class-implement-traits.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4817,7 +5000,8 @@
             "bin"
           ],
           "name": "rustc-issue-32292",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-32292.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-32292.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4827,7 +5011,8 @@
             "bin"
           ],
           "name": "rustc-issue-19135",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-19135.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-19135.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4837,7 +5022,8 @@
             "bin"
           ],
           "name": "rustc-issue-28561",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-28561.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-28561.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4847,7 +5033,8 @@
             "bin"
           ],
           "name": "derive-debug-generics",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-debug-generics.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-debug-generics.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4857,7 +5044,8 @@
             "bin"
           ],
           "name": "derive-partial-eq",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-partial-eq.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-partial-eq.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4867,7 +5055,8 @@
             "bin"
           ],
           "name": "rustc-issue-29540",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-29540.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-29540.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4877,7 +5066,8 @@
             "bin"
           ],
           "name": "rustc-issue-12860",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-12860.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-12860.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4887,7 +5077,8 @@
             "bin"
           ],
           "name": "rustc-issue-21402",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-21402.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-21402.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4897,7 +5088,8 @@
             "bin"
           ],
           "name": "rustc-deriving-bounds",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-bounds.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-bounds.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4907,7 +5099,8 @@
             "bin"
           ],
           "name": "rustc-deriving-in-fn",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-in-fn.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-in-fn.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4917,7 +5110,8 @@
             "bin"
           ],
           "name": "rustc-deriving-show-2",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-show-2.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-show-2.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4927,7 +5121,8 @@
             "bin"
           ],
           "name": "rustc-deriving-default-box",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-default-box.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-default-box.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4937,7 +5132,8 @@
             "bin"
           ],
           "name": "rustc-deriving-via-extension-hash-struct",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-via-extension-hash-struct.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-via-extension-hash-struct.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4947,7 +5143,8 @@
             "bin"
           ],
           "name": "rustc-issue-19037",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-19037.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-19037.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4957,7 +5154,8 @@
             "bin"
           ],
           "name": "rustc-issue-3935",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-3935.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-3935.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4967,7 +5165,8 @@
             "bin"
           ],
           "name": "derive-hash",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-hash.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-hash.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4977,7 +5176,8 @@
             "bin"
           ],
           "name": "rustc-deriving-meta",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-meta.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-meta.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4987,7 +5187,8 @@
             "bin"
           ],
           "name": "rustc-issue-16530",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-16530.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-16530.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -4997,7 +5198,8 @@
             "bin"
           ],
           "name": "rustc-issue-23649-3",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-23649-3.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-23649-3.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5007,7 +5209,8 @@
             "bin"
           ],
           "name": "compile-test",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/compile-test.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/compile-test.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5017,7 +5220,8 @@
             "bin"
           ],
           "name": "rustc-deriving-clone-array",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-array.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-array.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5027,7 +5231,8 @@
             "bin"
           ],
           "name": "rustc-issue-24085",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-24085.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-24085.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5037,7 +5242,8 @@
             "bin"
           ],
           "name": "rustc-deriving-show",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-show.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-show.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5047,7 +5253,8 @@
             "bin"
           ],
           "name": "derive-debug",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-debug.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-debug.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5057,7 +5264,8 @@
             "bin"
           ],
           "name": "rustc-issue-29710",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-29710.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-29710.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5067,7 +5275,8 @@
             "bin"
           ],
           "name": "rustc-issue-29030",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-29030.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-29030.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5077,7 +5286,8 @@
             "bin"
           ],
           "name": "rustc-deriving-clone-enum",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-enum.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-enum.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5087,7 +5297,8 @@
             "bin"
           ],
           "name": "derive-eq",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-eq.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-eq.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5097,7 +5308,8 @@
             "bin"
           ],
           "name": "rustc-deriving-copyclone",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-copyclone.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-copyclone.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5107,7 +5319,8 @@
             "bin"
           ],
           "name": "derive-default",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-default.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-default.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5117,7 +5330,8 @@
             "bin"
           ],
           "name": "rustc-deriving-hash",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-hash.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-hash.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5127,7 +5341,8 @@
             "bin"
           ],
           "name": "rustc-zero-sized-btreemap-insert",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-zero-sized-btreemap-insert.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-zero-sized-btreemap-insert.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5137,7 +5352,8 @@
             "bin"
           ],
           "name": "rustc-deriving-clone-generic-enum",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-generic-enum.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-generic-enum.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5147,7 +5363,8 @@
             "bin"
           ],
           "name": "rustc-issue-19358",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-19358.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-19358.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5157,7 +5374,8 @@
             "bin"
           ],
           "name": "rustc-issue-13434",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-13434.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-13434.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5167,7 +5385,8 @@
             "bin"
           ],
           "name": "derive-default-bounds",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-default-bounds.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-default-bounds.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5177,7 +5396,8 @@
             "bin"
           ],
           "name": "rustc-deriving-meta-multiple",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-meta-multiple.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-meta-multiple.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5187,7 +5407,8 @@
             "bin"
           ],
           "name": "rustc-issue-25394",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-25394.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-25394.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5197,7 +5418,8 @@
             "bin"
           ],
           "name": "rustc-deriving-clone-generic-tuple-struct",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-generic-tuple-struct.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-generic-tuple-struct.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5207,7 +5429,8 @@
             "bin"
           ],
           "name": "rustc-expr-copy",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-expr-copy.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-expr-copy.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5217,7 +5440,8 @@
             "bin"
           ],
           "name": "rustc-exterior",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-exterior.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-exterior.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5227,7 +5451,8 @@
             "bin"
           ],
           "name": "rustc-issue-6341",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-6341.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-6341.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5237,7 +5462,8 @@
             "bin"
           ],
           "name": "rustc-typeclasses-eq-example",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-typeclasses-eq-example.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-typeclasses-eq-example.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5247,7 +5473,8 @@
             "bin"
           ],
           "name": "rustc-deriving-cmp-generic-enum",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-cmp-generic-enum.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-cmp-generic-enum.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5257,7 +5484,8 @@
             "bin"
           ],
           "name": "derive-debug-transparent",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-debug-transparent.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-debug-transparent.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5267,7 +5495,8 @@
             "bin"
           ],
           "name": "derive-clone",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-clone.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-clone.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5277,7 +5506,8 @@
             "bin"
           ],
           "name": "rustc-deriving-enum-single-variant",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-enum-single-variant.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-enum-single-variant.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5287,7 +5517,8 @@
             "bin"
           ],
           "name": "rustc-issue-19102",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-19102.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-issue-19102.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5297,7 +5528,8 @@
             "bin"
           ],
           "name": "rustc-deriving-clone-struct",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-struct.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-clone-struct.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5307,7 +5539,8 @@
             "bin"
           ],
           "name": "rustc-deriving-via-extension-type-params",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-via-extension-type-params.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-via-extension-type-params.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5317,7 +5550,8 @@
             "bin"
           ],
           "name": "rustc-deriving-via-extension-hash-enum",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-via-extension-hash-enum.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/rustc-deriving-via-extension-hash-enum.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5327,7 +5561,8 @@
             "bin"
           ],
           "name": "derive-debug-bounds",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-debug-bounds.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/tests\/derive-debug-bounds.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -5335,7 +5570,8 @@
           "compiletest_rs"
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/derivative-1.0.0\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "smallvec",
@@ -5354,7 +5590,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -5366,7 +5602,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -5378,7 +5614,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -5392,7 +5628,8 @@
             "lib"
           ],
           "name": "smallvec",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/smallvec-0.4.4\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/smallvec-0.4.4\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5402,7 +5639,8 @@
             "bin"
           ],
           "name": "bench",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/smallvec-0.4.4\/benches\/bench.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/smallvec-0.4.4\/benches\/bench.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -5414,10 +5652,11 @@
           "std"
         ],
         "std": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/smallvec-0.4.4\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/smallvec-0.4.4\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "itertools",
@@ -5436,7 +5675,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -5448,7 +5687,7 @@
           "optional": false,
           "uses_default_features": false,
           "features": [
-            
+
           ],
           "target": null
         },
@@ -5460,7 +5699,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": null
         }
@@ -5474,7 +5713,8 @@
             "lib"
           ],
           "name": "itertools",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5484,7 +5724,8 @@
             "bin"
           ],
           "name": "iris",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/examples\/iris.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/examples\/iris.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5494,7 +5735,8 @@
             "bin"
           ],
           "name": "quick",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/quick.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/quick.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5504,7 +5746,8 @@
             "bin"
           ],
           "name": "peeking_take_while",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/peeking_take_while.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/peeking_take_while.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5514,7 +5757,8 @@
             "bin"
           ],
           "name": "tests",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/tests.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/tests.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5524,7 +5768,8 @@
             "bin"
           ],
           "name": "tuples",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/tuples.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/tuples.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5534,7 +5779,8 @@
             "bin"
           ],
           "name": "zip",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/zip.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/tests\/zip.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5544,7 +5790,8 @@
             "bin"
           ],
           "name": "tuple_combinations",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/benches\/tuple_combinations.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/benches\/tuple_combinations.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5554,7 +5801,8 @@
             "bin"
           ],
           "name": "bench1",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/benches\/bench1.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/benches\/bench1.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5564,13 +5812,15 @@
             "bin"
           ],
           "name": "tuples",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/benches\/tuples.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/benches\/tuples.rs",
+          "edition": "2018"
         }
       ],
       "features": {
-        
+
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/itertools-0.5.10\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "rand",
@@ -5589,7 +5839,7 @@
           "optional": false,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": "cfg(target_os = \"fuchsia\")"
         },
@@ -5601,7 +5851,7 @@
           "optional": true,
           "uses_default_features": true,
           "features": [
-            
+
           ],
           "target": "cfg(unix)"
         },
@@ -5630,7 +5880,8 @@
             "lib"
           ],
           "name": "rand",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/src\/lib.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5640,7 +5891,8 @@
             "bin"
           ],
           "name": "generators",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/benches\/generators.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/benches\/generators.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5650,7 +5902,8 @@
             "bin"
           ],
           "name": "misc",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/benches\/misc.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/benches\/misc.rs",
+          "edition": "2018"
         },
         {
           "kind": [
@@ -5660,18 +5913,19 @@
             "bin"
           ],
           "name": "bench",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/benches\/bench.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/benches\/bench.rs",
+          "edition": "2018"
         }
       ],
       "features": {
         "alloc": [
-          
+
         ],
         "default": [
           "std"
         ],
         "i128_support": [
-          
+
         ],
         "nightly": [
           "i128_support"
@@ -5680,7 +5934,8 @@
           "libc"
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/rand-0.4.2\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "bitflags",
@@ -5691,7 +5946,7 @@
       "description": "A macro to generate structures which behave like bitflags.\n",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -5702,7 +5957,8 @@
             "lib"
           ],
           "name": "bitflags",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/bitflags-1.0.1\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/bitflags-1.0.1\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
@@ -5710,10 +5966,11 @@
           "example_generated"
         ],
         "example_generated": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/bitflags-1.0.1\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/bitflags-1.0.1\/Cargo.toml",
+      "edition": "2018"
     },
     {
       "name": "unicode-xid",
@@ -5724,7 +5981,7 @@
       "description": "Determine whether characters have the XID_Start\nor XID_Continue properties according to\nUnicode Standard Annex #31.\n",
       "source": "registry+https:\/\/github.com\/rust-lang\/crates.io-index",
       "dependencies": [
-        
+
       ],
       "targets": [
         {
@@ -5735,21 +5992,23 @@
             "lib"
           ],
           "name": "unicode-xid",
-          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/unicode-xid-0.0.4\/src\/lib.rs"
+          "src_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/unicode-xid-0.0.4\/src\/lib.rs",
+          "edition": "2018"
         }
       ],
       "features": {
         "bench": [
-          
+
         ],
         "default": [
-          
+
         ],
         "no_std": [
-          
+
         ]
       },
-      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/unicode-xid-0.0.4\/Cargo.toml"
+      "manifest_path": "\/home\/alex\/.cargo\/registry\/src\/github.com-1ecc6299db9ec823\/unicode-xid-0.0.4\/Cargo.toml",
+      "edition": "2018"
     }
   ],
   "workspace_members": [
@@ -5768,19 +6027,19 @@
       {
         "id": "regex-syntax 0.4.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
         "id": "nodrop 0.1.12 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
         "id": "atom 0.3.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
@@ -5805,13 +6064,13 @@
       {
         "id": "winapi-x86_64-pc-windows-gnu 0.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
         "id": "winapi-i686-pc-windows-gnu 0.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
@@ -5832,7 +6091,7 @@
       {
         "id": "quote 0.3.15 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
@@ -5844,13 +6103,13 @@
       {
         "id": "fuchsia-zircon-sys 0.3.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
         "id": "tuple_utils 0.2.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
@@ -5866,19 +6125,19 @@
       {
         "id": "bitflags 1.0.1 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
         "id": "lazy_static 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
         "id": "libc 0.2.36 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
@@ -5891,7 +6150,7 @@
       {
         "id": "scopeguard 0.3.3 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
@@ -5912,7 +6171,7 @@
       {
         "id": "fnv 1.0.6 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
@@ -5925,13 +6184,13 @@
       {
         "id": "cfg-if 0.1.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
         "id": "memoffset 0.2.1 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
@@ -5945,7 +6204,7 @@
       {
         "id": "odds 0.2.26 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
@@ -5991,7 +6250,7 @@
       {
         "id": "void 1.0.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
@@ -6042,19 +6301,19 @@
       {
         "id": "lazy_static 0.2.11 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
         "id": "crossbeam 0.3.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
         "id": "unicode-xid 0.0.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
@@ -6074,13 +6333,13 @@
       {
         "id": "mopa 0.2.2 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
         "id": "either 1.4.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
@@ -6099,19 +6358,19 @@
       {
         "id": "redox_syscall 0.1.37 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
         "id": "utf8-ranges 1.0.0 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {
         "id": "smallvec 0.4.4 (registry+https:\/\/github.com\/rust-lang\/crates.io-index)",
         "dependencies": [
-          
+
         ]
       },
       {

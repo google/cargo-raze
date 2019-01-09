@@ -88,6 +88,7 @@ pub struct Package {
   pub targets: Vec<Target>,
   pub features: HashMap<String, Vec<String>>,
   pub manifest_path: String,
+  pub edition: String,
   pub sha256: Option<String>,
 }
 
@@ -124,6 +125,7 @@ pub struct Target {
   pub kind: Vec<String>,
   pub crate_types: Vec<String>,
   pub src_path: String,
+  pub edition: String,
 }
 
 /**
@@ -272,7 +274,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
 
     for package_id in resolved_packages.package_ids() {
       // TODO(acmcarther): Justify this unwrap
-      let package = resolved_packages.get(&package_id).unwrap().clone();
+      let package = resolved_packages.get_one(&package_id).unwrap().clone();
       let manifest_metadata = package.manifest().metadata();
 
       let mut dependencies = Vec::new();
@@ -305,7 +307,8 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
           name: target.name().to_owned(),
           kind: util::kind_to_kinds(target.kind()),
           crate_types: crate_types,
-          src_path: target.src_path().display().to_string(),
+          src_path: target.src_path().path().display().to_string(),
+          edition: target.edition().to_string()
         });
       }
 
@@ -352,6 +355,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
         targets: targets,
         features: features,
         manifest_path: package.manifest_path().display().to_string(),
+        edition: package.manifest().edition().to_string(),
         sha256: sha256,
       });
     }
@@ -423,6 +427,7 @@ pub mod testing {
       targets: Vec::new(),
       features: HashMap::new(),
       manifest_path: String::new(),
+      edition: String::new(),
       sha256: None,
     }
   }

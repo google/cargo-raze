@@ -4,6 +4,7 @@ rust_binary(
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_{{ target_name_sanitized }}",
     crate_root = "{{ target.path }}",
+    edition = "{{ target.edition }}",
     srcs = glob(["**/*.rs"]),
     deps = [
         # Binaries get an implicit dependency on their lib
