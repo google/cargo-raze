@@ -44,7 +44,7 @@ WORKSPACE. Here is an example:
 ```python
 git_repository(
     name = "io_bazel_rules_rust",
-    commit = "df95c3e3cd5afd87a69fa71dc9a56a0d0baa7823",
+    commit = "f32695dcd02d9a19e42b9eb7f29a24a8ceb2b858",
     remote = "https://github.com/bazelbuild/rules_rust.git",
 )
 load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
