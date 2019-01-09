@@ -44,11 +44,10 @@ WORKSPACE. Here is an example:
 ```python
 git_repository(
     name = "io_bazel_rules_rust",
-    commit = "df95c3e3cd5afd87a69fa71dc9a56a0d0baa7823",
+    commit = "f32695dcd02d9a19e42b9eb7f29a24a8ceb2b858",
     remote = "https://github.com/bazelbuild/rules_rust.git",
 )
 load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
-
 rust_repositories()
 ```
 
@@ -239,7 +238,7 @@ new_local_repository(
 ```
 
 In a few cases, the sys crate may need to be overridden entirely. This can be
-facilitated by removing and supplementing dependencies in the Cargo.toml, 
+facilitated by removing and supplementing dependencies in the Cargo.toml,
 pre-generation:
 
 ```toml
