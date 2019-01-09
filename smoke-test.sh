@@ -74,7 +74,8 @@ for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
     bazel_cargo_path="//$ex_type/$ex_name/cargo:all"
 
     echo "Running Bazel build for $bazel_path, $bazel_cargo_path"
-    bazel build "$bazel_path" && bazel build "$bazel_cargo_path"
+    bazel build "$bazel_path"
+    bazel build "$bazel_cargo_path"
 done
 
 cd "$PWD"
