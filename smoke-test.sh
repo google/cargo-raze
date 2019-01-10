@@ -23,13 +23,18 @@ command_exists "bazel"
 rm -rf "$EXAMPLES_DIR/remote" "$EXAMPLES_DIR/vendored"
 cp -r "$TEST_DIR/remote" "$TEST_DIR/vendored" "$EXAMPLES_DIR"
 
+# Set up root BUILD file
+touch "$EXAMPLES_DIR/BUILD"
+
 # Set up the new WORKSPACE file
 cat > "$EXAMPLES_DIR/WORKSPACE" << EOF
-workspace(name = "io_bazel_rules_rust")
+workspace(name = "examples")
+
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(
     name = "io_bazel_rules_rust",
-    commit = "f32695dcd02d9a19e42b9eb7f29a24a8ceb2b858",
+    commit = "5894d35bb7b5f982478dfbf71bc411426fae3451",
     remote = "https://github.com/bazelbuild/rules_rust.git",
 )
 
@@ -83,7 +88,8 @@ for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
     bazel_cargo_path="//$ex_type/$ex_name/cargo:all"
 
     echo "Running Bazel build for $bazel_path, $bazel_cargo_path"
-    bazel build "$bazel_path" && bazel build "$bazel_cargo_path"
+    bazel build "$bazel_path"
+    bazel build "$bazel_cargo_path"
 done
 
 cd "$PWD"
