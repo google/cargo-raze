@@ -11,7 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
+extern crate cargo_raze;
 extern crate cargo;
 extern crate itertools;
 extern crate serde;
@@ -29,14 +31,14 @@ extern crate failure;
 #[macro_use]
 extern crate hamcrest;
 
-mod bazel;
-mod context;
-mod license;
-mod metadata;
-mod planning;
-mod rendering;
-mod settings;
-mod util;
+use cargo_raze::bazel;
+use cargo_raze::context;
+use cargo_raze::license;
+use cargo_raze::metadata;
+use cargo_raze::planning;
+use cargo_raze::rendering;
+use cargo_raze::settings;
+use cargo_raze::util;
 
 use bazel::BazelRenderer;
 use cargo::CargoError;
