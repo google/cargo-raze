@@ -17,26 +17,26 @@ extern crate cargo_raze;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde_json;
 extern crate docopt;
 extern crate home;
+extern crate serde_json;
 
-use docopt::Docopt;
-use std::env;
-use std::path::PathBuf;
-use std::string::ToString;
-use std::fs::File;
-use std::io::Write;
-use std::fmt;
-use std::error::Error as StdError;
-use cargo::CliResult;
-use cargo::CargoError;
 use cargo::util::CargoResult;
 use cargo::util::Config;
+use cargo::CargoError;
+use cargo::CliResult;
+use docopt::Docopt;
+use std::env;
+use std::error::Error as StdError;
+use std::fmt;
+use std::fs::File;
+use std::io::Write;
+use std::path::PathBuf;
+use std::string::ToString;
 
-use cargo_raze::metadata::MetadataFetcher;
-use cargo_raze::metadata::CargoWorkspaceFiles;
 use cargo_raze::metadata::CargoInternalsMetadataFetcher;
+use cargo_raze::metadata::CargoWorkspaceFiles;
+use cargo_raze::metadata::MetadataFetcher;
 
 #[derive(Debug)]
 struct DumpError(String);
@@ -87,7 +87,7 @@ fn validate_opts(options: &Options) -> Result<ValidatedOptions, String> {
     path_to_toml: options.arg_path_to_toml.clone(),
     infer_lock_file: infer_lock_file,
     pretty_print: options.flag_pretty_print.clone(),
-    output_file_opt: options.flag_output_file.clone()
+    output_file_opt: options.flag_output_file.clone(),
   })
 }
 
@@ -107,18 +107,21 @@ fn find_workspace_files(options: &ValidatedOptions) -> CargoResult<CargoWorkspac
   // Verify that toml file exists
   {
     File::open(&abs_toml_path).map_err(|e| {
-      CargoError::from(DumpError(format!("opening {:?}: {}", abs_toml_path, e.to_string())))
+      CargoError::from(DumpError(format!(
+        "opening {:?}: {}",
+        abs_toml_path,
+        e.to_string()
+      )))
     })?;
   }
 
   // Try to find an associated lock file
   let mut abs_lock_path_opt = None;
   if options.infer_lock_file {
-    let expected_abs_lock_path =
-      abs_toml_path
-        .parent()
-        .unwrap() // CHECKED: Toml must live in a dir
-        .join("Cargo.lock");
+    let expected_abs_lock_path = abs_toml_path
+      .parent()
+      .unwrap() // CHECKED: Toml must live in a dir
+      .join("Cargo.lock");
 
     if File::open(&abs_toml_path).is_ok() {
       abs_lock_path_opt = Some(expected_abs_lock_path);
@@ -153,13 +156,11 @@ fn dump_metadata(options: ValidatedOptions, cargo_config: &mut Config) -> CargoR
   Ok(())
 }
 
-
 fn real_main(validated_opts: ValidatedOptions, cargo_config: &mut Config) -> CliResult {
   dump_metadata(validated_opts, cargo_config)?;
 
   Ok(())
 }
-
 
 fn make_cargo_config(validated_opts: &ValidatedOptions) -> CargoResult<Config> {
   // Sets the config cwd based on the manifest path. This is sort of backwards, but we're emulating
@@ -170,19 +171,16 @@ fn make_cargo_config(validated_opts: &ValidatedOptions) -> CargoResult<Config> {
 
   let config_cwd = {
     // CHECKED toml file must have dir (even if it's just ".")
-    PathBuf::from(&validated_opts.path_to_toml).parent()
+    PathBuf::from(&validated_opts.path_to_toml)
+      .parent()
       .unwrap()
       .to_path_buf()
   };
 
   let homedir = home::cargo_home_with_cwd(&config_cwd)?;
 
-  Ok(Config::new(
-    cargo::core::Shell::new(),
-    config_cwd,
-    homedir))
+  Ok(Config::new(cargo::core::Shell::new(), config_cwd, homedir))
 }
-
 
 fn main() {
   let opts: Options = Docopt::new(USAGE)
@@ -198,4 +196,3 @@ fn main() {
     cargo::exit_with_error(e, &mut *config.shell());
   }
 }
-
