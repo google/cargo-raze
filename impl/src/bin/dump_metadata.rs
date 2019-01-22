@@ -37,8 +37,6 @@ use cargo::util::Config;
 
 use cargo_raze::metadata::MetadataFetcher;
 use cargo_raze::metadata::CargoWorkspaceFiles;
-use cargo_raze::metadata::Metadata;
-use cargo_raze::metadata::CargoSubcommandMetadataFetcher;
 use cargo_raze::metadata::CargoInternalsMetadataFetcher;
 
 #[derive(Debug)]
