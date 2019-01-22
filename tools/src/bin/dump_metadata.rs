@@ -18,9 +18,8 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
-extern crate tempdir;
 extern crate docopt;
-extern crate failure;
+extern crate home;
 
 use docopt::Docopt;
 use std::env;
@@ -97,11 +96,12 @@ fn find_workspace_files(options: &ValidatedOptions) -> CargoResult<CargoWorkspac
 
   // Find abs path to toml
   let abs_toml_path = if opt_toml_path.is_absolute() {
-    opt_toml_path
+    opt_toml_path.canonicalize()?
   } else {
     env::current_dir()
       .map_err(|e| CargoError::from(DumpError(e.to_string())))?
       .join(opt_toml_path)
+      .canonicalize()?
   };
 
   // Verify that toml file exists
@@ -160,14 +160,37 @@ fn real_main(validated_opts: ValidatedOptions, cargo_config: &mut Config) -> Cli
   Ok(())
 }
 
-fn main() {
-  let mut config = Config::default().unwrap();
 
+fn make_cargo_config(validated_opts: &ValidatedOptions) -> CargoResult<Config> {
+  // Sets the config cwd based on the manifest path. This is sort of backwards, but we're emulating
+  // how cargo handles "manifest-path".
+  //
+  // N.B. Config does not expose a constructor that accepts cwd only, and does not allow
+  // overwriting cwd later, so we need to emulate `default` but use our own CWD
+
+  let config_cwd = {
+    // CHECKED toml file must have dir (even if it's just ".")
+    PathBuf::from(&validated_opts.path_to_toml).parent()
+      .unwrap()
+      .to_path_buf()
+  };
+
+  let homedir = home::cargo_home_with_cwd(&config_cwd)?;
+
+  Ok(Config::new(
+    cargo::core::Shell::new(),
+    config_cwd,
+    homedir))
+}
+
+
+fn main() {
   let opts: Options = Docopt::new(USAGE)
     .and_then(|d| d.deserialize())
     .unwrap_or_else(|e| e.exit());
-
   let validated_opts = validate_opts(&opts).unwrap();
+
+  let mut config = make_cargo_config(&validated_opts).unwrap();
 
   let result = real_main(validated_opts, &mut config);
 
