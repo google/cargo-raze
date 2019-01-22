@@ -407,7 +407,8 @@ impl<'planner> CrateSubplanner<'planner> {
     {
       for target in &targets {
         if target.name == package.name {
-          has_eponymous_lib = true
+          has_eponymous_lib = true;
+          break;
         }
       }
     }
