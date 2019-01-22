@@ -76,7 +76,7 @@ pub struct CrateContext {
   // I'm punting on this now because this requires a more serious look at the renderer code.
   pub expected_build_path: String,
 
-  // Does this crate have a lib with the same name?
+  // Does this crate contain a lib target with the same name as the crate?
   pub has_eponymous_lib: bool,
 }
 
