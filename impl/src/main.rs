@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate cargo_raze;
 extern crate cargo;
 extern crate itertools;
 extern crate serde;
@@ -30,12 +29,14 @@ extern crate failure;
 #[macro_use]
 extern crate hamcrest;
 
-use cargo_raze::bazel;
-use cargo_raze::metadata;
-use cargo_raze::planning;
-use cargo_raze::rendering;
-use cargo_raze::settings;
-use cargo_raze::util;
+mod bazel;
+mod context;
+mod license;
+mod metadata;
+mod planning;
+mod rendering;
+mod settings;
+mod util;
 
 use bazel::BazelRenderer;
 use cargo::CargoError;
@@ -51,6 +52,7 @@ use rendering::FileOutputs;
 use rendering::RenderDetails;
 use settings::GenMode;
 use settings::RazeSettings;
+use std::env;
 use std::fs::File;
 use std::fs;
 use std::io::Read;
