@@ -20,7 +20,6 @@ normalize_comments = false
 reorder_imports = true
 report_fixme = "always"
 tab_spaces = 2
-use_small_heuristics = false
 where_single_line = false
 wrap_comments = false
 reorder_extern_crates = true

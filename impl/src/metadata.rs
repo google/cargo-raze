@@ -59,7 +59,7 @@ pub struct CargoWorkspaceFiles {
  * own "ExportInfo":
  * https://github.com/rust-lang/cargo/blob/9c78c3a17ac4bc0c8b3b837095f60aa84d09c426/src/cargo/ops/cargo_output_metadata.rs#L78-L85
  */
-#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Metadata {
   pub packages: Vec<Package>,
   pub resolve: Resolve,
@@ -75,7 +75,7 @@ pub struct Metadata {
  * own "SerializedPackage":
  * https://github.com/rust-lang/cargo/blob/9c78c3a17ac4bc0c8b3b837095f60aa84d09c426/src/cargo/core/package.rs#L32-L50
  */
-#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Package {
   pub name: String,
   pub version: String,
@@ -99,7 +99,7 @@ pub struct Package {
  * own "SerializedDependency":
  * https://github.com/rust-lang/cargo/blob/75ec2d3a8d045f90792b3ce5d7050cad43bfb3bf/src/cargo/core/dependency.rs#L49-L60
  */
-#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Dependency {
   pub name: String,
   pub source: String,
@@ -119,7 +119,7 @@ pub struct Dependency {
  * own "SerializedTarget":
  * https://github.com/rust-lang/cargo/blob/c24a09772c2c1cb315970dbc721f2a42d4515f21/src/cargo/core/manifest.rs#L188-L197
  */
-#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Target {
   pub name: String,
   pub kind: Vec<String>,
@@ -135,7 +135,7 @@ pub struct Target {
  * own "MetadataResolve":
  * https://github.com/rust-lang/cargo/blob/9c78c3a17ac4bc0c8b3b837095f60aa84d09c426/src/cargo/ops/cargo_output_metadata.rs#L91-L95
  */
-#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Resolve {
   pub nodes: Vec<ResolveNode>,
   pub root: PackageId,
@@ -148,7 +148,7 @@ pub struct Resolve {
  * own "Node":
  * https://github.com/rust-lang/cargo/blob/9c78c3a17ac4bc0c8b3b837095f60aa84d09c426/src/cargo/ops/cargo_output_metadata.rs#L102-L106
  */
-#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ResolveNode {
   pub id: PackageId,
   pub dependencies: Vec<PackageId>,
