@@ -13,17 +13,6 @@ A Cargo subcommand to generate Bazel BUILD files
 [badges]
 travis-ci = { repository = "google/cargo-raze", branch = "master" }
 
-[lib]
-path = "src/lib.rs"
-
-[[bin]]
-name = "cargo-raze"
-path = "src/bin/cargo-raze.rs"
-
-[[bin]]
-name = "dump_metadata"
-path = "src/bin/dump_metadata.rs"
-
 [dependencies]
 failure = "0.1.5"
 docopt = "1.0.2"
