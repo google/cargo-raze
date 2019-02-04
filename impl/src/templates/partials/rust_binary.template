@@ -7,9 +7,9 @@ rust_binary(
     edition = "{{ target.edition }}",
     srcs = glob(["**/*.rs"]),
     deps = [
-        {%- if crate.has_eponymous_lib %}
+        {%- if crate.lib_target_name %}
         # Binaries get an implicit dependency on their crate's lib
-        ":{{crate.pkg_name | replace(from="-", to="_") }}",
+        ":{{crate.lib_target_name}}",
         {%- endif %}
         {%- for dependency in crate.dependencies %}
         "{{dependency.buildable_target}}",
