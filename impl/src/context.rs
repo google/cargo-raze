@@ -75,6 +75,10 @@ pub struct CrateContext {
   //
   // I'm punting on this now because this requires a more serious look at the renderer code.
   pub expected_build_path: String,
+
+  // The name of the main lib target for this crate (if present).
+  // Currently only one such lib can exist per crate.
+  pub lib_target_name: Option<String>
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]

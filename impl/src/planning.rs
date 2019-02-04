@@ -403,6 +403,15 @@ impl<'planner> CrateSubplanner<'planner> {
     let build_script_target_opt = self.take_build_script_target(&mut targets);
 
     let package = self.crate_catalog_entry.package();
+    let mut lib_target_name = None;
+    {
+      for target in &targets {
+        if target.kind == "lib" {
+          lib_target_name = Some(target.name.clone());
+          break;
+        }
+      }
+    }
     Ok(CrateContext {
       pkg_name: package.name.clone(),
       pkg_version: package.version.clone(),
@@ -424,6 +433,7 @@ impl<'planner> CrateSubplanner<'planner> {
         .crate_catalog_entry
         .local_build_path(&self.settings),
       sha256: package.sha256.clone(),
+      lib_target_name: lib_target_name,
     })
   }
 
