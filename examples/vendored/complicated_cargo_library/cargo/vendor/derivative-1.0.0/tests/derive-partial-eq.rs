@@ -71,29 +71,29 @@ impl SomeTrait for SomeType {}
 
 #[test]
 fn main() {
-    assert!(Foo { foo: 7 } == Foo { foo: 7 });
-    assert!(Foo { foo: 7 } != Foo { foo: 42 });
+    assert_eq!(Foo { foo: 7 }, Foo { foo: 7 });
+    assert_ne!(Foo { foo: 7 }, Foo { foo: 42 });
 
     let ptr1: *const SomeTrait = &SomeType { foo: 0 };
     let ptr2: *const SomeTrait = &SomeType { foo: 1 };
-    assert!(WithPtr { foo: ptr1 } == WithPtr { foo: ptr1 });
-    assert!(WithPtr { foo: ptr1 } != WithPtr { foo: ptr2 });
+    assert_eq!(WithPtr { foo: ptr1 }, WithPtr { foo: ptr1 });
+    assert_ne!(WithPtr { foo: ptr1 }, WithPtr { foo: ptr2 });
 
-    assert!(Empty == Empty);
-    assert!(AllIgnored { foo: 0 } == AllIgnored { foo: 42 });
-    assert!(OneIgnored { foo: 0, bar: 6 } == OneIgnored { foo: 42, bar: 6 });
-    assert!(OneIgnored { foo: 0, bar: 6 } != OneIgnored { foo: 42, bar: 7 });
+    assert_eq!(Empty, Empty);
+    assert_eq!(AllIgnored { foo: 0 }, AllIgnored { foo: 42 });
+    assert_eq!(OneIgnored { foo: 0, bar: 6 }, OneIgnored { foo: 42, bar: 6 });
+    assert_ne!(OneIgnored { foo: 0, bar: 6 }, OneIgnored { foo: 42, bar: 7 });
 
-    assert!(Option::Some(42) == Option::Some(42));
-    assert!(Option::Some(0) != Option::Some(42));
-    assert!(Option::Some(42) != Option::None);
-    assert!(Option::None != Option::Some(42));
-    assert!(Option::None::<u8> == Option::None::<u8>);
+    assert_eq!(Option::Some(42), Option::Some(42));
+    assert_ne!(Option::Some(0), Option::Some(42));
+    assert_ne!(Option::Some(42), Option::None);
+    assert_ne!(Option::None, Option::Some(42));
+    assert_eq!(Option::None::<u8>, Option::None::<u8>);
 
-    assert!(Parity(3) == Parity(7));
-    assert!(Parity(2) == Parity(42));
-    assert!(Parity(3) != Parity(42));
-    assert!(Parity(2) != Parity(7));
+    assert_eq!(Parity(3), Parity(7));
+    assert_eq!(Parity(2), Parity(42));
+    assert_ne!(Parity(3), Parity(42));
+    assert_ne!(Parity(2), Parity(7));
 
-    assert!(Generic(SomeType { foo: 0 }) == Generic(SomeType{ foo: 0 }));
+    assert_eq!(Generic(SomeType { foo: 0 }), Generic(SomeType{ foo: 0 }));
 }
