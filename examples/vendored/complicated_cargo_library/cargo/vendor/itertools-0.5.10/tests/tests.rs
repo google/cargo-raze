@@ -22,11 +22,11 @@ fn product2() {
     let s = "αβ";
 
     let mut prod = iproduct!(s.chars(), 0..2);
-    assert!(prod.next() == Some(('α', 0)));
-    assert!(prod.next() == Some(('α', 1)));
-    assert!(prod.next() == Some(('β', 0)));
-    assert!(prod.next() == Some(('β', 1)));
-    assert!(prod.next() == None);
+    assert_eq!(prod.next(), Some(('α', 0)));
+    assert_eq!(prod.next(), Some(('α', 1)));
+    assert_eq!(prod.next(), Some(('β', 0)));
+    assert_eq!(prod.next(), Some(('β', 1)));
+    assert_eq!(prod.next(), None);
 }
 
 #[test]
@@ -37,7 +37,7 @@ fn product3() {
     for i in 0..3 {
         for j in 0..2 {
             for k in 0..2 {
-                assert!((i, j, k) == v[(i * 2 * 2 + j * 2 + k) as usize]);
+                assert_eq!((i, j, k), v[(i * 2 * 2 + j * 2 + k) as usize]);
             }
         }
     }
@@ -62,7 +62,7 @@ fn product_temporary() {
 fn izip_macro() {
     let mut zip = izip!(0..3, 0..2, 0..2i8);
     for i in 0..2 {
-        assert!((i as usize, i, i as i8) == zip.next().unwrap());
+        assert_eq!((i as usize, i, i as i8), zip.next().unwrap());
     }
     assert!(zip.next().is_none());
 
@@ -75,7 +75,7 @@ fn izip_macro() {
 fn izip3() {
     let mut zip = multizip((0..3, 0..2, 0..2i8));
     for i in 0..2 {
-        assert!((i as usize, i, i as i8) == zip.next().unwrap());
+        assert_eq!((i as usize, i, i as i8), zip.next().unwrap());
     }
     assert!(zip.next().is_none());
 
@@ -93,12 +93,12 @@ fn write_to() {
     let xs = [7, 9, 8];
     let mut ys = [0; 5];
     let cnt = ys.iter_mut().set_from(xs.iter().map(|x| *x));
-    assert!(cnt == xs.len());
-    assert!(ys == [7, 9, 8, 0, 0]);
+    assert_eq!(cnt, xs.len());
+    assert_eq!(ys, [7, 9, 8, 0, 0]);
 
     let cnt = ys.iter_mut().set_from(0..10);
-    assert!(cnt == ys.len());
-    assert!(ys == [0, 1, 2, 3, 4]);
+    assert_eq!(cnt, ys.len());
+    assert_eq!(ys, [0, 1, 2, 3, 4]);
 }
 
 #[test]
@@ -144,7 +144,7 @@ fn foreach() {
     let xs = [1i32, 2, 3];
     let mut sum = 0;
     xs.iter().foreach(|elt| sum += *elt);
-    assert!(sum == 6);
+    assert_eq!(sum, 6);
 }
 
 #[test]
@@ -166,7 +166,7 @@ fn intersperse() {
 
     let ys = [0, 1, 2, 3];
     let mut it = ys[..0].iter().map(|x| *x).intersperse(1);
-    assert!(it.next() == None);
+    assert_eq!(it.next(), None);
 }
 
 #[test]
