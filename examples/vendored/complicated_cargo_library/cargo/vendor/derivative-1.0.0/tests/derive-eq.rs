@@ -31,15 +31,15 @@ fn assert_eq<T: Eq>(_: T) {}
 
 #[test]
 fn main() {
-    assert!(Foo { foo: 7 } == Foo { foo: 7 });
-    assert!(Foo { foo: 7 } != Foo { foo: 42 });
+    assert_eq!(Foo { foo: 7 }, Foo { foo: 7 });
+    assert_ne!(Foo { foo: 7 }, Foo { foo: 42 });
 
     assert_eq(Foo { foo: 7 });
 
     let ptr1: *const SomeTrait = &SomeType { foo: 0 };
     let ptr2: *const SomeTrait = &SomeType { foo: 1 };
-    assert!(WithPtr { foo: ptr1 } == WithPtr { foo: ptr1 });
-    assert!(WithPtr { foo: ptr1 } != WithPtr { foo: ptr2 });
+    assert_eq!(WithPtr { foo: ptr1 }, WithPtr { foo: ptr1 });
+    assert_ne!(WithPtr { foo: ptr1 }, WithPtr { foo: ptr2 });
 
     assert_eq(WithPtr { foo: ptr1 });
 }
