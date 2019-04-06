@@ -9,7 +9,7 @@ rust_binary(
     deps = [
         {%- if crate.lib_target_name %}
         # Binaries get an implicit dependency on their crate's lib
-        ":{{crate.lib_target_name}}",
+        ":{{crate.lib_target_name | replace(from="-", to="_") }}",
         {%- endif %}
         {%- for dependency in crate.dependencies %}
         "{{dependency.buildable_target}}",
