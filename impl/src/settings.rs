@@ -61,6 +61,13 @@ pub struct RazeSettings {
   /** How to generate the dependencies. See GenMode for details. */
   #[serde(default = "default_raze_settings_field_genmode")]
   pub genmode: GenMode,
+
+  /**
+    * Suffix for generated build files, uses whole value for Vendored mode
+    * Default: BUILD
+    */
+  #[serde(default = "default_raze_settings_field_output_buildfile_suffix")]
+  pub output_buildfile_suffix: String,
 }
 
 /** Override settings for individual crates (as part of RazeSettings). */
@@ -159,6 +166,7 @@ pub mod testing {
       crates: HashMap::new(),
       gen_workspace_prefix: "raze_test".to_owned(),
       genmode: GenMode::Remote,
+      output_buildfile_suffix: "BUILD".to_owned(),
     }
   }
 }
@@ -173,6 +181,10 @@ fn default_raze_settings_field_gen_workspace_prefix() -> String {
 
 fn default_raze_settings_field_genmode() -> GenMode {
   GenMode::Vendored
+}
+
+fn default_raze_settings_field_output_buildfile_suffix() -> String {
+  "BUILD".to_owned()
 }
 
 fn default_crate_settings_field_gen_buildrs() -> bool {

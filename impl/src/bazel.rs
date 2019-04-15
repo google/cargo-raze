@@ -14,6 +14,10 @@
 
 use cargo::CargoError;
 use cargo::util::CargoResult;
+use tera;
+use tera::Context;
+use tera::Tera;
+
 use context::CrateContext;
 use context::WorkspaceContext;
 use planning::PlannedBuild;
@@ -21,9 +25,6 @@ use rendering::BuildRenderer;
 use rendering::FileOutputs;
 use rendering::RenderDetails;
 use util::RazeError;
-use tera::Context;
-use tera::Tera;
-use tera;
 
 pub struct BazelRenderer {
   internal_renderer: Tera,
@@ -140,7 +141,9 @@ impl BuildRenderer for BazelRenderer {
     planned_build: &PlannedBuild,
   ) -> CargoResult<Vec<FileOutputs>> {
     let &RenderDetails {
-      ref path_prefix, ..
+      ref path_prefix,
+      ref buildfile_suffix,
+      ..
     } = render_details;
     let &PlannedBuild {
       ref workspace_context,
@@ -164,7 +167,7 @@ impl BuildRenderer for BazelRenderer {
       })
     }
 
-    let build_file_path = format!("{}/BUILD", &path_prefix);
+    let build_file_path = format!("{}/{}", &path_prefix, buildfile_suffix);
     let rendered_alias_build_file = try!(
       self
         .render_aliases(&workspace_context, &crate_contexts)
@@ -186,7 +189,9 @@ impl BuildRenderer for BazelRenderer {
     planned_build: &PlannedBuild,
   ) -> CargoResult<Vec<FileOutputs>> {
     let &RenderDetails {
-      ref path_prefix, ..
+      ref path_prefix,
+      ref buildfile_suffix,
+      ..
     } = render_details;
     let &PlannedBuild {
       ref workspace_context,
@@ -197,7 +202,7 @@ impl BuildRenderer for BazelRenderer {
 
     // N.B. File needs to exist so that contained xyz-1.2.3.BUILD can be referenced
     file_outputs.push(FileOutputs {
-      path: "remote/BUILD".to_owned(),
+      path: format!("remote/{}", buildfile_suffix).to_owned(),
       contents: String::new(),
     });
 
@@ -216,7 +221,7 @@ impl BuildRenderer for BazelRenderer {
       })
     }
 
-    let alias_file_path = format!("{}/BUILD", &path_prefix);
+    let alias_file_path = format!("{}/{}", &path_prefix, buildfile_suffix);
     let rendered_alias_build_file = try!(
       self
         .render_remote_aliases(&workspace_context, &crate_contexts)
@@ -250,18 +255,21 @@ impl BuildRenderer for BazelRenderer {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
-  use context::*;
   use hamcrest::core::expect;
   use hamcrest::prelude::*;
+
+  use context::*;
   use planning::PlannedBuild;
-  use settings::CrateSettings;
   use rendering::FileOutputs;
   use rendering::RenderDetails;
+  use settings::CrateSettings;
 
-  fn dummy_render_details() -> RenderDetails {
+  use super::*;
+
+  fn dummy_render_details(buildfile_suffix: &str) -> RenderDetails {
     RenderDetails {
       path_prefix: "./some_render_prefix".to_owned(),
+      buildfile_suffix: buildfile_suffix.to_owned(),
     }
   }
 
@@ -276,13 +284,13 @@ mod tests {
     }
   }
 
-  fn dummy_binary_crate() -> CrateContext {
+  fn dummy_binary_crate_with_name(buildfile_suffix: &str) -> CrateContext {
     CrateContext {
       pkg_name: "test-binary".to_owned(),
       pkg_version: "1.1.1".to_owned(),
       edition: "2015".to_owned(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
-      expected_build_path: "vendor/test-binary-1.1.1/BUILD".to_owned(),
+      expected_build_path: format!("vendor/test-binary-1.1.1/{}", buildfile_suffix),
       licenses: Vec::new(),
       raze_settings: CrateSettings::default(),
       dependencies: Vec::new(),
@@ -305,7 +313,11 @@ mod tests {
     }
   }
 
-  fn dummy_library_crate() -> CrateContext {
+  fn dummy_binary_crate() -> CrateContext {
+    return dummy_binary_crate_with_name("BUILD");
+  }
+
+  fn dummy_library_crate_with_name(buildfile_suffix: &str) -> CrateContext {
     CrateContext {
       pkg_name: "test-library".to_owned(),
       pkg_version: "1.1.1".to_owned(),
@@ -313,7 +325,7 @@ mod tests {
       licenses: Vec::new(),
       raze_settings: CrateSettings::default(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
-      expected_build_path: "vendor/test-library-1.1.1/BUILD".to_owned(),
+      expected_build_path: format!("vendor/test-library-1.1.1/{}", buildfile_suffix),
       dependencies: Vec::new(),
       build_dependencies: Vec::new(),
       dev_dependencies: Vec::new(),
@@ -334,6 +346,10 @@ mod tests {
     }
   }
 
+  fn dummy_library_crate() -> CrateContext {
+    return dummy_library_crate_with_name("BUILD")
+  }
+
   fn extract_contents_matching_path(file_outputs: &Vec<FileOutputs>, file_name: &str) -> String {
     println!("Known files :{:?}", file_outputs);
     let mut matching_files_contents = file_outputs
@@ -346,10 +362,14 @@ mod tests {
     matching_files_contents.pop().unwrap()
   }
 
-  fn render_crates_for_test(contexts: Vec<CrateContext>) -> Vec<FileOutputs> {
+  fn render_crates_for_test_with_name(buildfile_suffix: &str, crate_contexts: Vec<CrateContext>) -> Vec<FileOutputs> {
     BazelRenderer::new()
-      .render_planned_build(&dummy_render_details(), &dummy_planned_build(contexts))
+      .render_planned_build(&dummy_render_details(buildfile_suffix), &dummy_planned_build(crate_contexts))
       .unwrap()
+  }
+
+  fn render_crates_for_test(crate_contexts: Vec<CrateContext>) -> Vec<FileOutputs> {
+    return render_crates_for_test_with_name("BUILD", crate_contexts);
   }
 
   #[test]
@@ -379,6 +399,23 @@ mod tests {
       contains(vec![
         "./some_render_prefix/vendor/test-library-1.1.1/BUILD",
         "./some_render_prefix/BUILD",
+      ]).exactly()
+    );
+  }
+
+  #[test]
+  fn crates_generate_build_files_bazel() {
+    let file_outputs = render_crates_for_test_with_name("BUILD.bazel", vec![dummy_library_crate_with_name("BUILD.bazel")]);
+    let file_names = file_outputs
+      .iter()
+      .map(|output| output.path.as_ref())
+      .collect::<Vec<&str>>();
+
+    assert_that!(
+      &file_names,
+      contains(vec![
+        "./some_render_prefix/vendor/test-library-1.1.1/BUILD.bazel",
+        "./some_render_prefix/BUILD.bazel",
       ]).exactly()
     );
   }

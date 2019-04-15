@@ -38,6 +38,7 @@ git_repository(
     remote = "https://github.com/bazelbuild/rules_rust.git",
 )
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "bazel_skylib",
     sha256 = "eb5c57e4c12e68c0c20bc774bfbc60a568e800d025557bc4ea022c6479acc867",
