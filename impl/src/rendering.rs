@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use cargo::util::CargoResult;
+
 use planning::PlannedBuild;
 
 /**
@@ -41,4 +42,5 @@ pub struct FileOutputs {
 #[derive(Debug, Clone)]
 pub struct RenderDetails {
   pub path_prefix: String,
+  pub buildfile_suffix: String,
 }

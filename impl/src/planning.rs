@@ -12,10 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::path::PathBuf;
+use std::str;
+use std::str::FromStr;
+
 use cargo::CargoError;
-use cargo::core::SourceId;
 use cargo::core::dependency::Platform;
+use cargo::core::SourceId;
 use cargo::util::CargoResult;
+use serde_json;
+
 use context::BuildableDependency;
 use context::BuildableTarget;
 use context::CrateContext;
@@ -29,19 +37,13 @@ use metadata::Metadata;
 use metadata::MetadataFetcher;
 use metadata::Package;
 use metadata::ResolveNode;
-use serde_json;
 use settings::CrateSettings;
 use settings::GenMode;
 use settings::RazeSettings;
-use std::collections::HashMap;
-use std::collections::HashSet;
-use std::path::PathBuf;
-use std::str::FromStr;
-use std::str;
-use util::PlatformDetails;
-use util::RazeError;
-use util::PLEASE_FILE_A_BUG;
 use util;
+use util::PlatformDetails;
+use util::PLEASE_FILE_A_BUG;
+use util::RazeError;
 
 pub const VENDOR_DIR: &'static str = "vendor/";
 
@@ -185,12 +187,14 @@ impl CrateCatalogEntry {
   pub fn local_build_path(&self, settings: &RazeSettings) -> String {
     match settings.genmode {
       GenMode::Remote => format!(
-        "remote/{}.BUILD",
-        &self.package_ident
+        "remote/{}.{}",
+        &self.package_ident,
+        settings.output_buildfile_suffix,
       ),
       GenMode::Vendored => format!(
-        "vendor/{}/BUILD",
-        &self.package_ident
+        "vendor/{}/{}",
+        &self.package_ident,
+        settings.output_buildfile_suffix,
       ),
     }
   }
@@ -321,12 +325,15 @@ impl<'planner> WorkspaceSubplanner<'planner> {
   /** Produces a planned build using internal state. */
   pub fn produce_planned_build(&self) -> CargoResult<PlannedBuild> {
     try!(checks::check_resolve_matches_packages(&self.metadata));
-    if self.settings.genmode == GenMode::Vendored {
+
+    if self.settings.genmode != GenMode::Remote {
       try!(checks::check_all_vendored(self.crate_catalog.entries()));
     }
+
     checks::warn_unused_settings(&self.settings.crates, &self.metadata.packages);
 
     let crate_contexts = try!(self.produce_crate_contexts());
+
     Ok(PlannedBuild {
       workspace_context: self.produce_workspace_context(),
       crate_contexts: crate_contexts,
@@ -724,18 +731,20 @@ fn load_and_dedup_licenses(licenses: &str) -> Vec<LicenseData> {
 }
 
 mod checks {
+  use std::collections::HashMap;
+  use std::collections::HashSet;
+  use std::env;
+  use std::fs;
+
   use cargo::CargoError;
   use cargo::util::CargoResult;
+
   use metadata::Metadata;
   use metadata::Package;
   use metadata::PackageId;
   use planning::CrateCatalogEntry;
   use planning::VENDOR_DIR;
   use settings::CrateSettingsPerVersion;
-  use std::collections::HashMap;
-  use std::collections::HashSet;
-  use std::env;
-  use std::fs;
   use util::collect_up_to;
   use util::RazeError;
 
@@ -851,13 +860,14 @@ mod checks {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
   use metadata::Metadata;
   use metadata::ResolveNode;
   use metadata::testing as metadata_testing;
   use metadata::testing::StubMetadataFetcher;
-  use settings::testing as settings_testing;
   use planning::checks;
+  use settings::testing as settings_testing;
+
+  use super::*;
 
   const ROOT_NODE_IDX: usize = 0;
 

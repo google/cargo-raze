@@ -12,8 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate cargo_raze;
 extern crate cargo;
+extern crate cargo_raze;
+extern crate docopt;
+extern crate failure;
+#[cfg(test)]
+#[macro_use]
+extern crate hamcrest;
 extern crate itertools;
 extern crate serde;
 #[macro_use]
@@ -23,25 +28,27 @@ extern crate slug;
 extern crate tempdir;
 extern crate tera;
 extern crate toml;
-extern crate docopt;
-extern crate failure;
 
-#[cfg(test)]
-#[macro_use]
-extern crate hamcrest;
+use std::fs;
+use std::fs::File;
+use std::io::Read;
+use std::io::Write;
+use std::path::Path;
+use std::path::PathBuf;
 
+use cargo::CargoError;
+use cargo::CliResult;
+use cargo::util::CargoResult;
+use cargo::util::Config;
+use docopt::Docopt;
+
+use bazel::BazelRenderer;
 use cargo_raze::bazel;
 use cargo_raze::metadata;
 use cargo_raze::planning;
 use cargo_raze::rendering;
 use cargo_raze::settings;
 use cargo_raze::util;
-
-use bazel::BazelRenderer;
-use cargo::CargoError;
-use cargo::CliResult;
-use cargo::util::CargoResult;
-use cargo::util::Config;
 use metadata::CargoInternalsMetadataFetcher;
 use metadata::CargoWorkspaceFiles;
 use planning::BuildPlanner;
@@ -51,15 +58,8 @@ use rendering::FileOutputs;
 use rendering::RenderDetails;
 use settings::GenMode;
 use settings::RazeSettings;
-use std::fs::File;
-use std::fs;
-use std::io::Read;
-use std::io::Write;
-use std::path::Path;
-use std::path::PathBuf;
 use util::PlatformDetails;
 use util::RazeError;
-use docopt::Docopt;
 
 #[derive(Debug, Deserialize)]
 struct Options {
@@ -133,6 +133,7 @@ fn real_main(options: Options, cargo_config: &mut Config) -> CliResult {
   let mut bazel_renderer = BazelRenderer::new();
   let render_details = RenderDetails {
     path_prefix: "./".to_owned(),
+    buildfile_suffix: settings.output_buildfile_suffix,
   };
 
   let bazel_file_outputs = match settings.genmode {
