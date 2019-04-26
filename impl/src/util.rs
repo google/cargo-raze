@@ -12,20 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::error::Error as StdError;
+use std::fmt;
+use std::iter::Iterator;
+use std::process::Command;
+use std::str;
+use std::str::FromStr;
+
 use cargo::CargoError;
 use cargo::core::TargetKind;
 use cargo::util::CargoResult;
 use cargo::util::Cfg;
-use slug;
-use std::fmt;
-use std::iter::Iterator;
-use std::process::Command;
-use std::str::FromStr;
-use std::str;
-use std::error::Error as StdError;
+use failure::Context;
 use failure::Error;
 use failure::Fail;
-use failure::Context;
+use slug;
 
 pub const PLEASE_FILE_A_BUG: &'static str =
   "Please file an issue at github.com/google/cargo-raze with details.";
