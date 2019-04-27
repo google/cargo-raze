@@ -3,10 +3,10 @@ name = "compile_with_bazel"
 version = "0.1.0"
 
 [dependencies]
-regex = "0.2.5"
-specs = "0.10.0"
 conduit-mime-types = "0.7.3"
-
+regex = "0.2.5"
+security-framework-sys = "0.2.2"
+specs = "0.10.0"
 
 [lib]
 path = "fake_lib.rs"
@@ -15,11 +15,12 @@ path = "fake_lib.rs"
 workspace_path = "//vendored/complicated_cargo_library/cargo"
 target = "x86_64-unknown-linux-gnu"
 
-[raze.crates.regex.'0.2.5']
-skipped_deps = [
-  # This will break the regex crate
-  #"regex-syntax-0.4.2"
+[raze.crates.proc-macro2.'0.4.28']
+additional_flags = [
+    "--cfg=use_proc_macro",
 ]
+
+[raze.crates.regex.'1.1.6']
 additional_deps = [
   # Add an unused dep
   "//complicated_cargo_library/cargo/vendor:specs"

@@ -1,4 +1,3 @@
-{%- set target_name_sanitized = target.name | replace(from="-", to="_") %}
 {%- if target_name_sanitized != crate_name_sanitized %}
 alias(
   name = "{{ crate_name_sanitized }}",

@@ -140,7 +140,7 @@ pub struct PlannedBuild {
 impl CrateCatalogEntry {
 
   pub fn new(package: &Package, is_root: bool, is_root_dep: bool) -> CrateCatalogEntry {
-    let sanitized_name = util::sanitize_ident(&package.name);
+    let sanitized_name = package.name.replace("-", "_");
     let sanitized_version = util::sanitize_ident(&package.version);
 
     CrateCatalogEntry {

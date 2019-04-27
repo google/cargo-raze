@@ -29,6 +29,7 @@ load(
 {%- include "templates/partials/build_script.template" %}
 {%- endif %}
 {%- for target in crate.targets %}
+{%- set target_name_sanitized = target.name | replace(from="-", to="_") %}
 {%- if target.kind == "lib" %}
 {%- include "templates/partials/rust_library.template" %}
 {%- elif target.kind == "bin" %}
