@@ -170,16 +170,7 @@ fn validate_settings(settings: &mut RazeSettings) -> CargoResult<()> {
     }));
   }
 
-  if settings.workspace_path == "//" {
-    return Err(CargoError::from(RazeError::Config {
-          field_path_opt: Some("raze.workspace_path".to_owned()),
-          message: format!("Path must must not be '//' (it is currently unsupported). \
-                            Its probably not what you want anyway, as this would vendor the \
-                            crates directly into //vendor.")
-    }));
-  }
-
-  if settings.workspace_path.ends_with("/") {
+  if settings.workspace_path != "//" && settings.workspace_path.ends_with("/") {
     settings.workspace_path.pop();
   }
 
