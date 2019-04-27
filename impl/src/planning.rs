@@ -207,10 +207,14 @@ impl CrateCatalogEntry {
         "@{}__{}__{}//",
         &settings.gen_workspace_prefix, &self.sanitized_name, &self.sanitized_version
       ),
-      GenMode::Vendored => format!(
-        "{}/vendor/{}",
-        &settings.workspace_path, &self.package_ident
-      ),
+      GenMode::Vendored => {
+        // Convert "settings.workspace_path" to dir. Workspace roots are special cased, no need to append /
+        if settings.workspace_path.ends_with("//") {
+          format!("{}vendor/{}", settings.workspace_path, &self.package_ident)
+        } else {
+          format!("{}/vendor/{}", settings.workspace_path, &self.package_ident)
+        }
+      },
     }
   }
 
@@ -224,10 +228,14 @@ impl CrateCatalogEntry {
         &self.sanitized_version,
         &self.sanitized_name
       ),
-      GenMode::Vendored => format!(
-        "{}/vendor/{}:{}",
-        &settings.workspace_path, &self.package_ident, &self.sanitized_name
-      ),
+      GenMode::Vendored => {
+       // Convert "settings.workspace_path" to dir. Workspace roots are special cased, no need to append /
+        if settings.workspace_path.ends_with("//") {
+          format!("{}vendor/{}:{}", settings.workspace_path, &self.package_ident, &self.sanitized_name)
+        } else {
+          format!("{}/vendor/{}:{}", settings.workspace_path, &self.package_ident, &self.sanitized_name)
+        }
+      },
     }
   }
 }
