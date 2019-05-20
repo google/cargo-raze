@@ -36,10 +36,11 @@ rust_library(
     name = "specs",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "@complicated_cargo_library__crossbeam__0_3_2//:crossbeam",
-        "@complicated_cargo_library__derivative__1_0_0//:derivative",
+        "@complicated_cargo_library__derivative__1_0_2//:derivative",
         "@complicated_cargo_library__fnv__1_0_6//:fnv",
         "@complicated_cargo_library__hibitset__0_3_2//:hibitset",
         "@complicated_cargo_library__mopa__0_2_2//:mopa",
@@ -50,7 +51,6 @@ rust_library(
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.10.0",
     crate_features = [

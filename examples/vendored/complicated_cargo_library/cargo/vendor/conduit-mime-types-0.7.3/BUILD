@@ -28,6 +28,7 @@ rust_library(
     name = "conduit_mime_types",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/rustc-serialize-0.3.24:rustc_serialize",

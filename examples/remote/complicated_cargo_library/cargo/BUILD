@@ -10,7 +10,11 @@ licenses([
 ])
 alias(
     name = "regex",
-    actual = "@complicated_cargo_library__regex__0_2_6//:regex",
+    actual = "@complicated_cargo_library__regex__0_2_11//:regex",
+)
+alias(
+    name = "security_framework_sys",
+    actual = "@complicated_cargo_library__security_framework_sys__0_2_3//:security_framework_sys",
 )
 alias(
     name = "specs",

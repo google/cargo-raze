@@ -28,14 +28,14 @@ rust_library(
     name = "crossbeam_deque",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "@complicated_cargo_library__crossbeam_epoch__0_3_0//:crossbeam_epoch",
+        "@complicated_cargo_library__crossbeam_epoch__0_3_1//:crossbeam_epoch",
         "@complicated_cargo_library__crossbeam_utils__0_2_2//:crossbeam_utils",
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.2.0",
     crate_features = [

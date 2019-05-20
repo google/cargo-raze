@@ -14,7 +14,7 @@ alias(
 )
 alias(
     name = "futures",
-    actual = "//vendored/non_cratesio_library/cargo/vendor/futures-0.2.0-alpha:futures",
+    actual = "//vendored/non_cratesio_library/cargo/vendor/futures-0.2.0:futures",
 )
 alias(
     name = "log",

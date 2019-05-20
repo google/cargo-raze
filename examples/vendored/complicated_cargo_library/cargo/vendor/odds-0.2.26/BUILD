@@ -31,6 +31,7 @@ rust_library(
     name = "odds",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
     ],

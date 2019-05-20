@@ -28,6 +28,7 @@ rust_library(
     name = "syn",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/quote-0.3.15:quote",

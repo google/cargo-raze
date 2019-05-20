@@ -29,9 +29,10 @@ rust_library(
     name = "hibitset",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "//vendored/complicated_cargo_library/cargo/vendor/atom-0.3.4:atom",
+        "//vendored/complicated_cargo_library/cargo/vendor/atom-0.3.5:atom",
         "//vendored/complicated_cargo_library/cargo/vendor/rayon-0.8.2:rayon",
     ],
     rustc_flags = [

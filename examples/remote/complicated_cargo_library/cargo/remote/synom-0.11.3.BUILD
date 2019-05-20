@@ -28,13 +28,13 @@ rust_library(
     name = "synom",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "@complicated_cargo_library__unicode_xid__0_0_4//:unicode_xid",
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.11.3",
     crate_features = [

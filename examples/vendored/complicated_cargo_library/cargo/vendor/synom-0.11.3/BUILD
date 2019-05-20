@@ -28,6 +28,7 @@ rust_library(
     name = "synom",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/unicode-xid-0.0.4:unicode_xid",

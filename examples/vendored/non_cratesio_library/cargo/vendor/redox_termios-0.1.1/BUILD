@@ -28,6 +28,7 @@ rust_library(
     name = "redox_termios",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/redox_syscall-0.1.37:redox_syscall",

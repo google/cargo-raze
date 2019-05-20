@@ -29,9 +29,10 @@ rust_binary(
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_aho_corasick_dot",
     crate_root = "src/main.rs",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        # Binaries get an implicit dependency on their lib
+        # Binaries get an implicit dependency on their crate's lib
         ":aho_corasick",
         "//vendored/non_cratesio_library/cargo/vendor/memchr-2.0.1:memchr",
     ],
@@ -48,6 +49,7 @@ rust_library(
     name = "aho_corasick",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/memchr-2.0.1:memchr",

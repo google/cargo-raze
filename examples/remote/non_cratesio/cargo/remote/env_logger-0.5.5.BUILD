@@ -33,17 +33,17 @@ rust_library(
     name = "env_logger",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "@non_cratesio__atty__0_2_8//:atty",
-        "@non_cratesio__humantime__1_1_1//:humantime",
-        "@non_cratesio__log__0_4_1//:log",
-        "@non_cratesio__regex__0_2_9//:regex",
-        "@non_cratesio__termcolor__0_3_5//:termcolor",
+        "@non_cratesio__atty__0_2_11//:atty",
+        "@non_cratesio__humantime__1_2_0//:humantime",
+        "@non_cratesio__log__0_4_6//:log",
+        "@non_cratesio__regex__0_2_11//:regex",
+        "@non_cratesio__termcolor__0_3_6//:termcolor",
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.5.5",
     crate_features = [

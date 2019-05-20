@@ -28,9 +28,10 @@ rust_library(
     name = "arrayvec",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "//vendored/complicated_cargo_library/cargo/vendor/nodrop-0.1.12:nodrop",
+        "//vendored/complicated_cargo_library/cargo/vendor/nodrop-0.1.13:nodrop",
         "//vendored/complicated_cargo_library/cargo/vendor/odds-0.2.26:odds",
     ],
     rustc_flags = [

@@ -1,12 +1,3 @@
-[root]
-name = "compile_with_bazel"
-version = "0.1.0"
-dependencies = [
- "env_logger 0.5.5 (git+https://github.com/sebasmagri/env_logger.git?tag=v0.5.5)",
- "futures 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "log 0.4.0 (git+https://github.com/rust-lang-nursery/log.git?rev=bf40d1f563c)",
-]
-
 [[package]]
 name = "aho-corasick"
 version = "0.6.4"
@@ -31,6 +22,15 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "compile_with_bazel"
+version = "0.1.0"
+dependencies = [
+ "env_logger 0.5.5 (git+https://github.com/sebasmagri/env_logger.git?tag=v0.5.5)",
+ "futures 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "log 0.4.0 (git+https://github.com/rust-lang-nursery/log.git?rev=bf40d1f563c)",
+]
+
+[[package]]
 name = "either"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -49,84 +49,83 @@ dependencies = [
 
 [[package]]
 name = "futures"
-version = "0.2.0-alpha"
-source = "git+https://github.com/rust-lang-nursery/futures-rs.git#f7bea829380cae25b6eb66785ab37470f200d6b8"
+version = "0.2.0"
+source = "git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0#53796cc27ead6988478fa09681750386fb3998a2"
 dependencies = [
- "futures-channel 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "futures-core 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "futures-executor 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "futures-io 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "futures-sink 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "futures-stable 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "futures-util 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
+ "futures-channel 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "futures-core 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "futures-executor 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "futures-io 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "futures-sink 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "futures-stable 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "futures-util 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
 ]
 
 [[package]]
 name = "futures-channel"
-version = "0.2.0-alpha"
-source = "git+https://github.com/rust-lang-nursery/futures-rs.git#f7bea829380cae25b6eb66785ab37470f200d6b8"
+version = "0.2.0"
+source = "git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0#53796cc27ead6988478fa09681750386fb3998a2"
 dependencies = [
- "futures-core 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
+ "futures-core 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
 ]
 
 [[package]]
 name = "futures-core"
-version = "0.2.0-alpha"
-source = "git+https://github.com/rust-lang-nursery/futures-rs.git#f7bea829380cae25b6eb66785ab37470f200d6b8"
+version = "0.2.0"
+source = "git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0#53796cc27ead6988478fa09681750386fb3998a2"
 dependencies = [
  "either 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "pin-api 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "futures-executor"
-version = "0.2.0-alpha"
-source = "git+https://github.com/rust-lang-nursery/futures-rs.git#f7bea829380cae25b6eb66785ab37470f200d6b8"
+version = "0.2.0"
+source = "git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0#53796cc27ead6988478fa09681750386fb3998a2"
 dependencies = [
- "futures-channel 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "futures-core 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "futures-util 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
+ "futures-channel 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "futures-core 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "futures-util 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "lazy_static 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_cpus 1.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "futures-io"
-version = "0.2.0-alpha"
-source = "git+https://github.com/rust-lang-nursery/futures-rs.git#f7bea829380cae25b6eb66785ab37470f200d6b8"
+version = "0.2.0"
+source = "git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0#53796cc27ead6988478fa09681750386fb3998a2"
 dependencies = [
- "futures-core 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
+ "futures-core 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
  "iovec 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "futures-sink"
-version = "0.2.0-alpha"
-source = "git+https://github.com/rust-lang-nursery/futures-rs.git#f7bea829380cae25b6eb66785ab37470f200d6b8"
+version = "0.2.0"
+source = "git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0#53796cc27ead6988478fa09681750386fb3998a2"
 dependencies = [
- "futures-channel 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "futures-core 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
+ "futures-channel 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "futures-core 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
 ]
 
 [[package]]
 name = "futures-stable"
-version = "0.2.0-alpha"
-source = "git+https://github.com/rust-lang-nursery/futures-rs.git#f7bea829380cae25b6eb66785ab37470f200d6b8"
+version = "0.2.0"
+source = "git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0#53796cc27ead6988478fa09681750386fb3998a2"
 dependencies = [
- "futures-core 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "futures-executor 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "pin-api 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "futures-core 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "futures-executor 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
 ]
 
 [[package]]
 name = "futures-util"
-version = "0.2.0-alpha"
-source = "git+https://github.com/rust-lang-nursery/futures-rs.git#f7bea829380cae25b6eb66785ab37470f200d6b8"
+version = "0.2.0"
+source = "git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0#53796cc27ead6988478fa09681750386fb3998a2"
 dependencies = [
  "either 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "futures-channel 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "futures-core 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "futures-io 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
- "futures-sink 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)",
+ "futures-channel 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "futures-core 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "futures-io 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
+ "futures-sink 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)",
 ]
 
 [[package]]
@@ -187,11 +186,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "libc 0.2.39 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
-
-[[package]]
-name = "pin-api"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "quick-error"
@@ -319,14 +313,14 @@ dependencies = [
 "checksum cfg-if 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "d4c819a1287eb618df47cc647173c5c4c66ba19d888a6e50d605672aed3140de"
 "checksum either 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "740178ddf48b1a9e878e6d6509a1442a2d42fd2928aae8e7a6f8a36fb01981b3"
 "checksum env_logger 0.5.5 (git+https://github.com/sebasmagri/env_logger.git?tag=v0.5.5)" = "<none>"
-"checksum futures 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)" = "<none>"
-"checksum futures-channel 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)" = "<none>"
-"checksum futures-core 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)" = "<none>"
-"checksum futures-executor 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)" = "<none>"
-"checksum futures-io 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)" = "<none>"
-"checksum futures-sink 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)" = "<none>"
-"checksum futures-stable 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)" = "<none>"
-"checksum futures-util 0.2.0-alpha (git+https://github.com/rust-lang-nursery/futures-rs.git)" = "<none>"
+"checksum futures 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)" = "<none>"
+"checksum futures-channel 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)" = "<none>"
+"checksum futures-core 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)" = "<none>"
+"checksum futures-executor 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)" = "<none>"
+"checksum futures-io 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)" = "<none>"
+"checksum futures-sink 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)" = "<none>"
+"checksum futures-stable 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)" = "<none>"
+"checksum futures-util 0.2.0 (git+https://github.com/rust-lang-nursery/futures-rs.git?tag=0.2.0)" = "<none>"
 "checksum humantime 1.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "0484fda3e7007f2a4a0d9c3a703ca38c71c54c55602ce4660c419fd32e188c9e"
 "checksum iovec 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "dbe6e417e7d0975db6512b90796e8ce223145ac4e33c377e4a42882a0e88bb08"
 "checksum lazy_static 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c8f31047daa365f19be14b47c29df4f7c3b581832407daabe6ae77397619237d"
@@ -335,7 +329,6 @@ dependencies = [
 "checksum log 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "89f010e843f2b1a31dbd316b3b8d443758bc634bed37aabade59c686d644e0a2"
 "checksum memchr 2.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "796fba70e76612589ed2ce7f45282f5af869e0fdd7cc6199fa1aa1f1d591ba9d"
 "checksum num_cpus 1.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c51a3322e4bca9d212ad9a158a02abc6934d005490c054a2778df73a70aa0a30"
-"checksum pin-api 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)" = "f8ede9061a87cf9393d581087a23b2afbc0618933c7ba29a349e306055c1a999"
 "checksum quick-error 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "eda5fe9b71976e62bc81b781206aaa076401769b2143379d3eb2118388babac4"
 "checksum redox_syscall 0.1.37 (registry+https://github.com/rust-lang/crates.io-index)" = "0d92eecebad22b767915e4d529f89f28ee96dbbf5a4810d2b844373f136417fd"
 "checksum redox_termios 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "7e891cfe48e9100a70a3b6eb652fef28920c117d366339687bd5576160db0f76"

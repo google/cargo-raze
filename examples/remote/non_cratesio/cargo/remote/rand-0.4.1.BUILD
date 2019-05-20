@@ -31,13 +31,13 @@ rust_library(
     name = "rand",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "@non_cratesio__libc__0_2_39//:libc",
+        "@non_cratesio__libc__0_2_53//:libc",
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.4.1",
     crate_features = [

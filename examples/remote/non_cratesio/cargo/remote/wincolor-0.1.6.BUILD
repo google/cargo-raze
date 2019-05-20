@@ -29,13 +29,13 @@ rust_library(
     name = "wincolor",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "@non_cratesio__winapi__0_3_4//:winapi",
+        "@non_cratesio__winapi__0_3_7//:winapi",
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.1.6",
     crate_features = [
