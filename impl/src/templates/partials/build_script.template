@@ -45,5 +45,8 @@ genrule(
         + " export OUT_DIR=$$PWD/{{ crate_name_sanitized }}_out_dir_outputs;"
         + " export BINARY_PATH=\"$$PWD/$(location :{{ crate_name_sanitized }}_build_script)\";"
         + " export OUT_TAR=$$PWD/$@;"
+        {%- for environment_variable in crate.raze_settings.buildrs_additional_environment_variables %}
+        + " export {{ environment_variable }};"
+        {%- endfor %}
         + " cd $$(dirname $(location :Cargo.toml)) && $$BINARY_PATH && tar -czf $$OUT_TAR -C $$OUT_DIR .)"
 )

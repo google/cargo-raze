@@ -123,6 +123,14 @@ pub struct CrateSettings {
    */
   #[serde(default = "default_crate_settings_field_data_attr")]
   pub data_attr: Option<String>,
+
+  /**
+   * Additional environment variables to add when running the build script.
+   * 
+   * Values should looks like "KEY=VALUE".
+   */
+  #[serde(default)]
+  pub buildrs_additional_environment_variables: Vec<String>
 }
 
 /**
@@ -151,6 +159,7 @@ impl Default for CrateSettings {
       additional_flags: Vec::new(),
       gen_buildrs: default_crate_settings_field_gen_buildrs(),
       data_attr: default_crate_settings_field_data_attr(),
+      buildrs_additional_environment_variables: Vec::new(),
     }
   }
 }
