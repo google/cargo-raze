@@ -279,6 +279,7 @@ mod tests {
         workspace_path: "//workspace/prefix".to_owned(),
         platform_triple: "irrelevant".to_owned(),
         gen_workspace_prefix: "".to_owned(),
+        output_buildfile_suffix: "BUILD".to_owned(),
       },
       crate_contexts: crate_contexts,
     }
