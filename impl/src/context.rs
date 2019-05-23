@@ -93,4 +93,10 @@ pub struct WorkspaceContext {
   //
   // This has no effect unless the GenMode setting is Remote.
   pub gen_workspace_prefix: String,
+
+  // The file extension of generated BUILD files.
+  //
+  // Bare files will just be named after this setting. Named files, such as those passed to
+  // repository rules, will take the form of $prefix.$this_value.
+  pub output_buildfile_suffix: String
 }

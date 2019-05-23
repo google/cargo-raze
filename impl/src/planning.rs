@@ -354,6 +354,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       workspace_path: self.settings.workspace_path.clone(),
       platform_triple: self.settings.target.clone(),
       gen_workspace_prefix: self.settings.gen_workspace_prefix.clone(),
+      output_buildfile_suffix: self.settings.output_buildfile_suffix.clone(),
     }
   }
 
