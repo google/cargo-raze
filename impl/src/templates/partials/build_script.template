@@ -32,7 +32,7 @@ genrule(
     tools = [
       ":{{ crate_name_sanitized  }}_build_script",
     ],
-    local = 1,
+    tags = ["no-sandbox"],
     cmd = "mkdir -p $$(dirname $@)/{{ crate_name_sanitized}}_out_dir_outputs/;"
         + " (export CARGO_MANIFEST_DIR=\"$$PWD/$$(dirname $(location :Cargo.toml))\";"
         # TODO(acmcarther): This needs to be revisited as part of the cross compilation story.
