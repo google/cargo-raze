@@ -162,7 +162,7 @@ Some crates execute a "build script", which, while technically unrestricted in
 what it can do, usually does one of a few common things.
 
 All options noted below are enumerated in the
-[src/settings.rs](./src/settings.rs) file.
+[src/settings.rs](./impl/src/settings.rs) file.
 
 #### Crates that generate files using locally known information
 
