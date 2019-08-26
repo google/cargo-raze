@@ -66,7 +66,7 @@ done
 for ex in $(find $EXAMPLES_DIR/vendored -maxdepth 1 -type d | tail -n+2); do
     echo "Running Cargo Vendor for $(basename "$ex")"
     cd "$ex/cargo"
-    cargo vendor -xq
+    cargo-vendor vendor -xq
 done
 
 # Ensure Cargo Raze build is up-to-date

@@ -102,7 +102,7 @@ $ cargo generate-lockfile
 Following that, vendor your dependencies from within the cargo/ directory (mind the `-x`, it guarantees the
 version is included in the file path).
 ```bash
-$ cargo vendor -x
+$ cargo-vendor vendor -x
 ```
 
 Finally, generate your BUILD files, again from within the cargo/ directory
