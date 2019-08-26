@@ -37,6 +37,7 @@ rust_library(
     name = "regex",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/aho-corasick-0.6.4:aho_corasick",

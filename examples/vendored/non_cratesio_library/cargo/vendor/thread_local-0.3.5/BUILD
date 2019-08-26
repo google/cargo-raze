@@ -29,6 +29,7 @@ rust_library(
     name = "thread_local",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/lazy_static-1.0.0:lazy_static",

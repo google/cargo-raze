@@ -36,10 +36,11 @@ rust_library(
     name = "specs",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/crossbeam-0.3.2:crossbeam",
-        "//vendored/complicated_cargo_library/cargo/vendor/derivative-1.0.0:derivative",
+        "//vendored/complicated_cargo_library/cargo/vendor/derivative-1.0.2:derivative",
         "//vendored/complicated_cargo_library/cargo/vendor/fnv-1.0.6:fnv",
         "//vendored/complicated_cargo_library/cargo/vendor/hibitset-0.3.2:hibitset",
         "//vendored/complicated_cargo_library/cargo/vendor/mopa-0.2.2:mopa",

@@ -28,6 +28,7 @@ rust_library(
     name = "syn",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "@complicated_cargo_library__quote__0_3_15//:quote",
@@ -36,7 +37,6 @@ rust_library(
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.11.11",
     crate_features = [

@@ -29,13 +29,13 @@ rust_library(
     name = "log",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "@non_cratesio__cfg_if__0_1_2//:cfg_if",
+        "@non_cratesio__cfg_if__0_1_7//:cfg_if",
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.4.0",
     crate_features = [

@@ -28,14 +28,14 @@ rust_binary(
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_bench",
     crate_root = "src/bin/bench.rs",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        # Binaries get an implicit dependency on their lib
+        # Binaries get an implicit dependency on their crate's lib
         ":crossbeam",
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.3.2",
     crate_features = [
@@ -47,12 +47,12 @@ rust_library(
     name = "crossbeam",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.3.2",
     crate_features = [
@@ -64,14 +64,14 @@ rust_binary(
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_stress_msq",
     crate_root = "src/bin/stress-msq.rs",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        # Binaries get an implicit dependency on their lib
+        # Binaries get an implicit dependency on their crate's lib
         ":crossbeam",
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.3.2",
     crate_features = [

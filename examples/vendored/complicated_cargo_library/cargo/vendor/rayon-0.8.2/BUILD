@@ -29,9 +29,10 @@ rust_library(
     name = "rayon",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "//vendored/complicated_cargo_library/cargo/vendor/rayon-core-1.4.0:rayon_core",
+        "//vendored/complicated_cargo_library/cargo/vendor/rayon-core-1.4.1:rayon_core",
     ],
     rustc_flags = [
         "--cap-lints=allow",

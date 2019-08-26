@@ -30,6 +30,7 @@ rust_library(
     name = "utf8_ranges",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
     ],

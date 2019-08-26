@@ -28,13 +28,13 @@ rust_library(
     name = "redox_termios",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "@non_cratesio__redox_syscall__0_1_37//:redox_syscall",
+        "@non_cratesio__redox_syscall__0_1_54//:redox_syscall",
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.1.1",
     crate_features = [

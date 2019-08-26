@@ -28,6 +28,7 @@ rust_library(
     name = "shred_derive",
     crate_root = "src/lib.rs",
     crate_type = "proc-macro",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "@complicated_cargo_library__quote__0_3_15//:quote",
@@ -35,7 +36,6 @@ rust_library(
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.3.0",
     crate_features = [

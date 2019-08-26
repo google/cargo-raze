@@ -28,6 +28,7 @@ rust_library(
     name = "shred_derive",
     crate_root = "src/lib.rs",
     crate_type = "proc-macro",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/quote-0.3.15:quote",

@@ -30,6 +30,7 @@ rust_library(
     name = "humantime",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/quick-error-1.2.1:quick_error",

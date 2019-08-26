@@ -33,6 +33,7 @@ rust_library(
     name = "env_logger",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/atty-0.2.8:atty",

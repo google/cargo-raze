@@ -14,7 +14,11 @@ alias(
 )
 alias(
     name = "regex",
-    actual = "//vendored/complicated_cargo_library/cargo/vendor/regex-0.2.6:regex",
+    actual = "//vendored/complicated_cargo_library/cargo/vendor/regex-0.2.11:regex",
+)
+alias(
+    name = "security_framework_sys",
+    actual = "//vendored/complicated_cargo_library/cargo/vendor/security-framework-sys-0.2.3:security_framework_sys",
 )
 alias(
     name = "specs",

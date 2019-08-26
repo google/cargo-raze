@@ -28,14 +28,14 @@ rust_library(
     name = "arrayvec",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "@complicated_cargo_library__nodrop__0_1_12//:nodrop",
+        "@complicated_cargo_library__nodrop__0_1_13//:nodrop",
         "@complicated_cargo_library__odds__0_2_26//:odds",
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.3.25",
     crate_features = [

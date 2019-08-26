@@ -4,7 +4,8 @@ version = "0.1.0"
 authors = ["Bradlee Speice <bradlee.speice@gmail.com>"]
 
 [dependencies]
-futures = { git = "https://github.com/rust-lang-nursery/futures-rs.git", branch = "master" }
+
+futures = { git = "https://github.com/rust-lang-nursery/futures-rs.git", tag = "0.2.0" }
 env_logger = { git = "https://github.com/sebasmagri/env_logger.git", tag = "v0.5.5" }
 # Note that we use a (slightly) outdated version of log; because env_logger resolves a version
 # of `log` from crates.io that may clash with the resolution here, we need to force

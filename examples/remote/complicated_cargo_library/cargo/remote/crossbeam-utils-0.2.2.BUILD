@@ -28,13 +28,13 @@ rust_library(
     name = "crossbeam_utils",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "@complicated_cargo_library__cfg_if__0_1_2//:cfg_if",
+        "@complicated_cargo_library__cfg_if__0_1_7//:cfg_if",
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.2.2",
     crate_features = [

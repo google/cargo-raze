@@ -29,13 +29,13 @@ rust_library(
     name = "rayon",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "@complicated_cargo_library__rayon_core__1_4_0//:rayon_core",
+        "@complicated_cargo_library__rayon_core__1_4_1//:rayon_core",
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "--target=x86_64-unknown-linux-gnu",
     ],
     version = "0.8.2",
     crate_features = [

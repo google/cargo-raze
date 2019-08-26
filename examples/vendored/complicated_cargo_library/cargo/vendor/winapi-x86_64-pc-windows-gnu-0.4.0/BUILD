@@ -29,6 +29,7 @@ rust_library(
     name = "winapi_x86_64_pc_windows_gnu",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
     ],

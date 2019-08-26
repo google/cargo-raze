@@ -29,6 +29,7 @@ rust_library(
     name = "regex_syntax",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/ucd-util-0.1.1:ucd_util",

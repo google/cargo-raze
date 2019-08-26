@@ -37,6 +37,7 @@ rust_library(
     name = "shred",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/arrayvec-0.3.25:arrayvec",
@@ -45,7 +46,7 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/pulse-0.5.3:pulse",
         "//vendored/complicated_cargo_library/cargo/vendor/rayon-0.8.2:rayon",
         "//vendored/complicated_cargo_library/cargo/vendor/shred-derive-0.3.0:shred_derive",
-        "//vendored/complicated_cargo_library/cargo/vendor/smallvec-0.4.4:smallvec",
+        "//vendored/complicated_cargo_library/cargo/vendor/smallvec-0.4.5:smallvec",
     ],
     rustc_flags = [
         "--cap-lints=allow",

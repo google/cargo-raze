@@ -30,10 +30,11 @@ rust_library(
     name = "pulse",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "//vendored/complicated_cargo_library/cargo/vendor/atom-0.3.4:atom",
-        "//vendored/complicated_cargo_library/cargo/vendor/time-0.1.39:time",
+        "//vendored/complicated_cargo_library/cargo/vendor/atom-0.3.5:atom",
+        "//vendored/complicated_cargo_library/cargo/vendor/time-0.1.42:time",
     ],
     rustc_flags = [
         "--cap-lints=allow",

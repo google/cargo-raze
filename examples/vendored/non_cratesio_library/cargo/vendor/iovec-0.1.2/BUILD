@@ -28,6 +28,7 @@ rust_library(
     name = "iovec",
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/libc-0.2.39:libc",
