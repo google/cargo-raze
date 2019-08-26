@@ -9,7 +9,7 @@
 4. Add a [raze] section with your desired options (see cargo-raze `settings::CargoToml` for
    the exact details)
 4. Run `cargo generate-lockfile` from `cargo/`
-5. Run `cargo vendor -x` (the -x forces versioning) from `cargo/`
+5. Run `cargo-vendor vendor -x` (the -x forces versioning) from `cargo/`
 6. Run `cargo raze` from `cargo/`
 
 At this point you will have a dependency specification that Bazel can understand. You will also have starter BUILD files that referene the specified dependencies and generate rust_library rules.
