@@ -23,9 +23,6 @@ use cargo::CargoError;
 use cargo::core::TargetKind;
 use cargo::util::CargoResult;
 use cargo::util::Cfg;
-use failure::Context;
-use failure::Error;
-use failure::Fail;
 use slug;
 
 pub const PLEASE_FILE_A_BUG: &'static str =
