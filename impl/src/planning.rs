@@ -96,6 +96,8 @@ pub struct CrateCatalogEntry {
   is_root: bool,
   // Is this a dependency of the catalog root crate?
   is_root_dep: bool,
+  // Is this a member of the root crate workspace?
+  is_workspace_crate: bool,
 }
 
 /** An intermediate structure that contains details about all crates in the workspace. */
@@ -139,7 +141,7 @@ pub struct PlannedBuild {
 
 impl CrateCatalogEntry {
 
-  pub fn new(package: &Package, is_root: bool, is_root_dep: bool) -> CrateCatalogEntry {
+  pub fn new(package: &Package, is_root: bool, is_root_dep: bool, is_workspace_crate: bool) -> CrateCatalogEntry {
     let sanitized_name = package.name.replace("-", "_");
     let sanitized_version = util::sanitize_ident(&package.version);
 
@@ -150,6 +152,7 @@ impl CrateCatalogEntry {
       package_ident: format!("{}-{}", &package.name, &package.version),
       is_root: is_root,
       is_root_dep: is_root_dep,
+      is_workspace_crate: is_workspace_crate,
     }
   }
 
@@ -167,6 +170,11 @@ impl CrateCatalogEntry {
   /** Returns whether or not this is the root crate in the workspace. */
   pub fn is_root(&self) -> bool {
     self.is_root
+  }
+
+  /** Returns whether or not this is a member of the root workspace. */
+  pub fn is_workspace_crate(&self) -> bool {
+    self.is_workspace_crate
   }
 
   /** Returns whether or not this is a dependency of the workspace root crate.*/
@@ -264,13 +272,16 @@ impl CrateCatalog {
     };
     let root_direct_deps =
       root_resolve_node.dependencies.iter().cloned().collect::<HashSet<_>>();
+    let workspace_crates =
+      metadata.workspace_members.iter().cloned().collect::<HashSet<_>>();
 
     let crate_catalog_entries = metadata
       .packages
       .iter()
       .map(|package| CrateCatalogEntry::new(package,
                                             root_resolve_node.id == package.id,
-                                            root_direct_deps.contains(&package.id)))
+                                            root_direct_deps.contains(&package.id),
+                                            workspace_crates.contains(&package.id)))
       .collect::<Vec<_>>();
 
     let mut package_id_to_entries_idx = HashMap::new();
@@ -370,7 +381,16 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       let own_package = own_crate_catalog_entry.package();
 
       // Skip the root package (which is probably a junk package, by convention)
-      if own_package.id == self.metadata.resolve.root {
+      if own_crate_catalog_entry.is_root() {
+        continue;
+      }
+
+      // Skip workspace crates, since we haven't yet decided how they should be handled.
+      //
+      // Hey you, reader! If you have opinions about this please comment on the below bug, or file
+      // another bug.
+      // See Also: https://github.com/google/cargo-raze/issues/111
+      if own_crate_catalog_entry.is_workspace_crate() {
         continue;
       }
 
@@ -767,6 +787,7 @@ mod checks {
       .iter()
       // Root does not need to be vendored -- usually it is a wrapper package.
       .filter(|p| !p.is_root())
+      .filter(|p| !p.is_workspace_crate())
       .filter(|p| !fs::metadata(p.expected_vendored_path()).is_ok())
       .map(|p| p.package_ident.clone());
 
@@ -1048,6 +1069,34 @@ mod tests {
 
     println!("{:#?}", planned_build_res);
     assert!(planned_build_res.is_err());
+  }
+
+  #[test]
+  fn test_plan_build_ignores_workspace_crates() {
+    let mut settings = settings_testing::dummy_raze_settings();
+    settings.genmode = GenMode::Vendored;
+
+    let workspace_crates_metadata = {
+      let mut base_metadata = minimum_valid_metadata();
+      let mut workspace_crate_dep = metadata_testing::dummy_package();
+      workspace_crate_dep.name = "ws_crate_dep".to_owned();
+      workspace_crate_dep.id = "ws_crate_dep_id".to_owned();
+      workspace_crate_dep.version = "ws_crate_version".to_owned();
+      base_metadata.packages.push(workspace_crate_dep);
+      base_metadata.workspace_members.push("ws_crate_dep_id".to_owned());
+      base_metadata
+    };
+
+    let mut fetcher =
+      StubMetadataFetcher::with_metadata(workspace_crates_metadata);
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    // N.B. This will fail if we don't correctly ignore workspace crates.
+    let planned_build_res = planner.plan_build(
+      &settings,
+      dummy_workspace_files(),
+      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+    );
+    assert!(planned_build_res.unwrap().crate_contexts.is_empty());
   }
 
   // TODO(acmcarther): Add tests:
