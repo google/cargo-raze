@@ -144,9 +144,8 @@ $ cargo raze
 
 Finally, invoke the remote library fetching function within your WORKSPACE:
 ```python
-load("//cargo:crates.bzl", "raze_fetch_remote_crates")
-
-raze_fetch_remote_crates()
+load("//cargo:crates.bzl", "complicated_cargo_library_fetch_remote_crates")
+complicated_cargo_library_fetch_remote_crates()
 ```
 This tells Bazel where to get the dependencies from, and how to build them:
 using the files generated into //cargo.
