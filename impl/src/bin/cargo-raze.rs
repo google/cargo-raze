@@ -76,7 +76,7 @@ const USAGE: &'static str = r#"
 Generate BUILD files for your pre-vendored Cargo dependencies.
 
 Usage:
-    cargo raze
+    cargo raze [--help --verbose --quiet --color WHEN --dryrun]
 
 Options:
     -h, --help                Print this message
