@@ -442,7 +442,7 @@ impl<'planner> CrateSubplanner<'planner> {
     let mut lib_target_name = None;
     {
       for target in &targets {
-        if target.kind == "lib" {
+        if target.kind == "lib" || target.kind == "proc-macro" {
           lib_target_name = Some(target.name.clone());
           break;
         }
