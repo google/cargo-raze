@@ -70,6 +70,7 @@ pub struct CrateContext {
   pub build_script_target: Option<BuildableTarget>,
   pub source_details: SourceDetails,
   pub sha256: Option<String>,
+
   // TODO(acmcarther): This is used internally by renderer to know where to put the build file. It
   // probably should live somewhere else. Renderer params (separate from context) should live
   // somewhere more explicit.

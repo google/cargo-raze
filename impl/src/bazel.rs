@@ -56,6 +56,10 @@ impl BazelRenderer {
           "templates/remote_crates.bzl.template",
           include_str!("templates/remote_crates.bzl.template"),
         ),
+        (
+          "templates/partials/remote_crates_patch.template",
+          include_str!("templates/partials/remote_crates_patch.template"),
+        ),
       ])
       .unwrap();
 
