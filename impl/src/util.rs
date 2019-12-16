@@ -21,9 +21,9 @@ use std::{
 };
 
 use cargo::{
-    CargoError,
+    CargoResult,
     core::TargetKind,
-    util::{CargoResult, Cfg},
+    util::Cfg,
 };
 
 use slug;
@@ -175,10 +175,7 @@ pub fn kind_to_kinds(kind: &TargetKind) -> Vec<String> {
 fn fetch_attrs(target: &str) -> CargoResult<Vec<Cfg>> {
   let args = vec![format!("--target={}", target), "--print=cfg".to_owned()];
 
-  let output = Command::new("rustc")
-      .args(&args)
-      .output()
-      .map_err(CargoError::from)?;
+  let output = Command::new("rustc").args(&args).output()?;
 
   if !output.status.success() {
     panic!(format!(

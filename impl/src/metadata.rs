@@ -13,14 +13,15 @@
 // limitations under the License.
 
 use cargo::{
-    CargoError,
+    CargoResult,
     core::{
         Workspace,
         summary::FeatureValue as CargoFeatureValue,
         dependency::Kind as CargoKind,
+        resolver::ResolveOpts,
     },
     ops::{self, Packages},
-    util::{CargoResult, Config},
+    util::Config,
 };
 
 use serde_json;
@@ -192,14 +193,14 @@ impl MetadataFetcher for CargoSubcommandMetadataFetcher {
     // Copy files into a temp directory
     // UNWRAP: Guarded by function assertion
     let cargo_tempdir = {
-      let dir = TempDir::new("cargo_raze_metadata_dir").map_err(CargoError::from)?;
+      let dir = TempDir::new("cargo_raze_metadata_dir")?;
 
       let dir_path = dir.path();
       let new_toml_path = dir_path.join(files.toml_path.file_name().unwrap());
-      fs::copy(files.toml_path, new_toml_path).map_err(CargoError::from)?;
+      fs::copy(files.toml_path, new_toml_path)?;
       if let Some(lock_path) = files.lock_path_opt {
         let new_lock_path = dir_path.join(lock_path.file_name().unwrap());
-        fs::copy(lock_path, new_lock_path).map_err(CargoError::from)?;
+        fs::copy(lock_path, new_lock_path)?;
       }
 
       dir
@@ -209,8 +210,7 @@ impl MetadataFetcher for CargoSubcommandMetadataFetcher {
     let exec_output = Command::new("cargo")
         .current_dir(cargo_tempdir.path())
         .args(&["metadata", "--format-version", "1"])
-        .output()
-        .map_err(CargoError::from)?;
+        .output()?;
 
     // Handle command errs
     let stdout_str =
@@ -221,12 +221,11 @@ impl MetadataFetcher for CargoSubcommandMetadataFetcher {
       println!("`cargo metadata` failed. Inspect Cargo.toml for issues!");
       println!("stdout: {}", stdout_str);
       println!("stderr: {}", stderr_str);
-      return Err(CargoError::from(RazeError::Generic("Failed to run `cargo metadata`".to_owned())))
+      return Err(RazeError::Generic("Failed to run `cargo metadata`".to_owned()).into())
     }
 
     // Parse and yield metadata
-    serde_json::from_str::<Metadata>(&stdout_str)
-      .map_err(CargoError::from)
+    serde_json::from_str::<Metadata>(&stdout_str).map_err(|e| e.into())
   }
 }
 
@@ -239,16 +238,16 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
     };
     let ws = Workspace::new(&manifest, &self.cargo_config)?;
     let specs = Packages::All.to_package_id_specs(&ws)?;
-    let root_name = specs.iter().next().unwrap().name().to_owned();
+    let root_name = specs.iter().next().unwrap().name();
 
-    let (resolved_packages, cargo_resolve) =
-      ops::resolve_ws_precisely(&ws, None, &[], false, false, &specs)?;
+    let resolve_opts = ResolveOpts::new(true, &[], false, false);
+    let (resolved_packages, cargo_resolve) = ops::resolve_ws_with_opts(&ws, resolve_opts, &specs)?;
 
     let root_package_id = cargo_resolve
         .iter()
-        .filter(|dep| dep.name().as_str() == root_name)
+        .filter(|dep| dep.name() == root_name)
         .next()
-        .ok_or(CargoError::from(RazeError::Internal("root crate should be in cargo resolve".to_owned())))?
+        .ok_or(RazeError::Internal("root crate should be in cargo resolve".to_owned()))?
         .to_string();
 
     let mut packages = Vec::new();
@@ -275,7 +274,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
 
     for package_id in resolved_packages.package_ids() {
       // TODO(acmcarther): Justify this unwrap
-      let package = resolved_packages.get_one(&package_id).unwrap().clone();
+      let package = resolved_packages.get_one(package_id).unwrap().clone();
       let manifest_metadata = package.manifest().metadata();
 
       let mut dependencies = Vec::new();
@@ -283,7 +282,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
         dependencies.push(Dependency {
           name: dependency.package_name().to_string(),
           // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
-          source: serde_json::to_string(dependency.source_id()).unwrap(),
+          source: serde_json::to_string(&dependency.source_id()).unwrap(),
           req: dependency.version_req().to_string(),
           kind: match dependency.kind() {
             CargoKind::Normal => None,
@@ -308,7 +307,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
           name: target.name().to_owned(),
           kind: util::kind_to_kinds(target.kind()),
           crate_types: crate_types,
-          src_path: target.src_path().path().display().to_string(),
+          src_path: target.src_path().path().unwrap().display().to_string(),
           edition: target.edition().to_string()
         });
       }
@@ -335,7 +334,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
       }
 
       // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
-      let pkg_source = serde_json::to_string(package_id.source_id()).unwrap();
+      let pkg_source = serde_json::to_string(&package_id.source_id()).unwrap();
 
       // Cargo use SHA256 for checksum so we can use them directly
       let sha256 = package

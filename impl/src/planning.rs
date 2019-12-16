@@ -19,9 +19,8 @@ use std::{
 };
 
 use cargo::{
-    CargoError,
+    CargoResult,
     core::{SourceId, dependency::Platform},
-    util::CargoResult,
 };
 
 use serde_json;
@@ -559,7 +558,7 @@ impl<'planner> CrateSubplanner<'planner> {
         let platform = Platform::from_str(target_str)?;
 
         // Skip this dep if it doesn't match our platform attributes
-        if !platform.matches(&self.settings.target, Some(&platform_attrs)) {
+        if !platform.matches(&self.settings.target, platform_attrs.as_ref()) {
           continue;
         }
       }
@@ -569,14 +568,14 @@ impl<'planner> CrateSubplanner<'planner> {
         Some("dev") => dev_dep_names.push(dep.name.clone()),
         Some("build") => build_dep_names.push(dep.name.clone()),
         something_else => {
-          return Err(CargoError::from(RazeError::Planning {
+          return Err(RazeError::Planning {
             dependency_name_opt: Some(package.name.to_string()),
             message: format!(
               "Unhandlable dependency type {:?} on {} detected! {}",
               something_else,
               dep.name,
               PLEASE_FILE_A_BUG)
-          }))
+          }.into())
         }
       }
     }
@@ -689,7 +688,7 @@ impl<'planner> CrateSubplanner<'planner> {
    */
   fn find_package_root_for_manifest(&self, manifest_path: PathBuf) -> CargoResult<PathBuf> {
     let has_git_repo_root = {
-      let is_git = self.source_id.as_ref().map_or(false, SourceId::is_git);
+      let is_git = self.source_id.map_or(false, SourceId::is_git);
       is_git && self.settings.genmode == GenMode::Remote
     };
 
@@ -715,10 +714,10 @@ impl<'planner> CrateSubplanner<'planner> {
       }
 
       // Reached filesystem root and did not find Git repo
-      Err(CargoError::from(RazeError::Generic(format!(
+      Err(RazeError::Generic(format!(
         "Unable to locate git repository root for manifest at {:?}. {}",
         manifest_path, PLEASE_FILE_A_BUG
-      ))))
+      )).into())
     }
   }
 }
@@ -757,7 +756,6 @@ mod checks {
   use std::env;
   use std::fs;
 
-  use cargo::CargoError;
   use cargo::util::CargoResult;
 
   use crate::{
@@ -794,13 +792,13 @@ mod checks {
     let expected_full_path = env::current_dir()
       .unwrap()
       .join(format!("./{}", VENDOR_DIR));
-    return Err(CargoError::from(RazeError::Planning {
-          dependency_name_opt: None,
-          message: format!(
-            "Failed to find expected vendored crates in {:?}: {:?}. Did you forget to run cargo-vendor?",
-            expected_full_path.to_str(),
-            limited_missing_crates)
-    }));
+    return Err(RazeError::Planning {
+      dependency_name_opt: None,
+      message: format!(
+        "Failed to find expected vendored crates in {:?}: {:?}. Did you forget to run cargo-vendor?",
+        expected_full_path.to_str(),
+        limited_missing_crates)
+      }.into())
   }
 
   pub fn check_resolve_matches_packages(metadata: &Metadata) -> CargoResult<()> {
@@ -826,13 +824,13 @@ mod checks {
     }
 
     // Oops, missing some package metadata. Yield a nice message
-    return Err(CargoError::from(RazeError::Planning {
+    return Err(RazeError::Planning {
       dependency_name_opt: None,
       message: format!(
         "Failed to find metadata.packages which were expected from metadata.resolve {:?}. {}",
         limited_missing_node_ids,
         crate::util::PLEASE_FILE_A_BUG)
-    }));
+    }.into())
   }
 
   pub fn warn_unused_settings(

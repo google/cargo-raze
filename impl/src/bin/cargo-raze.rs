@@ -19,8 +19,8 @@ use std::{
 };
 
 use cargo::{
-    CargoError, CliResult,
-    util::{CargoResult, Config},
+    CargoResult, CliResult,
+    util::Config,
 };
 
 use docopt::Docopt;
@@ -82,6 +82,7 @@ fn real_main(options: Options, cargo_config: &mut Config) -> CliResult {
     &options.flag_color,
     /* frozen = */ false,
     /* locked = */ false,
+    /* offline */ false,
     /* target_dir = */ &None,
     &[]
   )?;
@@ -116,7 +117,7 @@ fn real_main(options: Options, cargo_config: &mut Config) -> CliResult {
     GenMode::Remote => {
       // Create "remote/" if it doesn't exist
       if fs::metadata("remote/").is_err() {
-        fs::create_dir("remote/").map_err(|e| CargoError::from(e))?;
+        fs::create_dir("remote/").map_err(failure::Error::from)?;
       }
 
       bazel_renderer.render_remote_planned_build(&render_details, &planned_build)?
@@ -138,11 +139,11 @@ fn real_main(options: Options, cargo_config: &mut Config) -> CliResult {
 /** Verifies that the provided settings make sense. */
 fn validate_settings(settings: &mut RazeSettings) -> CargoResult<()> {
   if !settings.workspace_path.starts_with("//") {
-    return Err(CargoError::from(RazeError::Config {
-          field_path_opt: Some("raze.workspace_path".to_owned()),
-          message: format!("Path must start with \"//\". Paths into local repositories (such as \
-                           @local//path) are currently unsupported.")
-    }));
+    return Err(RazeError::Config {
+      field_path_opt: Some("raze.workspace_path".to_owned()),
+      message: format!("Path must start with \"//\". Paths into local repositories (such as \
+                       @local//path) are currently unsupported.")
+    }.into());
   }
 
   if settings.workspace_path != "//" && settings.workspace_path.ends_with("/") {
@@ -153,19 +154,17 @@ fn validate_settings(settings: &mut RazeSettings) -> CargoResult<()> {
 }
 
 fn write_to_file_loudly(path: &str, contents: &str) -> CargoResult<()> {
-  File::create(&path)
-      .and_then(|mut f| f.write_all(contents.as_bytes()))
-      .map_err(CargoError::from)?;
+  File::create(&path).and_then(|mut f| f.write_all(contents.as_bytes()))?;
   println!("Generated {} successfully", path);
   Ok(())
 }
 
-fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings, CargoError> {
+fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> CargoResult<RazeSettings> {
   let path = cargo_toml_path.as_ref();
-  let mut toml = File::open(path).map_err(CargoError::from)?;
+  let mut toml = File::open(path)?;
   let mut toml_contents = String::new();
-  toml.read_to_string(&mut toml_contents).map_err(CargoError::from)?;
+  toml.read_to_string(&mut toml_contents)?;
   toml::from_str::<CargoToml>(&toml_contents)
-    .map_err(CargoError::from)
+    .map_err(|e| e.into())
     .map(|toml| toml.raze)
 }
