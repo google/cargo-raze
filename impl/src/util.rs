@@ -12,17 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::error::Error as StdError;
-use std::fmt;
-use std::iter::Iterator;
-use std::process::Command;
-use std::str;
-use std::str::FromStr;
+use std::{
+    error::Error as StdError,
+    fmt,
+    iter::Iterator,
+    process::Command,
+    str::{self, FromStr},
+};
 
-use cargo::CargoError;
-use cargo::core::TargetKind;
-use cargo::util::CargoResult;
-use cargo::util::Cfg;
+use cargo::{
+    CargoError,
+    core::TargetKind,
+    util::{CargoResult, Cfg},
+};
+
 use slug;
 
 pub const PLEASE_FILE_A_BUG: &'static str =
@@ -92,7 +95,7 @@ pub struct LimitedResults<T> {
 
 impl PlatformDetails {
   pub fn new_using_rustc(target_triple: &str) -> CargoResult<PlatformDetails> {
-    let attrs = try!(fetch_attrs(target_triple));
+    let attrs = fetch_attrs(target_triple)?;
 
     Ok(PlatformDetails::new(target_triple.to_owned(), attrs))
   }
@@ -172,12 +175,10 @@ pub fn kind_to_kinds(kind: &TargetKind) -> Vec<String> {
 fn fetch_attrs(target: &str) -> CargoResult<Vec<Cfg>> {
   let args = vec![format!("--target={}", target), "--print=cfg".to_owned()];
 
-  let output = try!(
-    Command::new("rustc")
+  let output = Command::new("rustc")
       .args(&args)
       .output()
-      .map_err(CargoError::from)
-  );
+      .map_err(CargoError::from)?;
 
   if !output.status.success() {
     panic!(format!(

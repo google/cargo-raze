@@ -12,23 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo::CargoError;
-use cargo::core::Workspace;
-use cargo::core::summary::FeatureValue as CargoFeatureValue;
-use cargo::core::dependency::Kind as CargoKind;
-use cargo::ops::Packages;
-use cargo::ops;
-use cargo::util::CargoResult;
-use cargo::util::Config;
+use cargo::{
+    CargoError,
+    core::{
+        Workspace,
+        summary::FeatureValue as CargoFeatureValue,
+        dependency::Kind as CargoKind,
+    },
+    ops::{self, Packages},
+    util::{CargoResult, Config},
+};
+
 use serde_json;
-use std::collections::HashMap;
-use std::env;
-use std::fs;
-use std::path::PathBuf;
-use std::process::Command;
+use std::{
+    collections::HashMap,
+    process::Command,
+    path::PathBuf,
+    env, fs,
+};
+
 use tempdir::TempDir;
-use util::RazeError;
-use util;
+use crate::util::{self, RazeError};
+
+use serde_derive::{Serialize, Deserialize};
 
 pub type PackageId = String;
 pub type Kind = String;
@@ -186,29 +192,25 @@ impl MetadataFetcher for CargoSubcommandMetadataFetcher {
     // Copy files into a temp directory
     // UNWRAP: Guarded by function assertion
     let cargo_tempdir = {
-      let dir = try!(
-        TempDir::new("cargo_raze_metadata_dir").map_err(CargoError::from)
-      );
-      {
-        let dir_path = dir.path();
-        let new_toml_path = dir_path.join(files.toml_path.file_name().unwrap());
-        try!(fs::copy(files.toml_path, new_toml_path).map_err(CargoError::from));
-        if let Some(lock_path) = files.lock_path_opt {
-          let new_lock_path = dir_path.join(lock_path.file_name().unwrap());
-          try!(fs::copy(lock_path, new_lock_path).map_err(CargoError::from));
-        }
+      let dir = TempDir::new("cargo_raze_metadata_dir").map_err(CargoError::from)?;
+
+      let dir_path = dir.path();
+      let new_toml_path = dir_path.join(files.toml_path.file_name().unwrap());
+      fs::copy(files.toml_path, new_toml_path).map_err(CargoError::from)?;
+      if let Some(lock_path) = files.lock_path_opt {
+        let new_lock_path = dir_path.join(lock_path.file_name().unwrap());
+        fs::copy(lock_path, new_lock_path).map_err(CargoError::from)?;
       }
+
       dir
     };
 
     // Shell out to cargo
-    let exec_output = try!(
-      Command::new("cargo")
+    let exec_output = Command::new("cargo")
         .current_dir(cargo_tempdir.path())
         .args(&["metadata", "--format-version", "1"])
         .output()
-        .map_err(CargoError::from)
-    );
+        .map_err(CargoError::from)?;
 
     // Handle command errs
     let stdout_str =
@@ -235,20 +237,19 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
     } else {
       files.toml_path
     };
-    let ws = try!(Workspace::new(&manifest, &self.cargo_config));
+    let ws = Workspace::new(&manifest, &self.cargo_config)?;
     let specs = Packages::All.to_package_id_specs(&ws)?;
     let root_name = specs.iter().next().unwrap().name().to_owned();
 
     let (resolved_packages, cargo_resolve) =
       ops::resolve_ws_precisely(&ws, None, &[], false, false, &specs)?;
 
-    let root_package_id = try!(
-      cargo_resolve
+    let root_package_id = cargo_resolve
         .iter()
         .filter(|dep| dep.name().as_str() == root_name)
         .next()
-        .ok_or(CargoError::from(RazeError::Internal("root crate should be in cargo resolve".to_owned())))
-    ).to_string();
+        .ok_or(CargoError::from(RazeError::Internal("root crate should be in cargo resolve".to_owned())))?
+        .to_string();
 
     let mut packages = Vec::new();
     let mut resolve = Resolve {

@@ -6,6 +6,7 @@ readme = "README.md"
 keywords = ["subcommand"]
 license = "Apache-2.0"
 repository = "https://github.com/google/cargo-raze"
+edition = "2018"
 description = """
 A Cargo subcommand to generate Bazel BUILD files
 """
@@ -35,4 +36,4 @@ tempdir = "0.3.7"
 
 [dev-dependencies]
 lazy_static = "1.2.0"
-hamcrest = "0.1.5"
+hamcrest2 = "0.3.0"

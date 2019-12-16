@@ -12,23 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate cargo;
-extern crate itertools;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_json;
-extern crate slug;
-extern crate tempdir;
-extern crate tera;
-extern crate toml;
-extern crate docopt;
-extern crate failure;
-
-#[cfg(test)]
-#[macro_use]
-extern crate hamcrest;
-
 pub mod bazel;
 pub mod context;
 pub mod license;

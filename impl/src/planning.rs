@@ -12,38 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::HashMap;
-use std::collections::HashSet;
-use std::path::PathBuf;
-use std::str;
-use std::str::FromStr;
+use std::{
+    collections::{HashMap, HashSet},
+    path::PathBuf,
+    str::{self, FromStr},
+};
 
-use cargo::CargoError;
-use cargo::core::dependency::Platform;
-use cargo::core::SourceId;
-use cargo::util::CargoResult;
+use cargo::{
+    CargoError,
+    core::{SourceId, dependency::Platform},
+    util::CargoResult,
+};
+
 use serde_json;
 
-use context::BuildableDependency;
-use context::BuildableTarget;
-use context::CrateContext;
-use context::GitRepo;
-use context::LicenseData;
-use context::SourceDetails;
-use context::WorkspaceContext;
-use license;
-use metadata::CargoWorkspaceFiles;
-use metadata::Metadata;
-use metadata::MetadataFetcher;
-use metadata::Package;
-use metadata::ResolveNode;
-use settings::CrateSettings;
-use settings::GenMode;
-use settings::RazeSettings;
-use util;
-use util::PlatformDetails;
-use util::PLEASE_FILE_A_BUG;
-use util::RazeError;
+use crate::{
+    context::{
+        BuildableDependency, BuildableTarget, CrateContext, GitRepo, LicenseData,
+        SourceDetails, WorkspaceContext
+    },
+    license,
+    metadata::{CargoWorkspaceFiles, Metadata, MetadataFetcher, Package, ResolveNode},
+    settings::{CrateSettings, GenMode, RazeSettings},
+    util::{self, PlatformDetails, PLEASE_FILE_A_BUG, RazeError},
+};
 
 pub const VENDOR_DIR: &'static str = "vendor/";
 
@@ -108,7 +100,7 @@ pub struct CrateCatalog {
 
 /** The default implementation of a BuildPlanner. */
 pub struct BuildPlannerImpl<'fetcher> {
-  metadata_fetcher: &'fetcher mut MetadataFetcher,
+  metadata_fetcher: &'fetcher mut dyn MetadataFetcher,
 }
 
 /** An internal working planner for generating context for a whole workspace. */
@@ -318,7 +310,7 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
     files: CargoWorkspaceFiles,
     platform_details: PlatformDetails,
   ) -> CargoResult<PlannedBuild> {
-    let metadata = try!(self.metadata_fetcher.fetch_metadata(files));
+    let metadata = self.metadata_fetcher.fetch_metadata(files)?;
     let crate_catalog = CrateCatalog::new(&metadata);
 
     let workspace_subplanner = WorkspaceSubplanner {
@@ -333,7 +325,7 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
 }
 
 impl<'fetcher> BuildPlannerImpl<'fetcher> {
-  pub fn new(metadata_fetcher: &'fetcher mut MetadataFetcher) -> BuildPlannerImpl<'fetcher> {
+  pub fn new(metadata_fetcher: &'fetcher mut dyn MetadataFetcher) -> BuildPlannerImpl<'fetcher> {
     BuildPlannerImpl {
       metadata_fetcher: metadata_fetcher,
     }
@@ -343,15 +335,15 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
 impl<'planner> WorkspaceSubplanner<'planner> {
   /** Produces a planned build using internal state. */
   pub fn produce_planned_build(&self) -> CargoResult<PlannedBuild> {
-    try!(checks::check_resolve_matches_packages(&self.metadata));
+    checks::check_resolve_matches_packages(&self.metadata)?;
 
     if self.settings.genmode != GenMode::Remote {
-      try!(checks::check_all_vendored(self.crate_catalog.entries()));
+      checks::check_all_vendored(self.crate_catalog.entries())?;
     }
 
     checks::warn_unused_settings(&self.settings.crates, &self.metadata.packages);
 
-    let crate_contexts = try!(self.produce_crate_contexts());
+    let crate_contexts = self.produce_crate_contexts()?;
 
     Ok(PlannedBuild {
       workspace_context: self.produce_workspace_context(),
@@ -418,7 +410,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
         crate_settings: &crate_settings,
       };
 
-      let crate_context = try!(crate_subplanner.produce_context());
+      let crate_context = crate_subplanner.produce_context()?;
       crate_contexts.push(crate_context);
     }
 
@@ -433,9 +425,9 @@ impl<'planner> CrateSubplanner<'planner> {
       build_deps,
       dev_deps,
       normal_deps,
-    } = try!(self.produce_deps());
+    } = self.produce_deps()?;
 
-    let mut targets = try!(self.produce_targets());
+    let mut targets = self.produce_targets()?;
     let build_script_target_opt = self.take_build_script_target(&mut targets);
 
     let package = self.crate_catalog_entry.package();
@@ -491,7 +483,7 @@ impl<'planner> CrateSubplanner<'planner> {
       build_dep_names,
       dev_dep_names,
       normal_dep_names,
-    } = try!(self.identify_named_deps());
+    } = self.identify_named_deps()?;
 
     let mut build_deps = Vec::new();
     let mut dev_deps = Vec::new();
@@ -564,7 +556,7 @@ impl<'planner> CrateSubplanner<'planner> {
       if dep.target.is_some() {
         // UNWRAP: Safe from above check
         let target_str = dep.target.as_ref().unwrap();
-        let platform = try!(Platform::from_str(target_str));
+        let platform = Platform::from_str(target_str)?;
 
         // Skip this dep if it doesn't match our platform attributes
         if !platform.matches(&self.settings.target, Some(&platform_attrs)) {
@@ -658,7 +650,7 @@ impl<'planner> CrateSubplanner<'planner> {
       let manifest_path = PathBuf::from(&package.manifest_path);
       assert!(manifest_path.is_absolute());
 
-      let package_root_path = try!(self.find_package_root_for_manifest(manifest_path));
+      let package_root_path = self.find_package_root_for_manifest(manifest_path)?;
 
       // Trim the manifest_path parent dir from the target path (to give us the crate-local path)j
       let mut package_root_path_str = target
@@ -737,7 +729,7 @@ fn load_and_dedup_licenses(licenses: &str) -> Vec<LicenseData> {
     let rating = license_type.to_bazel_rating();
 
     if rating_to_license_name.contains_key(&rating) {
-      let mut license_names_str: &mut String = rating_to_license_name.get_mut(&rating).unwrap();
+      let license_names_str: &mut String = rating_to_license_name.get_mut(&rating).unwrap();
       license_names_str.push_str(",");
       license_names_str.push_str(&license_name);
     } else {
@@ -768,14 +760,12 @@ mod checks {
   use cargo::CargoError;
   use cargo::util::CargoResult;
 
-  use metadata::Metadata;
-  use metadata::Package;
-  use metadata::PackageId;
-  use planning::CrateCatalogEntry;
-  use planning::VENDOR_DIR;
-  use settings::CrateSettingsPerVersion;
-  use util::collect_up_to;
-  use util::RazeError;
+  use crate::{
+    metadata::{Metadata, Package, PackageId},
+    planning::{CrateCatalogEntry, VENDOR_DIR},
+    settings::CrateSettingsPerVersion,
+    util::{collect_up_to, RazeError}
+  };
 
   // TODO(acmcarther): Consider including a switch to disable limiting
   const MAX_DISPLAYED_MISSING_VENDORED_CRATES: usize = 5;
@@ -841,7 +831,7 @@ mod checks {
       message: format!(
         "Failed to find metadata.packages which were expected from metadata.resolve {:?}. {}",
         limited_missing_node_ids,
-        ::util::PLEASE_FILE_A_BUG)
+        crate::util::PLEASE_FILE_A_BUG)
     }));
   }
 
@@ -890,12 +880,15 @@ mod checks {
 
 #[cfg(test)]
 mod tests {
-  use metadata::Metadata;
-  use metadata::ResolveNode;
-  use metadata::testing as metadata_testing;
-  use metadata::testing::StubMetadataFetcher;
-  use planning::checks;
-  use settings::testing as settings_testing;
+  use crate::{
+    metadata::{
+      testing as metadata_testing,
+      testing::StubMetadataFetcher,
+      Metadata, ResolveNode,
+    },
+    planning::checks,
+    settings::testing as settings_testing,
+  };
 
   use super::*;
 

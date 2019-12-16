@@ -12,19 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo::CargoError;
-use cargo::util::CargoResult;
-use tera;
-use tera::Context;
-use tera::Tera;
+use cargo::{CargoError, util::CargoResult};
+use tera::{self, Context, Tera};
 
-use context::CrateContext;
-use context::WorkspaceContext;
-use planning::PlannedBuild;
-use rendering::BuildRenderer;
-use rendering::FileOutputs;
-use rendering::RenderDetails;
-use util::RazeError;
+use crate::{
+    context::{CrateContext, WorkspaceContext},
+    planning::PlannedBuild,
+    rendering::{BuildRenderer, FileOutputs, RenderDetails},
+    util::RazeError
+};
 
 pub struct BazelRenderer {
   internal_renderer: Tera,
@@ -153,14 +149,13 @@ impl BuildRenderer for BazelRenderer {
     let mut file_outputs = Vec::new();
 
     for package in crate_contexts {
-      let rendered_crate_build_file = try!(
-        self
+      let rendered_crate_build_file = self
           .render_crate(&workspace_context, &package)
           .map_err(|e| CargoError::from(RazeError::Rendering {
             crate_name_opt: None,
             message: e.to_string(),
-          }))
-      );
+          }))?;
+
       file_outputs.push(FileOutputs {
         path: format!("{}/{}", path_prefix, package.expected_build_path),
         contents: rendered_crate_build_file,
@@ -168,14 +163,13 @@ impl BuildRenderer for BazelRenderer {
     }
 
     let build_file_path = format!("{}/{}", &path_prefix, buildfile_suffix);
-    let rendered_alias_build_file = try!(
-      self
+    let rendered_alias_build_file = self
         .render_aliases(&workspace_context, &crate_contexts)
         .map_err(|e| CargoError::from(RazeError::Rendering {
           crate_name_opt: None,
           message: e.to_string(),
-        }))
-    );
+        }))?;
+
     file_outputs.push(FileOutputs {
       path: build_file_path,
       contents: rendered_alias_build_file,
@@ -207,14 +201,13 @@ impl BuildRenderer for BazelRenderer {
     });
 
     for package in crate_contexts {
-      let rendered_crate_build_file = try!(
-        self
+      let rendered_crate_build_file = self
           .render_remote_crate(&workspace_context, &package)
           .map_err(|e| CargoError::from(RazeError::Rendering {
             crate_name_opt: Some(package.pkg_name.to_owned()),
             message: e.to_string(),
-          }))
-      );
+          }))?;
+
       file_outputs.push(FileOutputs {
         path: format!("{}/{}", path_prefix, package.expected_build_path),
         contents: rendered_crate_build_file,
@@ -222,28 +215,26 @@ impl BuildRenderer for BazelRenderer {
     }
 
     let alias_file_path = format!("{}/{}", &path_prefix, buildfile_suffix);
-    let rendered_alias_build_file = try!(
-      self
+    let rendered_alias_build_file = self
         .render_remote_aliases(&workspace_context, &crate_contexts)
         .map_err(|e| CargoError::from(RazeError::Rendering {
           crate_name_opt: None,
           message: e.to_string(),
-        }))
-    );
+        }))?;
+
     file_outputs.push(FileOutputs {
       path: alias_file_path,
       contents: rendered_alias_build_file,
     });
 
     let bzl_fetch_file_path = format!("{}/crates.bzl", &path_prefix);
-    let rendered_bzl_fetch_file = try!(
-      self
+    let rendered_bzl_fetch_file = self
         .render_bzl_fetch(&workspace_context, &crate_contexts)
         .map_err(|e| CargoError::from(RazeError::Rendering {
           crate_name_opt: None,
           message: e.to_string(),
-        }))
-    );
+        }))?;
+
     file_outputs.push(FileOutputs {
       path: bzl_fetch_file_path,
       contents: rendered_bzl_fetch_file,
@@ -255,14 +246,14 @@ impl BuildRenderer for BazelRenderer {
 
 #[cfg(test)]
 mod tests {
-  use hamcrest::core::expect;
-  use hamcrest::prelude::*;
+  use hamcrest2::{core::expect, prelude::*};
 
-  use context::*;
-  use planning::PlannedBuild;
-  use rendering::FileOutputs;
-  use rendering::RenderDetails;
-  use settings::CrateSettings;
+  use crate::{
+    context::*,
+    planning::PlannedBuild,
+    rendering::{FileOutputs, RenderDetails},
+    settings::CrateSettings
+  };
 
   use super::*;
 

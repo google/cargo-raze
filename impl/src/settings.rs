@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::collections::HashMap;
+use serde_derive::{Serialize, Deserialize};
 
 pub type CrateSettingsPerVersion = HashMap<String, CrateSettings>;
 
