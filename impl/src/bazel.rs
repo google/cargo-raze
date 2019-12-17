@@ -27,10 +27,10 @@ pub struct BazelRenderer {
 }
 
 impl BazelRenderer {
-  pub fn new() -> BazelRenderer {
+  pub fn new() -> Self {
     // Configure tera with a bogus template dir: We don't want any runtime template support
-    let mut renderer = Tera::new("src/not/a/dir/*").unwrap();
-    renderer
+    let mut internal_renderer = Tera::new("src/not/a/dir/*").unwrap();
+    internal_renderer
       .add_raw_templates(vec![
         (
           "templates/partials/build_script.template",
@@ -59,9 +59,7 @@ impl BazelRenderer {
       ])
       .unwrap();
 
-    BazelRenderer {
-      internal_renderer: renderer,
-    }
+    Self { internal_renderer }
   }
 
   pub fn render_crate(
@@ -80,7 +78,7 @@ impl BazelRenderer {
   pub fn render_aliases(
     &self,
     workspace_context: &WorkspaceContext,
-    all_packages: &Vec<CrateContext>,
+    all_packages: &[CrateContext],
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
     context.insert("workspace", &workspace_context);
@@ -106,7 +104,7 @@ impl BazelRenderer {
   pub fn render_remote_aliases(
     &self,
     workspace_context: &WorkspaceContext,
-    all_packages: &Vec<CrateContext>,
+    all_packages: &[CrateContext],
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
     context.insert("workspace", &workspace_context);
@@ -119,7 +117,7 @@ impl BazelRenderer {
   pub fn render_bzl_fetch(
     &self,
     workspace_context: &WorkspaceContext,
-    all_packages: &Vec<CrateContext>,
+    all_packages: &[CrateContext],
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
     context.insert("workspace", &workspace_context);
@@ -272,7 +270,7 @@ mod tests {
         gen_workspace_prefix: "".to_owned(),
         output_buildfile_suffix: "BUILD".to_owned(),
       },
-      crate_contexts: crate_contexts,
+      crate_contexts,
     }
   }
 

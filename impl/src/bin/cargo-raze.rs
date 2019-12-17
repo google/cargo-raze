@@ -47,7 +47,7 @@ struct Options {
   flag_dryrun: Option<bool>,
 }
 
-const USAGE: &'static str = r#"
+const USAGE: &str = r#"
 Generate BUILD files for your pre-vendored Cargo dependencies.
 
 Usage:
@@ -68,14 +68,14 @@ fn main() {
     .and_then(|d| d.deserialize())
     .unwrap_or_else(|e| e.exit());
 
-  let result = real_main(options, &mut config);
+  let result = real_main(&options, &mut config);
 
   if let Err(e) = result {
     cargo::exit_with_error(e, &mut *config.shell());
   }
 }
 
-fn real_main(options: Options, cargo_config: &mut Config) -> CliResult {
+fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
   cargo_config.configure(
     options.flag_verbose,
     options.flag_quiet,
@@ -96,14 +96,8 @@ fn real_main(options: Options, cargo_config: &mut Config) -> CliResult {
   let mut planner = BuildPlannerImpl::new(&mut metadata_fetcher);
 
   let toml_path = PathBuf::from("./Cargo.toml");
-  let mut lock_path_opt = None;
-  if fs::metadata("./Cargo.lock").is_ok() {
-    lock_path_opt = Some(PathBuf::from("./Cargo.lock"));
-  }
-  let files = CargoWorkspaceFiles {
-    toml_path: toml_path,
-    lock_path_opt: lock_path_opt,
-  };
+  let lock_path_opt = fs::metadata("./Cargo.lock").ok().map(|_| PathBuf::from("./Cargo.lock"));
+  let files = CargoWorkspaceFiles { toml_path, lock_path_opt };
   let platform_details = PlatformDetails::new_using_rustc(&settings.target)?;
   let planned_build = planner.plan_build(&settings, files, platform_details)?;
   let mut bazel_renderer = BazelRenderer::new();
@@ -126,10 +120,10 @@ fn real_main(options: Options, cargo_config: &mut Config) -> CliResult {
 
   let dry_run = options.flag_dryrun.unwrap_or(false);
   for FileOutputs { path, contents } in bazel_file_outputs {
-    if !dry_run {
-      write_to_file_loudly(&path, &contents)?;
-    } else {
+    if dry_run {
       println!("{}:\n{}", path, contents);
+    } else {
+      write_to_file_loudly(&path, &contents)?;
     }
   }
 
@@ -141,16 +135,16 @@ fn validate_settings(settings: &mut RazeSettings) -> CargoResult<()> {
   if !settings.workspace_path.starts_with("//") {
     return Err(RazeError::Config {
       field_path_opt: Some("raze.workspace_path".to_owned()),
-      message: format!("Path must start with \"//\". Paths into local repositories (such as \
-                       @local//path) are currently unsupported.")
+      message: concat!("Path must start with \"//\". Paths into local repositories (such as ",
+                       "@local//path) are currently unsupported.").to_owned()
     }.into());
   }
 
-  if settings.workspace_path != "//" && settings.workspace_path.ends_with("/") {
+  if settings.workspace_path != "//" && settings.workspace_path.ends_with('/') {
     settings.workspace_path.pop();
   }
 
-  return Ok(());
+  Ok(())
 }
 
 fn write_to_file_loudly(path: &str, contents: &str) -> CargoResult<()> {

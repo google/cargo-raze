@@ -71,7 +71,7 @@ pub struct RazeSettings {
   pub output_buildfile_suffix: String,
 }
 
-/** Override settings for individual crates (as part of RazeSettings). */
+/** Override settings for individual crates (as part of `RazeSettings`). */
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CrateSettings {
   /**
@@ -127,7 +127,7 @@ pub struct CrateSettings {
 
   /**
    * Additional environment variables to add when running the build script.
-   * 
+   *
    * Values should looks like "KEY=VALUE".
    */
   #[serde(default)]
@@ -152,8 +152,8 @@ pub enum GenMode {
 }
 
 impl Default for CrateSettings {
-  fn default() -> CrateSettings {
-    CrateSettings {
+  fn default() -> Self {
+    Self {
       additional_deps: Vec::new(),
       skipped_deps: Vec::new(),
       extra_aliased_targets: Vec::new(),

@@ -31,13 +31,11 @@ pub enum BazelLicenseType {
 impl BazelLicenseType {
   pub fn to_bazel_rating(&self) -> &'static str {
     match self {
-      &BazelLicenseType::Unencumbered => "unencumbered",
-      &BazelLicenseType::Notice => "notice",
-      &BazelLicenseType::Reciprocal => "reciprocal",
+      Self::Unencumbered => "unencumbered",
+      Self::Notice => "notice",
+      Self::Reciprocal => "reciprocal",
       // N.B.: Bazel doesn't have a notion of "disallowed" or "by_exception_only", using restricted instead.
-      &BazelLicenseType::Restricted
-      | &BazelLicenseType::ByExceptionOnly
-      | &BazelLicenseType::Disallowed => "restricted",
+      Self::Restricted | Self::ByExceptionOnly | Self::Disallowed => "restricted",
     }
   }
 }

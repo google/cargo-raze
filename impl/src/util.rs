@@ -28,7 +28,7 @@ use cargo::{
 
 use slug;
 
-pub const PLEASE_FILE_A_BUG: &'static str =
+pub const PLEASE_FILE_A_BUG: &str =
   "Please file an issue at github.com/google/cargo-raze with details.";
 
 #[derive(Debug)]
@@ -49,35 +49,26 @@ pub enum RazeError {
   },
 }
 
-impl StdError for RazeError {
-}
+impl StdError for RazeError {}
 
 impl fmt::Display for RazeError {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     match &self {
-      RazeError::Generic(s) => {
-        write!(f, "Raze failed with cause: \"{}\"", s)
-      },
-      RazeError::Internal(s) => {
+      Self::Generic(s) => write!(f, "Raze failed with cause: \"{}\"", s),
+      Self::Internal(s) => {
         write!(f, "Raze failed unexpectedly with cause: \"{}\". {}", s, PLEASE_FILE_A_BUG)
       },
-      RazeError::Config { field_path_opt, message } => {
-        match field_path_opt {
-          Some(path) => write!(f, "Raze config problem in field \"{}\" with cause: \"{}\"", path, message),
-          None => write!(f, "Raze config problem with cause: \"{}\"", message),
-        }
+      Self::Config { field_path_opt, message } => match field_path_opt {
+        Some(path) => write!(f, "Raze config problem in field \"{}\" with cause: \"{}\"", path, message),
+        None => write!(f, "Raze config problem with cause: \"{}\"", message),
       },
-      RazeError::Rendering { crate_name_opt, message } => {
-        match crate_name_opt {
-          Some(name) => write!(f, "Raze failed to render crate \"{}\" with cause: \"{}\"", name, message),
-          None => write!(f, "Raze failed to render with cause: \"{}\"", message),
-        }
+      Self::Rendering { crate_name_opt, message } => match crate_name_opt {
+        Some(name) => write!(f, "Raze failed to render crate \"{}\" with cause: \"{}\"", name, message),
+        None => write!(f, "Raze failed to render with cause: \"{}\"", message),
       },
-      RazeError::Planning { dependency_name_opt, message } => {
-        match dependency_name_opt {
-          Some(dep_name) => write!(f, "Raze failed to plan crate \"{}\" with cause: \"{}\"", dep_name, message),
-          None => write!(f, "Raze failed to render with cause: \"{}\"", message),
-        }
+      Self::Planning { dependency_name_opt, message } => match dependency_name_opt {
+        Some(dep_name) => write!(f, "Raze failed to plan crate \"{}\" with cause: \"{}\"", dep_name, message),
+        None => write!(f, "Raze failed to render with cause: \"{}\"", message),
       }
     }
   }
@@ -94,17 +85,13 @@ pub struct LimitedResults<T> {
 }
 
 impl PlatformDetails {
-  pub fn new_using_rustc(target_triple: &str) -> CargoResult<PlatformDetails> {
+  pub fn new_using_rustc(target_triple: &str) -> CargoResult<Self> {
     let attrs = fetch_attrs(target_triple)?;
-
-    Ok(PlatformDetails::new(target_triple.to_owned(), attrs))
+    Ok(Self::new(target_triple.to_owned(), attrs))
   }
 
-  pub fn new(target_triple: String, attrs: Vec<Cfg>) -> PlatformDetails {
-    PlatformDetails {
-      target_triple: target_triple,
-      attrs: attrs,
-    }
+  pub fn new(target_triple: String, attrs: Vec<Cfg>) -> Self {
+    Self { target_triple, attrs }
   }
 
   #[allow(dead_code)]
@@ -145,10 +132,7 @@ pub fn collect_up_to<T, U: Iterator<Item = T>>(max: usize, iter: U) -> LimitedRe
     }
   }
 
-  LimitedResults {
-    items: items,
-    count_extras: count_extras,
-  }
+  LimitedResults { items, count_extras }
 }
 
 pub fn sanitize_ident(ident: &str) -> String {
@@ -156,18 +140,18 @@ pub fn sanitize_ident(ident: &str) -> String {
 }
 
 /**
- * Extracts consistently named Strings for the provided TargetKind.
+ * Extracts consistently named Strings for the provided `TargetKind`.
  *
  * TODO(acmcarther): Remove this shim borrowed from Cargo when Cargo is upgraded
  */
 pub fn kind_to_kinds(kind: &TargetKind) -> Vec<String> {
-  match kind {
-    &TargetKind::Lib(ref kinds) => kinds.iter().map(|k| k.crate_type().to_owned()).collect(),
-    &TargetKind::Bin => vec!["bin".to_owned()],
-    &TargetKind::ExampleBin | &TargetKind::ExampleLib(_) => vec!["example".to_owned()],
-    &TargetKind::Test => vec!["test".to_owned()],
-    &TargetKind::CustomBuild => vec!["custom-build".to_owned()],
-    &TargetKind::Bench => vec!["bench".to_owned()],
+  match *kind {
+    TargetKind::Lib(ref kinds) => kinds.iter().map(|k| k.crate_type().to_owned()).collect(),
+    TargetKind::Bin => vec!["bin".to_owned()],
+    TargetKind::ExampleBin | TargetKind::ExampleLib(_) => vec!["example".to_owned()],
+    TargetKind::Test => vec!["test".to_owned()],
+    TargetKind::CustomBuild => vec!["custom-build".to_owned()],
+    TargetKind::Bench => vec!["bench".to_owned()],
   }
 }
 
@@ -182,8 +166,8 @@ fn fetch_attrs(target: &str) -> CargoResult<Vec<Cfg>> {
       "getting target attrs for {} failed with status: '{}' \nstdout: {}\nstderr: {}",
       target,
       output.status,
-      String::from_utf8(output.stdout).unwrap_or("[unparseable bytes]".to_owned()),
-      String::from_utf8(output.stderr).unwrap_or("[unparseable bytes]".to_owned())
+      String::from_utf8(output.stdout).unwrap_or_else(|_| "[unparseable bytes]".to_owned()),
+      String::from_utf8(output.stderr).unwrap_or_else(|_| "[unparseable bytes]".to_owned())
     ))
   }
 
