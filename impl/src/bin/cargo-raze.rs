@@ -13,25 +13,22 @@
 // limitations under the License.
 
 use std::{
-    fs::{self, File},
-    io::{Read, Write},
-    path::{Path, PathBuf},
+  fs::{self, File},
+  io::{Read, Write},
+  path::{Path, PathBuf},
 };
 
-use cargo::{
-    CargoResult, CliResult,
-    util::Config,
-};
+use cargo::{util::Config, CargoResult, CliResult};
 
 use docopt::Docopt;
 
 use cargo_raze::{
-    bazel::BazelRenderer,
-    metadata::{CargoInternalsMetadataFetcher, CargoWorkspaceFiles},
-    planning::{BuildPlanner, BuildPlannerImpl},
-    rendering::{BuildRenderer, FileOutputs, RenderDetails},
-    settings::{GenMode, RazeSettings, CargoToml},
-    util::{PlatformDetails, RazeError},
+  bazel::BazelRenderer,
+  metadata::{CargoInternalsMetadataFetcher, CargoWorkspaceFiles},
+  planning::{BuildPlanner, BuildPlannerImpl},
+  rendering::{BuildRenderer, FileOutputs, RenderDetails},
+  settings::{CargoToml, GenMode, RazeSettings},
+  util::{PlatformDetails, RazeError},
 };
 
 use serde_derive::Deserialize;
@@ -84,7 +81,7 @@ fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
     /* locked = */ false,
     /* offline */ false,
     /* target_dir = */ &None,
-    &[]
+    &[],
   )?;
 
   let mut settings = load_settings("Cargo.toml")?;
@@ -96,8 +93,13 @@ fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
   let mut planner = BuildPlannerImpl::new(&mut metadata_fetcher);
 
   let toml_path = PathBuf::from("./Cargo.toml");
-  let lock_path_opt = fs::metadata("./Cargo.lock").ok().map(|_| PathBuf::from("./Cargo.lock"));
-  let files = CargoWorkspaceFiles { toml_path, lock_path_opt };
+  let lock_path_opt = fs::metadata("./Cargo.lock")
+    .ok()
+    .map(|_| PathBuf::from("./Cargo.lock"));
+  let files = CargoWorkspaceFiles {
+    toml_path,
+    lock_path_opt,
+  };
   let platform_details = PlatformDetails::new_using_rustc(&settings.target)?;
   let planned_build = planner.plan_build(&settings, files, platform_details)?;
   let mut bazel_renderer = BazelRenderer::new();
@@ -133,11 +135,17 @@ fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
 /** Verifies that the provided settings make sense. */
 fn validate_settings(settings: &mut RazeSettings) -> CargoResult<()> {
   if !settings.workspace_path.starts_with("//") {
-    return Err(RazeError::Config {
-      field_path_opt: Some("raze.workspace_path".to_owned()),
-      message: concat!("Path must start with \"//\". Paths into local repositories (such as ",
-                       "@local//path) are currently unsupported.").to_owned()
-    }.into());
+    return Err(
+      RazeError::Config {
+        field_path_opt: Some("raze.workspace_path".to_owned()),
+        message: concat!(
+          "Path must start with \"//\". Paths into local repositories (such as ",
+          "@local//path) are currently unsupported."
+        )
+        .to_owned(),
+      }
+      .into(),
+    );
   }
 
   if settings.workspace_path != "//" && settings.workspace_path.ends_with('/') {

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo::util::CargoResult;
 use crate::planning::PlannedBuild;
+use cargo::util::CargoResult;
 
 /**
  * An object that can convert a prepared build plan into a series of files for a Bazel-like build

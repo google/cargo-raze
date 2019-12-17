@@ -13,18 +13,14 @@
 // limitations under the License.
 
 use std::{
-    error::Error as StdError,
-    fmt,
-    iter::Iterator,
-    process::Command,
-    str::{self, FromStr},
+  error::Error as StdError,
+  fmt,
+  iter::Iterator,
+  process::Command,
+  str::{self, FromStr},
 };
 
-use cargo::{
-    CargoResult,
-    core::TargetKind,
-    util::Cfg,
-};
+use cargo::{core::TargetKind, util::Cfg, CargoResult};
 
 use slug;
 
@@ -55,21 +51,44 @@ impl fmt::Display for RazeError {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     match &self {
       Self::Generic(s) => write!(f, "Raze failed with cause: \"{}\"", s),
-      Self::Internal(s) => {
-        write!(f, "Raze failed unexpectedly with cause: \"{}\". {}", s, PLEASE_FILE_A_BUG)
-      },
-      Self::Config { field_path_opt, message } => match field_path_opt {
-        Some(path) => write!(f, "Raze config problem in field \"{}\" with cause: \"{}\"", path, message),
+      Self::Internal(s) => write!(
+        f,
+        "Raze failed unexpectedly with cause: \"{}\". {}",
+        s, PLEASE_FILE_A_BUG
+      ),
+      Self::Config {
+        field_path_opt,
+        message,
+      } => match field_path_opt {
+        Some(path) => write!(
+          f,
+          "Raze config problem in field \"{}\" with cause: \"{}\"",
+          path, message
+        ),
         None => write!(f, "Raze config problem with cause: \"{}\"", message),
       },
-      Self::Rendering { crate_name_opt, message } => match crate_name_opt {
-        Some(name) => write!(f, "Raze failed to render crate \"{}\" with cause: \"{}\"", name, message),
+      Self::Rendering {
+        crate_name_opt,
+        message,
+      } => match crate_name_opt {
+        Some(name) => write!(
+          f,
+          "Raze failed to render crate \"{}\" with cause: \"{}\"",
+          name, message
+        ),
         None => write!(f, "Raze failed to render with cause: \"{}\"", message),
       },
-      Self::Planning { dependency_name_opt, message } => match dependency_name_opt {
-        Some(dep_name) => write!(f, "Raze failed to plan crate \"{}\" with cause: \"{}\"", dep_name, message),
+      Self::Planning {
+        dependency_name_opt,
+        message,
+      } => match dependency_name_opt {
+        Some(dep_name) => write!(
+          f,
+          "Raze failed to plan crate \"{}\" with cause: \"{}\"",
+          dep_name, message
+        ),
         None => write!(f, "Raze failed to render with cause: \"{}\"", message),
-      }
+      },
     }
   }
 }
@@ -91,7 +110,10 @@ impl PlatformDetails {
   }
 
   pub fn new(target_triple: String, attrs: Vec<Cfg>) -> Self {
-    Self { target_triple, attrs }
+    Self {
+      target_triple,
+      attrs,
+    }
   }
 
   #[allow(dead_code)]
@@ -132,7 +154,10 @@ pub fn collect_up_to<T, U: Iterator<Item = T>>(max: usize, iter: U) -> LimitedRe
     }
   }
 
-  LimitedResults { items, count_extras }
+  LimitedResults {
+    items,
+    count_extras,
+  }
 }
 
 pub fn sanitize_ident(ident: &str) -> String {

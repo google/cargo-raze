@@ -13,29 +13,22 @@
 // limitations under the License.
 
 use cargo::{
-    CargoResult,
-    core::{
-        Workspace,
-        summary::FeatureValue as CargoFeatureValue,
-        dependency::Kind as CargoKind,
-        resolver::ResolveOpts,
-    },
-    ops::{self, Packages},
-    util::Config,
+  core::{
+    dependency::Kind as CargoKind, resolver::ResolveOpts,
+    summary::FeatureValue as CargoFeatureValue, Workspace,
+  },
+  ops::{self, Packages},
+  util::Config,
+  CargoResult,
 };
 
 use serde_json;
-use std::{
-    collections::HashMap,
-    process::Command,
-    path::PathBuf,
-    env, fs,
-};
+use std::{collections::HashMap, env, fs, path::PathBuf, process::Command};
 
-use tempdir::TempDir;
 use crate::util::{self, RazeError};
+use tempdir::TempDir;
 
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::{Deserialize, Serialize};
 
 pub type PackageId = String;
 pub type Kind = String;
@@ -112,7 +105,8 @@ pub struct Dependency {
   pub source: String,
   pub req: String,
   pub kind: Option<Kind>,
-  #[serde(default = "default_dependency_field_optional")] pub optional: bool,
+  #[serde(default = "default_dependency_field_optional")]
+  pub optional: bool,
   #[serde(default = "default_dependency_field_uses_default_features")]
   pub uses_default_features: bool,
   pub features: Vec<String>,
@@ -182,12 +176,7 @@ pub struct CargoInternalsMetadataFetcher<'config> {
 impl MetadataFetcher for CargoSubcommandMetadataFetcher {
   fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> CargoResult<Metadata> {
     assert!(files.toml_path.is_file());
-    assert!(
-      files
-        .lock_path_opt
-        .as_ref()
-        .map_or(true, |p| p.is_file())
-    );
+    assert!(files.lock_path_opt.as_ref().map_or(true, |p| p.is_file()));
 
     // Copy files into a temp directory
     // UNWRAP: Guarded by function assertion
@@ -207,21 +196,21 @@ impl MetadataFetcher for CargoSubcommandMetadataFetcher {
 
     // Shell out to cargo
     let exec_output = Command::new("cargo")
-        .current_dir(cargo_tempdir.path())
-        .args(&["metadata", "--format-version", "1"])
-        .output()?;
+      .current_dir(cargo_tempdir.path())
+      .args(&["metadata", "--format-version", "1"])
+      .output()?;
 
     // Handle command errs
-    let stdout_str = String::from_utf8(exec_output.stdout)
-        .unwrap_or_else(|_| "[unparsable bytes]".to_owned());
+    let stdout_str =
+      String::from_utf8(exec_output.stdout).unwrap_or_else(|_| "[unparsable bytes]".to_owned());
 
     if !exec_output.status.success() {
-      let stderr_str = String::from_utf8(exec_output.stderr)
-          .unwrap_or_else(|_| "[unparsable bytes]".to_owned());
+      let stderr_str =
+        String::from_utf8(exec_output.stderr).unwrap_or_else(|_| "[unparsable bytes]".to_owned());
       println!("`cargo metadata` failed. Inspect Cargo.toml for issues!");
       println!("stdout: {}", stdout_str);
       println!("stderr: {}", stderr_str);
-      return Err(RazeError::Generic("Failed to run `cargo metadata`".to_owned()).into())
+      return Err(RazeError::Generic("Failed to run `cargo metadata`".to_owned()).into());
     }
 
     // Parse and yield metadata
@@ -249,23 +238,33 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
       .ok_or_else(|| RazeError::Internal("root crate should be in cargo resolve".to_owned()))?
       .to_string();
 
-    let nodes = cargo_resolve.iter()
+    let nodes = cargo_resolve
+      .iter()
       .map(|id| ResolveNode {
         id: id.to_string(),
-        features: Some(cargo_resolve.features_sorted(id).iter().map(|s| s.to_string()).collect()),
+        features: Some(
+          cargo_resolve
+            .features_sorted(id)
+            .iter()
+            .map(|s| s.to_string())
+            .collect(),
+        ),
         dependencies: cargo_resolve.deps(id).map(|(p, _)| p.to_string()).collect(),
       })
       .collect();
 
     let resolve = Resolve { nodes, root };
 
-    let packages = resolved_packages.package_ids()
+    let packages = resolved_packages
+      .package_ids()
       // TODO(acmcarther): Justify this unwrap
       .map(|package_id| (package_id, resolved_packages.get_one(package_id).unwrap()))
       .map(|(package_id, package)| {
         let manifest_metadata = package.manifest().metadata();
 
-        let dependencies = package.dependencies().iter()
+        let dependencies = package
+          .dependencies()
+          .iter()
           .map(|dependency| Dependency {
             name: dependency.package_name().to_string(),
             // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
@@ -278,35 +277,52 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
             },
             optional: dependency.is_optional(),
             uses_default_features: dependency.uses_default_features(),
-            features: dependency.features().iter().map(|s| s.to_string()).collect(),
+            features: dependency
+              .features()
+              .iter()
+              .map(|s| s.to_string())
+              .collect(),
             target: dependency.platform().map(|p| p.to_string()),
           })
           .collect();
 
-        let targets = package.targets().iter()
+        let targets = package
+          .targets()
+          .iter()
           .map(|target| Target {
             name: target.name().to_owned(),
             kind: util::kind_to_kinds(target.kind()),
             src_path: target.src_path().path().unwrap().display().to_string(),
             edition: target.edition().to_string(),
-            crate_types: target.rustc_crate_types().iter().map(|t| t.to_string()).collect(),
+            crate_types: target
+              .rustc_crate_types()
+              .iter()
+              .map(|t| t.to_string())
+              .collect(),
           })
           .collect();
 
-        let features = package.summary().features().iter()
+        let features = package
+          .summary()
+          .features()
+          .iter()
           .map(|(feature, feature_values)| {
-            let our_feature_values = feature_values.iter()
+            let our_feature_values = feature_values
+              .iter()
               .map(|value| match value {
-                CargoFeatureValue::Feature(name) | CargoFeatureValue::Crate(name) => name.to_string(),
+                CargoFeatureValue::Feature(name) | CargoFeatureValue::Crate(name) => {
+                  name.to_string()
+                }
                 // This matches the current Serialize impl for CargoFeatureValue
-                CargoFeatureValue::CrateFeature(crate_name, feature_name) =>
-                  format!("{}/{}", crate_name.as_str(), feature_name.as_str()),
+                CargoFeatureValue::CrateFeature(crate_name, feature_name) => {
+                  format!("{}/{}", crate_name.as_str(), feature_name.as_str())
+                }
               })
               .collect();
 
             (feature.to_string(), our_feature_values)
           })
-        .collect();
+          .collect();
 
         // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
         let pkg_source = serde_json::to_string(&package_id.source_id()).unwrap();
@@ -328,19 +344,25 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
           source: Some(pkg_source),
           manifest_path: package.manifest_path().display().to_string(),
           edition: package.manifest().edition().to_string(),
-          dependencies, targets, features, sha256,
+          dependencies,
+          targets,
+          features,
+          sha256,
         }
-    })
-    .collect();
+      })
+      .collect();
 
-    let workspace_members = ws.members()
+    let workspace_members = ws
+      .members()
       .map(|pkg| pkg.package_id().to_string())
       .collect();
 
     Ok(Metadata {
       target_directory: ws.target_dir().display().to_string(),
       version: 0, /* not generated via subcomand */
-      packages, resolve, workspace_members,
+      packages,
+      resolve,
+      workspace_members,
     })
   }
 }
@@ -459,7 +481,10 @@ dependencies = [
     let toml_path = dir.path().join("Cargo.toml");
     let mut toml = File::create(&toml_path).unwrap();
     toml.write_all(basic_toml().as_bytes()).unwrap();
-    let files = CargoWorkspaceFiles { lock_path_opt: None, toml_path };
+    let files = CargoWorkspaceFiles {
+      lock_path_opt: None,
+      toml_path,
+    };
 
     let mut fetcher = CargoSubcommandMetadataFetcher;
 
@@ -481,7 +506,10 @@ dependencies = [
       lock.write_all(basic_lock().as_bytes()).unwrap();
       path
     };
-    let files = CargoWorkspaceFiles { lock_path_opt: Some(lock_path), toml_path };
+    let files = CargoWorkspaceFiles {
+      lock_path_opt: Some(lock_path),
+      toml_path,
+    };
 
     let mut fetcher = CargoSubcommandMetadataFetcher;
 
@@ -497,7 +525,10 @@ dependencies = [
       toml.write_all(b"hello").unwrap();
       path
     };
-    let files = CargoWorkspaceFiles { lock_path_opt: None, toml_path };
+    let files = CargoWorkspaceFiles {
+      lock_path_opt: None,
+      toml_path,
+    };
 
     let mut fetcher = CargoSubcommandMetadataFetcher;
     assert!(fetcher.fetch_metadata(files).is_err());

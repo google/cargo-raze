@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
-use serde_derive::{Serialize, Deserialize};
 
 pub type CrateSettingsPerVersion = HashMap<String, CrateSettings>;
 
@@ -64,9 +64,9 @@ pub struct RazeSettings {
   pub genmode: GenMode,
 
   /**
-    * Suffix for generated build files, uses whole value for Vendored mode
-    * Default: BUILD
-    */
+   * Suffix for generated build files, uses whole value for Vendored mode
+   * Default: BUILD
+   */
   #[serde(default = "default_raze_settings_field_output_buildfile_suffix")]
   pub output_buildfile_suffix: String,
 }

@@ -16,10 +16,10 @@ use cargo::CargoResult;
 use tera::{self, Context, Tera};
 
 use crate::{
-    context::{CrateContext, WorkspaceContext},
-    planning::PlannedBuild,
-    rendering::{BuildRenderer, FileOutputs, RenderDetails},
-    util::RazeError
+  context::{CrateContext, WorkspaceContext},
+  planning::PlannedBuild,
+  rendering::{BuildRenderer, FileOutputs, RenderDetails},
+  util::RazeError,
 };
 
 pub struct BazelRenderer {
@@ -147,7 +147,8 @@ impl BuildRenderer for BazelRenderer {
     let mut file_outputs = Vec::new();
 
     for package in crate_contexts {
-      let rendered_crate_build_file = self
+      let rendered_crate_build_file =
+        self
           .render_crate(&workspace_context, &package)
           .map_err(|e| RazeError::Rendering {
             crate_name_opt: None,
@@ -162,11 +163,11 @@ impl BuildRenderer for BazelRenderer {
 
     let build_file_path = format!("{}/{}", &path_prefix, buildfile_suffix);
     let rendered_alias_build_file = self
-        .render_aliases(&workspace_context, &crate_contexts)
-        .map_err(|e| RazeError::Rendering {
-          crate_name_opt: None,
-          message: e.to_string(),
-        })?;
+      .render_aliases(&workspace_context, &crate_contexts)
+      .map_err(|e| RazeError::Rendering {
+        crate_name_opt: None,
+        message: e.to_string(),
+      })?;
 
     file_outputs.push(FileOutputs {
       path: build_file_path,
@@ -200,11 +201,11 @@ impl BuildRenderer for BazelRenderer {
 
     for package in crate_contexts {
       let rendered_crate_build_file = self
-          .render_remote_crate(&workspace_context, &package)
-          .map_err(|e| RazeError::Rendering {
-            crate_name_opt: Some(package.pkg_name.to_owned()),
-            message: e.to_string(),
-          })?;
+        .render_remote_crate(&workspace_context, &package)
+        .map_err(|e| RazeError::Rendering {
+          crate_name_opt: Some(package.pkg_name.to_owned()),
+          message: e.to_string(),
+        })?;
 
       file_outputs.push(FileOutputs {
         path: format!("{}/{}", path_prefix, package.expected_build_path),
@@ -214,11 +215,11 @@ impl BuildRenderer for BazelRenderer {
 
     let alias_file_path = format!("{}/{}", &path_prefix, buildfile_suffix);
     let rendered_alias_build_file = self
-        .render_remote_aliases(&workspace_context, &crate_contexts)
-        .map_err(|e| RazeError::Rendering {
-          crate_name_opt: None,
-          message: e.to_string(),
-        })?;
+      .render_remote_aliases(&workspace_context, &crate_contexts)
+      .map_err(|e| RazeError::Rendering {
+        crate_name_opt: None,
+        message: e.to_string(),
+      })?;
 
     file_outputs.push(FileOutputs {
       path: alias_file_path,
@@ -227,11 +228,11 @@ impl BuildRenderer for BazelRenderer {
 
     let bzl_fetch_file_path = format!("{}/crates.bzl", &path_prefix);
     let rendered_bzl_fetch_file = self
-        .render_bzl_fetch(&workspace_context, &crate_contexts)
-        .map_err(|e| RazeError::Rendering {
-          crate_name_opt: None,
-          message: e.to_string(),
-        })?;
+      .render_bzl_fetch(&workspace_context, &crate_contexts)
+      .map_err(|e| RazeError::Rendering {
+        crate_name_opt: None,
+        message: e.to_string(),
+      })?;
 
     file_outputs.push(FileOutputs {
       path: bzl_fetch_file_path,
@@ -250,7 +251,7 @@ mod tests {
     context::*,
     planning::PlannedBuild,
     rendering::{FileOutputs, RenderDetails},
-    settings::CrateSettings
+    settings::CrateSettings,
   };
 
   use super::*;
@@ -288,14 +289,12 @@ mod tests {
       dev_dependencies: Vec::new(),
       is_root_dependency: true,
       workspace_path_to_crate: "@raze__test_binary__1_1_1//".to_owned(),
-      targets: vec![
-        BuildableTarget {
-          name: "some_binary".to_owned(),
-          kind: "bin".to_owned(),
-          path: "bin/main.rs".to_owned(),
-          edition: "2015".to_owned(),
-        },
-      ],
+      targets: vec![BuildableTarget {
+        name: "some_binary".to_owned(),
+        kind: "bin".to_owned(),
+        path: "bin/main.rs".to_owned(),
+        edition: "2015".to_owned(),
+      }],
       build_script_target: None,
       source_details: SourceDetails { git_data: None },
       sha256: None,
@@ -321,14 +320,12 @@ mod tests {
       dev_dependencies: Vec::new(),
       is_root_dependency: true,
       workspace_path_to_crate: "@raze__test_library__1_1_1//".to_owned(),
-      targets: vec![
-        BuildableTarget {
-          name: "some_library".to_owned(),
-          kind: "lib".to_owned(),
-          path: "path/lib.rs".to_owned(),
-          edition: "2015".to_owned(),
-        },
-      ],
+      targets: vec![BuildableTarget {
+        name: "some_library".to_owned(),
+        kind: "lib".to_owned(),
+        path: "path/lib.rs".to_owned(),
+        edition: "2015".to_owned(),
+      }],
       build_script_target: None,
       source_details: SourceDetails { git_data: None },
       sha256: None,
@@ -337,7 +334,7 @@ mod tests {
   }
 
   fn dummy_library_crate() -> CrateContext {
-    return dummy_library_crate_with_name("BUILD")
+    return dummy_library_crate_with_name("BUILD");
   }
 
   fn extract_contents_matching_path(file_outputs: &Vec<FileOutputs>, file_name: &str) -> String {
@@ -352,9 +349,15 @@ mod tests {
     matching_files_contents.pop().unwrap()
   }
 
-  fn render_crates_for_test_with_name(buildfile_suffix: &str, crate_contexts: Vec<CrateContext>) -> Vec<FileOutputs> {
+  fn render_crates_for_test_with_name(
+    buildfile_suffix: &str,
+    crate_contexts: Vec<CrateContext>,
+  ) -> Vec<FileOutputs> {
     BazelRenderer::new()
-      .render_planned_build(&dummy_render_details(buildfile_suffix), &dummy_planned_build(crate_contexts))
+      .render_planned_build(
+        &dummy_render_details(buildfile_suffix),
+        &dummy_planned_build(crate_contexts),
+      )
       .unwrap()
   }
 
@@ -389,13 +392,17 @@ mod tests {
       contains(vec![
         "./some_render_prefix/vendor/test-library-1.1.1/BUILD",
         "./some_render_prefix/BUILD",
-      ]).exactly()
+      ])
+      .exactly()
     );
   }
 
   #[test]
   fn crates_generate_build_files_bazel() {
-    let file_outputs = render_crates_for_test_with_name("BUILD.bazel", vec![dummy_library_crate_with_name("BUILD.bazel")]);
+    let file_outputs = render_crates_for_test_with_name(
+      "BUILD.bazel",
+      vec![dummy_library_crate_with_name("BUILD.bazel")],
+    );
     let file_names = file_outputs
       .iter()
       .map(|output| output.path.as_ref())
@@ -406,7 +413,8 @@ mod tests {
       contains(vec![
         "./some_render_prefix/vendor/test-library-1.1.1/BUILD.bazel",
         "./some_render_prefix/BUILD.bazel",
-      ]).exactly()
+      ])
+      .exactly()
     );
   }
 
@@ -423,7 +431,8 @@ mod tests {
          contained [{}]",
         root_build_contents
       ),
-    ).unwrap();
+    )
+    .unwrap();
   }
 
   #[test]
@@ -442,7 +451,8 @@ mod tests {
          contained [{}]",
         root_build_contents
       ),
-    ).unwrap();
+    )
+    .unwrap();
   }
 
   #[test]
@@ -459,7 +469,8 @@ mod tests {
         "expected crate build contents to contain rust_binary, but it just contained [{}]",
         crate_build_contents
       ),
-    ).unwrap();
+    )
+    .unwrap();
   }
 
   #[test]
@@ -476,6 +487,7 @@ mod tests {
         "expected crate build contents to contain rust_library, but it just contained [{}]",
         crate_build_contents
       ),
-    ).unwrap();
+    )
+    .unwrap();
   }
 }
