@@ -55,6 +55,12 @@ pub struct SourceDetails {
 }
 
 #[derive(Debug, Clone, Serialize)]
+pub struct DependencyAlias {
+  pub target: String,
+  pub alias: String
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct CrateContext {
   pub pkg_name: String,
   pub pkg_version: Version,
@@ -66,6 +72,7 @@ pub struct CrateContext {
   pub dependencies: Vec<BuildableDependency>,
   pub build_dependencies: Vec<BuildableDependency>,
   pub dev_dependencies: Vec<BuildableDependency>,
+  pub dependency_aliases: Vec<DependencyAlias>,
   pub is_root_dependency: bool,
   pub targets: Vec<BuildableTarget>,
   pub build_script_target: Option<BuildableTarget>,

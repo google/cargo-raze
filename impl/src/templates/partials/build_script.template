@@ -12,6 +12,11 @@ rust_binary(
         "{{dependency.buildable_target}}",
       {%- endfor %}
     ],
+    aliases = {
+      {%- for alias in crate.dependency_aliases %}
+        "{{alias.target}}": "{{alias.alias}}"
+      {%- endfor %}
+    },
     rustc_flags = [
         "--cap-lints=allow",
     ],

@@ -20,6 +20,11 @@ rust_binary(
         {%- endfor %}
         {%- endif %}
     ],
+    aliases = {
+      {%- for alias in crate.dependency_aliases %}
+        "{{alias.target}}": "{{alias.alias | replace(from="-", to="_")}}"
+      {%- endfor %}
+    },
     rustc_flags = [
         "--cap-lints=allow",
         {%- if crate.raze_setttings %}

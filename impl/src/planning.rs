@@ -26,10 +26,10 @@ use itertools::Itertools;
 use crate::{
   context::{
     BuildableDependency, BuildableTarget, CrateContext, GitRepo, LicenseData, SourceDetails,
-    WorkspaceContext,
+    DependencyAlias, WorkspaceContext,
   },
   license,
-  metadata::{CargoWorkspaceFiles, Metadata, MetadataFetcher, Package, ResolveNode},
+  metadata::{CargoWorkspaceFiles, Metadata, MetadataFetcher, Package, ResolveNode, Dependency, DependencyKind},
   settings::{CrateSettings, GenMode, RazeSettings},
   util::{self, PlatformDetails, RazeError, PLEASE_FILE_A_BUG},
 };
@@ -50,16 +50,6 @@ pub trait BuildPlanner {
   ) -> CargoResult<PlannedBuild>;
 }
 
-/** A set of named dependencies (without version) derived from a package manifest. */
-struct DependencyNames {
-  // Dependencies that are required for all buildable targets of this crate
-  normal_dep_names: Vec<String>,
-  // Dependencies that are required for build script only
-  build_dep_names: Vec<String>,
-  // Dependencies that are required for tests
-  dev_dep_names: Vec<String>,
-}
-
 // TODO(acmcarther): Remove this struct -- move it into CrateContext.
 /** A set of dependencies that a crate has broken down by type. */
 struct DependencySet {
@@ -69,6 +59,8 @@ struct DependencySet {
   build_deps: Vec<BuildableDependency>,
   // Dependencies that are required for tests
   dev_deps: Vec<BuildableDependency>,
+  // Dependencies that have been renamed or aliased
+  aliased_deps: Vec<DependencyAlias>,
 }
 
 /** An entry in the Crate catalog for a single crate. */
@@ -271,12 +263,11 @@ impl CrateCatalog {
     let root_direct_deps = root_resolve_node
       .dependencies
       .iter()
-      .cloned()
       .collect::<HashSet<_>>();
+
     let workspace_crates = metadata
       .workspace_members
       .iter()
-      .cloned()
       .collect::<HashSet<_>>();
 
     let entries = metadata
@@ -461,6 +452,7 @@ impl<'planner> CrateSubplanner<'planner> {
       build_deps,
       dev_deps,
       normal_deps,
+      aliased_deps,
     } = self.produce_deps()?;
 
     let mut targets = self.produce_targets()?;
@@ -468,14 +460,14 @@ impl<'planner> CrateSubplanner<'planner> {
 
     let package = self.crate_catalog_entry.package();
     let mut lib_target_name = None;
-    {
-      for target in &targets {
-        if target.kind == "lib" || target.kind == "proc-macro" {
-          lib_target_name = Some(target.name.clone());
-          break;
-        }
+
+    for target in &targets {
+      if target.kind == "lib" || target.kind == "proc-macro" {
+        lib_target_name = Some(target.name.clone());
+        break;
       }
     }
+
     Ok(CrateContext {
       pkg_name: package.name.clone(),
       pkg_version: package.version.clone(),
@@ -486,6 +478,7 @@ impl<'planner> CrateSubplanner<'planner> {
       dependencies: normal_deps,
       build_dependencies: build_deps,
       dev_dependencies: dev_deps,
+      dependency_aliases: aliased_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings),
       build_script_target: build_script_target_opt,
       raze_settings: self.crate_settings.cloned(),
@@ -510,15 +503,12 @@ impl<'planner> CrateSubplanner<'planner> {
 
   /** Generates the set of dependencies for the contained crate. */
   fn produce_deps(&self) -> CargoResult<DependencySet> {
-    let DependencyNames {
-      build_dep_names,
-      dev_dep_names,
-      normal_dep_names,
-    } = self.identify_named_deps()?;
+    let dep_decls = self.identify_named_deps()?;
 
     let mut build_deps = Vec::new();
     let mut dev_deps = Vec::new();
     let mut normal_deps = Vec::new();
+    let mut aliased_deps = Vec::new();
     let all_skipped_deps = self.crate_settings
         .iter()
         .flat_map(|x| x.skipped_deps.iter())
@@ -537,30 +527,32 @@ impl<'planner> CrateSubplanner<'planner> {
         continue;
       }
 
-      // UNWRAP: Guaranteed to exist by checks in WorkspaceSubplanner#produce_build_plan
-      let buildable_target = self
-        .crate_catalog
-        .entry_for_package_id(dep_id)
-        .unwrap()
-        .workspace_path_and_default_target(&self.settings);
+      let mut process_dep = |deps: &mut Vec<BuildableDependency>, kind| {
+        let raw_pkg_name = &dep_package.name.as_str();
+        if let Some(dep_decl) = dep_decls.get(&(raw_pkg_name, kind)) {
+          let target = self.crate_catalog
+              .entry_for_package_id(dep_id)
+              .unwrap()
+              .workspace_path_and_default_target(&self.settings);
 
-      let buildable_dependency = BuildableDependency {
-        name: dep_package.name.clone(),
-        version: dep_package.version.clone(),
-        buildable_target,
+          if let Some(ref alias) = dep_decl.rename {
+            aliased_deps.push(DependencyAlias {
+              target: target.clone(),
+              alias: alias.to_string()
+            })
+          }
+
+          deps.push(BuildableDependency {
+            name: raw_pkg_name.to_string(),
+            version: dep_package.version.clone(),
+            buildable_target: target
+          });
+        }
       };
 
-      if build_dep_names.contains(&dep_package.name) {
-        build_deps.push(buildable_dependency.clone());
-      }
-
-      if dev_dep_names.contains(&dep_package.name) {
-        dev_deps.push(buildable_dependency.clone());
-      }
-
-      if normal_dep_names.contains(&dep_package.name) {
-        normal_deps.push(buildable_dependency);
-      }
+      process_dep(&mut normal_deps, DependencyKind::Normal);
+      process_dep(&mut dev_deps, DependencyKind::Dev);
+      process_dep(&mut build_deps, DependencyKind::Build);
     }
 
     build_deps.sort();
@@ -571,54 +563,33 @@ impl<'planner> CrateSubplanner<'planner> {
       build_deps,
       dev_deps,
       normal_deps,
+      aliased_deps,
     })
   }
 
   /** Yields the list of dependencies as described by the manifest (without version). */
-  fn identify_named_deps(&self) -> CargoResult<DependencyNames> {
-    // Resolve dependencies into types
-    let mut build_dep_names = Vec::new();
-    let mut dev_dep_names = Vec::new();
-    let mut normal_dep_names = Vec::new();
+  fn identify_named_deps(&self) -> CargoResult<HashMap<(&'planner str, DependencyKind), &'planner Dependency>> {
 
     let platform_attrs = self.platform_details.attrs();
     let package = self.crate_catalog_entry.package();
-    for dep in &package.dependencies {
-      if dep.target.is_some() {
-        // UNWRAP: Safe from above check
-        let target_str = dep.target.as_ref().unwrap();
-        let platform = Platform::from_str(target_str)?;
 
+    package.dependencies
+      .iter()
+      .filter_map(|dep| match dep.target {
+        None => Some(Ok(dep)),
         // Skip this dep if it doesn't match our platform attributes
-        if !platform.matches(&self.settings.target, platform_attrs.as_ref()) {
-          continue;
+        Some(ref target_str) => {
+          match Platform::from_str(target_str) {
+            Ok(platform) if !platform.matches(&self.settings.target, &platform_attrs) => return None,
+            Err(e) => return Some(Err(e)),
+            _ => Some(Ok(dep))
+          }
         }
-      }
-
-      match dep.kind.as_deref() {
-        None | Some("normal") => normal_dep_names.push(dep.name.clone()),
-        Some("dev") => dev_dep_names.push(dep.name.clone()),
-        Some("build") => build_dep_names.push(dep.name.clone()),
-        something_else => {
-          return Err(
-            RazeError::Planning {
-              dependency_name_opt: Some(package.name.to_string()),
-              message: format!(
-                "Unhandlable dependency type {:?} on {} detected! {}",
-                something_else, dep.name, PLEASE_FILE_A_BUG
-              ),
-            }
-            .into(),
-          )
-        }
-      }
-    }
-
-    Ok(DependencyNames {
-      build_dep_names,
-      dev_dep_names,
-      normal_dep_names,
-    })
+      })
+      .fold_results(HashMap::new(), |mut accum, dep| {
+          accum.insert((dep.name.as_str(), dep.kind), dep);
+          accum
+      })
   }
 
   /** Generates source details for internal crate. */

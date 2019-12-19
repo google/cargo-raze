@@ -293,6 +293,7 @@ mod tests {
       dependencies: Vec::new(),
       build_dependencies: Vec::new(),
       dev_dependencies: Vec::new(),
+      dependency_aliases: Vec::new(),
       is_root_dependency: true,
       workspace_path_to_crate: "@raze__test_binary__1_1_1//".to_owned(),
       targets: vec![BuildableTarget {
@@ -324,6 +325,7 @@ mod tests {
       dependencies: Vec::new(),
       build_dependencies: Vec::new(),
       dev_dependencies: Vec::new(),
+      dependency_aliases: Vec::new(),
       is_root_dependency: true,
       workspace_path_to_crate: "@raze__test_library__1_1_1//".to_owned(),
       targets: vec![BuildableTarget {

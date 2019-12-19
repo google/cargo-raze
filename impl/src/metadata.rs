@@ -14,7 +14,7 @@
 
 use cargo::{
   core::{
-    dependency::Kind as CargoKind, resolver::ResolveOpts,
+    resolver::ResolveOpts,
     summary::FeatureValue as CargoFeatureValue, Workspace,
   },
   ops::{self, Packages},
@@ -23,13 +23,14 @@ use cargo::{
 };
 
 use semver::Version;
+use serde::de;
 use serde_json;
 use std::{collections::HashMap, env, fs, path::PathBuf, process::Command};
 
-use crate::util::{self, RazeError};
+use crate::util::{self, RazeError, PLEASE_FILE_A_BUG};
 use tempdir::TempDir;
 
-use serde_derive::{Deserialize, Serialize};
+use serde_derive::Deserialize;
 
 const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
 
@@ -62,7 +63,7 @@ pub struct CargoWorkspaceFiles {
  * This struct mirrors Cargo's own [`ExportInfo`](
  * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/ops/cargo_output_metadata.rs#L78-L85)
  */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
 pub struct Metadata {
   pub packages: Vec<Package>,
   pub resolve: Resolve,
@@ -78,7 +79,7 @@ pub struct Metadata {
  * This struct mirrors Cargo's own [`SerializedPackage`](
  * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/core/package.rs#L32-L50)
  */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
 pub struct Package {
   pub name: String,
   pub version: Version,
@@ -102,12 +103,13 @@ pub struct Package {
  * This struct mirrors Cargo's own [`SerializedDependency`](
  * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/core/dependency.rs#L49-L60)
  */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
 pub struct Dependency {
   pub name: String,
   pub source: String,
   pub req: String,
-  pub kind: Option<Kind>,
+  pub kind: DependencyKind,
+  pub rename: Option<String>,
   #[serde(default = "default_dependency_field_optional")]
   pub optional: bool,
   #[serde(default = "default_dependency_field_uses_default_features")]
@@ -117,13 +119,53 @@ pub struct Dependency {
 }
 
 /**
+ * The kind of dependency
+ *
+ * This (somewhat) mirrors Kind
+ */
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
+pub enum DependencyKind {
+    Normal,
+    Dev,
+    Build
+}
+
+impl From<cargo::core::dependency::Kind> for DependencyKind {
+    fn from(kind: cargo::core::dependency::Kind) -> Self {
+        match kind {
+            cargo::core::dependency::Kind::Normal => DependencyKind::Normal,
+            cargo::core::dependency::Kind::Development => DependencyKind::Dev,
+            cargo::core::dependency::Kind::Build => DependencyKind::Build,
+        }
+    }
+}
+
+
+impl <'de> de::Deserialize<'de> for DependencyKind {
+  fn deserialize<D>(deserializer: D) -> Result<DependencyKind, D::Error>
+    where D: de::Deserializer<'de>
+  {
+    let raw: Option<&'de str> = Option::deserialize(deserializer)?;
+    match raw {
+      None | Some("normal") => Ok(DependencyKind::Normal),
+      Some("dev") => Ok(DependencyKind::Dev),
+      Some("build") => Ok(DependencyKind::Build),
+      other => {
+        let err_msg = format!("Unhandlable dependency type {:?} {}", other, PLEASE_FILE_A_BUG);
+        Err(de::Error::custom(err_msg))
+      }
+    }
+  }
+}
+
+/**
  * The metadata for a compileable target.
  *
  * WARNING: Cargo-raze does not control the definition of this struct.
  * This struct mirrors Cargo's own [`SerializedTarget`](
  * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/core/manifest.rs#L188-L197)
  */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
 pub struct Target {
   pub name: String,
   pub kind: Vec<String>,
@@ -139,7 +181,7 @@ pub struct Target {
  * This struct mirrors Cargo's own [`MetadataResolve`](
  * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/ops/cargo_output_metadata.rs#L91-L95)
  */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
 pub struct Resolve {
   pub nodes: Vec<ResolveNode>,
   pub root: PackageId,
@@ -152,7 +194,7 @@ pub struct Resolve {
  * This struct mirrors Cargo's own [`Node`](
  * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/ops/cargo_output_metadata.rs#L102-L106)
  */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
 pub struct ResolveNode {
   pub id: PackageId,
   pub dependencies: Vec<PackageId>,
@@ -293,11 +335,8 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
             // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
             source: serde_json::to_string(&dependency.source_id()).unwrap(),
             req: dependency.version_req().to_string(),
-            kind: match dependency.kind() {
-              CargoKind::Normal => None,
-              CargoKind::Development => Some("dev".to_owned()),
-              CargoKind::Build => Some("build".to_owned()),
-            },
+            kind: dependency.kind().into(),
+            rename: dependency.explicit_name_in_toml().map(|x| x.to_string()),
             optional: dependency.is_optional(),
             uses_default_features: dependency.uses_default_features(),
             features: dependency
