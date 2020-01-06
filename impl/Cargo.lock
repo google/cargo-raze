@@ -172,7 +172,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-raze"
-version = "0.2.10"
+version = "0.2.11"
 dependencies = [
  "cargo 0.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "docopt 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
