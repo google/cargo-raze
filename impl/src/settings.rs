@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 pub type CrateSettingsPerVersion = HashMap<String, CrateSettings>;
@@ -63,14 +64,14 @@ pub struct RazeSettings {
   pub genmode: GenMode,
 
   /**
-    * Suffix for generated build files, uses whole value for Vendored mode
-    * Default: BUILD
-    */
+   * Suffix for generated build files, uses whole value for Vendored mode
+   * Default: BUILD
+   */
   #[serde(default = "default_raze_settings_field_output_buildfile_suffix")]
   pub output_buildfile_suffix: String,
 }
 
-/** Override settings for individual crates (as part of RazeSettings). */
+/** Override settings for individual crates (as part of `RazeSettings`). */
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CrateSettings {
   /**
@@ -126,7 +127,7 @@ pub struct CrateSettings {
 
   /**
    * Additional environment variables to add when running the build script.
-   * 
+   *
    * Values should looks like "KEY=VALUE".
    */
   #[serde(default)]
@@ -151,8 +152,8 @@ pub enum GenMode {
 }
 
 impl Default for CrateSettings {
-  fn default() -> CrateSettings {
-    CrateSettings {
+  fn default() -> Self {
+    Self {
       additional_deps: Vec::new(),
       skipped_deps: Vec::new(),
       extra_aliased_targets: Vec::new(),

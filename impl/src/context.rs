@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use settings::CrateSettings;
+use crate::settings::CrateSettings;
+use serde_derive::Serialize;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableDependency {
@@ -78,7 +79,7 @@ pub struct CrateContext {
 
   // The name of the main lib target for this crate (if present).
   // Currently only one such lib can exist per crate.
-  pub lib_target_name: Option<String>
+  pub lib_target_name: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -98,5 +99,5 @@ pub struct WorkspaceContext {
   //
   // Bare files will just be named after this setting. Named files, such as those passed to
   // repository rules, will take the form of $prefix.$this_value.
-  pub output_buildfile_suffix: String
+  pub output_buildfile_suffix: String,
 }

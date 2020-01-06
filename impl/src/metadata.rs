@@ -12,23 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo::CargoError;
-use cargo::core::Workspace;
-use cargo::core::summary::FeatureValue as CargoFeatureValue;
-use cargo::core::dependency::Kind as CargoKind;
-use cargo::ops::Packages;
-use cargo::ops;
-use cargo::util::CargoResult;
-use cargo::util::Config;
+use cargo::{
+  core::{
+    dependency::Kind as CargoKind, resolver::ResolveOpts,
+    summary::FeatureValue as CargoFeatureValue, Workspace,
+  },
+  ops::{self, Packages},
+  util::Config,
+  CargoResult,
+};
+
 use serde_json;
-use std::collections::HashMap;
-use std::env;
-use std::fs;
-use std::path::PathBuf;
-use std::process::Command;
+use std::{collections::HashMap, env, fs, path::PathBuf, process::Command};
+
+use crate::util::{self, RazeError};
 use tempdir::TempDir;
-use util::RazeError;
-use util;
+
+use serde_derive::{Deserialize, Serialize};
 
 pub type PackageId = String;
 pub type Kind = String;
@@ -37,10 +37,10 @@ pub type TargetSpec = String;
 /**
  * An entity that can retrive deserialized metadata for a Cargo Workspace.
  *
- * The "CargoInternalsMetadataFetcher" is probably the one you want.
+ * The `CargoInternalsMetadataFetcher` is probably the one you want.
  *
  * Usage of ..Subcommand.. is waiting on a cargo release containing
- * https://github.com/rust-lang/cargo/pull/5122
+ * <https://github.com/rust-lang/cargo/pull/5122>
  */
 pub trait MetadataFetcher {
   fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> CargoResult<Metadata>;
@@ -55,9 +55,9 @@ pub struct CargoWorkspaceFiles {
 /**
  * The metadata for a whole Cargo workspace.
  *
- * WARNING: Cargo-raze does not control the definition of this struct. This struct mirrors Cargo's
- * own "ExportInfo":
- * https://github.com/rust-lang/cargo/blob/9c78c3a17ac4bc0c8b3b837095f60aa84d09c426/src/cargo/ops/cargo_output_metadata.rs#L78-L85
+ * WARNING: Cargo-raze does not control the definition of this struct.
+ * This struct mirrors Cargo's own [`ExportInfo`](
+ * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/ops/cargo_output_metadata.rs#L78-L85)
  */
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Metadata {
@@ -71,9 +71,9 @@ pub struct Metadata {
 /**
  * The metadata for an individual Cargo crate.
  *
- * WARNING: Cargo-raze does not control the definition of this struct. This struct mirrors Cargo's
- * own "SerializedPackage":
- * https://github.com/rust-lang/cargo/blob/9c78c3a17ac4bc0c8b3b837095f60aa84d09c426/src/cargo/core/package.rs#L32-L50
+ * WARNING: Cargo-raze does not control the definition of this struct.
+ * This struct mirrors Cargo's own [`SerializedPackage`](
+ * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/core/package.rs#L32-L50)
  */
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Package {
@@ -95,9 +95,9 @@ pub struct Package {
 /**
  * The metadata for a dependency (a reference connecting a crate to another crate).
  *
- * WARNING: Cargo-raze does not control the definition of this struct. This struct mirrors Cargo's
- * own "SerializedDependency":
- * https://github.com/rust-lang/cargo/blob/75ec2d3a8d045f90792b3ce5d7050cad43bfb3bf/src/cargo/core/dependency.rs#L49-L60
+ * WARNING: Cargo-raze does not control the definition of this struct.
+ * This struct mirrors Cargo's own [`SerializedDependency`](
+ * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/core/dependency.rs#L49-L60)
  */
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Dependency {
@@ -105,7 +105,8 @@ pub struct Dependency {
   pub source: String,
   pub req: String,
   pub kind: Option<Kind>,
-  #[serde(default = "default_dependency_field_optional")] pub optional: bool,
+  #[serde(default = "default_dependency_field_optional")]
+  pub optional: bool,
   #[serde(default = "default_dependency_field_uses_default_features")]
   pub uses_default_features: bool,
   pub features: Vec<String>,
@@ -115,9 +116,9 @@ pub struct Dependency {
 /**
  * The metadata for a compileable target.
  *
- * WARNING: Cargo-raze does not control the definition of this struct. This struct mirrors Cargo's
- * own "SerializedTarget":
- * https://github.com/rust-lang/cargo/blob/c24a09772c2c1cb315970dbc721f2a42d4515f21/src/cargo/core/manifest.rs#L188-L197
+ * WARNING: Cargo-raze does not control the definition of this struct.
+ * This struct mirrors Cargo's own [`SerializedTarget`](
+ * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/core/manifest.rs#L188-L197)
  */
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Target {
@@ -131,9 +132,9 @@ pub struct Target {
 /**
  * The metadata for a fully resolved dependency tree.
  *
- * WARNING: Cargo-raze does not control the definition of this struct. This struct mirrors Cargo's
- * own "MetadataResolve":
- * https://github.com/rust-lang/cargo/blob/9c78c3a17ac4bc0c8b3b837095f60aa84d09c426/src/cargo/ops/cargo_output_metadata.rs#L91-L95
+ * WARNING: Cargo-raze does not control the definition of this struct.
+ * This struct mirrors Cargo's own [`MetadataResolve`](
+ * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/ops/cargo_output_metadata.rs#L91-L95)
  */
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Resolve {
@@ -144,9 +145,9 @@ pub struct Resolve {
 /**
  * The metadata for a single resolved entry in the full dependency tree.
  *
- * WARNING: Cargo-raze does not control the definition of this struct. This struct mirrors Cargo's
- * own "Node":
- * https://github.com/rust-lang/cargo/blob/9c78c3a17ac4bc0c8b3b837095f60aa84d09c426/src/cargo/ops/cargo_output_metadata.rs#L102-L106
+ * WARNING: Cargo-raze does not control the definition of this struct.
+ * This struct mirrors Cargo's own [`Node`](
+ * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/ops/cargo_output_metadata.rs#L102-L106)
  */
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ResolveNode {
@@ -175,56 +176,45 @@ pub struct CargoInternalsMetadataFetcher<'config> {
 impl MetadataFetcher for CargoSubcommandMetadataFetcher {
   fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> CargoResult<Metadata> {
     assert!(files.toml_path.is_file());
-    assert!(
-      files
-        .lock_path_opt
-        .as_ref()
-        .map(|p| p.is_file())
-        .unwrap_or(true)
-    );
+    assert!(files.lock_path_opt.as_ref().map_or(true, |p| p.is_file()));
 
     // Copy files into a temp directory
     // UNWRAP: Guarded by function assertion
     let cargo_tempdir = {
-      let dir = try!(
-        TempDir::new("cargo_raze_metadata_dir").map_err(CargoError::from)
-      );
-      {
-        let dir_path = dir.path();
-        let new_toml_path = dir_path.join(files.toml_path.file_name().unwrap());
-        try!(fs::copy(files.toml_path, new_toml_path).map_err(CargoError::from));
-        if let Some(lock_path) = files.lock_path_opt {
-          let new_lock_path = dir_path.join(lock_path.file_name().unwrap());
-          try!(fs::copy(lock_path, new_lock_path).map_err(CargoError::from));
-        }
+      let dir = TempDir::new("cargo_raze_metadata_dir")?;
+
+      let dir_path = dir.path();
+      let new_toml_path = dir_path.join(files.toml_path.file_name().unwrap());
+      fs::copy(files.toml_path, new_toml_path)?;
+      if let Some(lock_path) = files.lock_path_opt {
+        let new_lock_path = dir_path.join(lock_path.file_name().unwrap());
+        fs::copy(lock_path, new_lock_path)?;
       }
+
       dir
     };
 
     // Shell out to cargo
-    let exec_output = try!(
-      Command::new("cargo")
-        .current_dir(cargo_tempdir.path())
-        .args(&["metadata", "--format-version", "1"])
-        .output()
-        .map_err(CargoError::from)
-    );
+    let exec_output = Command::new("cargo")
+      .current_dir(cargo_tempdir.path())
+      .args(&["metadata", "--format-version", "1"])
+      .output()?;
 
     // Handle command errs
     let stdout_str =
-      String::from_utf8(exec_output.stdout).unwrap_or("[unparsable bytes]".to_owned());
+      String::from_utf8(exec_output.stdout).unwrap_or_else(|_| "[unparsable bytes]".to_owned());
+
     if !exec_output.status.success() {
       let stderr_str =
-        String::from_utf8(exec_output.stderr).unwrap_or("[unparsable bytes]".to_owned());
+        String::from_utf8(exec_output.stderr).unwrap_or_else(|_| "[unparsable bytes]".to_owned());
       println!("`cargo metadata` failed. Inspect Cargo.toml for issues!");
       println!("stdout: {}", stdout_str);
       println!("stderr: {}", stderr_str);
-      return Err(CargoError::from(RazeError::Generic("Failed to run `cargo metadata`".to_owned())))
+      return Err(RazeError::Generic("Failed to run `cargo metadata`".to_owned()).into());
     }
 
     // Parse and yield metadata
-    serde_json::from_str::<Metadata>(&stdout_str)
-      .map_err(CargoError::from)
+    serde_json::from_str::<Metadata>(&stdout_str).map_err(|e| e.into())
   }
 }
 
@@ -235,150 +225,151 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
     } else {
       files.toml_path
     };
-    let ws = try!(Workspace::new(&manifest, &self.cargo_config));
+    let ws = Workspace::new(&manifest, &self.cargo_config)?;
     let specs = Packages::All.to_package_id_specs(&ws)?;
-    let root_name = specs.iter().next().unwrap().name().to_owned();
+    let root_name = specs.iter().next().unwrap().name();
 
-    let (resolved_packages, cargo_resolve) =
-      ops::resolve_ws_precisely(&ws, None, &[], false, false, &specs)?;
+    let resolve_opts = ResolveOpts::new(true, &[], false, false);
+    let (resolved_packages, cargo_resolve) = ops::resolve_ws_with_opts(&ws, resolve_opts, &specs)?;
 
-    let root_package_id = try!(
-      cargo_resolve
-        .iter()
-        .filter(|dep| dep.name().as_str() == root_name)
-        .next()
-        .ok_or(CargoError::from(RazeError::Internal("root crate should be in cargo resolve".to_owned())))
-    ).to_string();
+    let root = cargo_resolve
+      .iter()
+      .find(|dep| dep.name() == root_name)
+      .ok_or_else(|| RazeError::Internal("root crate should be in cargo resolve".to_owned()))?
+      .to_string();
 
-    let mut packages = Vec::new();
-    let mut resolve = Resolve {
-      nodes: Vec::new(),
-      root: root_package_id,
-    };
-
-    for id in cargo_resolve.iter() {
-      let dependencies = cargo_resolve.deps(id)
-        .map(|(p, _)| p.to_string())
-        .collect();
-      let features = cargo_resolve
-        .features_sorted(id)
-        .iter()
-        .map(|s| s.to_string())
-        .collect();
-      resolve.nodes.push(ResolveNode {
+    let nodes = cargo_resolve
+      .iter()
+      .map(|id| ResolveNode {
         id: id.to_string(),
-        dependencies: dependencies,
-        features: Some(features),
+        features: Some(
+          cargo_resolve
+            .features_sorted(id)
+            .iter()
+            .map(|s| s.to_string())
+            .collect(),
+        ),
+        dependencies: cargo_resolve.deps(id).map(|(p, _)| p.to_string()).collect(),
       })
-    }
+      .collect();
 
-    for package_id in resolved_packages.package_ids() {
+    let resolve = Resolve { nodes, root };
+
+    let packages = resolved_packages
+      .package_ids()
       // TODO(acmcarther): Justify this unwrap
-      let package = resolved_packages.get_one(&package_id).unwrap().clone();
-      let manifest_metadata = package.manifest().metadata();
+      .map(|package_id| (package_id, resolved_packages.get_one(package_id).unwrap()))
+      .map(|(package_id, package)| {
+        let manifest_metadata = package.manifest().metadata();
 
-      let mut dependencies = Vec::new();
-      for dependency in package.dependencies().iter() {
-        dependencies.push(Dependency {
-          name: dependency.package_name().to_string(),
-          // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
-          source: serde_json::to_string(dependency.source_id()).unwrap(),
-          req: dependency.version_req().to_string(),
-          kind: match dependency.kind() {
-            CargoKind::Normal => None,
-            CargoKind::Development => Some("dev".to_owned()),
-            CargoKind::Build => Some("build".to_owned()),
-          },
-          optional: dependency.is_optional(),
-          uses_default_features: dependency.uses_default_features(),
-          features: dependency.features().iter().map(|s| s.to_string()).collect(),
-          target: dependency.platform().map(|p| p.to_string()),
-        });
-      }
-
-      let mut targets = Vec::new();
-      for target in package.targets().iter() {
-        let crate_types = target
-          .rustc_crate_types()
+        let dependencies = package
+          .dependencies()
           .iter()
-          .map(|t| t.to_string())
+          .map(|dependency| Dependency {
+            name: dependency.package_name().to_string(),
+            // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
+            source: serde_json::to_string(&dependency.source_id()).unwrap(),
+            req: dependency.version_req().to_string(),
+            kind: match dependency.kind() {
+              CargoKind::Normal => None,
+              CargoKind::Development => Some("dev".to_owned()),
+              CargoKind::Build => Some("build".to_owned()),
+            },
+            optional: dependency.is_optional(),
+            uses_default_features: dependency.uses_default_features(),
+            features: dependency
+              .features()
+              .iter()
+              .map(|s| s.to_string())
+              .collect(),
+            target: dependency.platform().map(|p| p.to_string()),
+          })
           .collect();
-        targets.push(Target {
-          name: target.name().to_owned(),
-          kind: util::kind_to_kinds(target.kind()),
-          crate_types: crate_types,
-          src_path: target.src_path().path().display().to_string(),
-          edition: target.edition().to_string()
-        });
-      }
 
-      let mut features = HashMap::new();
-      for (feature, feature_values) in package.summary().features().iter() {
-        let mut our_feature_values = Vec::new();
-        for feature_value in feature_values {
-          let our_feature_value = {
-            match feature_value {
-              CargoFeatureValue::Feature(feature_name) =>
-                feature_name.to_string(),
-              CargoFeatureValue::Crate(crate_name) =>
-                crate_name.to_string(),
-              // This matches the current Serialize impl for CargoFeatureValue
-              CargoFeatureValue::CrateFeature(crate_name, feature_name) =>
-                format!("{}/{}", crate_name.as_str(), feature_name.as_str()),
-            }
-          };
-          our_feature_values.push(our_feature_value);
+        let targets = package
+          .targets()
+          .iter()
+          .map(|target| Target {
+            name: target.name().to_owned(),
+            kind: util::kind_to_kinds(target.kind()),
+            src_path: target.src_path().path().unwrap().display().to_string(),
+            edition: target.edition().to_string(),
+            crate_types: target
+              .rustc_crate_types()
+              .iter()
+              .map(|t| t.to_string())
+              .collect(),
+          })
+          .collect();
+
+        let features = package
+          .summary()
+          .features()
+          .iter()
+          .map(|(feature, feature_values)| {
+            let our_feature_values = feature_values
+              .iter()
+              .map(|value| match value {
+                CargoFeatureValue::Feature(name) | CargoFeatureValue::Crate(name) => {
+                  name.to_string()
+                }
+                // This matches the current Serialize impl for CargoFeatureValue
+                CargoFeatureValue::CrateFeature(crate_name, feature_name) => {
+                  format!("{}/{}", crate_name.as_str(), feature_name.as_str())
+                }
+              })
+              .collect();
+
+            (feature.to_string(), our_feature_values)
+          })
+          .collect();
+
+        // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
+        let pkg_source = serde_json::to_string(&package_id.source_id()).unwrap();
+
+        // Cargo use SHA256 for checksum so we can use them directly
+        let sha256 = package
+          .manifest()
+          .summary()
+          .checksum()
+          .map(ToString::to_string);
+
+        Package {
+          name: package.name().to_string(),
+          version: package.version().to_string(),
+          id: package_id.to_string(),
+          license: manifest_metadata.license.clone(),
+          license_file: manifest_metadata.license_file.clone(),
+          description: manifest_metadata.description.clone(),
+          source: Some(pkg_source),
+          manifest_path: package.manifest_path().display().to_string(),
+          edition: package.manifest().edition().to_string(),
+          dependencies,
+          targets,
+          features,
+          sha256,
         }
-        features.insert(feature.to_string(),
-                        our_feature_values);
-      }
+      })
+      .collect();
 
-      // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
-      let pkg_source = serde_json::to_string(package_id.source_id()).unwrap();
-
-      // Cargo use SHA256 for checksum so we can use them directly
-      let sha256 = package
-        .manifest()
-        .summary()
-        .checksum()
-        .map(ToString::to_string);
-
-      packages.push(Package {
-        name: package.name().to_string(),
-        version: package.version().to_string(),
-        id: package_id.to_string(),
-        license: manifest_metadata.license.clone(),
-        license_file: manifest_metadata.license_file.clone(),
-        description: manifest_metadata.description.clone(),
-        source: Some(pkg_source),
-        dependencies: dependencies,
-        targets: targets,
-        features: features,
-        manifest_path: package.manifest_path().display().to_string(),
-        edition: package.manifest().edition().to_string(),
-        sha256: sha256,
-      });
-    }
-
-    let workspace_members = ws.members()
+    let workspace_members = ws
+      .members()
       .map(|pkg| pkg.package_id().to_string())
       .collect();
 
     Ok(Metadata {
-      packages: packages,
-      resolve: resolve,
-      workspace_members: workspace_members,
       target_directory: ws.target_dir().display().to_string(),
       version: 0, /* not generated via subcomand */
+      packages,
+      resolve,
+      workspace_members,
     })
   }
 }
 
 impl<'config> CargoInternalsMetadataFetcher<'config> {
   pub fn new(cargo_config: &'config Config) -> CargoInternalsMetadataFetcher<'config> {
-    CargoInternalsMetadataFetcher {
-      cargo_config: cargo_config,
-    }
+    CargoInternalsMetadataFetcher { cargo_config }
   }
 }
 
@@ -410,7 +401,7 @@ pub mod testing {
 
   impl StubMetadataFetcher {
     pub fn with_metadata(metadata: Metadata) -> StubMetadataFetcher {
-      StubMetadataFetcher { metadata: metadata }
+      StubMetadataFetcher { metadata }
     }
   }
 
@@ -491,8 +482,8 @@ dependencies = [
     let mut toml = File::create(&toml_path).unwrap();
     toml.write_all(basic_toml().as_bytes()).unwrap();
     let files = CargoWorkspaceFiles {
-      toml_path: toml_path,
       lock_path_opt: None,
+      toml_path,
     };
 
     let mut fetcher = CargoSubcommandMetadataFetcher;
@@ -516,8 +507,8 @@ dependencies = [
       path
     };
     let files = CargoWorkspaceFiles {
-      toml_path: toml_path,
       lock_path_opt: Some(lock_path),
+      toml_path,
     };
 
     let mut fetcher = CargoSubcommandMetadataFetcher;
@@ -535,8 +526,8 @@ dependencies = [
       path
     };
     let files = CargoWorkspaceFiles {
-      toml_path: toml_path,
       lock_path_opt: None,
+      toml_path,
     };
 
     let mut fetcher = CargoSubcommandMetadataFetcher;

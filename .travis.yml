@@ -37,6 +37,6 @@ script:
   - cd impl
   - cargo build --verbose
   - cargo test --verbose
-  - cargo install --debug -f
+  - cargo install --debug -f --path .
   - cd ../
   - ./smoke-test.sh

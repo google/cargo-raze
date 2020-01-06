@@ -12,54 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate cargo;
-extern crate cargo_raze;
-extern crate docopt;
-extern crate failure;
-#[cfg(test)]
-#[macro_use]
-extern crate hamcrest;
-extern crate itertools;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_json;
-extern crate slug;
-extern crate tempdir;
-extern crate tera;
-extern crate toml;
+use std::{
+  fs::{self, File},
+  io::{Read, Write},
+  path::{Path, PathBuf},
+};
 
-use std::fs;
-use std::fs::File;
-use std::io::Read;
-use std::io::Write;
-use std::path::Path;
-use std::path::PathBuf;
+use cargo::{util::Config, CargoResult, CliResult};
 
-use cargo::CargoError;
-use cargo::CliResult;
-use cargo::util::CargoResult;
-use cargo::util::Config;
 use docopt::Docopt;
 
-use bazel::BazelRenderer;
-use cargo_raze::bazel;
-use cargo_raze::metadata;
-use cargo_raze::planning;
-use cargo_raze::rendering;
-use cargo_raze::settings;
-use cargo_raze::util;
-use metadata::CargoInternalsMetadataFetcher;
-use metadata::CargoWorkspaceFiles;
-use planning::BuildPlanner;
-use planning::BuildPlannerImpl;
-use rendering::BuildRenderer;
-use rendering::FileOutputs;
-use rendering::RenderDetails;
-use settings::GenMode;
-use settings::RazeSettings;
-use util::PlatformDetails;
-use util::RazeError;
+use cargo_raze::{
+  bazel::BazelRenderer,
+  metadata::{CargoInternalsMetadataFetcher, CargoWorkspaceFiles},
+  planning::{BuildPlanner, BuildPlannerImpl},
+  rendering::{BuildRenderer, FileOutputs, RenderDetails},
+  settings::{CargoToml, GenMode, RazeSettings},
+  util::{PlatformDetails, RazeError},
+};
+
+use serde_derive::Deserialize;
 
 #[derive(Debug, Deserialize)]
 struct Options {
@@ -72,7 +44,7 @@ struct Options {
   flag_dryrun: Option<bool>,
 }
 
-const USAGE: &'static str = r#"
+const USAGE: &str = r#"
 Generate BUILD files for your pre-vendored Cargo dependencies.
 
 Usage:
@@ -93,43 +65,43 @@ fn main() {
     .and_then(|d| d.deserialize())
     .unwrap_or_else(|e| e.exit());
 
-  let result = real_main(options, &mut config);
+  let result = real_main(&options, &mut config);
 
   if let Err(e) = result {
     cargo::exit_with_error(e, &mut *config.shell());
   }
 }
 
-fn real_main(options: Options, cargo_config: &mut Config) -> CliResult {
-  try!(cargo_config.configure(
+fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
+  cargo_config.configure(
     options.flag_verbose,
     options.flag_quiet,
     &options.flag_color,
     /* frozen = */ false,
     /* locked = */ false,
+    /* offline */ false,
     /* target_dir = */ &None,
-    &[]
-  ));
-  let mut settings = try!(load_settings("Cargo.toml"));
+    &[],
+  )?;
+
+  let mut settings = load_settings("Cargo.toml")?;
   println!("Loaded override settings: {:#?}", settings);
 
-  try!(validate_settings(&mut settings));
+  validate_settings(&mut settings)?;
 
   let mut metadata_fetcher = CargoInternalsMetadataFetcher::new(&cargo_config);
   let mut planner = BuildPlannerImpl::new(&mut metadata_fetcher);
 
   let toml_path = PathBuf::from("./Cargo.toml");
-  let mut lock_path_opt = None;
-  if fs::metadata("./Cargo.lock").is_ok() {
-    lock_path_opt = Some(PathBuf::from("./Cargo.lock"));
-  }
+  let lock_path_opt = fs::metadata("./Cargo.lock")
+    .ok()
+    .map(|_| PathBuf::from("./Cargo.lock"));
   let files = CargoWorkspaceFiles {
-    toml_path: toml_path,
-    lock_path_opt: lock_path_opt,
+    toml_path,
+    lock_path_opt,
   };
-  let platform_details = try!(PlatformDetails::new_using_rustc(&settings.target));
-  let planned_build = try!(planner
-    .plan_build(&settings, files, platform_details));
+  let platform_details = PlatformDetails::new_using_rustc(&settings.target)?;
+  let planned_build = planner.plan_build(&settings, files, platform_details)?;
   let mut bazel_renderer = BazelRenderer::new();
   let render_details = RenderDetails {
     path_prefix: "./".to_owned(),
@@ -137,23 +109,23 @@ fn real_main(options: Options, cargo_config: &mut Config) -> CliResult {
   };
 
   let bazel_file_outputs = match settings.genmode {
-    GenMode::Vendored => try!(bazel_renderer.render_planned_build(&render_details, &planned_build)),
+    GenMode::Vendored => bazel_renderer.render_planned_build(&render_details, &planned_build)?,
     GenMode::Remote => {
       // Create "remote/" if it doesn't exist
       if fs::metadata("remote/").is_err() {
-        try!(fs::create_dir("remote/").map_err(|e| CargoError::from(e)));
+        fs::create_dir("remote/").map_err(failure::Error::from)?;
       }
 
-      try!(bazel_renderer.render_remote_planned_build(&render_details, &planned_build))
+      bazel_renderer.render_remote_planned_build(&render_details, &planned_build)?
     } /* exhaustive, we control the definition */
   };
 
   let dry_run = options.flag_dryrun.unwrap_or(false);
   for FileOutputs { path, contents } in bazel_file_outputs {
-    if !dry_run {
-      try!(write_to_file_loudly(&path, &contents));
-    } else {
+    if dry_run {
       println!("{}:\n{}", path, contents);
+    } else {
+      write_to_file_loudly(&path, &contents)?;
     }
   }
 
@@ -163,35 +135,38 @@ fn real_main(options: Options, cargo_config: &mut Config) -> CliResult {
 /** Verifies that the provided settings make sense. */
 fn validate_settings(settings: &mut RazeSettings) -> CargoResult<()> {
   if !settings.workspace_path.starts_with("//") {
-    return Err(CargoError::from(RazeError::Config {
-          field_path_opt: Some("raze.workspace_path".to_owned()),
-          message: format!("Path must start with \"//\". Paths into local repositories (such as \
-                           @local//path) are currently unsupported.")
-    }));
+    return Err(
+      RazeError::Config {
+        field_path_opt: Some("raze.workspace_path".to_owned()),
+        message: concat!(
+          "Path must start with \"//\". Paths into local repositories (such as ",
+          "@local//path) are currently unsupported."
+        )
+        .to_owned(),
+      }
+      .into(),
+    );
   }
 
-  if settings.workspace_path != "//" && settings.workspace_path.ends_with("/") {
+  if settings.workspace_path != "//" && settings.workspace_path.ends_with('/') {
     settings.workspace_path.pop();
   }
 
-  return Ok(());
+  Ok(())
 }
 
 fn write_to_file_loudly(path: &str, contents: &str) -> CargoResult<()> {
-  try!(
-    File::create(&path)
-      .and_then(|mut f| f.write_all(contents.as_bytes()))
-      .map_err(CargoError::from));
+  File::create(&path).and_then(|mut f| f.write_all(contents.as_bytes()))?;
   println!("Generated {} successfully", path);
   Ok(())
 }
 
-fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings, CargoError> {
+fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> CargoResult<RazeSettings> {
   let path = cargo_toml_path.as_ref();
-  let mut toml = try!(File::open(path).map_err(CargoError::from));
+  let mut toml = File::open(path)?;
   let mut toml_contents = String::new();
-  try!(toml.read_to_string(&mut toml_contents).map_err(CargoError::from));
-  toml::from_str::<settings::CargoToml>(&toml_contents)
-    .map_err(CargoError::from)
+  toml.read_to_string(&mut toml_contents)?;
+  toml::from_str::<CargoToml>(&toml_contents)
+    .map_err(|e| e.into())
     .map(|toml| toml.raze)
 }
