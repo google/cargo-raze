@@ -16,7 +16,7 @@ use cargo::CargoResult;
 use tera::{self, Context, Tera};
 
 use crate::{
-  context::{CrateContext, WorkspaceContext},
+  context::{CrateContext, WorkspaceContext, DependencyAlias},
   planning::PlannedBuild,
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
   util::RazeError,
@@ -82,12 +82,10 @@ impl BazelRenderer {
 
   pub fn render_aliases(
     &self,
-    workspace_context: &WorkspaceContext,
-    all_packages: &[CrateContext],
+    dependency_aliases: &[DependencyAlias],
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
-    context.insert("workspace", &workspace_context);
-    context.insert("crates", &all_packages);
+    context.insert("aliases", &dependency_aliases);
     self
       .internal_renderer
       .render("templates/workspace.BUILD.template", &context)
@@ -104,19 +102,6 @@ impl BazelRenderer {
     self
       .internal_renderer
       .render("templates/crate.BUILD.template", &context)
-  }
-
-  pub fn render_remote_aliases(
-    &self,
-    workspace_context: &WorkspaceContext,
-    all_packages: &[CrateContext],
-  ) -> Result<String, tera::Error> {
-    let mut context = Context::new();
-    context.insert("workspace", &workspace_context);
-    context.insert("crates", &all_packages);
-    self
-      .internal_renderer
-      .render("templates/workspace.BUILD.template", &context)
   }
 
   pub fn render_bzl_fetch(
@@ -147,6 +132,7 @@ impl BuildRenderer for BazelRenderer {
     let &PlannedBuild {
       ref workspace_context,
       ref crate_contexts,
+      ref dependency_aliases,
       ..
     } = planned_build;
     let mut file_outputs = Vec::new();
@@ -168,7 +154,7 @@ impl BuildRenderer for BazelRenderer {
 
     let build_file_path = format!("{}/{}", &path_prefix, buildfile_suffix);
     let rendered_alias_build_file = self
-      .render_aliases(&workspace_context, &crate_contexts)
+      .render_aliases(dependency_aliases)
       .map_err(|e| RazeError::Rendering {
         crate_name_opt: None,
         message: e.to_string(),
@@ -194,6 +180,7 @@ impl BuildRenderer for BazelRenderer {
     let &PlannedBuild {
       ref workspace_context,
       ref crate_contexts,
+      ref dependency_aliases,
       ..
     } = planned_build;
     let mut file_outputs = Vec::new();
@@ -220,7 +207,7 @@ impl BuildRenderer for BazelRenderer {
 
     let alias_file_path = format!("{}/{}", &path_prefix, buildfile_suffix);
     let rendered_alias_build_file = self
-      .render_remote_aliases(&workspace_context, &crate_contexts)
+      .render_aliases(dependency_aliases)
       .map_err(|e| RazeError::Rendering {
         crate_name_opt: None,
         message: e.to_string(),
@@ -269,7 +256,7 @@ mod tests {
     }
   }
 
-  fn dummy_planned_build(crate_contexts: Vec<CrateContext>) -> PlannedBuild {
+  fn dummy_planned_build(dependency_aliases: Vec<DependencyAlias>, crate_contexts: Vec<CrateContext>) -> PlannedBuild {
     PlannedBuild {
       workspace_context: WorkspaceContext {
         workspace_path: "//workspace/prefix".to_owned(),
@@ -277,6 +264,7 @@ mod tests {
         gen_workspace_prefix: "".to_owned(),
         output_buildfile_suffix: "BUILD".to_owned(),
       },
+      dependency_aliases,
       crate_contexts,
     }
   }
@@ -359,18 +347,19 @@ mod tests {
 
   fn render_crates_for_test_with_name(
     buildfile_suffix: &str,
+    dependency_aliases: Vec<DependencyAlias>,
     crate_contexts: Vec<CrateContext>,
   ) -> Vec<FileOutputs> {
     BazelRenderer::new()
       .render_planned_build(
         &dummy_render_details(buildfile_suffix),
-        &dummy_planned_build(crate_contexts),
+        &dummy_planned_build(dependency_aliases, crate_contexts),
       )
       .unwrap()
   }
 
-  fn render_crates_for_test(crate_contexts: Vec<CrateContext>) -> Vec<FileOutputs> {
-    return render_crates_for_test_with_name("BUILD", crate_contexts);
+  fn render_crates_for_test(dependency_aliases: Vec<DependencyAlias>, crate_contexts: Vec<CrateContext>) -> Vec<FileOutputs> {
+    return render_crates_for_test_with_name("BUILD", dependency_aliases, crate_contexts);
   }
 
   #[test]
@@ -428,7 +417,7 @@ mod tests {
 
   #[test]
   fn root_crates_get_build_aliases() {
-    let file_outputs = render_crates_for_test(vec![dummy_library_crate()]);
+    let file_outputs = render_crates_for_test(vec![dummy_dep_alias()], vec![dummy_library_crate()]);
     let root_build_contents =
       extract_contents_matching_path(&file_outputs, "./some_render_prefix/BUILD");
 

@@ -9,22 +9,9 @@ licenses([
   "notice" # See individual crates for specific licenses
 ])
 
-{%- for crate in crates %}
-{%- if crate.is_root_dependency and crate.lib_target_name %}
-{%- set crate_name_sanitized = crate.pkg_name | replace(from="-", to="_") %}
+{%- for alias in aliases %}
 alias(
-    name = "{{crate_name_sanitized}}",
-    actual = "{{crate.workspace_path_to_crate}}:{{crate_name_sanitized}}",
+    name = "{{alias.alias}}",
+    actual = "{{alias.target}}"
 )
-{%- endif %}
-{%- if crate.raze_settings %}
-{%- for aliased_target in crate.raze_settings.extra_aliased_targets %}
-alias(
-    # Extra aliased target, from raze configuration
-    # N.B.: The exact form of this is subject to change.
-    name = "{{aliased_target}}",
-    actual = "{{crate.workspace_path_to_crate}}:{{aliased_target}}",
-)
-{%- endfor %}
-{%- endif %}
 {%- endfor %}

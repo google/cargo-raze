@@ -14,6 +14,7 @@
 
 use crate::settings::CrateSettings;
 use semver::Version;
+use derivative::Derivative;
 use serde_derive::Serialize;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -21,6 +22,7 @@ pub struct BuildableDependency {
   pub name: String,
   pub version: Version,
   pub buildable_target: String,
+  pub is_aliased: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -54,10 +56,12 @@ pub struct SourceDetails {
   pub git_data: Option<GitRepo>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Derivative, Eq, PartialOrd, Ord, Serialize)]
+#[derivative(PartialEq, Hash)]
 pub struct DependencyAlias {
   pub target: String,
-  pub alias: String
+  #[derivative(PartialEq="ignore", Hash="ignore")]
+  pub alias: String,
 }
 
 #[derive(Debug, Clone, Serialize)]

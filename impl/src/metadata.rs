@@ -22,7 +22,7 @@ use cargo::{
   CargoResult,
 };
 
-use semver::Version;
+use semver::{Version, VersionReq};
 use serde::de;
 use serde_json;
 use std::{collections::HashMap, env, fs, path::PathBuf, process::Command};
@@ -107,7 +107,7 @@ pub struct Package {
 pub struct Dependency {
   pub name: String,
   pub source: String,
-  pub req: String,
+  pub req: VersionReq,
   pub kind: DependencyKind,
   pub rename: Option<String>,
   #[serde(default = "default_dependency_field_optional")]
@@ -334,7 +334,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
             name: dependency.package_name().to_string(),
             // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
             source: serde_json::to_string(&dependency.source_id()).unwrap(),
-            req: dependency.version_req().to_string(),
+            req: dependency.version_req().clone(),
             kind: dependency.kind().into(),
             rename: dependency.explicit_name_in_toml().map(|x| x.to_string()),
             optional: dependency.is_optional(),
