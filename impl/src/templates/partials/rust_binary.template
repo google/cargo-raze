@@ -14,20 +14,24 @@ rust_binary(
         {%- for dependency in crate.dependencies %}
         "{{dependency.buildable_target}}",
         {%- endfor %}
+        {%- if crate.raze_setttings %}
         {%- for dependency in crate.raze_settings.additional_deps %}
         "{{dependency}}",
         {%- endfor %}
+        {%- endif %}
     ],
     rustc_flags = [
         "--cap-lints=allow",
+        {%- if crate.raze_setttings %}
         {%- for flag in crate.raze_settings.additional_flags %}
         "{{flag}}",
         {%- endfor %}
+        {%- endif %}
     ],
     {%- if crate.build_script_target %}
     out_dir_tar = ":{{ crate.pkg_name | replace(from="-", to="_")}}_build_script_executor",
     {%- endif %}
-    {%- if crate.raze_settings.data_attr %}
+    {%- if crate.raze_settings and crate.raze_settings.data_attr %}
     data = {{crate.raze_settings.data_attr}},
     {%- endif %}
     version = "{{ crate.pkg_version }}",

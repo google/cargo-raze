@@ -22,6 +22,7 @@ use cargo::{
   CargoResult,
 };
 
+use semver::Version;
 use serde_json;
 use std::{collections::HashMap, env, fs, path::PathBuf, process::Command};
 
@@ -80,7 +81,7 @@ pub struct Metadata {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Package {
   pub name: String,
-  pub version: String,
+  pub version: Version,
   pub id: PackageId,
   pub license: Option<String>,
   pub license_file: Option<String>,
@@ -357,7 +358,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
 
         Package {
           name: package.name().to_string(),
-          version: package.version().to_string(),
+          version: package.version().clone(),
           id: package_id.to_string(),
           license: manifest_metadata.license.clone(),
           license_file: manifest_metadata.license_file.clone(),
@@ -429,7 +430,7 @@ pub mod testing {
   pub fn dummy_package() -> Package {
     Package {
       name: String::new(),
-      version: String::new(),
+      version: Version::parse("0.0.0").unwrap(),
       id: String::new(),
       license: None,
       license_file: None,

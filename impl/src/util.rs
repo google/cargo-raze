@@ -209,6 +209,42 @@ fn fetch_attrs(target: &str) -> CargoResult<Vec<Cfg>> {
   )
 }
 
+/// Specialised trait behaving like `Itertools::exactly_one` but returns `None` if no elements exist
+pub trait SingleItemPeel : Iterator {
+  /// If the iterator yields exactly zero or one element, that element will be returned as an
+  /// `Option` otherwise an error will be returned
+  ///
+  /// This provides an additional layer of validation over just calling `Iterator::next()`.
+  /// If your assumption that there should only be one element yielded is false this provides
+  /// the opportunity to detect and handle that, preventing errors at a distance.
+  ///
+  /// # Examples
+  /// ```
+  /// use crate::utils::SingleItemPeel;
+  ///
+  /// assert_eq!((0..10).filter(|&x| x == 2).single_item().unwrap(), 2);
+  /// assert!((0..10).filter(|&x| x > 1 && x < 4).single_item().is_err());
+  /// assert!((0..10).filter(|&x| x > 1 && x < 5).single_item().is_err());
+  /// assert!((0..10).filter(|&_| false).single_item().is_err());
+  /// ```
+  fn single_item(mut self) -> Result<Option<Self::Item>, RazeError>
+    where
+        Self: Sized,
+  {
+    self.next()
+     .map(|first| {
+       if self.next().is_some() {
+         Err(RazeError::Generic("Too many items found in iteration".to_string()))
+       } else {
+         Ok(first)
+       }
+     })
+     .transpose()
+  }
+}
+
+impl<T: ?Sized> SingleItemPeel for T where T: Iterator { }
+
 #[cfg(test)]
 mod tests {
   use super::*;

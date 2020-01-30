@@ -14,8 +14,9 @@
 
 use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
+use semver::VersionReq;
 
-pub type CrateSettingsPerVersion = HashMap<String, CrateSettings>;
+pub type CrateSettingsPerVersion = HashMap<VersionReq, CrateSettings>;
 
 /**
  * A "deserializable struct" for the whole Cargo.toml

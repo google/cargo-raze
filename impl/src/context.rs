@@ -13,12 +13,13 @@
 // limitations under the License.
 
 use crate::settings::CrateSettings;
+use semver::Version;
 use serde_derive::Serialize;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableDependency {
   pub name: String,
-  pub version: String,
+  pub version: Version,
   pub buildable_target: String,
 }
 
@@ -56,9 +57,9 @@ pub struct SourceDetails {
 #[derive(Debug, Clone, Serialize)]
 pub struct CrateContext {
   pub pkg_name: String,
-  pub pkg_version: String,
+  pub pkg_version: Version,
   pub edition: String,
-  pub raze_settings: CrateSettings,
+  pub raze_settings: Option<CrateSettings>,
   pub licenses: Vec<LicenseData>,
   pub features: Vec<String>,
   pub workspace_path_to_crate: String,

@@ -118,7 +118,7 @@ struct CrateSubplanner<'planner> {
   crate_catalog_entry: &'planner CrateCatalogEntry,
   source_id: &'planner Option<SourceId>,
   node: &'planner ResolveNode,
-  crate_settings: &'planner CrateSettings,
+  crate_settings: Option<&'planner CrateSettings>,
 }
 
 /** A ready-to-be-rendered build, containing renderable context for each crate. */
@@ -136,7 +136,7 @@ impl CrateCatalogEntry {
     is_workspace_crate: bool,
   ) -> Self {
     let sanitized_name = package.name.replace("-", "_");
-    let sanitized_version = util::sanitize_ident(&package.version);
+    let sanitized_version = util::sanitize_ident(&package.version.to_string());
 
     Self {
       package: package.clone(),
@@ -404,14 +404,6 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           return None;
         }
 
-        let crate_settings = self
-          .settings
-          .crates
-          .get(&own_package.name)
-          .and_then(|c| c.get(&own_package.version))
-          .cloned()
-          .unwrap_or_else(CrateSettings::default);
-
         // UNWRAP: Safe given unwrap during serialize step of metadata
         let own_source_id = own_package
           .source
@@ -425,12 +417,40 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           crate_catalog_entry: &own_crate_catalog_entry,
           source_id: &own_source_id,
           node: &node,
-          crate_settings: &crate_settings,
+          crate_settings: self.crate_settings(&own_package).unwrap(),
         };
 
         Some(crate_subplanner.produce_context())
       })
       .collect()
+  }
+
+  fn crate_settings(&self, package: &Package) -> CargoResult<Option<&CrateSettings>> {
+    use crate::util::SingleItemPeel;
+
+    self.settings.crates.get(&package.name)
+      .and_then(|settings| {
+        settings.iter()
+          .filter_map(|(k, v)| {
+            if k.matches(&package.version) {
+              Some(v)
+            } else {
+              None
+            }
+          })
+          .single_item()
+          .map_err(|_e| {
+            RazeError::Config {
+              field_path_opt: None,
+              message: format!(
+                "Multiple potential semver matches found for `{}`",
+                &package.name
+              )
+            }.into()
+          })
+          .transpose()
+      })
+      .transpose()
   }
 }
 
@@ -468,7 +488,7 @@ impl<'planner> CrateSubplanner<'planner> {
       dev_dependencies: dev_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings),
       build_script_target: build_script_target_opt,
-      raze_settings: self.crate_settings.clone(),
+      raze_settings: self.crate_settings.cloned(),
       source_details: self.produce_source_details(),
       expected_build_path: self.crate_catalog_entry.local_build_path(&self.settings),
       sha256: package.sha256.clone(),
@@ -499,12 +519,10 @@ impl<'planner> CrateSubplanner<'planner> {
     let mut build_deps = Vec::new();
     let mut dev_deps = Vec::new();
     let mut normal_deps = Vec::new();
-    let all_skipped_deps = self
-      .crate_settings
-      .skipped_deps
-      .iter()
-      .cloned()
-      .collect::<HashSet<_>>();
+    let all_skipped_deps = self.crate_settings
+        .iter()
+        .flat_map(|x| x.skipped_deps.iter())
+        .collect::<HashSet<_>>();
 
     for dep_id in &self.node.dependencies {
       // UNWRAP(s): Safe from verification of packages_by_id
@@ -833,42 +851,23 @@ mod checks {
     all_crate_settings: &HashMap<String, CrateSettingsPerVersion>,
     all_packages: &[Package],
   ) {
-    let mut known_versions_per_crate = HashMap::new();
-    for &Package {
-      ref name,
-      ref version,
-      ..
-    } in all_packages
-    {
-      known_versions_per_crate
-        .entry(name.clone())
-        .or_insert_with(HashSet::new)
-        .insert(version.clone());
+    use std::iter::FromIterator;
+
+    // 1st check names
+    let pkg_names = all_packages.iter().map(|pkg| &pkg.name).collect::<HashSet<_>>();
+    let setting_names = HashSet::from_iter(all_crate_settings.keys());
+    for missing in setting_names.difference(&pkg_names) {
+      eprintln!("Found unused raze crate settings for `{}`", missing);
     }
 
-    for (name, settings_per_version) in all_crate_settings {
-      if !known_versions_per_crate.contains_key(name) {
-        eprintln!(
-          "Found unused raze settings for all of {}-{:?}",
-          name,
-          settings_per_version.keys()
-        );
-        // No version introspection needed -- no known version of this crate
-        continue;
-      }
-
-      // UNWRAP: Guarded above
-      let all_known_versions = known_versions_per_crate.get(name).unwrap();
-
-      for version in settings_per_version.keys() {
-        if !all_known_versions.contains(version) {
-          eprintln!(
-            "Found unused raze settings for {}-{}, but {:?} were known",
-            name, version, all_known_versions
-          )
-        }
-      }
-    }
+    // Then check versions
+    all_crate_settings.iter()
+      .flat_map(|(name, settings)| settings.iter().map(move |x| (x.0, name)))
+      .filter(|(ver_req, _)| !all_packages.iter().any(|pkg| ver_req.matches(&pkg.version)))
+      .for_each(|(ver_req, name)| {
+        eprintln!("Found unused raze settings for version `{}` against crate `{}`",
+                  ver_req, name);
+      });
   }
 }
 
@@ -879,6 +878,7 @@ mod tests {
     planning::checks,
     settings::testing as settings_testing,
   };
+  use semver::Version;
 
   use super::*;
 
@@ -920,7 +920,7 @@ mod tests {
     let mut test_dep = metadata_testing::dummy_package();
     test_dep.name = "test_dep".to_owned();
     test_dep.id = "test_dep_id".to_owned();
-    test_dep.version = "test_version".to_owned();
+    test_dep.version = Version::parse("2.3.4").unwrap();
     metadata.packages.push(test_dep);
     metadata
   }
@@ -1062,7 +1062,7 @@ mod tests {
       let mut workspace_crate_dep = metadata_testing::dummy_package();
       workspace_crate_dep.name = "ws_crate_dep".to_owned();
       workspace_crate_dep.id = "ws_crate_dep_id".to_owned();
-      workspace_crate_dep.version = "ws_crate_version".to_owned();
+      workspace_crate_dep.version = Version::parse("1.2.3").unwrap();
       base_metadata.packages.push(workspace_crate_dep);
       base_metadata
         .workspace_members
