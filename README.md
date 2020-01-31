@@ -22,8 +22,8 @@ onerous, even for code with few dependencies.
 ## Usage
 
 cargo-raze can generate buildable targets in one of two modes: Vendoring, or
-Non-Vendoring. In the vendoring mode, developers use the common `cargo-vendor`
-tool to retrieve the dependencies indicated by their workspace Cargo.toml into
+Non-Vendoring. In the vendoring mode, developers use the common `cargo vendor`
+subcommand to retrieve the dependencies indicated by their workspace Cargo.toml into
 directories that cargo-raze then populates with BUILD files. In the
 non-vendoring mode, cargo-raze generates a flat list of BUILD files, and a
 workspace-level macro that can be invoked in the WORKSPACE file to pull down the
@@ -90,7 +90,6 @@ target = "x86_64-unknown-linux-gnu"
 First, install the required tools for vendoring and generating BUILDable
 targets.
 ```bash
-$ cargo install cargo-vendor
 $ cargo install cargo-raze
 ```
 
@@ -102,7 +101,7 @@ $ cargo generate-lockfile
 Following that, vendor your dependencies from within the cargo/ directory (mind the `-x`, it guarantees the
 version is included in the file path).
 ```bash
-$ cargo-vendor vendor -x
+$ cargo vendor --versioned-dirs --locked
 ```
 
 Finally, generate your BUILD files, again from within the cargo/ directory

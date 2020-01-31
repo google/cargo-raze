@@ -795,7 +795,7 @@ mod checks {
     Err(RazeError::Planning {
       dependency_name_opt: None,
       message: format!(
-        "Failed to find expected vendored crates in {:?}: {:?}. Did you forget to run cargo-vendor?",
+        "Failed to find expected vendored crates in {:?}: {:?}. Did you forget to run cargo vendor?",
         expected_full_path.to_str(),
         limited_missing_crates)
       }.into())
