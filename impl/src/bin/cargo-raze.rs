@@ -24,7 +24,7 @@ use docopt::Docopt;
 
 use cargo_raze::{
   bazel::BazelRenderer,
-  metadata::{CargoInternalsMetadataFetcher, CargoWorkspaceFiles},
+  metadata::{CargoSubcommandMetadataFetcher, CargoWorkspaceFiles},
   planning::{BuildPlanner, BuildPlannerImpl},
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
   settings::{CargoToml, GenMode, RazeSettings},
@@ -89,7 +89,7 @@ fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
 
   validate_settings(&mut settings)?;
 
-  let mut metadata_fetcher = CargoInternalsMetadataFetcher::new(&cargo_config);
+  let mut metadata_fetcher = CargoSubcommandMetadataFetcher::new(&cargo_config);
   let mut planner = BuildPlannerImpl::new(&mut metadata_fetcher);
 
   let toml_path = PathBuf::from("./Cargo.toml");
