@@ -53,13 +53,13 @@ Usage:
     cargo raze [--help --verbose --quiet --color WHEN --dryrun --cargo_bin_path BINARY_PATH]
 
 Options:
-    -h, --help                       Print this message
-    -v, --verbose                    Use verbose output
-    -q, --quiet                      No output printed to stdout
-    --color WHEN                     Coloring: auto, always, never
-    -d, --dryrun                     Do not emit any files
-    --deprecated_use_cargo_internals Force usage of cargo internals (instead of cargo-metadata)
-    --cargo_bin_path                 Path to the cargo binary to be used for loading workspace metadata
+    -h, --help                         Print this message
+    -v, --verbose                      Use verbose output
+    -q, --quiet                        No output printed to stdout
+    --color WHEN                       Coloring: auto, always, never
+    -d, --dryrun                       Do not emit any files
+    --deprecated_use_cargo_internals   Force usage of cargo internals (instead of cargo-metadata)
+    --cargo_bin_path BINARY_PATH       Path to the cargo binary to be used for loading workspace metadata
 "#;
 
 fn main() {
