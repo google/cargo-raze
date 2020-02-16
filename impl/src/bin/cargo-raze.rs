@@ -24,7 +24,7 @@ use docopt::Docopt;
 
 use cargo_raze::{
   bazel::BazelRenderer,
-  metadata::{CargoInternalsMetadataFetcher, CargoWorkspaceFiles},
+  metadata::{CargoInternalsMetadataFetcher, CargoSubcommandMetadataFetcher, CargoWorkspaceFiles, MetadataFetcher},
   planning::{BuildPlanner, BuildPlannerImpl},
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
   settings::{CargoToml, GenMode, RazeSettings},
@@ -42,20 +42,26 @@ struct Options {
   flag_color: Option<String>,
   flag_target: Option<String>,
   flag_dryrun: Option<bool>,
+  flag_deprecated_use_cargo_internals: Option<bool>,
+  flag_cargo_bin_path: Option<String>,
 }
 
 const USAGE: &str = r#"
 Generate BUILD files for your pre-vendored Cargo dependencies.
 
 Usage:
-    cargo raze [--help --verbose --quiet --color WHEN --dryrun]
+    cargo raze (-h | --help)
+    cargo raze [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>] [--deprecated-use-cargo-internals]
+    cargo raze <buildprefix> [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>] [--deprecated-use-cargo-internals]
 
 Options:
-    -h, --help                Print this message
-    -v, --verbose             Use verbose output
-    -q, --quiet               No output printed to stdout
-    --color WHEN              Coloring: auto, always, never
-    -d, --dryrun              Do not emit any files
+    -h, --help                         Print this message
+    -v, --verbose                      Use verbose output
+    -q, --quiet                        No output printed to stdout
+    --color=<WHEN>                     Coloring: auto, always, never
+    -d, --dryrun                       Do not emit any files
+    --cargo-bin-path=<PATH>            Path to the cargo binary to be used for loading workspace metadata
+    --deprecated-use-cargo-internals   Force usage of cargo internals (instead of cargo-metadata)
 "#;
 
 fn main() {
@@ -89,8 +95,15 @@ fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
 
   validate_settings(&mut settings)?;
 
-  let mut metadata_fetcher = CargoInternalsMetadataFetcher::new(&cargo_config);
-  let mut planner = BuildPlannerImpl::new(&mut metadata_fetcher);
+  let mut metadata_fetcher: Box<dyn MetadataFetcher> = if options.flag_deprecated_use_cargo_internals.unwrap_or(false) {
+    Box::new(CargoInternalsMetadataFetcher::new(cargo_config))
+  } else {
+    match options.flag_cargo_bin_path {
+      Some(ref p) => Box::new(CargoSubcommandMetadataFetcher::new(p)),
+      None => Box::new(CargoSubcommandMetadataFetcher::default()),
+    }
+  };
+  let mut planner = BuildPlannerImpl::new(&mut* metadata_fetcher);
 
   let toml_path = PathBuf::from("./Cargo.toml");
   let lock_path_opt = fs::metadata("./Cargo.lock")

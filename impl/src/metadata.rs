@@ -30,6 +30,8 @@ use tempdir::TempDir;
 
 use serde_derive::{Deserialize, Serialize};
 
+const SYSTEM_CARGO_BIN_PATH: &'static str = "cargo";
+
 pub type PackageId = String;
 pub type Kind = String;
 pub type TargetSpec = String;
@@ -158,8 +160,9 @@ pub struct ResolveNode {
 }
 
 /** A workspace metadata fetcher that uses the Cargo Metadata subcommand. */
-#[allow(dead_code)]
-pub struct CargoSubcommandMetadataFetcher;
+pub struct CargoSubcommandMetadataFetcher {
+  cargo_bin_path: PathBuf,
+}
 
 /**
  * A workspace metadata fetcher that uses Cargo's internals.
@@ -171,6 +174,20 @@ pub struct CargoSubcommandMetadataFetcher;
  */
 pub struct CargoInternalsMetadataFetcher<'config> {
   cargo_config: &'config Config,
+}
+
+impl CargoSubcommandMetadataFetcher {
+  pub fn new<P: Into<PathBuf>>(cargo_bin_path: P) -> CargoSubcommandMetadataFetcher {
+    CargoSubcommandMetadataFetcher {
+      cargo_bin_path: cargo_bin_path.into(),
+    }
+  }
+}
+
+impl Default for CargoSubcommandMetadataFetcher {
+  fn default() -> CargoSubcommandMetadataFetcher {
+    CargoSubcommandMetadataFetcher::new(SYSTEM_CARGO_BIN_PATH)
+  }
 }
 
 impl MetadataFetcher for CargoSubcommandMetadataFetcher {
@@ -195,7 +212,7 @@ impl MetadataFetcher for CargoSubcommandMetadataFetcher {
     };
 
     // Shell out to cargo
-    let exec_output = Command::new("cargo")
+    let exec_output = Command::new(&self.cargo_bin_path)
       .current_dir(cargo_tempdir.path())
       .args(&["metadata", "--format-version", "1"])
       .output()?;
@@ -488,7 +505,7 @@ dependencies = [
       toml_path,
     };
 
-    let mut fetcher = CargoSubcommandMetadataFetcher;
+    let mut fetcher = CargoSubcommandMetadataFetcher::default();
 
     fetcher.fetch_metadata(files).unwrap();
   }
@@ -513,7 +530,7 @@ dependencies = [
       toml_path,
     };
 
-    let mut fetcher = CargoSubcommandMetadataFetcher;
+    let mut fetcher = CargoSubcommandMetadataFetcher::default();
 
     fetcher.fetch_metadata(files).unwrap();
   }
@@ -532,7 +549,7 @@ dependencies = [
       toml_path,
     };
 
-    let mut fetcher = CargoSubcommandMetadataFetcher;
+    let mut fetcher = CargoSubcommandMetadataFetcher::default();
     assert!(fetcher.fetch_metadata(files).is_err());
   }
 }

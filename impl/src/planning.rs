@@ -25,7 +25,6 @@ use cargo::{
 use cargo_platform::Platform;
 
 use itertools::Itertools;
-use serde_json;
 
 use crate::{
   context::{
@@ -420,7 +419,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
         let own_source_id = own_package
           .source
           .as_ref()
-          .map(|s| serde_json::from_str::<SourceId>(&s).unwrap());
+          .map(|s| SourceId::from_url(&s).unwrap());
 
         let crate_subplanner = CrateSubplanner {
           crate_catalog: &self.crate_catalog,
