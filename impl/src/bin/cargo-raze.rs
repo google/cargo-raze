@@ -60,8 +60,8 @@ Options:
     -q, --quiet                        No output printed to stdout
     --color=<WHEN>                     Coloring: auto, always, never
     -d, --dryrun                       Do not emit any files
-    --cargo_bin_path=<PATH>            Path to the cargo binary to be used for loading workspace metadata
-    --deprecated_use_cargo_internals   Force usage of cargo internals (instead of cargo-metadata)
+    --cargo-bin-path=<PATH>            Path to the cargo binary to be used for loading workspace metadata
+    --deprecated-use-cargo-internals   Force usage of cargo internals (instead of cargo-metadata)
 "#;
 
 fn main() {
