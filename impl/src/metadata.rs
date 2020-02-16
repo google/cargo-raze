@@ -214,7 +214,8 @@ impl MetadataFetcher for CargoSubcommandMetadataFetcher {
     // Shell out to cargo
     let exec_output = Command::new(&self.cargo_bin_path)
       .current_dir(cargo_tempdir.path())
-      .args(&["metadata", "--format-version", "1"])
+      // TODO: Update format-version
+      .args(&["metadata"/*, "--format-version", "1"*/])
       .output()?;
 
     // Handle command errs
