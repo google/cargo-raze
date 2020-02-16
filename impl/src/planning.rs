@@ -19,9 +19,10 @@ use std::{
 };
 
 use cargo::{
-  core::{dependency::Platform, SourceId},
+  core::SourceId,
   CargoResult,
 };
+use cargo_platform::Platform;
 
 use itertools::Itertools;
 use serde_json;
@@ -414,6 +415,8 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           .and_then(|c| c.get(&own_package.version))
           .cloned()
           .unwrap_or_else(CrateSettings::default);
+
+        println!("DEBUG: {:?}", own_package.source);
 
         // UNWRAP: Safe given unwrap during serialize step of metadata
         let own_source_id = own_package

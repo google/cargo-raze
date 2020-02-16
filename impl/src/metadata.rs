@@ -230,35 +230,39 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
     let root_name = specs.iter().next().unwrap().name();
 
     let resolve_opts = ResolveOpts::new(true, &[], false, false);
-    let (resolved_packages, cargo_resolve) = ops::resolve_ws_with_opts(&ws, resolve_opts, &specs)?;
+    // TODO: DELETE
+    //let (resolved_packages, cargo_resolve) = ops::resolve_ws_with_opts(&ws, resolve_opts, &specs)?;
+    let ws_resolve = ops::resolve_ws_with_opts(&ws, resolve_opts, &specs)?;
+    let pkg_set = ws_resolve.pkg_set;
+    let targeted_resolve = ws_resolve.targeted_resolve;
 
-    let root = cargo_resolve
+    let root = targeted_resolve
       .iter()
       .find(|dep| dep.name() == root_name)
       .ok_or_else(|| RazeError::Internal("root crate should be in cargo resolve".to_owned()))?
       .to_string();
 
-    let nodes = cargo_resolve
+    let nodes = targeted_resolve
       .iter()
       .map(|id| ResolveNode {
         id: id.to_string(),
         features: Some(
-          cargo_resolve
+          targeted_resolve
             .features_sorted(id)
             .iter()
             .map(|s| s.to_string())
             .collect(),
         ),
-        dependencies: cargo_resolve.deps(id).map(|(p, _)| p.to_string()).collect(),
+        dependencies: targeted_resolve.deps(id).map(|(p, _)| p.to_string()).collect(),
       })
       .collect();
 
     let resolve = Resolve { nodes, root };
 
-    let packages = resolved_packages
+    let packages = pkg_set
       .package_ids()
       // TODO(acmcarther): Justify this unwrap
-      .map(|package_id| (package_id, resolved_packages.get_one(package_id).unwrap()))
+      .map(|package_id| (package_id, pkg_set.get_one(package_id).unwrap()))
       .map(|(package_id, package)| {
         let manifest_metadata = package.manifest().metadata();
 
