@@ -95,8 +95,6 @@ fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
 
   validate_settings(&mut settings)?;
 
-  println!("DEBUG: {:?}", options.flag_cargo_bin_path);
-
   let mut metadata_fetcher: Box<dyn MetadataFetcher> = if options.flag_deprecated_use_cargo_internals.unwrap_or(false) {
     Box::new(CargoInternalsMetadataFetcher::new(cargo_config))
   } else {
