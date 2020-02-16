@@ -230,8 +230,6 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
     let root_name = specs.iter().next().unwrap().name();
 
     let resolve_opts = ResolveOpts::new(true, &[], false, false);
-    // TODO: DELETE
-    //let (resolved_packages, cargo_resolve) = ops::resolve_ws_with_opts(&ws, resolve_opts, &specs)?;
     let ws_resolve = ops::resolve_ws_with_opts(&ws, resolve_opts, &specs)?;
     let pkg_set = ws_resolve.pkg_set;
     let targeted_resolve = ws_resolve.targeted_resolve;
