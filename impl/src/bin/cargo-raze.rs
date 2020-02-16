@@ -50,16 +50,18 @@ const USAGE: &str = r#"
 Generate BUILD files for your pre-vendored Cargo dependencies.
 
 Usage:
-    cargo raze [--help --verbose --quiet --color WHEN --dryrun --cargo_bin_path BINARY_PATH]
+    cargo raze (-h | --help)
+    cargo raze [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>] [--deprecated-use-cargo-internals]
+    cargo raze <buildprefix> [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>] [--deprecated-use-cargo-internals]
 
 Options:
     -h, --help                         Print this message
     -v, --verbose                      Use verbose output
     -q, --quiet                        No output printed to stdout
-    --color WHEN                       Coloring: auto, always, never
+    --color=<WHEN>                     Coloring: auto, always, never
     -d, --dryrun                       Do not emit any files
+    --cargo_bin_path=<PATH>            Path to the cargo binary to be used for loading workspace metadata
     --deprecated_use_cargo_internals   Force usage of cargo internals (instead of cargo-metadata)
-    --cargo_bin_path BINARY_PATH       Path to the cargo binary to be used for loading workspace metadata
 "#;
 
 fn main() {
@@ -92,6 +94,8 @@ fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
   println!("Loaded override settings: {:#?}", settings);
 
   validate_settings(&mut settings)?;
+
+  println!("DEBUG: {:?}", options.flag_cargo_bin_path);
 
   let mut metadata_fetcher: Box<dyn MetadataFetcher> = if options.flag_deprecated_use_cargo_internals.unwrap_or(false) {
     Box::new(CargoInternalsMetadataFetcher::new(cargo_config))
