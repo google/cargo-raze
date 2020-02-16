@@ -19,9 +19,10 @@ use std::{
 };
 
 use cargo::{
-  core::{dependency::Platform, SourceId},
+  core::SourceId,
   CargoResult,
 };
+use cargo_platform::Platform;
 
 use itertools::Itertools;
 use serde_json;

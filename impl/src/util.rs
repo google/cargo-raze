@@ -20,7 +20,8 @@ use std::{
   str::{self, FromStr},
 };
 
-use cargo::{core::TargetKind, util::Cfg, CargoResult};
+use cargo::{core::TargetKind, CargoResult};
+use cargo_platform::Cfg;
 
 use slug;
 
