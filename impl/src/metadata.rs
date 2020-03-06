@@ -343,8 +343,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
           })
           .collect();
 
-        // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
-        let pkg_source = serde_json::to_string(&package_id.source_id()).unwrap();
+        let pkg_source = package_id.source_id().into_url().to_string();
 
         // Cargo use SHA256 for checksum so we can use them directly
         let sha256 = package
