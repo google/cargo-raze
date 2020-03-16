@@ -13,7 +13,10 @@
 // limitations under the License.
 
 use crate::settings::CrateSettings;
+use crate::util::RazeResult;
 use serde_derive::Serialize;
+use std::fmt;
+use url::Url;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableDependency {
@@ -51,6 +54,137 @@ pub struct GitRepo {
 #[derive(Debug, Clone, Serialize)]
 pub struct SourceDetails {
   pub git_data: Option<GitRepo>,
+}
+
+#[derive(Debug, Clone)]
+pub struct SourceId {
+  pub kind: SourceKind,
+  pub url: Url,
+  pub precise: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+pub enum SourceKind {
+    /// A git repository.
+    Git(GitReference),
+    /// A local path..
+    Path,
+    /// A remote registry.
+    Registry,
+    /// A local filesystem-based registry.
+    LocalRegistry,
+    /// A directory-based registry.
+    Directory,
+}
+
+impl SourceId {
+    /// Creates a `SourceId` object from the kind and URL.
+    ///
+    /// The canonical url will be calculated, but the precise field will not
+    fn new(kind: SourceKind, url: Url) -> SourceId {
+        SourceId {
+            kind,
+            url,
+            precise: None,
+        }
+    }
+
+    /// Parses a source URL and returns the corresponding ID.
+    ///
+    /// Copied from cargo, but Raze only uses git SourceIds.
+    ///    
+    /// ## Example
+    ///
+    /// ```
+    /// use cargo_raze::context::SourceId;
+    /// SourceId::from_url("git+https://github.com/alexcrichton/\
+    ///                     libssh2-static-sys#80e71a3021618eb05\
+    ///                     656c58fb7c5ef5f12bc747f");
+    ///
+    /// ```
+    pub fn from_url(string: &str) -> RazeResult<SourceId> {
+        let mut parts = string.splitn(2, '+');
+        let kind = parts.next().unwrap();
+        let url_str= parts
+            .next()
+            .ok_or_else(|| anyhow::format_err!("invalid source `{}`", string))?;
+        let mut url = Url::parse(url_str).map_err(|s| anyhow::format_err!("invalid url `{}`: {}", url_str, s))?;
+
+        match kind {
+            "git" => {
+                let mut reference = GitReference::Branch("master".to_string());
+                for (k, v) in url.query_pairs() {
+                    match &k[..] {
+                        // Map older 'ref' to branch.
+                        "branch" | "ref" => reference = GitReference::Branch(v.into_owned()),
+
+                        "rev" => reference = GitReference::Rev(v.into_owned()),
+                        "tag" => reference = GitReference::Tag(v.into_owned()),
+                        _ => {}
+                    }
+                }
+                let precise = url.fragment().map(|s| s.to_owned());
+                url.set_fragment(None);
+                url.set_query(None);
+                let mut id = SourceId::new(SourceKind::Git(reference), url);
+                id.precise = precise;
+                Ok(id)
+            }
+            "registry" => {
+                let mut id = SourceId::new(SourceKind::Registry, url);
+                id.precise = Some("locked".to_string());
+                Ok(id)
+            }
+            "path" => {
+                Ok(SourceId::new(SourceKind::Path, url))
+            }
+            kind => Err(anyhow::format_err!("unsupported source protocol: {}", kind)),
+        }
+    }
+
+    pub fn is_git(&self) -> bool {
+        match self.kind {
+            SourceKind::Git(_) => true,
+            _ => false,
+        }
+    }
+}
+
+/// Information to find a specific commit in a Git repository.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum GitReference {
+    /// From a tag.
+    Tag(String),
+    /// From the HEAD of a branch.
+    Branch(String),
+    /// From a specific revision.
+    Rev(String),
+}
+
+impl GitReference {
+    /// Returns a `Display`able view of this git reference, or None if using
+    /// the head of the "master" branch
+    pub fn pretty_ref(&self) -> Option<PrettyRef<'_>> {
+        match *self {
+            GitReference::Branch(ref s) if *s == "master" => None,
+            _ => Some(PrettyRef { inner: self }),
+        }
+    }
+}
+
+/// A git reference that can be `Display`ed
+pub struct PrettyRef<'a> {
+    inner: &'a GitReference,
+}
+
+impl<'a> fmt::Display for PrettyRef<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self.inner {
+            GitReference::Branch(ref b) => write!(f, "branch={}", b),
+            GitReference::Tag(ref s) => write!(f, "tag={}", s),
+            GitReference::Rev(ref s) => write!(f, "rev={}", s),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]

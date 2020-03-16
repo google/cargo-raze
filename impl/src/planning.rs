@@ -18,10 +18,6 @@ use std::{
   str::{self, FromStr},
 };
 
-use cargo::{
-  core::SourceId,
-  CargoResult,
-};
 use cargo_platform::Platform;
 
 use itertools::Itertools;
@@ -29,12 +25,12 @@ use itertools::Itertools;
 use crate::{
   context::{
     BuildableDependency, BuildableTarget, CrateContext, GitRepo, LicenseData, SourceDetails,
-    WorkspaceContext,
+    SourceId, WorkspaceContext,
   },
   license,
   metadata::{CargoWorkspaceFiles, Metadata, MetadataFetcher, Package, ResolveNode},
   settings::{CrateSettings, GenMode, RazeSettings},
-  util::{self, PlatformDetails, RazeError, PLEASE_FILE_A_BUG},
+  util::{self, PlatformDetails, RazeError, RazeResult, PLEASE_FILE_A_BUG},
 };
 
 pub const VENDOR_DIR: &str = "vendor/";
@@ -50,7 +46,7 @@ pub trait BuildPlanner {
     settings: &RazeSettings,
     files: CargoWorkspaceFiles,
     platform_details: PlatformDetails,
-  ) -> CargoResult<PlannedBuild>;
+  ) -> RazeResult<PlannedBuild>;
 }
 
 /** A set of named dependencies (without version) derived from a package manifest. */
@@ -330,7 +326,7 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
     settings: &RazeSettings,
     files: CargoWorkspaceFiles,
     platform_details: PlatformDetails,
-  ) -> CargoResult<PlannedBuild> {
+  ) -> RazeResult<PlannedBuild> {
     let metadata = self.metadata_fetcher.fetch_metadata(files)?;
     let crate_catalog = CrateCatalog::new(&metadata);
 
@@ -353,7 +349,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
 
 impl<'planner> WorkspaceSubplanner<'planner> {
   /** Produces a planned build using internal state. */
-  pub fn produce_planned_build(&self) -> CargoResult<PlannedBuild> {
+  pub fn produce_planned_build(&self) -> RazeResult<PlannedBuild> {
     checks::check_resolve_matches_packages(&self.metadata)?;
 
     if self.settings.genmode != GenMode::Remote {
@@ -381,7 +377,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
   }
 
   /** Produces a crate context for each declared crate and dependency. */
-  fn produce_crate_contexts(&self) -> CargoResult<Vec<CrateContext>> {
+  fn produce_crate_contexts(&self) -> RazeResult<Vec<CrateContext>> {
     self
       .metadata
       .resolve
@@ -439,7 +435,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
 impl<'planner> CrateSubplanner<'planner> {
   /** Builds a crate context from internal state. */
-  fn produce_context(&self) -> CargoResult<CrateContext> {
+  fn produce_context(&self) -> RazeResult<CrateContext> {
     let DependencySet {
       build_deps,
       dev_deps,
@@ -492,7 +488,7 @@ impl<'planner> CrateSubplanner<'planner> {
   }
 
   /** Generates the set of dependencies for the contained crate. */
-  fn produce_deps(&self) -> CargoResult<DependencySet> {
+  fn produce_deps(&self) -> RazeResult<DependencySet> {
     let DependencyNames {
       build_dep_names,
       dev_dep_names,
@@ -560,7 +556,7 @@ impl<'planner> CrateSubplanner<'planner> {
   }
 
   /** Yields the list of dependencies as described by the manifest (without version). */
-  fn identify_named_deps(&self) -> CargoResult<DependencyNames> {
+  fn identify_named_deps(&self) -> RazeResult<DependencyNames> {
     // Resolve dependencies into types
     let mut build_dep_names = Vec::new();
     let mut dev_dep_names = Vec::new();
@@ -609,9 +605,9 @@ impl<'planner> CrateSubplanner<'planner> {
   /** Generates source details for internal crate. */
   fn produce_source_details(&self) -> SourceDetails {
     SourceDetails {
-      git_data: self.source_id.filter(|id| id.is_git()).map(|id| GitRepo {
-        remote: id.url().to_string(),
-        commit: id.precise().unwrap().to_owned(),
+      git_data: self.source_id.as_ref().filter(|id| id.is_git()).map(|id| GitRepo {
+        remote: id.url.to_string(),
+        commit: id.precise.as_ref().unwrap().to_owned(),
       }),
     }
   }
@@ -646,7 +642,7 @@ impl<'planner> CrateSubplanner<'planner> {
    * This function may access the file system. See #find_package_root_for_manifest for more
    * details.
    */
-  fn produce_targets(&self) -> CargoResult<Vec<BuildableTarget>> {
+  fn produce_targets(&self) -> RazeResult<Vec<BuildableTarget>> {
     let mut targets = Vec::new();
     let package = self.crate_catalog_entry.package();
     for target in &package.targets {
@@ -690,10 +686,11 @@ impl<'planner> CrateSubplanner<'planner> {
    * often aren't solely the crate of interest, but rather a repository that contains the crate of
    * interest among others.
    */
-  fn find_package_root_for_manifest(&self, manifest_path: &PathBuf) -> CargoResult<PathBuf> {
-    let has_git_repo_root = {
-      let is_git = self.source_id.map_or(false, SourceId::is_git);
-      is_git && self.settings.genmode == GenMode::Remote
+  fn find_package_root_for_manifest(&self, manifest_path: &PathBuf) -> RazeResult<PathBuf> {
+    let has_git_repo_root = if let Some(id) = &self.source_id {
+      id.is_git() && self.settings.genmode == GenMode::Remote
+    } else {
+      false
     };
 
     // Return manifest path itself if not git
@@ -755,13 +752,11 @@ mod checks {
     env, fs,
   };
 
-  use cargo::util::CargoResult;
-
   use crate::{
     metadata::{Metadata, Package, PackageId},
     planning::{CrateCatalogEntry, VENDOR_DIR},
     settings::CrateSettingsPerVersion,
-    util::{collect_up_to, RazeError},
+    util::{collect_up_to, RazeError, RazeResult},
   };
 
   // TODO(acmcarther): Consider including a switch to disable limiting
@@ -769,7 +764,7 @@ mod checks {
   const MAX_DISPLAYED_MISSING_RESOLVE_PACKAGES: usize = 5;
 
   // Verifies that all provided packages are vendored (in VENDOR_DIR relative to CWD)
-  pub fn check_all_vendored(crate_catalog_entries: &[CrateCatalogEntry]) -> CargoResult<()> {
+  pub fn check_all_vendored(crate_catalog_entries: &[CrateCatalogEntry]) -> RazeResult<()> {
     let missing_package_ident_iter = crate_catalog_entries
       .iter()
       // Root does not need to be vendored -- usually it is a wrapper package.
@@ -801,7 +796,7 @@ mod checks {
       }.into())
   }
 
-  pub fn check_resolve_matches_packages(metadata: &Metadata) -> CargoResult<()> {
+  pub fn check_resolve_matches_packages(metadata: &Metadata) -> RazeResult<()> {
     let known_package_ids = metadata
       .packages
       .iter()
@@ -1088,6 +1083,7 @@ mod tests {
     );
     assert!(planned_build_res.unwrap().crate_contexts.is_empty());
   }
+
 
   // TODO(acmcarther): Add tests:
   // TODO(acmcarther): Extra flags work

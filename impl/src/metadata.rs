@@ -12,20 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(cargo_internals)]
 use cargo::{
   core::{
+    TargetKind,
     dependency::Kind as CargoKind, resolver::ResolveOpts,
     summary::FeatureValue as CargoFeatureValue, Workspace,
   },
   ops::{self, Packages},
   util::Config,
-  CargoResult,
 };
 
 use serde_json;
-use std::{collections::HashMap, env, fs, path::PathBuf, process::Command};
+use std::{collections::HashMap, fs, path::PathBuf, process::Command};
 
-use crate::util::{self, RazeError};
+use crate::util::{RazeError, RazeResult};
 use tempdir::TempDir;
 
 use serde_derive::{Deserialize, Serialize};
@@ -45,7 +46,7 @@ pub type TargetSpec = String;
  * <https://github.com/rust-lang/cargo/pull/5122>
  */
 pub trait MetadataFetcher {
-  fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> CargoResult<Metadata>;
+  fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> RazeResult<Metadata>;
 }
 
 /** The local Cargo workspace files to be used for build planning .*/
@@ -172,6 +173,7 @@ pub struct CargoSubcommandMetadataFetcher {
  * changing it.
  * !DANGER DANGER!
  */
+#[cfg(cargo_internals)]
 pub struct CargoInternalsMetadataFetcher<'config> {
   cargo_config: &'config Config,
 }
@@ -191,7 +193,7 @@ impl Default for CargoSubcommandMetadataFetcher {
 }
 
 impl MetadataFetcher for CargoSubcommandMetadataFetcher {
-  fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> CargoResult<Metadata> {
+  fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> RazeResult<Metadata> {
     assert!(files.toml_path.is_file());
     assert!(files.lock_path_opt.as_ref().map_or(true, |p| p.is_file()));
 
@@ -235,10 +237,11 @@ impl MetadataFetcher for CargoSubcommandMetadataFetcher {
   }
 }
 
+#[cfg(cargo_internals)]
 impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
-  fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> CargoResult<Metadata> {
+  fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> RazeResult<Metadata> {
     let manifest = if files.toml_path.is_relative() {
-      env::current_dir().unwrap().join(&files.toml_path)
+      std::env::current_dir().unwrap().join(&files.toml_path)
     } else {
       files.toml_path
     };
@@ -310,7 +313,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
           .iter()
           .map(|target| Target {
             name: target.name().to_owned(),
-            kind: util::kind_to_kinds(target.kind()),
+            kind: kind_to_kinds(target.kind()),
             src_path: target.src_path().path().unwrap().display().to_string(),
             edition: target.edition().to_string(),
             crate_types: target
@@ -386,6 +389,25 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
   }
 }
 
+/**
+ * Extracts consistently named Strings for the provided `TargetKind`.
+ *
+ * TODO(acmcarther)
+ : Remove this shim borrowed from Cargo when Cargo is upgraded
+ */
+#[cfg(cargo_internals)]
+pub fn kind_to_kinds(kind: &TargetKind) -> Vec<String> {
+  match *kind {
+    TargetKind::Lib(ref kinds) => kinds.iter().map(|k| k.crate_type().to_owned()).collect(),
+    TargetKind::Bin => vec!["bin".to_owned()],
+    TargetKind::ExampleBin | TargetKind::ExampleLib(_) => vec!["example".to_owned()],
+    TargetKind::Test => vec!["test".to_owned()],
+    TargetKind::CustomBuild => vec!["custom-build".to_owned()],
+    TargetKind::Bench => vec!["bench".to_owned()],
+  }
+}
+
+#[cfg(cargo_internals)]
 impl<'config> CargoInternalsMetadataFetcher<'config> {
   pub fn new(cargo_config: &'config Config) -> CargoInternalsMetadataFetcher<'config> {
     CargoInternalsMetadataFetcher { cargo_config }
@@ -413,7 +435,7 @@ pub mod testing {
   }
 
   impl MetadataFetcher for StubMetadataFetcher {
-    fn fetch_metadata(&mut self, _: CargoWorkspaceFiles) -> CargoResult<Metadata> {
+    fn fetch_metadata(&mut self, _: CargoWorkspaceFiles) -> RazeResult<Metadata> {
       Ok(self.metadata.clone())
     }
   }

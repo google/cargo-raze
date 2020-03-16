@@ -18,18 +18,22 @@ use std::{
   path::{Path, PathBuf},
 };
 
-use cargo::{util::Config, CargoResult, CliResult};
+#[cfg(cargo_internals)]
+use cargo::util::Config;
 
 use docopt::Docopt;
 
 use cargo_raze::{
   bazel::BazelRenderer,
-  metadata::{CargoInternalsMetadataFetcher, CargoSubcommandMetadataFetcher, CargoWorkspaceFiles, MetadataFetcher},
+  metadata::{CargoSubcommandMetadataFetcher, CargoWorkspaceFiles, MetadataFetcher},
   planning::{BuildPlanner, BuildPlannerImpl},
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
   settings::{CargoToml, GenMode, RazeSettings},
-  util::{PlatformDetails, RazeError},
+  util::{PlatformDetails, RazeError, RazeResult},
 };
+
+#[cfg(cargo_internals)]
+use cargo_raze::metadata::CargoInternalsMetadataFetcher;
 
 use serde_derive::Deserialize;
 
@@ -65,44 +69,60 @@ Options:
 "#;
 
 fn main() {
-  let mut config = Config::default().unwrap();
-
   let options = Docopt::new(USAGE)
     .and_then(|d| d.deserialize())
     .unwrap_or_else(|e| e.exit());
 
-  let result = real_main(&options, &mut config);
+  let metadata_fetcher = create_fetcher(&options);
+  let result = real_main(&options, metadata_fetcher);
 
-  if let Err(e) = result {
-    cargo::exit_with_error(e, &mut *config.shell());
+  if let Err(_e) = result {
+    std::process::exit(-1);
   }
 }
 
-fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
-  cargo_config.configure(
-    options.flag_verbose,
-    options.flag_quiet,
-    &options.flag_color,
-    /* frozen = */ false,
-    /* locked = */ false,
-    /* offline */ false,
-    /* target_dir = */ &None,
-    &[],
-  )?;
+#[cfg(cargo_internals)]
+fn create_fetcher(options: &Options) -> Box<dyn MetadataFetcher> {
+  create_cargo_internals_fetcher(options)
+}
 
-  let mut settings = load_settings("Cargo.toml")?;
-  println!("Loaded override settings: {:#?}", settings);
+#[cfg(not(cargo_internals))]
+fn create_fetcher(options: &Options) -> Box<dyn MetadataFetcher> {
+  create_subcommand_fetcher(options)
+}
 
-  validate_settings(&mut settings)?;
-
-  let mut metadata_fetcher: Box<dyn MetadataFetcher> = if options.flag_deprecated_use_cargo_internals.unwrap_or(false) {
+#[cfg(cargo_internals)]
+fn create_cargo_internals_fetcher(options: &Options) -> Box<dyn MetadataFetcher> {
+  if options.flag_deprecated_use_cargo_internals.unwrap_or(false) {
+    let mut cargo_config = Config::default().unwrap();
+    cargo_config.configure(
+      options.flag_verbose,
+      options.flag_quiet,
+      &options.flag_color,
+      /* frozen = */ false,
+      /* locked = */ false,
+      /* offline */ false,
+      /* target_dir = */ &None,
+      &[],
+    )?;
     Box::new(CargoInternalsMetadataFetcher::new(cargo_config))
   } else {
-    match options.flag_cargo_bin_path {
-      Some(ref p) => Box::new(CargoSubcommandMetadataFetcher::new(p)),
-      None => Box::new(CargoSubcommandMetadataFetcher::default()),
-    }
-  };
+     create_subcommand_fetcher()
+  }
+}
+
+fn create_subcommand_fetcher(options: &Options) -> Box<dyn MetadataFetcher> {
+  match options.flag_cargo_bin_path {
+    Some(ref p) => Box::new(CargoSubcommandMetadataFetcher::new(p)),
+    None => Box::new(CargoSubcommandMetadataFetcher::default()),
+  }
+}
+
+fn real_main(options: &Options, mut metadata_fetcher: Box<dyn MetadataFetcher>) -> RazeResult<()> {
+  let mut settings = load_settings("Cargo.toml")?;
+  println!("Loaded override settings: {:#?}", settings);
+  validate_settings(&mut settings)?;
+
   let mut planner = BuildPlannerImpl::new(&mut* metadata_fetcher);
 
   let toml_path = PathBuf::from("./Cargo.toml");
@@ -126,7 +146,10 @@ fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
     GenMode::Remote => {
       // Create "remote/" if it doesn't exist
       if fs::metadata("remote/").is_err() {
-        fs::create_dir("remote/").map_err(failure::Error::from)?;
+        match fs::create_dir("remote/") {
+          Ok(()) => (),
+          Err(_e) => return Err(anyhow::format_err!("couldn't create remote/ dir")),
+        }
       }
 
       bazel_renderer.render_remote_planned_build(&render_details, &planned_build)?
@@ -146,7 +169,7 @@ fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
 }
 
 /** Verifies that the provided settings make sense. */
-fn validate_settings(settings: &mut RazeSettings) -> CargoResult<()> {
+fn validate_settings(settings: &mut RazeSettings) -> RazeResult<()> {
   if !settings.workspace_path.starts_with("//") {
     return Err(
       RazeError::Config {
@@ -168,13 +191,13 @@ fn validate_settings(settings: &mut RazeSettings) -> CargoResult<()> {
   Ok(())
 }
 
-fn write_to_file_loudly(path: &str, contents: &str) -> CargoResult<()> {
+fn write_to_file_loudly(path: &str, contents: &str) -> RazeResult<()> {
   File::create(&path).and_then(|mut f| f.write_all(contents.as_bytes()))?;
   println!("Generated {} successfully", path);
   Ok(())
 }
 
-fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> CargoResult<RazeSettings> {
+fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> RazeResult<RazeSettings> {
   let path = cargo_toml_path.as_ref();
   let mut toml = File::open(path)?;
   let mut toml_contents = String::new();

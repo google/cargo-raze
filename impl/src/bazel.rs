@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo::CargoResult;
 use tera::{self, Context, Tera};
 
 use crate::{
   context::{CrateContext, WorkspaceContext},
   planning::PlannedBuild,
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
-  util::RazeError,
+  util::{RazeError, RazeResult}
 };
 
 pub struct BazelRenderer {
@@ -137,7 +136,7 @@ impl BuildRenderer for BazelRenderer {
     &mut self,
     render_details: &RenderDetails,
     planned_build: &PlannedBuild,
-  ) -> CargoResult<Vec<FileOutputs>> {
+  ) -> RazeResult<Vec<FileOutputs>> {
     let &RenderDetails {
       ref path_prefix,
       ref buildfile_suffix,
@@ -184,7 +183,7 @@ impl BuildRenderer for BazelRenderer {
     &mut self,
     render_details: &RenderDetails,
     planned_build: &PlannedBuild,
-  ) -> CargoResult<Vec<FileOutputs>> {
+  ) -> RazeResult<Vec<FileOutputs>> {
     let &RenderDetails {
       ref path_prefix,
       ref buildfile_suffix,

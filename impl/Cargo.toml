@@ -22,9 +22,10 @@ name = "cargo-raze"
 path = "src/bin/cargo-raze.rs"
 
 [dependencies]
+anyhow = "1.0"
 failure = "0.1.5"
 docopt = "1.0.2"
-cargo = "0.42.0"
+#cargo = "0.42.0"
 cargo-platform = "0.1.0"
 itertools = "0.8.0"
 slug = "0.1.4"
@@ -34,7 +35,13 @@ serde = "1.0.84"
 toml = "0.4.10"
 serde_json = "1.0.34"
 tempdir = "0.3.7"
+url = "2.0"
+
+cargo = { version = "0.42.0", optional = true }
 
 [dev-dependencies]
 lazy_static = "1.2.0"
 hamcrest2 = "0.3.0"
+
+[features]
+cargo_internals = ["cargo"]

@@ -35,6 +35,8 @@ matrix:
 
 script:
   - cd impl
+  - cargo build --verbose --features cargo_internals
+  - cargo test --verbose --features cargo_internals
   - cargo build --verbose
   - cargo test --verbose
   - cargo install --debug -f --path .
