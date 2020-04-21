@@ -630,9 +630,9 @@ impl<'planner> CrateSubplanner<'planner> {
       return None;
     }
 
-    let build_script_target_idx_opt = all_targets.iter().position(|t| t.kind == "custom-build");
-    let build_script_target_opt = build_script_target_idx_opt.map(|idx| all_targets.remove(idx));
-    build_script_target_opt
+    all_targets.iter()
+      .position(|t| t.kind == "custom-build")
+      .map(|idx| all_targets.remove(idx))
   }
 
   /**
