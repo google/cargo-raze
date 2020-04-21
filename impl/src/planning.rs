@@ -632,11 +632,6 @@ impl<'planner> CrateSubplanner<'planner> {
 
     let build_script_target_idx_opt = all_targets.iter().position(|t| t.kind == "custom-build");
     let build_script_target_opt = build_script_target_idx_opt.map(|idx| all_targets.remove(idx));
-
-    if !self.crate_settings.gen_buildrs {
-      return None;
-    }
-
     build_script_target_opt
   }
 
