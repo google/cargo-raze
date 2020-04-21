@@ -30,7 +30,7 @@ use tempdir::TempDir;
 
 use serde_derive::{Deserialize, Serialize};
 
-const SYSTEM_CARGO_BIN_PATH: &'static str = "cargo";
+const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
 
 pub type PackageId = String;
 pub type Kind = String;
@@ -265,10 +265,13 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
           targeted_resolve
             .features_sorted(id)
             .iter()
-            .map(|s| s.to_string())
+            .map(|s| (*s).to_string())
             .collect(),
         ),
-        dependencies: targeted_resolve.deps(id).map(|(p, _)| p.to_string()).collect(),
+        dependencies: targeted_resolve
+          .deps(id)
+          .map(|(p, _)| p.to_string())
+          .collect(),
       })
       .collect();
 
@@ -316,7 +319,7 @@ impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
             crate_types: target
               .rustc_crate_types()
               .iter()
-              .map(|t| t.to_string())
+              .map(|t| (*t).to_string())
               .collect(),
           })
           .collect();

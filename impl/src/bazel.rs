@@ -22,6 +22,7 @@ use crate::{
   util::RazeError,
 };
 
+#[derive(Default)]
 pub struct BazelRenderer {
   internal_renderer: Tera,
 }
@@ -199,7 +200,7 @@ impl BuildRenderer for BazelRenderer {
 
     // N.B. File needs to exist so that contained xyz-1.2.3.BUILD can be referenced
     file_outputs.push(FileOutputs {
-      path: format!("remote/{}", buildfile_suffix).to_owned(),
+      path: format!("remote/{}", buildfile_suffix),
       contents: String::new(),
     });
 

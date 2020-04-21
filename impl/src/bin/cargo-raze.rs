@@ -24,7 +24,10 @@ use docopt::Docopt;
 
 use cargo_raze::{
   bazel::BazelRenderer,
-  metadata::{CargoInternalsMetadataFetcher, CargoSubcommandMetadataFetcher, CargoWorkspaceFiles, MetadataFetcher},
+  metadata::{
+    CargoInternalsMetadataFetcher, CargoSubcommandMetadataFetcher, CargoWorkspaceFiles,
+    MetadataFetcher,
+  },
   planning::{BuildPlanner, BuildPlannerImpl},
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
   settings::{CargoToml, GenMode, RazeSettings},
@@ -95,15 +98,16 @@ fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
 
   validate_settings(&mut settings)?;
 
-  let mut metadata_fetcher: Box<dyn MetadataFetcher> = if options.flag_deprecated_use_cargo_internals.unwrap_or(false) {
-    Box::new(CargoInternalsMetadataFetcher::new(cargo_config))
-  } else {
-    match options.flag_cargo_bin_path {
-      Some(ref p) => Box::new(CargoSubcommandMetadataFetcher::new(p)),
-      None => Box::new(CargoSubcommandMetadataFetcher::default()),
-    }
-  };
-  let mut planner = BuildPlannerImpl::new(&mut* metadata_fetcher);
+  let mut metadata_fetcher: Box<dyn MetadataFetcher> =
+    if options.flag_deprecated_use_cargo_internals.unwrap_or(false) {
+      Box::new(CargoInternalsMetadataFetcher::new(cargo_config))
+    } else {
+      match options.flag_cargo_bin_path {
+        Some(ref p) => Box::new(CargoSubcommandMetadataFetcher::new(p)),
+        None => Box::new(CargoSubcommandMetadataFetcher::default()),
+      }
+    };
+  let mut planner = BuildPlannerImpl::new(&mut *metadata_fetcher);
 
   let toml_path = PathBuf::from("./Cargo.toml");
   let lock_path_opt = fs::metadata("./Cargo.lock")
