@@ -18,10 +18,7 @@ use std::{
   str::{self, FromStr},
 };
 
-use cargo::{
-  core::SourceId,
-  CargoResult,
-};
+use cargo::{core::SourceId, CargoResult};
 use cargo_platform::Platform;
 
 use itertools::Itertools;
@@ -580,7 +577,7 @@ impl<'planner> CrateSubplanner<'planner> {
         }
       }
 
-      match dep.kind.as_ref().map(|v| v.as_str()) {
+      match dep.kind.as_deref() {
         None | Some("normal") => normal_dep_names.push(dep.name.clone()),
         Some("dev") => dev_dep_names.push(dep.name.clone()),
         Some("build") => build_dep_names.push(dep.name.clone()),
