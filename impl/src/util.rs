@@ -23,8 +23,6 @@ use std::{
 use cargo::{core::TargetKind, CargoResult};
 use cargo_platform::Cfg;
 
-use slug;
-
 pub const PLEASE_FILE_A_BUG: &str =
   "Please file an issue at github.com/google/cargo-raze with details.";
 
