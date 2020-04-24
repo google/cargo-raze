@@ -12,20 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo::{
-  core::{
-    dependency::Kind as CargoKind, resolver::ResolveOpts,
-    summary::FeatureValue as CargoFeatureValue, Workspace,
-  },
-  ops::{self, Packages},
-  util::Config,
-  CargoResult,
-};
+use cargo::CargoResult;
 
 use serde_json;
-use std::{collections::HashMap, env, fs, path::PathBuf, process::Command};
+use std::{collections::HashMap, fs, path::PathBuf, process::Command};
 
-use crate::util::{self, RazeError};
+use crate::util::RazeError;
 use tempdir::TempDir;
 
 use serde_derive::{Deserialize, Serialize};
@@ -39,7 +31,7 @@ pub type TargetSpec = String;
 /**
  * An entity that can retrive deserialized metadata for a Cargo Workspace.
  *
- * The `CargoInternalsMetadataFetcher` is probably the one you want.
+ * The `CargoSubcommandMetadataFetcher` is probably the one you want.
  *
  * Usage of ..Subcommand.. is waiting on a cargo release containing
  * <https://github.com/rust-lang/cargo/pull/5122>
@@ -164,18 +156,6 @@ pub struct CargoSubcommandMetadataFetcher {
   cargo_bin_path: PathBuf,
 }
 
-/**
- * A workspace metadata fetcher that uses Cargo's internals.
- *
- * !DANGER DANGER!
- * This struct is very hard to test as it uses Cargo's stateful internals, please take care when
- * changing it.
- * !DANGER DANGER!
- */
-pub struct CargoInternalsMetadataFetcher<'config> {
-  cargo_config: &'config Config,
-}
-
 impl CargoSubcommandMetadataFetcher {
   pub fn new<P: Into<PathBuf>>(cargo_bin_path: P) -> CargoSubcommandMetadataFetcher {
     CargoSubcommandMetadataFetcher {
@@ -232,165 +212,6 @@ impl MetadataFetcher for CargoSubcommandMetadataFetcher {
 
     // Parse and yield metadata
     serde_json::from_str::<Metadata>(&stdout_str).map_err(|e| e.into())
-  }
-}
-
-impl<'config> MetadataFetcher for CargoInternalsMetadataFetcher<'config> {
-  fn fetch_metadata(&mut self, files: CargoWorkspaceFiles) -> CargoResult<Metadata> {
-    let manifest = if files.toml_path.is_relative() {
-      env::current_dir().unwrap().join(&files.toml_path)
-    } else {
-      files.toml_path
-    };
-    let ws = Workspace::new(&manifest, &self.cargo_config)?;
-    let specs = Packages::All.to_package_id_specs(&ws)?;
-    let root_name = specs.iter().next().unwrap().name();
-
-    let resolve_opts = ResolveOpts::new(true, &[], false, false);
-    let ws_resolve = ops::resolve_ws_with_opts(&ws, resolve_opts, &specs)?;
-    let pkg_set = ws_resolve.pkg_set;
-    let targeted_resolve = ws_resolve.targeted_resolve;
-
-    let root = targeted_resolve
-      .iter()
-      .find(|dep| dep.name() == root_name)
-      .ok_or_else(|| RazeError::Internal("root crate should be in cargo resolve".to_owned()))?
-      .to_string();
-
-    let nodes = targeted_resolve
-      .iter()
-      .map(|id| ResolveNode {
-        id: id.to_string(),
-        features: Some(
-          targeted_resolve
-            .features_sorted(id)
-            .iter()
-            .map(|s| (*s).to_string())
-            .collect(),
-        ),
-        dependencies: targeted_resolve
-          .deps(id)
-          .map(|(p, _)| p.to_string())
-          .collect(),
-      })
-      .collect();
-
-    let resolve = Resolve { nodes, root };
-
-    let packages = pkg_set
-      .package_ids()
-      // TODO(acmcarther): Justify this unwrap
-      .map(|package_id| (package_id, pkg_set.get_one(package_id).unwrap()))
-      .map(|(package_id, package)| {
-        let manifest_metadata = package.manifest().metadata();
-
-        let dependencies = package
-          .dependencies()
-          .iter()
-          .map(|dependency| Dependency {
-            name: dependency.package_name().to_string(),
-            // UNWRAP: It's cargo's responsibility to ensure a serializable source_id
-            source: serde_json::to_string(&dependency.source_id()).unwrap(),
-            req: dependency.version_req().to_string(),
-            kind: match dependency.kind() {
-              CargoKind::Normal => None,
-              CargoKind::Development => Some("dev".to_owned()),
-              CargoKind::Build => Some("build".to_owned()),
-            },
-            optional: dependency.is_optional(),
-            uses_default_features: dependency.uses_default_features(),
-            features: dependency
-              .features()
-              .iter()
-              .map(|s| s.to_string())
-              .collect(),
-            target: dependency.platform().map(|p| p.to_string()),
-          })
-          .collect();
-
-        let targets = package
-          .targets()
-          .iter()
-          .map(|target| Target {
-            name: target.name().to_owned(),
-            kind: util::kind_to_kinds(target.kind()),
-            src_path: target.src_path().path().unwrap().display().to_string(),
-            edition: target.edition().to_string(),
-            crate_types: target
-              .rustc_crate_types()
-              .iter()
-              .map(|t| (*t).to_string())
-              .collect(),
-          })
-          .collect();
-
-        let features = package
-          .summary()
-          .features()
-          .iter()
-          .map(|(feature, feature_values)| {
-            let our_feature_values = feature_values
-              .iter()
-              .map(|value| match value {
-                CargoFeatureValue::Feature(name) | CargoFeatureValue::Crate(name) => {
-                  name.to_string()
-                }
-                // This matches the current Serialize impl for CargoFeatureValue
-                CargoFeatureValue::CrateFeature(crate_name, feature_name) => {
-                  format!("{}/{}", crate_name.as_str(), feature_name.as_str())
-                }
-              })
-              .collect();
-
-            (feature.to_string(), our_feature_values)
-          })
-          .collect();
-
-        let pkg_source = package_id.source_id().into_url().to_string();
-
-        // Cargo use SHA256 for checksum so we can use them directly
-        let sha256 = package
-          .manifest()
-          .summary()
-          .checksum()
-          .map(ToString::to_string);
-
-        Package {
-          name: package.name().to_string(),
-          version: package.version().to_string(),
-          id: package_id.to_string(),
-          license: manifest_metadata.license.clone(),
-          license_file: manifest_metadata.license_file.clone(),
-          description: manifest_metadata.description.clone(),
-          source: Some(pkg_source),
-          manifest_path: package.manifest_path().display().to_string(),
-          edition: package.manifest().edition().to_string(),
-          dependencies,
-          targets,
-          features,
-          sha256,
-        }
-      })
-      .collect();
-
-    let workspace_members = ws
-      .members()
-      .map(|pkg| pkg.package_id().to_string())
-      .collect();
-
-    Ok(Metadata {
-      target_directory: ws.target_dir().display().to_string(),
-      version: 0, /* not generated via subcomand */
-      packages,
-      resolve,
-      workspace_members,
-    })
-  }
-}
-
-impl<'config> CargoInternalsMetadataFetcher<'config> {
-  pub fn new(cargo_config: &'config Config) -> CargoInternalsMetadataFetcher<'config> {
-    CargoInternalsMetadataFetcher { cargo_config }
   }
 }
 
