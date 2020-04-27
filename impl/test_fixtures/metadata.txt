@@ -6383,6 +6383,7 @@
     ],
     "root": "compile_with_bazel 0.1.0 (path+file:\/\/\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo)"
   },
+  "workspace_root": "\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo",
   "target_directory": "\/home\/alex\/projects\/cargo-raze-examples\/internal\/sources\/complicated_cargo_library\/cargo\/target",
   "version": 1
 }
