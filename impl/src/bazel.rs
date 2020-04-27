@@ -302,7 +302,7 @@ mod tests {
       }],
       build_script_target: None,
       source_details: SourceDetails { git_data: None },
-      sha256: None,
+//      sha256: None,
       lib_target_name: None,
     }
   }
@@ -333,7 +333,7 @@ mod tests {
       }],
       build_script_target: None,
       source_details: SourceDetails { git_data: None },
-      sha256: None,
+//      sha256: None,
       lib_target_name: Some("test_library".to_owned()),
     }
   }

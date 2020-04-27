@@ -14,19 +14,16 @@
 
 use cargo::CargoResult;
 
-use serde_json;
-use std::{collections::HashMap, fs, path::PathBuf, process::Command};
+use cargo_metadata::MetadataCommand;
+pub use cargo_metadata::{Dependency, DependencyKind, Metadata, Node, PackageId, Package, Resolve, Target};
 
-use crate::util::RazeError;
+use std::{fs, path::PathBuf};
+
 use tempdir::TempDir;
-
-use serde_derive::{Deserialize, Serialize};
 
 const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
 
-pub type PackageId = String;
 pub type Kind = String;
-pub type TargetSpec = String;
 
 /**
  * An entity that can retrive deserialized metadata for a Cargo Workspace.
@@ -44,111 +41,6 @@ pub trait MetadataFetcher {
 pub struct CargoWorkspaceFiles {
   pub toml_path: PathBuf,
   pub lock_path_opt: Option<PathBuf>,
-}
-
-/**
- * The metadata for a whole Cargo workspace.
- *
- * WARNING: Cargo-raze does not control the definition of this struct.
- * This struct mirrors Cargo's own [`ExportInfo`](
- * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/ops/cargo_output_metadata.rs#L78-L85)
- */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct Metadata {
-  pub packages: Vec<Package>,
-  pub resolve: Resolve,
-  pub workspace_members: Vec<PackageId>,
-  pub target_directory: String,
-  pub version: i64,
-}
-
-/**
- * The metadata for an individual Cargo crate.
- *
- * WARNING: Cargo-raze does not control the definition of this struct.
- * This struct mirrors Cargo's own [`SerializedPackage`](
- * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/core/package.rs#L32-L50)
- */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct Package {
-  pub name: String,
-  pub version: String,
-  pub id: PackageId,
-  pub license: Option<String>,
-  pub license_file: Option<String>,
-  pub description: Option<String>,
-  pub source: Option<String>,
-  pub dependencies: Vec<Dependency>,
-  pub targets: Vec<Target>,
-  pub features: HashMap<String, Vec<String>>,
-  pub manifest_path: String,
-  pub edition: String,
-  pub sha256: Option<String>,
-}
-
-/**
- * The metadata for a dependency (a reference connecting a crate to another crate).
- *
- * WARNING: Cargo-raze does not control the definition of this struct.
- * This struct mirrors Cargo's own [`SerializedDependency`](
- * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/core/dependency.rs#L49-L60)
- */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct Dependency {
-  pub name: String,
-  pub source: String,
-  pub req: String,
-  pub kind: Option<Kind>,
-  #[serde(default = "default_dependency_field_optional")]
-  pub optional: bool,
-  #[serde(default = "default_dependency_field_uses_default_features")]
-  pub uses_default_features: bool,
-  pub features: Vec<String>,
-  pub target: Option<TargetSpec>,
-}
-
-/**
- * The metadata for a compileable target.
- *
- * WARNING: Cargo-raze does not control the definition of this struct.
- * This struct mirrors Cargo's own [`SerializedTarget`](
- * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/core/manifest.rs#L188-L197)
- */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct Target {
-  pub name: String,
-  pub kind: Vec<String>,
-  pub crate_types: Vec<String>,
-  pub src_path: String,
-  pub edition: String,
-}
-
-/**
- * The metadata for a fully resolved dependency tree.
- *
- * WARNING: Cargo-raze does not control the definition of this struct.
- * This struct mirrors Cargo's own [`MetadataResolve`](
- * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/ops/cargo_output_metadata.rs#L91-L95)
- */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct Resolve {
-  pub nodes: Vec<ResolveNode>,
-  pub root: PackageId,
-}
-
-/**
- * The metadata for a single resolved entry in the full dependency tree.
- *
- * WARNING: Cargo-raze does not control the definition of this struct.
- * This struct mirrors Cargo's own [`Node`](
- * https://github.com/rust-lang/cargo/blob/0.40.0/src/cargo/ops/cargo_output_metadata.rs#L102-L106)
- */
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct ResolveNode {
-  pub id: PackageId,
-  pub dependencies: Vec<PackageId>,
-  // Optional due to recent feature addition in Cargo.
-  pub features: Option<Vec<String>>,
 }
 
 /** A workspace metadata fetcher that uses the Cargo Metadata subcommand. */
@@ -191,42 +83,16 @@ impl MetadataFetcher for CargoSubcommandMetadataFetcher {
       dir
     };
 
-    // Shell out to cargo
-    let exec_output = Command::new(&self.cargo_bin_path)
+    MetadataCommand::new()
+      .cargo_path(&self.cargo_bin_path)
       .current_dir(cargo_tempdir.path())
-      .args(&["metadata", "--format-version", "1"])
-      .output()?;
-
-    // Handle command errs
-    let stdout_str =
-      String::from_utf8(exec_output.stdout).unwrap_or_else(|_| "[unparsable bytes]".to_owned());
-
-    if !exec_output.status.success() {
-      let stderr_str =
-        String::from_utf8(exec_output.stderr).unwrap_or_else(|_| "[unparsable bytes]".to_owned());
-      println!("`cargo metadata` failed. Inspect Cargo.toml for issues!");
-      println!("stdout: {}", stdout_str);
-      println!("stderr: {}", stderr_str);
-      return Err(RazeError::Generic("Failed to run `cargo metadata`".to_owned()).into());
-    }
-
-    // Parse and yield metadata
-    serde_json::from_str::<Metadata>(&stdout_str).map_err(|e| e.into())
+      .other_options(&["--format-version".to_owned(), "1".to_owned()])
+      .exec()
+      .map_err(|e| e.into())
   }
 }
 
-fn default_dependency_field_optional() -> bool {
-  // Dependencies are implicitly required.
-  // TODO(acmcarther): Citation?
-  false
-}
-
-fn default_dependency_field_uses_default_features() -> bool {
-  // Default features are used by default
-  // Citation: https://doc.rust-lang.org/cargo/reference/manifest.html#rules
-  true
-}
-
+/*
 #[cfg(test)]
 pub mod testing {
   use super::*;
@@ -376,3 +242,4 @@ dependencies = [
     assert!(fetcher.fetch_metadata(files).is_err());
   }
 }
+*/
