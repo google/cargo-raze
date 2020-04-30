@@ -181,6 +181,16 @@ pub struct CrateSettings {
    */
   #[serde(default)]
   pub patches: Vec<String>,
+
+  /**
+   * Path to a file to be included as part of the generated BUILD file.
+   *
+   * For example, some crates include non-Rust code typically built through a build.rs script. They
+   * can be made compatible by manually writing appropriate Bazel targets, and including them into
+   * the crate through a combination of additional_build_file and additional_deps.
+   */
+  #[serde(default)]
+  pub additional_build_file: Option<String>,
 }
 
 /**
@@ -215,6 +225,7 @@ impl Default for CrateSettings {
       patch_cmds_win: Vec::new(),
       patch_tool: None,
       patches: Vec::new(),
+      additional_build_file: None,
     }
   }
 }
