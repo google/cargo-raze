@@ -16,7 +16,6 @@ EXAMPLES_DIR="$REPO_ROOT/examples"
 TEST_DIR="$REPO_ROOT/smoke_test"
 
 command_exists "cargo"
-command_exists "cargo-vendor"
 command_exists "bazel"
 
 # Clean the `examples` directory
@@ -66,7 +65,7 @@ done
 for ex in $(find $EXAMPLES_DIR/vendored -maxdepth 1 -type d | tail -n+2); do
     echo "Running Cargo Vendor for $(basename "$ex")"
     cd "$ex/cargo"
-    cargo-vendor vendor -xq
+    cargo vendor -q --versioned-dirs
 done
 
 # Ensure Cargo Raze build is up-to-date
