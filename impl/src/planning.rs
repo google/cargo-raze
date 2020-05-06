@@ -258,21 +258,19 @@ impl CrateCatalog {
     let resolve = metadata
       .resolve
       .as_ref()
-      .ok_or(RazeError::Generic("Missing resolve graph".into()))?;
+      .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?;
 
     let root_resolve_node = {
       let root_id = resolve
         .root
         .as_ref()
-        .ok_or(RazeError::Generic("Missing root in resolve graph".into()))?;
+        .ok_or_else(|| RazeError::Generic("Missing root in resolve graph".into()))?;
 
       resolve
         .nodes
         .iter()
         .find(|node| &node.id == root_id)
-        .ok_or(RazeError::Generic(
-          "Missing crate with root ID in resolve graph".into(),
-        ))?
+        .ok_or_else(|| RazeError::Generic("Missing crate with root ID in resolve graph".into()))?
     };
 
     let root_direct_deps = root_resolve_node
@@ -409,7 +407,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       .metadata
       .resolve
       .as_ref()
-      .ok_or(RazeError::Generic("Missing resolve graph".into()))?
+      .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?
       .nodes
       .iter()
       .sorted_by_key(|n| &n.id)
@@ -837,7 +835,7 @@ mod checks {
     let node_ids_missing_package_decl_iter = metadata
       .resolve
       .as_ref()
-      .ok_or(RazeError::Generic("Missing resolve graph".into()))?
+      .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?
       .nodes
       .iter()
       .filter(|n| !known_package_ids.contains(&n.id))
