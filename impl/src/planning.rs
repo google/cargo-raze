@@ -24,8 +24,6 @@ use cargo_platform::Platform;
 
 use itertools::Itertools;
 
-use semver::Version;
-
 use crate::{
   context::{
     BuildableDependency, BuildableTarget, CrateContext, GitRepo, LicenseData, SourceDetails,
@@ -36,7 +34,7 @@ use crate::{
     CargoWorkspaceFiles, DependencyKind, Metadata, MetadataFetcher, Node, Package, PackageId,
   },
   settings::{CrateSettings, GenMode, RazeSettings},
-  util::{PlatformDetails, RazeError, PLEASE_FILE_A_BUG},
+  util::{self, PlatformDetails, RazeError, PLEASE_FILE_A_BUG},
 };
 
 pub const VENDOR_DIR: &str = "vendor/";
@@ -83,7 +81,7 @@ pub struct CrateCatalogEntry {
   // The name of the package sanitized for use within Bazel
   sanitized_name: String,
   // The version of the package sanitized for use within Bazel
-  sanitized_version: Version,
+  sanitized_version: String,
   // A unique identifier for the package derived from Cargo usage of the form {name}-{version}
   package_ident: String,
   // Is this the root crate in the whole catalog?
@@ -143,7 +141,7 @@ impl CrateCatalogEntry {
     is_workspace_crate: bool,
   ) -> Self {
     let sanitized_name = package.name.replace("-", "_");
-    let sanitized_version = package.version.clone();
+    let sanitized_version = util::sanitize_ident(&package.version.clone().to_string());
 
     Self {
       package: package.clone(),
@@ -915,6 +913,7 @@ mod tests {
   };
 
   use super::*;
+  use semver::Version;
   use std::fs::File;
   use std::io::Write;
   use tempdir::TempDir;
@@ -1151,6 +1150,16 @@ dependencies = [
     let dep = planned_build.crate_contexts.get(0).unwrap();
     assert_eq!(dep.pkg_name, "test_dep");
     assert_eq!(dep.is_root_dependency, true);
+    assert!(
+      !dep.workspace_path_to_crate.contains("."),
+      "{} should be sanitized",
+      dep.workspace_path_to_crate
+    );
+    assert!(
+      !dep.workspace_path_to_crate.contains("-"),
+      "{} should be sanitized",
+      dep.workspace_path_to_crate
+    );
   }
 
   #[test]
