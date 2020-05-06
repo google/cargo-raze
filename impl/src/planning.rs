@@ -254,20 +254,25 @@ impl CrateCatalogEntry {
 
 impl CrateCatalog {
   /** Produces a CrateCatalog using the package entries from a metadata blob.*/
-  pub fn new(metadata: &Metadata) -> Self {
-    let resolve = metadata.resolve.as_ref().unwrap();
+  pub fn new(metadata: &Metadata) -> CargoResult<Self> {
+    let resolve = metadata
+      .resolve
+      .as_ref()
+      .ok_or(RazeError::Generic("Missing resolve graph".into()))?;
+
     let root_resolve_node = {
-      let root_id = resolve.root.as_ref().unwrap();
-      let root_resolve_node_opt = { resolve.nodes.iter().find(|node| &node.id == root_id) };
+      let root_id = resolve
+        .root
+        .as_ref()
+        .ok_or(RazeError::Generic("Missing root in resolve graph".into()))?;
 
-      if root_resolve_node_opt.is_none() {
-        eprintln!("Resolve was: {:#?}", resolve);
-        eprintln!("root_id: {:?}", resolve.root);
-        panic!("Resolve did not contain root crate!");
-      }
-
-      // UNWRAP: Guarded above
-      root_resolve_node_opt.unwrap()
+      resolve
+        .nodes
+        .iter()
+        .find(|node| &node.id == root_id)
+        .ok_or(RazeError::Generic(
+          "Missing crate with root ID in resolve graph".into(),
+        ))?
     };
 
     let root_direct_deps = root_resolve_node
@@ -301,10 +306,10 @@ impl CrateCatalog {
       assert!(None == existing_value);
     }
 
-    Self {
+    Ok(Self {
       entries,
       package_id_to_entries_idx,
-    }
+    })
   }
 
   /** Yields the internally contained entry set. */
@@ -331,7 +336,7 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
     platform_details: PlatformDetails,
   ) -> CargoResult<PlannedBuild> {
     let metadata = self.metadata_fetcher.fetch_metadata(&files)?;
-    let crate_catalog = CrateCatalog::new(&metadata);
+    let crate_catalog = CrateCatalog::new(&metadata)?;
 
     let workspace_subplanner = WorkspaceSubplanner {
       crate_catalog: &crate_catalog,
@@ -404,7 +409,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       .metadata
       .resolve
       .as_ref()
-      .unwrap()
+      .ok_or(RazeError::Generic("Missing resolve graph".into()))?
       .nodes
       .iter()
       .sorted_by_key(|n| &n.id)
@@ -832,7 +837,7 @@ mod checks {
     let node_ids_missing_package_decl_iter = metadata
       .resolve
       .as_ref()
-      .unwrap()
+      .ok_or(RazeError::Generic("Missing resolve graph".into()))?
       .nodes
       .iter()
       .filter(|n| !known_package_ids.contains(&n.id))
@@ -1028,16 +1033,16 @@ dependencies = [
   }
 
   #[test]
-  #[should_panic]
-  fn test_plan_build_missing_resolve_panics() {
+  fn test_plan_build_missing_resolve_returns_error() {
     let (_temp_dir, files) = make_basic_workspace();
     let mut fetcher = ResolveDroppingMetadataFetcher::default();
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let _ = planner.plan_build(
+    let res = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
       files,
       PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
     );
+    assert!(res.is_err());
   }
 
   // A wrapper around a MetadataFetcher which drops the
