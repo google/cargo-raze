@@ -6,8 +6,11 @@ version = "0.1.0"
 path = "fake_lib.rs"
 
 [dependencies]
-regex = "0.2.5"
-specs = "0.10.0"
+# Newer versions of libloading don't depend on C code anymore, so we're using an older version to
+# test additional_build_file.
+libloading = "=0.5.2"
+regex = "=0.2.5"
+specs = "=0.10.0"
 security-framework-sys = "0.2.2"
 
 [raze]
@@ -22,6 +25,10 @@ additional_flags = [
     "--cfg=use_proc_macro",
 ]
 
+[raze.crates.libloading.'0.5.2']
+additional_deps = [":global_static"]
+additional_build_file = "libloading_global_static.BUILD"
+
 [raze.crates.regex.'0.2.5']
 skipped_deps = [
   # This will break the regex crate
@@ -29,7 +36,7 @@ skipped_deps = [
 ]
 additional_deps = [
   # Add an unused dep
-  "@complicated__specs__0_10_0//:specs"
+  "@complicated_cargo_library__specs__0_10_0//:specs"
 ]
 additional_flags = [
   # Add an unused flag

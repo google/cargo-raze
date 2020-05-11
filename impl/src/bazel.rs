@@ -133,6 +133,28 @@ impl BazelRenderer {
   }
 }
 
+fn include_additional_build_file(
+  package: &CrateContext,
+  existing_contents: String,
+) -> CargoResult<String> {
+  match &package.raze_settings.additional_build_file {
+    Some(file_path) => {
+      let additional_content =
+        std::fs::read_to_string(file_path).map_err(|e| RazeError::Rendering {
+          crate_name_opt: Some(package.pkg_name.to_owned()),
+          message: format!("failed to read additional_build_file: {}", e),
+        })?;
+
+      Ok(format!(
+        "{}\n# Additional content from {}\n{}",
+        existing_contents, file_path, additional_content
+      ))
+    }
+
+    None => Ok(existing_contents),
+  }
+}
+
 impl BuildRenderer for BazelRenderer {
   fn render_planned_build(
     &mut self,
@@ -160,9 +182,12 @@ impl BuildRenderer for BazelRenderer {
             message: e.to_string(),
           })?;
 
+      let final_crate_build_file =
+        include_additional_build_file(package, rendered_crate_build_file)?;
+
       file_outputs.push(FileOutputs {
         path: format!("{}/{}", path_prefix, package.expected_build_path),
-        contents: rendered_crate_build_file,
+        contents: final_crate_build_file,
       })
     }
 
@@ -212,9 +237,12 @@ impl BuildRenderer for BazelRenderer {
           message: e.to_string(),
         })?;
 
+      let final_crate_build_file =
+        include_additional_build_file(package, rendered_crate_build_file)?;
+
       file_outputs.push(FileOutputs {
         path: format!("{}/{}", path_prefix, package.expected_build_path),
-        contents: rendered_crate_build_file,
+        contents: final_crate_build_file,
       })
     }
 
@@ -490,6 +518,46 @@ mod tests {
       crate_build_contents.contains("rust_library("),
       format!(
         "expected crate build contents to contain rust_library, but it just contained [{}]",
+        crate_build_contents
+      ),
+    )
+    .unwrap();
+  }
+
+  #[test]
+  fn additional_build_file_missing_file_failure() {
+    let render_result = BazelRenderer::new().render_planned_build(
+      &dummy_render_details("BUILD"),
+      &dummy_planned_build(vec![CrateContext {
+        raze_settings: CrateSettings {
+          additional_build_file: Some("non-existent-file".into()),
+          ..Default::default()
+        },
+        ..dummy_library_crate()
+      }]),
+    );
+
+    assert_that!(render_result, err());
+  }
+
+  #[test]
+  fn additional_build_file_included() {
+    let file_outputs = render_crates_for_test(vec![CrateContext {
+      raze_settings: CrateSettings {
+        additional_build_file: Some("README.md".into()),
+        ..Default::default()
+      },
+      ..dummy_library_crate()
+    }]);
+    let crate_build_contents = extract_contents_matching_path(
+      &file_outputs,
+      "./some_render_prefix/vendor/test-library-1.1.1/BUILD",
+    );
+
+    expect(
+      crate_build_contents.contains("# Additional content from README.md"),
+      format!(
+        "expected crate build contents to include additional_build_file, but it just contained [{}]",
         crate_build_contents
       ),
     )
