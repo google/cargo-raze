@@ -30,7 +30,9 @@ use crate::{
     WorkspaceContext,
   },
   license,
-  metadata::{CargoWorkspaceFiles, Metadata, MetadataFetcher, Package, ResolveNode},
+  metadata::{
+    CargoWorkspaceFiles, DependencyKind, Metadata, MetadataFetcher, Node, Package, PackageId,
+  },
   settings::{CrateSettings, GenMode, RazeSettings},
   util::{self, PlatformDetails, RazeError, PLEASE_FILE_A_BUG},
 };
@@ -93,7 +95,7 @@ pub struct CrateCatalogEntry {
 /** An intermediate structure that contains details about all crates in the workspace. */
 pub struct CrateCatalog {
   entries: Vec<CrateCatalogEntry>,
-  package_id_to_entries_idx: HashMap<String, usize>,
+  package_id_to_entries_idx: HashMap<PackageId, usize>,
 }
 
 /** The default implementation of a `BuildPlanner`. */
@@ -119,7 +121,7 @@ struct CrateSubplanner<'planner> {
   // Crate specific content
   crate_catalog_entry: &'planner CrateCatalogEntry,
   source_id: &'planner Option<SourceId>,
-  node: &'planner ResolveNode,
+  node: &'planner Node,
   crate_settings: &'planner CrateSettings,
   sha256: &'planner Option<String>,
 }
@@ -139,7 +141,7 @@ impl CrateCatalogEntry {
     is_workspace_crate: bool,
   ) -> Self {
     let sanitized_name = package.name.replace("-", "_");
-    let sanitized_version = util::sanitize_ident(&package.version);
+    let sanitized_version = util::sanitize_ident(&package.version.clone().to_string());
 
     Self {
       package: package.clone(),
@@ -250,25 +252,23 @@ impl CrateCatalogEntry {
 
 impl CrateCatalog {
   /** Produces a CrateCatalog using the package entries from a metadata blob.*/
-  pub fn new(metadata: &Metadata) -> Self {
+  pub fn new(metadata: &Metadata) -> CargoResult<Self> {
+    let resolve = metadata
+      .resolve
+      .as_ref()
+      .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?;
+
     let root_resolve_node = {
-      let root_resolve_node_opt = {
-        let root_id = &metadata.resolve.root;
-        metadata
-          .resolve
-          .nodes
-          .iter()
-          .find(|node| &node.id == root_id)
-      };
+      let root_id = resolve
+        .root
+        .as_ref()
+        .ok_or_else(|| RazeError::Generic("Missing root in resolve graph".into()))?;
 
-      if root_resolve_node_opt.is_none() {
-        eprintln!("Resolve was: {:#?}", metadata.resolve);
-        eprintln!("root_id: {:?}", metadata.resolve.root);
-        panic!("Resolve did not contain root crate!");
-      }
-
-      // UNWRAP: Guarded above
-      root_resolve_node_opt.unwrap()
+      resolve
+        .nodes
+        .iter()
+        .find(|node| &node.id == root_id)
+        .ok_or_else(|| RazeError::Generic("Missing crate with root ID in resolve graph".into()))?
     };
 
     let root_direct_deps = root_resolve_node
@@ -302,10 +302,10 @@ impl CrateCatalog {
       assert!(None == existing_value);
     }
 
-    Self {
+    Ok(Self {
       entries,
       package_id_to_entries_idx,
-    }
+    })
   }
 
   /** Yields the internally contained entry set. */
@@ -314,7 +314,7 @@ impl CrateCatalog {
   }
 
   /** Finds and returns the catalog entry with the given package id if present. */
-  pub fn entry_for_package_id(&self, package_id: &str) -> Option<&CrateCatalogEntry> {
+  pub fn entry_for_package_id(&self, package_id: &PackageId) -> Option<&CrateCatalogEntry> {
     self
       .package_id_to_entries_idx
       .get(package_id)
@@ -332,7 +332,7 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
     platform_details: PlatformDetails,
   ) -> CargoResult<PlannedBuild> {
     let metadata = self.metadata_fetcher.fetch_metadata(&files)?;
-    let crate_catalog = CrateCatalog::new(&metadata);
+    let crate_catalog = CrateCatalog::new(&metadata)?;
 
     let workspace_subplanner = WorkspaceSubplanner {
       crate_catalog: &crate_catalog,
@@ -394,7 +394,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       for package in lockfile.packages {
         if let Some(checksum) = package.checksum {
           package_to_checksum.insert(
-            (package.name.to_string(), package.version.to_string()),
+            (package.name.to_string(), package.version),
             checksum.to_string(),
           );
         }
@@ -404,6 +404,8 @@ impl<'planner> WorkspaceSubplanner<'planner> {
     self
       .metadata
       .resolve
+      .as_ref()
+      .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?
       .nodes
       .iter()
       .sorted_by_key(|n| &n.id)
@@ -441,7 +443,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
         let own_source_id = own_package
           .source
           .as_ref()
-          .map(|s| SourceId::from_url(&s).unwrap());
+          .map(|s| SourceId::from_url(&s.to_string()).unwrap());
 
         let crate_subplanner = CrateSubplanner {
           crate_catalog: &self.crate_catalog,
@@ -484,10 +486,10 @@ impl<'planner> CrateSubplanner<'planner> {
     }
     Ok(CrateContext {
       pkg_name: package.name.clone(),
-      pkg_version: package.version.clone(),
+      pkg_version: package.version.to_string(),
       edition: package.edition.clone(),
       licenses: self.produce_licenses(),
-      features: self.node.features.clone().unwrap_or_default(),
+      features: self.node.features.clone(),
       is_root_dependency: self.crate_catalog_entry.is_root_dep(),
       dependencies: normal_deps,
       build_dependencies: build_deps,
@@ -554,7 +556,7 @@ impl<'planner> CrateSubplanner<'planner> {
 
       let buildable_dependency = BuildableDependency {
         name: dep_package.name.clone(),
-        version: dep_package.version.clone(),
+        version: dep_package.version.to_string(),
         buildable_target,
       };
 
@@ -594,8 +596,8 @@ impl<'planner> CrateSubplanner<'planner> {
     for dep in &package.dependencies {
       if dep.target.is_some() {
         // UNWRAP: Safe from above check
-        let target_str = dep.target.as_ref().unwrap();
-        let platform = Platform::from_str(target_str)?;
+        let target_str = format!("{}", dep.target.as_ref().unwrap());
+        let platform = Platform::from_str(&target_str)?;
 
         // Skip this dep if it doesn't match our platform attributes
         if !platform.matches(&self.settings.target, platform_attrs.as_ref()) {
@@ -603,17 +605,17 @@ impl<'planner> CrateSubplanner<'planner> {
         }
       }
 
-      match dep.kind.as_deref() {
-        None | Some("normal") => normal_dep_names.push(dep.name.clone()),
-        Some("dev") => dev_dep_names.push(dep.name.clone()),
-        Some("build") => build_dep_names.push(dep.name.clone()),
-        something_else => {
+      match dep.kind {
+        DependencyKind::Normal => normal_dep_names.push(dep.name.clone()),
+        DependencyKind::Development => dev_dep_names.push(dep.name.clone()),
+        DependencyKind::Build => build_dep_names.push(dep.name.clone()),
+        _ => {
           return Err(
             RazeError::Planning {
               dependency_name_opt: Some(package.name.to_string()),
               message: format!(
                 "Unhandlable dependency type {:?} on {} detected! {}",
-                something_else, dep.name, PLEASE_FILE_A_BUG
+                dep.kind, dep.name, PLEASE_FILE_A_BUG
               ),
             }
             .into(),
@@ -674,10 +676,11 @@ impl<'planner> CrateSubplanner<'planner> {
 
       let package_root_path = self.find_package_root_for_manifest(&manifest_path)?;
 
-      // Trim the manifest_path parent dir from the target path (to give us the crate-local path)j
+      // Trim the manifest_path parent dir from the target path (to give us the crate-local path)
       let mut package_root_path_str = target
         .src_path
-        .clone()
+        .to_string_lossy()
+        .into_owned()
         // TODO(acmcarther): Is this even guaranteed to work? I don't think the `display` output
         // can be guaranteed....
         .split_off(package_root_path.display().to_string().len() + 1);
@@ -829,6 +832,8 @@ mod checks {
 
     let node_ids_missing_package_decl_iter = metadata
       .resolve
+      .as_ref()
+      .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?
       .nodes
       .iter()
       .filter(|n| !known_package_ids.contains(&n.id))
@@ -902,69 +907,81 @@ mod checks {
 #[cfg(test)]
 mod tests {
   use crate::{
-    metadata::{testing as metadata_testing, testing::StubMetadataFetcher, Metadata, ResolveNode},
+    metadata::{CargoMetadataFetcher, Metadata, MetadataFetcher},
     planning::checks,
     settings::testing as settings_testing,
   };
 
   use super::*;
+  use semver::Version;
+  use std::fs::File;
+  use std::io::Write;
+  use tempdir::TempDir;
 
-  const ROOT_NODE_IDX: usize = 0;
+  fn basic_toml() -> &'static str {
+    "
+[package]
+name = \"test\"
+version = \"0.0.1\"
 
-  fn dummy_workspace_files() -> CargoWorkspaceFiles {
-    CargoWorkspaceFiles {
-      toml_path: PathBuf::from("/tmp/Cargo.toml"),
-      lock_path_opt: None,
-    }
+[lib]
+path = \"not_a_file.rs\"
+    "
   }
 
-  fn minimum_valid_metadata() -> Metadata {
-    let mut metadata = metadata_testing::dummy_metadata();
-    metadata.resolve.root = "test_root_id".to_owned();
-    metadata.resolve.nodes.push(ResolveNode {
-      id: "test_root_id".to_owned(),
-      dependencies: Vec::new(),
-      features: None,
-    });
-    let mut test_package = metadata_testing::dummy_package();
-    test_package.name = "test_root".to_owned();
-    test_package.id = "test_root_id".to_owned();
-    metadata.packages.push(test_package);
-
-    metadata
+  fn basic_lock() -> &'static str {
+    "
+[[package]]
+name = \"test\"
+version = \"0.0.1\"
+dependencies = [
+]
+    "
   }
 
-  fn minimum_dependency_metadata() -> Metadata {
-    let mut metadata = minimum_valid_metadata();
-    metadata.resolve.nodes[ROOT_NODE_IDX]
-      .dependencies
-      .push("test_dep_id".to_owned());
-    metadata.resolve.nodes.push(ResolveNode {
-      id: "test_dep_id".to_owned(),
-      dependencies: Vec::new(),
-      features: None,
-    });
-    let mut test_dep = metadata_testing::dummy_package();
-    test_dep.name = "test_dep".to_owned();
-    test_dep.id = "test_dep_id".to_owned();
-    test_dep.version = "test_version".to_owned();
-    metadata.packages.push(test_dep);
-    metadata
+  fn make_basic_workspace() -> (TempDir, CargoWorkspaceFiles) {
+    let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
+    let toml_path = {
+      let path = dir.path().join("Cargo.toml");
+      let mut toml = File::create(&path).unwrap();
+      toml.write_all(basic_toml().as_bytes()).unwrap();
+      path
+    };
+    let lock_path = {
+      let path = dir.path().join("Cargo.lock");
+      let mut lock = File::create(&path).unwrap();
+      lock.write_all(basic_lock().as_bytes()).unwrap();
+      path
+    };
+    let files = CargoWorkspaceFiles {
+      lock_path_opt: Some(lock_path),
+      toml_path,
+    };
+
+    (dir, files)
   }
 
   #[test]
   #[allow(non_snake_case)]
   fn test__checks__check_resolve_matches_packages_fails_correctly() {
-    let mut mangled_metadata = minimum_valid_metadata();
-    mangled_metadata.packages = Vec::new();
-    assert!(checks::check_resolve_matches_packages(&mangled_metadata).is_err());
+    let (_temp_dir, files) = make_basic_workspace();
+    let mut fetcher = CargoMetadataFetcher::default();
+    let mut metadata = fetcher.fetch_metadata(&files).unwrap();
+
+    // Invalidate the metadata, expect an error.
+    metadata.packages = Vec::new();
+    assert!(checks::check_resolve_matches_packages(&metadata).is_err());
   }
 
   #[test]
   #[allow(non_snake_case)]
   fn test__checks__check_resolve_matches_packages_works_correctly() {
-    // Should not panic
-    checks::check_resolve_matches_packages(&minimum_valid_metadata()).unwrap();
+    let (_temp_dir, files) = make_basic_workspace();
+    let mut fetcher = CargoMetadataFetcher::default();
+    let metadata = fetcher.fetch_metadata(&files).unwrap();
+
+    // Should not panic with valid metadata.
+    checks::check_resolve_matches_packages(&metadata).unwrap();
   }
 
   #[test]
@@ -996,33 +1013,58 @@ mod tests {
     );
   }
 
+  // A wrapper around a MetadataFetcher which drops the
+  // resolved dependency graph from the acquired metadata.
+  #[derive(Default)]
+  struct ResolveDroppingMetadataFetcher {
+    fetcher: CargoMetadataFetcher,
+  }
+
+  impl MetadataFetcher for ResolveDroppingMetadataFetcher {
+    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> CargoResult<Metadata> {
+      let mut metadata = self.fetcher.fetch_metadata(&files)?;
+      assert!(metadata.resolve.is_some());
+      metadata.resolve = None;
+      Ok(metadata)
+    }
+  }
+
   #[test]
-  #[should_panic]
-  fn test_plan_build_missing_resolve_panics() {
-    let mut fetcher = StubMetadataFetcher::with_metadata(metadata_testing::dummy_metadata());
+  fn test_plan_build_missing_resolve_returns_error() {
+    let (_temp_dir, files) = make_basic_workspace();
+    let mut fetcher = ResolveDroppingMetadataFetcher::default();
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
-    let _ = planner.plan_build(
+    let res = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
-      dummy_workspace_files(),
+      files,
       PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
     );
+    assert!(res.is_err());
+  }
+
+  // A wrapper around a MetadataFetcher which drops the
+  // list of packages from the acquired metadata.
+  #[derive(Default)]
+  struct PackageDroppingMetadataFetcher {
+    fetcher: CargoMetadataFetcher,
+  }
+
+  impl MetadataFetcher for PackageDroppingMetadataFetcher {
+    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> CargoResult<Metadata> {
+      let mut metadata = self.fetcher.fetch_metadata(&files)?;
+      metadata.packages.clear();
+      Ok(metadata)
+    }
   }
 
   #[test]
   fn test_plan_build_missing_package_in_metadata() {
-    let mut metadata = metadata_testing::dummy_metadata();
-    metadata.resolve.root = "test_root".to_owned();
-    metadata.resolve.nodes.push(ResolveNode {
-      id: "test_root".to_owned(),
-      dependencies: Vec::new(),
-      features: None,
-    });
-
-    let mut fetcher = StubMetadataFetcher::with_metadata(metadata);
+    let (_temp_dir, files) = make_basic_workspace();
+    let mut fetcher = PackageDroppingMetadataFetcher::default();
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     let planned_build_res = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
-      dummy_workspace_files(),
+      files,
       PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
     );
 
@@ -1032,11 +1074,12 @@ mod tests {
 
   #[test]
   fn test_plan_build_minimum_workspace() {
-    let mut fetcher = StubMetadataFetcher::with_metadata(minimum_valid_metadata());
+    let (_temp_dir, files) = make_basic_workspace();
+    let mut fetcher = CargoMetadataFetcher::default();
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     let planned_build_res = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
-      dummy_workspace_files(),
+      files,
       PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
     );
 
@@ -1044,13 +1087,60 @@ mod tests {
     assert!(planned_build_res.unwrap().crate_contexts.is_empty());
   }
 
+  // A wrapper around a MetadataFetcher which injects a fake
+  // dependency into the acquired metadata.
+  #[derive(Default)]
+  struct DependencyInjectingMetadataFetcher {
+    fetcher: CargoMetadataFetcher,
+  }
+
+  impl MetadataFetcher for DependencyInjectingMetadataFetcher {
+    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> CargoResult<Metadata> {
+      let mut metadata = self.fetcher.fetch_metadata(&files)?;
+
+      // Phase 1: Add a dummy dependency to the dependency graph.
+
+      let mut resolve = metadata.resolve.take().unwrap();
+      let mut new_node = resolve.nodes[0].clone();
+      let name = "test_dep";
+      let name_id = "test_dep_id";
+
+      // Add the new dependency.
+      let id = PackageId {
+        repr: name_id.to_string(),
+      };
+      resolve.nodes[0].dependencies.push(id.clone());
+
+      // Add the new node representing the dependency.
+      new_node.id = id;
+      new_node.deps = Vec::new();
+      new_node.dependencies = Vec::new();
+      new_node.features = Vec::new();
+      resolve.nodes.push(new_node);
+      metadata.resolve = Some(resolve);
+
+      // Phase 2: Add the dummy dependency to the package list.
+
+      let mut new_package = metadata.packages[0].clone();
+      new_package.name = name.to_string();
+      new_package.id = PackageId {
+        repr: name_id.to_string(),
+      };
+      new_package.version = Version::new(0, 0, 1);
+      metadata.packages.push(new_package);
+
+      Ok(metadata)
+    }
+  }
+
   #[test]
   fn test_plan_build_minimum_root_dependency() {
-    let mut fetcher = StubMetadataFetcher::with_metadata(minimum_dependency_metadata());
+    let (_temp_dir, files) = make_basic_workspace();
+    let mut fetcher = DependencyInjectingMetadataFetcher::default();
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     let planned_build_res = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
-      dummy_workspace_files(),
+      files,
       PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
     );
 
@@ -1060,18 +1150,29 @@ mod tests {
     let dep = planned_build.crate_contexts.get(0).unwrap();
     assert_eq!(dep.pkg_name, "test_dep");
     assert_eq!(dep.is_root_dependency, true);
+    assert!(
+      !dep.workspace_path_to_crate.contains("."),
+      "{} should be sanitized",
+      dep.workspace_path_to_crate
+    );
+    assert!(
+      !dep.workspace_path_to_crate.contains("-"),
+      "{} should be sanitized",
+      dep.workspace_path_to_crate
+    );
   }
 
   #[test]
   fn test_plan_build_verifies_vendored_state() {
+    let (_temp_dir, files) = make_basic_workspace();
+    let mut fetcher = DependencyInjectingMetadataFetcher::default();
+
     let mut settings = settings_testing::dummy_raze_settings();
     settings.genmode = GenMode::Vendored;
-
-    let mut fetcher = StubMetadataFetcher::with_metadata(minimum_dependency_metadata());
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     let planned_build_res = planner.plan_build(
       &settings,
-      dummy_workspace_files(),
+      files,
       PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
     );
 
@@ -1079,30 +1180,50 @@ mod tests {
     assert!(planned_build_res.is_err());
   }
 
+  // A wrapper around a MetadataFetcher which injects a fake
+  // package into the workspace.
+  #[derive(Default)]
+  struct WorkspaceCrateMetadataFetcher {
+    fetcher: CargoMetadataFetcher,
+  }
+
+  impl MetadataFetcher for WorkspaceCrateMetadataFetcher {
+    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> CargoResult<Metadata> {
+      let mut metadata = self.fetcher.fetch_metadata(&files)?;
+
+      // Phase 1: Create a workspace package, add it to the packages list.
+
+      let name = "ws_crate_dep";
+      let name_id = "ws_crate_dep_id";
+      let id = PackageId {
+        repr: name_id.to_string(),
+      };
+      let mut new_package = metadata.packages[0].clone();
+      new_package.name = name.to_string();
+      new_package.id = id.clone();
+      new_package.version = Version::new(0, 0, 1);
+      metadata.packages.push(new_package);
+
+      // Phase 2: Add the workspace packages to the workspace members.
+
+      metadata.workspace_members.push(id);
+
+      Ok(metadata)
+    }
+  }
+
   #[test]
   fn test_plan_build_ignores_workspace_crates() {
+    let (_temp_dir, files) = make_basic_workspace();
+    let mut fetcher = WorkspaceCrateMetadataFetcher::default();
     let mut settings = settings_testing::dummy_raze_settings();
     settings.genmode = GenMode::Vendored;
 
-    let workspace_crates_metadata = {
-      let mut base_metadata = minimum_valid_metadata();
-      let mut workspace_crate_dep = metadata_testing::dummy_package();
-      workspace_crate_dep.name = "ws_crate_dep".to_owned();
-      workspace_crate_dep.id = "ws_crate_dep_id".to_owned();
-      workspace_crate_dep.version = "ws_crate_version".to_owned();
-      base_metadata.packages.push(workspace_crate_dep);
-      base_metadata
-        .workspace_members
-        .push("ws_crate_dep_id".to_owned());
-      base_metadata
-    };
-
-    let mut fetcher = StubMetadataFetcher::with_metadata(workspace_crates_metadata);
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     // N.B. This will fail if we don't correctly ignore workspace crates.
     let planned_build_res = planner.plan_build(
       &settings,
-      dummy_workspace_files(),
+      files,
       PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
     );
     assert!(planned_build_res.unwrap().crate_contexts.is_empty());

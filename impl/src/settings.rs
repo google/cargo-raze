@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use semver::Version;
 use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-pub type CrateSettingsPerVersion = HashMap<String, CrateSettings>;
+pub type CrateSettingsPerVersion = HashMap<Version, CrateSettings>;
 
 /**
  * A "deserializable struct" for the whole Cargo.toml
@@ -43,7 +44,7 @@ pub struct RazeSettings {
   #[serde(default = "default_raze_settings_field_target")]
   pub target: String,
 
-  /** Any crate-specific configuration. See CrateSetings for details. */
+  /** Any crate-specific configuration. See CrateSettings for details. */
   #[serde(default)]
   pub crates: HashMap<String, CrateSettingsPerVersion>,
 

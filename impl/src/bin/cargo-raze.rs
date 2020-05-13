@@ -24,7 +24,7 @@ use docopt::Docopt;
 
 use cargo_raze::{
   bazel::BazelRenderer,
-  metadata::{CargoSubcommandMetadataFetcher, CargoWorkspaceFiles, MetadataFetcher},
+  metadata::{CargoMetadataFetcher, CargoWorkspaceFiles, MetadataFetcher},
   planning::{BuildPlanner, BuildPlannerImpl},
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
   settings::{CargoToml, GenMode, RazeSettings},
@@ -94,8 +94,8 @@ fn real_main(options: &Options, cargo_config: &mut Config) -> CliResult {
   validate_settings(&mut settings)?;
 
   let mut metadata_fetcher: Box<dyn MetadataFetcher> = match options.flag_cargo_bin_path {
-    Some(ref p) => Box::new(CargoSubcommandMetadataFetcher::new(p)),
-    None => Box::new(CargoSubcommandMetadataFetcher::default()),
+    Some(ref p) => Box::new(CargoMetadataFetcher::new(p)),
+    None => Box::new(CargoMetadataFetcher::default()),
   };
   let mut planner = BuildPlannerImpl::new(&mut *metadata_fetcher);
 
