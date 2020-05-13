@@ -213,7 +213,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-raze"
-version = "0.2.12"
+version = "0.3.0"
 dependencies = [
  "cargo 0.42.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "cargo-lock 4.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
