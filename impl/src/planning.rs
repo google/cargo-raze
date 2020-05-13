@@ -19,6 +19,7 @@ use std::{
 };
 
 use cargo::{core::SourceId, CargoResult};
+use cargo_lock::lockfile::Lockfile;
 use cargo_platform::Platform;
 
 use itertools::Itertools;
@@ -106,6 +107,7 @@ struct WorkspaceSubplanner<'planner> {
   settings: &'planner RazeSettings,
   platform_details: &'planner PlatformDetails,
   crate_catalog: &'planner CrateCatalog,
+  files: &'planner CargoWorkspaceFiles,
 }
 
 /** An internal working planner for generating context for an individual crate. */
@@ -119,6 +121,7 @@ struct CrateSubplanner<'planner> {
   source_id: &'planner Option<SourceId>,
   node: &'planner ResolveNode,
   crate_settings: &'planner CrateSettings,
+  sha256: &'planner Option<String>,
 }
 
 /** A ready-to-be-rendered build, containing renderable context for each crate. */
@@ -328,7 +331,7 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
     files: CargoWorkspaceFiles,
     platform_details: PlatformDetails,
   ) -> CargoResult<PlannedBuild> {
-    let metadata = self.metadata_fetcher.fetch_metadata(files)?;
+    let metadata = self.metadata_fetcher.fetch_metadata(&files)?;
     let crate_catalog = CrateCatalog::new(&metadata);
 
     let workspace_subplanner = WorkspaceSubplanner {
@@ -336,6 +339,7 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
       metadata: &metadata,
       settings: &settings,
       platform_details: &platform_details,
+      files: &files,
     };
 
     workspace_subplanner.produce_planned_build()
@@ -379,6 +383,24 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
   /** Produces a crate context for each declared crate and dependency. */
   fn produce_crate_contexts(&self) -> CargoResult<Vec<CrateContext>> {
+    // Gather the checksums for all packages in the lockfile
+    // which have them.
+    //
+    // Store the representation of the package as a tuple
+    // of (name, version) -> checksum.
+    let mut package_to_checksum = HashMap::new();
+    if let Some(lock_path) = self.files.lock_path_opt.as_ref() {
+      let lockfile = Lockfile::load(lock_path.as_path())?;
+      for package in lockfile.packages {
+        if let Some(checksum) = package.checksum {
+          package_to_checksum.insert(
+            (package.name.to_string(), package.version.to_string()),
+            checksum.to_string(),
+          );
+        }
+      }
+    }
+
     self
       .metadata
       .resolve
@@ -389,6 +411,9 @@ impl<'planner> WorkspaceSubplanner<'planner> {
         // UNWRAP: Node packages guaranteed to exist by guard in `produce_planned_build`
         let own_crate_catalog_entry = self.crate_catalog.entry_for_package_id(&node.id).unwrap();
         let own_package = own_crate_catalog_entry.package();
+
+        let checksum_opt =
+          package_to_checksum.get(&(own_package.name.clone(), own_package.version.clone()));
 
         // Skip the root package (which is probably a junk package, by convention)
         if own_crate_catalog_entry.is_root() {
@@ -426,6 +451,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           source_id: &own_source_id,
           node: &node,
           crate_settings: &crate_settings,
+          sha256: &checksum_opt.map(|c| c.to_owned()),
         };
 
         Some(crate_subplanner.produce_context())
@@ -471,7 +497,7 @@ impl<'planner> CrateSubplanner<'planner> {
       raze_settings: self.crate_settings.clone(),
       source_details: self.produce_source_details(),
       expected_build_path: self.crate_catalog_entry.local_build_path(&self.settings),
-      sha256: package.sha256.clone(),
+      sha256: self.sha256.clone(),
       lib_target_name,
       targets,
     })
@@ -627,7 +653,8 @@ impl<'planner> CrateSubplanner<'planner> {
       return None;
     }
 
-    all_targets.iter()
+    all_targets
+      .iter()
       .position(|t| t.kind == "custom-build")
       .map(|idx| all_targets.remove(idx))
   }
