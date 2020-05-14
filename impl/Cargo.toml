@@ -22,9 +22,8 @@ name = "cargo-raze"
 path = "src/bin/cargo-raze.rs"
 
 [dependencies]
-failure = "0.1.5"
+anyhow = "1.0.30"
 docopt = "1.0.2"
-cargo = "0.42.0"
 cargo-lock = "4.0.1"
 cargo-platform = "0.1.0"
 cargo_metadata = "0.9.1"

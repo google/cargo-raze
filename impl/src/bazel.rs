@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo::CargoResult;
+use anyhow::Result;
+
 use tera::{self, Context, Tera};
 
 use crate::{
@@ -136,7 +137,7 @@ impl BazelRenderer {
 fn include_additional_build_file(
   package: &CrateContext,
   existing_contents: String,
-) -> CargoResult<String> {
+) -> Result<String> {
   match &package.raze_settings.additional_build_file {
     Some(file_path) => {
       let additional_content =
@@ -160,7 +161,7 @@ impl BuildRenderer for BazelRenderer {
     &mut self,
     render_details: &RenderDetails,
     planned_build: &PlannedBuild,
-  ) -> CargoResult<Vec<FileOutputs>> {
+  ) -> Result<Vec<FileOutputs>> {
     let &RenderDetails {
       ref path_prefix,
       ref buildfile_suffix,
@@ -210,7 +211,7 @@ impl BuildRenderer for BazelRenderer {
     &mut self,
     render_details: &RenderDetails,
     planned_build: &PlannedBuild,
-  ) -> CargoResult<Vec<FileOutputs>> {
+  ) -> Result<Vec<FileOutputs>> {
     let &RenderDetails {
       ref path_prefix,
       ref buildfile_suffix,

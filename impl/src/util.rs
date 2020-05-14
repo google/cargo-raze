@@ -13,14 +13,14 @@
 // limitations under the License.
 
 use std::{
-  error::Error as StdError,
   fmt,
   iter::Iterator,
   process::Command,
   str::{self, FromStr},
 };
 
-use cargo::{core::TargetKind, CargoResult};
+use anyhow::Result;
+
 use cargo_platform::Cfg;
 
 pub const PLEASE_FILE_A_BUG: &str =
@@ -44,7 +44,7 @@ pub enum RazeError {
   },
 }
 
-impl StdError for RazeError {}
+impl std::error::Error for RazeError {}
 
 impl fmt::Display for RazeError {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -103,7 +103,7 @@ pub struct LimitedResults<T> {
 }
 
 impl PlatformDetails {
-  pub fn new_using_rustc(target_triple: &str) -> CargoResult<Self> {
+  pub fn new_using_rustc(target_triple: &str) -> Result<Self> {
     let attrs = fetch_attrs(target_triple)?;
     Ok(Self::new(target_triple.to_owned(), attrs))
   }
@@ -163,24 +163,8 @@ pub fn sanitize_ident(ident: &str) -> String {
   slug::slugify(&ident).replace("-", "_")
 }
 
-/**
- * Extracts consistently named Strings for the provided `TargetKind`.
- *
- * TODO(acmcarther): Remove this shim borrowed from Cargo when Cargo is upgraded
- */
-pub fn kind_to_kinds(kind: &TargetKind) -> Vec<String> {
-  match *kind {
-    TargetKind::Lib(ref kinds) => kinds.iter().map(|k| k.crate_type().to_owned()).collect(),
-    TargetKind::Bin => vec!["bin".to_owned()],
-    TargetKind::ExampleBin | TargetKind::ExampleLib(_) => vec!["example".to_owned()],
-    TargetKind::Test => vec!["test".to_owned()],
-    TargetKind::CustomBuild => vec!["custom-build".to_owned()],
-    TargetKind::Bench => vec!["bench".to_owned()],
-  }
-}
-
 /** Gets the proper system attributes for the provided platform triple using rustc. */
-fn fetch_attrs(target: &str) -> CargoResult<Vec<Cfg>> {
+fn fetch_attrs(target: &str) -> Result<Vec<Cfg>> {
   let args = vec![format!("--target={}", target), "--print=cfg".to_owned()];
 
   let output = Command::new("rustc").args(&args).output()?;
