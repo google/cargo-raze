@@ -18,8 +18,10 @@ use std::{
   str::{self, FromStr},
 };
 
-use cargo::{core::SourceId, CargoResult};
+use anyhow::Result;
+
 use cargo_lock::lockfile::Lockfile;
+use cargo_lock::SourceId;
 use cargo_platform::Platform;
 
 use itertools::Itertools;
@@ -50,7 +52,7 @@ pub trait BuildPlanner {
     settings: &RazeSettings,
     files: CargoWorkspaceFiles,
     platform_details: PlatformDetails,
-  ) -> CargoResult<PlannedBuild>;
+  ) -> Result<PlannedBuild>;
 }
 
 /** A set of named dependencies (without version) derived from a package manifest. */
@@ -252,7 +254,7 @@ impl CrateCatalogEntry {
 
 impl CrateCatalog {
   /** Produces a CrateCatalog using the package entries from a metadata blob.*/
-  pub fn new(metadata: &Metadata) -> CargoResult<Self> {
+  pub fn new(metadata: &Metadata) -> Result<Self> {
     let resolve = metadata
       .resolve
       .as_ref()
@@ -330,7 +332,7 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
     settings: &RazeSettings,
     files: CargoWorkspaceFiles,
     platform_details: PlatformDetails,
-  ) -> CargoResult<PlannedBuild> {
+  ) -> Result<PlannedBuild> {
     let metadata = self.metadata_fetcher.fetch_metadata(&files)?;
     let crate_catalog = CrateCatalog::new(&metadata)?;
 
@@ -354,7 +356,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
 
 impl<'planner> WorkspaceSubplanner<'planner> {
   /** Produces a planned build using internal state. */
-  pub fn produce_planned_build(&self) -> CargoResult<PlannedBuild> {
+  pub fn produce_planned_build(&self) -> Result<PlannedBuild> {
     checks::check_resolve_matches_packages(&self.metadata)?;
 
     if self.settings.genmode != GenMode::Remote {
@@ -382,7 +384,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
   }
 
   /** Produces a crate context for each declared crate and dependency. */
-  fn produce_crate_contexts(&self) -> CargoResult<Vec<CrateContext>> {
+  fn produce_crate_contexts(&self) -> Result<Vec<CrateContext>> {
     // Gather the checksums for all packages in the lockfile
     // which have them.
     //
@@ -464,7 +466,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
 impl<'planner> CrateSubplanner<'planner> {
   /** Builds a crate context from internal state. */
-  fn produce_context(&self) -> CargoResult<CrateContext> {
+  fn produce_context(&self) -> Result<CrateContext> {
     let DependencySet {
       build_deps,
       dev_deps,
@@ -517,7 +519,7 @@ impl<'planner> CrateSubplanner<'planner> {
   }
 
   /** Generates the set of dependencies for the contained crate. */
-  fn produce_deps(&self) -> CargoResult<DependencySet> {
+  fn produce_deps(&self) -> Result<DependencySet> {
     let DependencyNames {
       build_dep_names,
       dev_dep_names,
@@ -585,7 +587,7 @@ impl<'planner> CrateSubplanner<'planner> {
   }
 
   /** Yields the list of dependencies as described by the manifest (without version). */
-  fn identify_named_deps(&self) -> CargoResult<DependencyNames> {
+  fn identify_named_deps(&self) -> Result<DependencyNames> {
     // Resolve dependencies into types
     let mut build_dep_names = Vec::new();
     let mut dev_dep_names = Vec::new();
@@ -634,10 +636,14 @@ impl<'planner> CrateSubplanner<'planner> {
   /** Generates source details for internal crate. */
   fn produce_source_details(&self) -> SourceDetails {
     SourceDetails {
-      git_data: self.source_id.filter(|id| id.is_git()).map(|id| GitRepo {
-        remote: id.url().to_string(),
-        commit: id.precise().unwrap().to_owned(),
-      }),
+      git_data: self
+        .source_id
+        .as_ref()
+        .filter(|id| id.is_git())
+        .map(|id| GitRepo {
+          remote: id.url().to_string(),
+          commit: id.precise().unwrap().to_owned(),
+        }),
     }
   }
 
@@ -667,7 +673,7 @@ impl<'planner> CrateSubplanner<'planner> {
    * This function may access the file system. See #find_package_root_for_manifest for more
    * details.
    */
-  fn produce_targets(&self) -> CargoResult<Vec<BuildableTarget>> {
+  fn produce_targets(&self) -> Result<Vec<BuildableTarget>> {
     let mut targets = Vec::new();
     let package = self.crate_catalog_entry.package();
     for target in &package.targets {
@@ -712,9 +718,9 @@ impl<'planner> CrateSubplanner<'planner> {
    * often aren't solely the crate of interest, but rather a repository that contains the crate of
    * interest among others.
    */
-  fn find_package_root_for_manifest(&self, manifest_path: &PathBuf) -> CargoResult<PathBuf> {
+  fn find_package_root_for_manifest(&self, manifest_path: &PathBuf) -> Result<PathBuf> {
     let has_git_repo_root = {
-      let is_git = self.source_id.map_or(false, SourceId::is_git);
+      let is_git = self.source_id.as_ref().map_or(false, SourceId::is_git);
       is_git && self.settings.genmode == GenMode::Remote
     };
 
@@ -777,7 +783,7 @@ mod checks {
     env, fs,
   };
 
-  use cargo::util::CargoResult;
+  use anyhow::Result;
 
   use crate::{
     metadata::{Metadata, Package, PackageId},
@@ -791,7 +797,7 @@ mod checks {
   const MAX_DISPLAYED_MISSING_RESOLVE_PACKAGES: usize = 5;
 
   // Verifies that all provided packages are vendored (in VENDOR_DIR relative to CWD)
-  pub fn check_all_vendored(crate_catalog_entries: &[CrateCatalogEntry]) -> CargoResult<()> {
+  pub fn check_all_vendored(crate_catalog_entries: &[CrateCatalogEntry]) -> Result<()> {
     let missing_package_ident_iter = crate_catalog_entries
       .iter()
       // Root does not need to be vendored -- usually it is a wrapper package.
@@ -823,7 +829,7 @@ mod checks {
       }.into())
   }
 
-  pub fn check_resolve_matches_packages(metadata: &Metadata) -> CargoResult<()> {
+  pub fn check_resolve_matches_packages(metadata: &Metadata) -> Result<()> {
     let known_package_ids = metadata
       .packages
       .iter()
@@ -1021,7 +1027,7 @@ dependencies = [
   }
 
   impl MetadataFetcher for ResolveDroppingMetadataFetcher {
-    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> CargoResult<Metadata> {
+    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
       let mut metadata = self.fetcher.fetch_metadata(&files)?;
       assert!(metadata.resolve.is_some());
       metadata.resolve = None;
@@ -1050,7 +1056,7 @@ dependencies = [
   }
 
   impl MetadataFetcher for PackageDroppingMetadataFetcher {
-    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> CargoResult<Metadata> {
+    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
       let mut metadata = self.fetcher.fetch_metadata(&files)?;
       metadata.packages.clear();
       Ok(metadata)
@@ -1095,7 +1101,7 @@ dependencies = [
   }
 
   impl MetadataFetcher for DependencyInjectingMetadataFetcher {
-    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> CargoResult<Metadata> {
+    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
       let mut metadata = self.fetcher.fetch_metadata(&files)?;
 
       // Phase 1: Add a dummy dependency to the dependency graph.
@@ -1188,7 +1194,7 @@ dependencies = [
   }
 
   impl MetadataFetcher for WorkspaceCrateMetadataFetcher {
-    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> CargoResult<Metadata> {
+    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
       let mut metadata = self.fetcher.fetch_metadata(&files)?;
 
       // Phase 1: Create a workspace package, add it to the packages list.

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo::CargoResult;
+use std::{fs, path::PathBuf};
+
+use anyhow::Result;
 
 use cargo_metadata::MetadataCommand;
 pub use cargo_metadata::{DependencyKind, Metadata, Node, Package, PackageId};
-
-use std::{fs, path::PathBuf};
 
 use tempdir::TempDir;
 
@@ -30,7 +30,7 @@ const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
  * <https://github.com/rust-lang/cargo/pull/5122>
  */
 pub trait MetadataFetcher {
-  fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> CargoResult<Metadata>;
+  fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata>;
 }
 
 /** The local Cargo workspace files to be used for build planning .*/
@@ -59,7 +59,7 @@ impl Default for CargoMetadataFetcher {
 }
 
 impl MetadataFetcher for CargoMetadataFetcher {
-  fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> CargoResult<Metadata> {
+  fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
     assert!(files.toml_path.is_file());
     assert!(files.lock_path_opt.as_ref().map_or(true, |p| p.is_file()));
 
