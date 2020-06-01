@@ -543,8 +543,7 @@ impl<'planner> CrateSubplanner<'planner> {
     let mut build_deps = Vec::new();
     let mut dev_deps = Vec::new();
     let mut normal_deps = Vec::new();
-    // Explicitly typed due to compiler error.
-    let mut renamed_deps: HashMap<String, String> = HashMap::new();
+    let mut renamed_deps = HashMap::new();
 
     let all_skipped_deps = self
       .crate_settings
@@ -576,20 +575,11 @@ impl<'planner> CrateSubplanner<'planner> {
       let buildable_dependency = BuildableDependency {
         name: dep_package.name.clone(),
         version: dep_package.version.to_string(),
-        buildable_target,
+        buildable_target: buildable_target.clone(),
       };
 
       if build_dep_names.contains(&dep_package.name) {
         build_deps.push(buildable_dependency.clone());
-        // Only add renamed build deps to the HashMap
-        let package_alias = renamed_dep_names.get(&dep_package.name);
-        if package_alias.is_some() {
-          // UNWRAP: Safe from check above.
-          renamed_deps.insert(
-            buildable_dependency.buildable_target.clone(),
-            package_alias.unwrap().clone(),
-          );
-        }
       }
 
       if dev_dep_names.contains(&dep_package.name) {
@@ -598,6 +588,15 @@ impl<'planner> CrateSubplanner<'planner> {
 
       if normal_dep_names.contains(&dep_package.name) {
         normal_deps.push(buildable_dependency);
+        // Only add renamed normal deps to the HashMap
+        let package_alias = renamed_dep_names.get(&dep_package.name);
+        if package_alias.is_some() {
+          // UNWRAP: Safe from check above.
+          renamed_deps.insert(
+            buildable_target.clone(),
+            package_alias.unwrap().replace("-", "_"),
+          );
+        }        
       }
     }
 
