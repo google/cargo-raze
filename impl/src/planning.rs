@@ -590,13 +590,12 @@ impl<'planner> CrateSubplanner<'planner> {
         normal_deps.push(buildable_dependency);
         // Only add renamed normal deps to the HashMap
         let package_alias = renamed_dep_names.get(&dep_package.name);
-        if package_alias.is_some() {
-          // UNWRAP: Safe from check above.
+        package_alias.as_ref().map(|alias| {
           renamed_deps.insert(
             buildable_target.clone(),
-            package_alias.unwrap().replace("-", "_"),
+            alias.replace("-", "_"),
           );
-        }        
+        });      
       }
     }
 
@@ -655,13 +654,12 @@ impl<'planner> CrateSubplanner<'planner> {
       }
 
       // Check if the dependency has been renamed
-      if dep.rename.is_some() {
-        // UNWRAP: Safe from above check
+      dep.rename.as_ref().map(|rename| {
         renamed_dep_names.insert(
           dep.name.clone(),
-          format!("{}", dep.rename.as_ref().unwrap()),
+          format!("{}", rename),
         );
-      }
+      });
     }
 
     Ok(DependencyNames {
