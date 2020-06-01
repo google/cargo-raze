@@ -23,8 +23,6 @@ use crate::{
   util::RazeError,
 };
 
-use std::collections::HashMap;
-
 #[derive(Default)]
 pub struct BazelRenderer {
   internal_renderer: Tera,
