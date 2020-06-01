@@ -37,7 +37,7 @@ rust_library(
         "{{feature}}",
         {%- endfor %}
     ],
-    {%- if crate.aliased_dependencies | length is not 0 %}
+    {%- if crate.aliased_dependencies | length != 0 %}
     aliases = {
         {%- for alias in aliased_dependencies %}
         {{alias}}
