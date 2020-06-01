@@ -65,6 +65,7 @@ pub struct CrateContext {
   pub dependencies: Vec<BuildableDependency>,
   pub build_dependencies: Vec<BuildableDependency>,
   pub dev_dependencies: Vec<BuildableDependency>,
+  pub aliased_dependencies: Vec<String>,
   pub is_root_dependency: bool,
   pub targets: Vec<BuildableTarget>,
   pub build_script_target: Option<BuildableTarget>,
