@@ -39,7 +39,7 @@ rust_binary(
     {%- if crate.aliased_dependencies | length != 0 %}
     aliases = {
         {%- for alias in crate.aliased_dependencies %}
-        {{alias}}
+        "{{alias.target}}": "{{alias.alias}}",
         {%- endfor %}
     },
     {%- endif %}
