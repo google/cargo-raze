@@ -28,8 +28,8 @@ use itertools::Itertools;
 
 use crate::{
   context::{
-    BuildableDependency, BuildableTarget, CrateContext, GitRepo, LicenseData, SourceDetails,
-    WorkspaceContext,
+    BuildableDependency, BuildableTarget, CrateContext, DependencyAlias, GitRepo, LicenseData,
+    SourceDetails, WorkspaceContext,
   },
   license,
   metadata::{
@@ -77,7 +77,7 @@ struct DependencySet {
   // Dependencies that are required for tests
   dev_deps: Vec<BuildableDependency>,
   // Dependencies that have been renamed and need to be aliased in the build rule
-  aliased_deps: Vec<String>,
+  aliased_deps: Vec<DependencyAlias>,
 }
 
 /** An entry in the Crate catalog for a single crate. */
@@ -584,7 +584,10 @@ impl<'planner> CrateSubplanner<'planner> {
         normal_deps.push(buildable_dependency);
         // Only add aliased normal deps to the Vec
         if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
-          aliased_deps.push(format!("\"{}\": \"{}\",", buildable_target.clone(), util::sanitize_name(alias)));
+          aliased_deps.push(DependencyAlias{
+            target: buildable_target.clone(),
+            alias: util::sanitize_name(alias),
+          })
         }     
       }
     }
