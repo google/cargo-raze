@@ -63,8 +63,8 @@ struct DependencyNames {
   build_dep_names: Vec<String>,
   // Dependencies that are required for tests
   dev_dep_names: Vec<String>,
-  // Dependencies that have been renamed
-  renamed_dep_names: HashMap<String, String>,
+  // Dependencies that have been renamed and need to be aliased in the build rule
+  aliased_dep_names: HashMap<String, String>,
 }
 
 // TODO(acmcarther): Remove this struct -- move it into CrateContext.
@@ -77,7 +77,7 @@ struct DependencySet {
   // Dependencies that are required for tests
   dev_deps: Vec<BuildableDependency>,
   // Dependencies that have been renamed and need to be aliased in the build rule
-  renamed_deps: HashMap<String, String>,
+  aliased_deps: Vec<String>,
 }
 
 /** An entry in the Crate catalog for a single crate. */
@@ -475,7 +475,7 @@ impl<'planner> CrateSubplanner<'planner> {
       build_deps,
       dev_deps,
       normal_deps,
-      renamed_deps,
+      aliased_deps,
     } = self.produce_deps()?;
 
     let mut targets = self.produce_targets()?;
@@ -492,12 +492,6 @@ impl<'planner> CrateSubplanner<'planner> {
       }
     }
 
-    // Take the hashmap and create a vector of strings that will be inserted into the template.
-    let mut aliased_dependencies = Vec::new();
-    for (name, alias) in &renamed_deps {
-      aliased_dependencies.push(format!("\"{}\": \"{}\",", name.clone(), alias.clone()));
-    }
-
     Ok(CrateContext {
       pkg_name: package.name.clone(),
       pkg_version: package.version.to_string(),
@@ -508,7 +502,7 @@ impl<'planner> CrateSubplanner<'planner> {
       dependencies: normal_deps,
       build_dependencies: build_deps,
       dev_dependencies: dev_deps,
-      aliased_dependencies,
+      aliased_dependencies: aliased_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings),
       build_script_target: build_script_target_opt,
       raze_settings: self.crate_settings.clone(),
@@ -537,13 +531,13 @@ impl<'planner> CrateSubplanner<'planner> {
       build_dep_names,
       dev_dep_names,
       normal_dep_names,
-      renamed_dep_names,
+      aliased_dep_names,
     } = self.identify_named_deps()?;
 
     let mut build_deps = Vec::new();
     let mut dev_deps = Vec::new();
     let mut normal_deps = Vec::new();
-    let mut renamed_deps = HashMap::new();
+    let mut aliased_deps = Vec::new();
 
     let all_skipped_deps = self
       .crate_settings
@@ -588,14 +582,10 @@ impl<'planner> CrateSubplanner<'planner> {
 
       if normal_dep_names.contains(&dep_package.name) {
         normal_deps.push(buildable_dependency);
-        // Only add renamed normal deps to the HashMap
-        let package_alias = renamed_dep_names.get(&dep_package.name);
-        package_alias.as_ref().map(|alias| {
-          renamed_deps.insert(
-            buildable_target.clone(),
-            alias.replace("-", "_"),
-          );
-        });      
+        // Only add aliased normal deps to the Vec
+        if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
+          aliased_deps.push(format!("\"{}\": \"{}\",", buildable_target.clone(), util::sanitize_name(alias)));
+        }     
       }
     }
 
@@ -607,7 +597,7 @@ impl<'planner> CrateSubplanner<'planner> {
       build_deps,
       dev_deps,
       normal_deps,
-      renamed_deps,
+      aliased_deps,
     })
   }
 
@@ -618,8 +608,8 @@ impl<'planner> CrateSubplanner<'planner> {
     let mut dev_dep_names = Vec::new();
     let mut normal_dep_names = Vec::new();
 
-    // Store renamed dependencies in a HashMap
-    let mut renamed_dep_names = HashMap::new();
+    // Store aliased dependencies in a HashMap
+    let mut aliased_dep_names = HashMap::new();
 
     let platform_attrs = self.platform_details.attrs();
     let package = self.crate_catalog_entry.package();
@@ -654,19 +644,16 @@ impl<'planner> CrateSubplanner<'planner> {
       }
 
       // Check if the dependency has been renamed
-      dep.rename.as_ref().map(|rename| {
-        renamed_dep_names.insert(
-          dep.name.clone(),
-          format!("{}", rename),
-        );
-      });
+      if let Some(alias) = dep.rename.as_ref() {
+        aliased_dep_names.insert(dep.name.clone(), alias.clone());
+      }
     }
 
     Ok(DependencyNames {
       build_dep_names,
       dev_dep_names,
       normal_dep_names,
-      renamed_dep_names,
+      aliased_dep_names,
     })
   }
 

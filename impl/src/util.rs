@@ -163,6 +163,10 @@ pub fn sanitize_ident(ident: &str) -> String {
   slug::slugify(&ident).replace("-", "_")
 }
 
+pub fn sanitize_name(name: &str) -> String {
+  slug::slugify(&name).replace("-", "_")
+}
+
 /** Gets the proper system attributes for the provided platform triple using rustc. */
 fn fetch_attrs(target: &str) -> Result<Vec<Cfg>> {
   let args = vec![format!("--target={}", target), "--print=cfg".to_owned()];
