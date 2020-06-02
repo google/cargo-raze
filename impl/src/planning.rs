@@ -586,7 +586,7 @@ impl<'planner> CrateSubplanner<'planner> {
         if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
           aliased_deps.push(DependencyAlias{
             target: buildable_target.clone(),
-            alias: util::sanitize_name(alias),
+            alias: util::sanitize_ident(alias),
           })
         }     
       }
