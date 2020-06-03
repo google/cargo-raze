@@ -109,6 +109,10 @@ pub struct CrateSettings {
   #[serde(default)]
   pub additional_flags: Vec<String>,
 
+  /** Environment variables to be added to the crate compilation process. */
+  #[serde(default)]
+  pub additional_env: HashMap<String, String>,
+
   /**
    * Whether or not to generate the build script that goes with this crate.
    *
@@ -218,6 +222,7 @@ impl Default for CrateSettings {
       skipped_deps: Vec::new(),
       extra_aliased_targets: Vec::new(),
       additional_flags: Vec::new(),
+      additional_env: HashMap::new(),
       gen_buildrs: default_crate_settings_field_gen_buildrs(),
       data_attr: default_crate_settings_field_data_attr(),
       buildrs_additional_environment_variables: Vec::new(),
