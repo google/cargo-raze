@@ -24,13 +24,13 @@ rust_binary(
         "{{flag}}",
         {%- endfor %}
     ],
-    {% if crate.raze_settings.additional_env %}
+    {%- if crate.raze_settings.additional_env %}
     rustc_env = {
-        {% for key, value in crate.raze_settings.additional_env %}
+        {%- for key, value in crate.raze_settings.additional_env %}
         "{{key}}": "{{value}}",
-        {% endfor %}
+        {%- endfor %}
     },
-    {% endif %}
+    {%- endif %}
     {%- if crate.build_script_target %}
     out_dir_tar = ":{{ crate.pkg_name | replace(from="-", to="_")}}_build_script_executor",
     {%- endif %}
