@@ -972,26 +972,33 @@ dependencies = [
     "
   }
 
-  fn make_basic_workspace() -> (TempDir, CargoWorkspaceFiles) {
+  fn make_workspace(toml_file: &'static str, lock_file: Option<&'static str>) -> (TempDir, CargoWorkspaceFiles) {
     let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
     let toml_path = {
       let path = dir.path().join("Cargo.toml");
       let mut toml = File::create(&path).unwrap();
-      toml.write_all(basic_toml().as_bytes()).unwrap();
+      toml.write_all(toml_file.as_bytes()).unwrap();
       path
     };
-    let lock_path = {
-      let path = dir.path().join("Cargo.lock");
-      let mut lock = File::create(&path).unwrap();
-      lock.write_all(basic_lock().as_bytes()).unwrap();
-      path
+    let lock_path = match lock_file {
+      Some(lock_file) => {
+        let path = dir.path().join("Cargo.lock");
+        let mut lock = File::create(&path).unwrap();
+        lock.write_all(lock_file.as_bytes()).unwrap();
+        Some(path)
+      },
+      None => None,
     };
     let files = CargoWorkspaceFiles {
-      lock_path_opt: Some(lock_path),
+      lock_path_opt: lock_path,
       toml_path,
     };
 
     (dir, files)
+  }
+
+  fn make_basic_workspace() -> (TempDir, CargoWorkspaceFiles) {
+    make_workspace(basic_toml(), Some(basic_lock()))
   }
 
   #[test]
@@ -1260,6 +1267,50 @@ dependencies = [
       PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
     );
     assert!(planned_build_res.unwrap().crate_contexts.is_empty());
+  }
+
+  #[test]
+  fn test_plan_build_produces_aliased_dependencies() {
+    let toml_file =     "
+    [package]
+    name = \"advanced_toml\"
+    version = \"0.1.0\"
+    
+    [lib]
+    path = \"not_a_file.rs\"
+
+    [dependencies]
+    actix-web = \"2.0.0\"
+    actix-rt = \"1.0.0\"
+        ";
+    let (_temp_dir, files) = make_workspace(toml_file, None);
+    let mut fetcher = WorkspaceCrateMetadataFetcher::default();
+    let mut settings = settings_testing::dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    // N.B. This will fail if we don't correctly ignore workspace crates.
+    let planned_build_res = planner.plan_build(
+      &settings,
+      files,
+      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+    );
+
+    let crates_with_aliased_deps: Vec<CrateContext> = planned_build_res.unwrap().crate_contexts.into_iter().filter(|krate| krate.aliased_dependencies.len() != 0).collect();
+    
+    // Vec length shouldn't be 0
+    assert!(crates_with_aliased_deps.len() != 0, "Crates with aliased dependencies is 0");
+
+    // Find the actix-web crate
+    let actix_web_position = crates_with_aliased_deps.iter().position(|krate| krate.pkg_name == "actix-http");
+    assert!(actix_web_position.is_some());
+
+    // Get crate context using computed position
+    let actix_http_context = crates_with_aliased_deps[actix_web_position.unwrap()].clone();
+
+    assert!(actix_http_context.aliased_dependencies.len() == 1);
+    assert!(actix_http_context.aliased_dependencies[0].target ==  "@raze_test__failure__0_1_8//:failure");
+    assert!(actix_http_context.aliased_dependencies[0].alias == "fail_ure");
   }
 
   // TODO(acmcarther): Add tests:
