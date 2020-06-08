@@ -23,6 +23,12 @@ pub struct BuildableDependency {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
+pub struct DependencyAlias {
+  pub target: String,
+  pub alias: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableTarget {
   pub name: String,
   pub kind: String,
@@ -65,6 +71,7 @@ pub struct CrateContext {
   pub dependencies: Vec<BuildableDependency>,
   pub build_dependencies: Vec<BuildableDependency>,
   pub dev_dependencies: Vec<BuildableDependency>,
+  pub aliased_dependencies: Vec<DependencyAlias>,
   pub is_root_dependency: bool,
   pub targets: Vec<BuildableTarget>,
   pub build_script_target: Option<BuildableTarget>,

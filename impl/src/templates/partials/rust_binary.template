@@ -43,4 +43,11 @@ rust_binary(
         "{{feature}}",
         {%- endfor %}
     ],
+    {%- if crate.aliased_dependencies | length != 0 %}
+    aliases = {
+        {%- for alias in crate.aliased_dependencies %}
+        "{{alias.target}}": "{{alias.alias}}",
+        {%- endfor %}
+    },
+    {%- endif %}
 )

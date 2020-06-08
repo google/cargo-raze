@@ -28,8 +28,8 @@ use itertools::Itertools;
 
 use crate::{
   context::{
-    BuildableDependency, BuildableTarget, CrateContext, GitRepo, LicenseData, SourceDetails,
-    WorkspaceContext,
+    BuildableDependency, BuildableTarget, CrateContext, DependencyAlias, GitRepo, LicenseData,
+    SourceDetails, WorkspaceContext,
   },
   license,
   metadata::{
@@ -63,6 +63,8 @@ struct DependencyNames {
   build_dep_names: Vec<String>,
   // Dependencies that are required for tests
   dev_dep_names: Vec<String>,
+  // Dependencies that have been renamed and need to be aliased in the build rule
+  aliased_dep_names: HashMap<String, String>,
 }
 
 // TODO(acmcarther): Remove this struct -- move it into CrateContext.
@@ -74,6 +76,8 @@ struct DependencySet {
   build_deps: Vec<BuildableDependency>,
   // Dependencies that are required for tests
   dev_deps: Vec<BuildableDependency>,
+  // Dependencies that have been renamed and need to be aliased in the build rule
+  aliased_deps: Vec<DependencyAlias>,
 }
 
 /** An entry in the Crate catalog for a single crate. */
@@ -471,6 +475,7 @@ impl<'planner> CrateSubplanner<'planner> {
       build_deps,
       dev_deps,
       normal_deps,
+      aliased_deps,
     } = self.produce_deps()?;
 
     let mut targets = self.produce_targets()?;
@@ -486,6 +491,7 @@ impl<'planner> CrateSubplanner<'planner> {
         }
       }
     }
+
     Ok(CrateContext {
       pkg_name: package.name.clone(),
       pkg_version: package.version.to_string(),
@@ -496,6 +502,7 @@ impl<'planner> CrateSubplanner<'planner> {
       dependencies: normal_deps,
       build_dependencies: build_deps,
       dev_dependencies: dev_deps,
+      aliased_dependencies: aliased_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings),
       build_script_target: build_script_target_opt,
       raze_settings: self.crate_settings.clone(),
@@ -524,11 +531,14 @@ impl<'planner> CrateSubplanner<'planner> {
       build_dep_names,
       dev_dep_names,
       normal_dep_names,
+      aliased_dep_names,
     } = self.identify_named_deps()?;
 
     let mut build_deps = Vec::new();
     let mut dev_deps = Vec::new();
     let mut normal_deps = Vec::new();
+    let mut aliased_deps = Vec::new();
+
     let all_skipped_deps = self
       .crate_settings
       .skipped_deps
@@ -559,7 +569,7 @@ impl<'planner> CrateSubplanner<'planner> {
       let buildable_dependency = BuildableDependency {
         name: dep_package.name.clone(),
         version: dep_package.version.to_string(),
-        buildable_target,
+        buildable_target: buildable_target.clone(),
       };
 
       if build_dep_names.contains(&dep_package.name) {
@@ -572,6 +582,13 @@ impl<'planner> CrateSubplanner<'planner> {
 
       if normal_dep_names.contains(&dep_package.name) {
         normal_deps.push(buildable_dependency);
+        // Only add aliased normal deps to the Vec
+        if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
+          aliased_deps.push(DependencyAlias {
+            target: buildable_target.clone(),
+            alias: util::sanitize_ident(alias),
+          })
+        }
       }
     }
 
@@ -583,6 +600,7 @@ impl<'planner> CrateSubplanner<'planner> {
       build_deps,
       dev_deps,
       normal_deps,
+      aliased_deps,
     })
   }
 
@@ -592,6 +610,9 @@ impl<'planner> CrateSubplanner<'planner> {
     let mut build_dep_names = Vec::new();
     let mut dev_dep_names = Vec::new();
     let mut normal_dep_names = Vec::new();
+
+    // Store aliased dependencies in a HashMap
+    let mut aliased_dep_names = HashMap::new();
 
     let platform_attrs = self.platform_details.attrs();
     let package = self.crate_catalog_entry.package();
@@ -624,12 +645,18 @@ impl<'planner> CrateSubplanner<'planner> {
           )
         }
       }
+
+      // Check if the dependency has been renamed
+      if let Some(alias) = dep.rename.as_ref() {
+        aliased_dep_names.insert(dep.name.clone(), alias.clone());
+      }
     }
 
     Ok(DependencyNames {
       build_dep_names,
       dev_dep_names,
       normal_dep_names,
+      aliased_dep_names,
     })
   }
 
@@ -945,26 +972,36 @@ dependencies = [
     "
   }
 
-  fn make_basic_workspace() -> (TempDir, CargoWorkspaceFiles) {
+  fn make_workspace(
+    toml_file: &'static str,
+    lock_file: Option<&'static str>,
+  ) -> (TempDir, CargoWorkspaceFiles) {
     let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
     let toml_path = {
       let path = dir.path().join("Cargo.toml");
       let mut toml = File::create(&path).unwrap();
-      toml.write_all(basic_toml().as_bytes()).unwrap();
+      toml.write_all(toml_file.as_bytes()).unwrap();
       path
     };
-    let lock_path = {
-      let path = dir.path().join("Cargo.lock");
-      let mut lock = File::create(&path).unwrap();
-      lock.write_all(basic_lock().as_bytes()).unwrap();
-      path
+    let lock_path = match lock_file {
+      Some(lock_file) => {
+        let path = dir.path().join("Cargo.lock");
+        let mut lock = File::create(&path).unwrap();
+        lock.write_all(lock_file.as_bytes()).unwrap();
+        Some(path)
+      }
+      None => None,
     };
     let files = CargoWorkspaceFiles {
-      lock_path_opt: Some(lock_path),
+      lock_path_opt: lock_path,
       toml_path,
     };
 
     (dir, files)
+  }
+
+  fn make_basic_workspace() -> (TempDir, CargoWorkspaceFiles) {
+    make_workspace(basic_toml(), Some(basic_lock()))
   }
 
   #[test]
@@ -1233,6 +1270,62 @@ dependencies = [
       PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
     );
     assert!(planned_build_res.unwrap().crate_contexts.is_empty());
+  }
+
+  #[test]
+  fn test_plan_build_produces_aliased_dependencies() {
+    let toml_file = "
+    [package]
+    name = \"advanced_toml\"
+    version = \"0.1.0\"
+    
+    [lib]
+    path = \"not_a_file.rs\"
+
+    [dependencies]
+    actix-web = \"2.0.0\"
+    actix-rt = \"1.0.0\"
+        ";
+    let (_temp_dir, files) = make_workspace(toml_file, None);
+    let mut fetcher = WorkspaceCrateMetadataFetcher::default();
+    let mut settings = settings_testing::dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    // N.B. This will fail if we don't correctly ignore workspace crates.
+    let planned_build_res = planner.plan_build(
+      &settings,
+      files,
+      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+    );
+
+    let crates_with_aliased_deps: Vec<CrateContext> = planned_build_res
+      .unwrap()
+      .crate_contexts
+      .into_iter()
+      .filter(|krate| krate.aliased_dependencies.len() != 0)
+      .collect();
+
+    // Vec length shouldn't be 0
+    assert!(
+      crates_with_aliased_deps.len() != 0,
+      "Crates with aliased dependencies is 0"
+    );
+
+    // Find the actix-web crate
+    let actix_web_position = crates_with_aliased_deps
+      .iter()
+      .position(|krate| krate.pkg_name == "actix-http");
+    assert!(actix_web_position.is_some());
+
+    // Get crate context using computed position
+    let actix_http_context = crates_with_aliased_deps[actix_web_position.unwrap()].clone();
+
+    assert!(actix_http_context.aliased_dependencies.len() == 1);
+    assert!(
+      actix_http_context.aliased_dependencies[0].target == "@raze_test__failure__0_1_8//:failure"
+    );
+    assert!(actix_http_context.aliased_dependencies[0].alias == "fail_ure");
   }
 
   // TODO(acmcarther): Add tests:
