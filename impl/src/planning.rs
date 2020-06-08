@@ -584,11 +584,11 @@ impl<'planner> CrateSubplanner<'planner> {
         normal_deps.push(buildable_dependency);
         // Only add aliased normal deps to the Vec
         if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
-          aliased_deps.push(DependencyAlias{
+          aliased_deps.push(DependencyAlias {
             target: buildable_target.clone(),
             alias: util::sanitize_ident(alias),
           })
-        }     
+        }
       }
     }
 
@@ -972,7 +972,10 @@ dependencies = [
     "
   }
 
-  fn make_workspace(toml_file: &'static str, lock_file: Option<&'static str>) -> (TempDir, CargoWorkspaceFiles) {
+  fn make_workspace(
+    toml_file: &'static str,
+    lock_file: Option<&'static str>,
+  ) -> (TempDir, CargoWorkspaceFiles) {
     let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
     let toml_path = {
       let path = dir.path().join("Cargo.toml");
@@ -986,7 +989,7 @@ dependencies = [
         let mut lock = File::create(&path).unwrap();
         lock.write_all(lock_file.as_bytes()).unwrap();
         Some(path)
-      },
+      }
       None => None,
     };
     let files = CargoWorkspaceFiles {
@@ -1271,7 +1274,7 @@ dependencies = [
 
   #[test]
   fn test_plan_build_produces_aliased_dependencies() {
-    let toml_file =     "
+    let toml_file = "
     [package]
     name = \"advanced_toml\"
     version = \"0.1.0\"
@@ -1296,20 +1299,32 @@ dependencies = [
       PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
     );
 
-    let crates_with_aliased_deps: Vec<CrateContext> = planned_build_res.unwrap().crate_contexts.into_iter().filter(|krate| krate.aliased_dependencies.len() != 0).collect();
-    
+    let crates_with_aliased_deps: Vec<CrateContext> = planned_build_res
+      .unwrap()
+      .crate_contexts
+      .into_iter()
+      .filter(|krate| krate.aliased_dependencies.len() != 0)
+      .collect();
+
     // Vec length shouldn't be 0
-    assert!(crates_with_aliased_deps.len() != 0, "Crates with aliased dependencies is 0");
+    assert!(
+      crates_with_aliased_deps.len() != 0,
+      "Crates with aliased dependencies is 0"
+    );
 
     // Find the actix-web crate
-    let actix_web_position = crates_with_aliased_deps.iter().position(|krate| krate.pkg_name == "actix-http");
+    let actix_web_position = crates_with_aliased_deps
+      .iter()
+      .position(|krate| krate.pkg_name == "actix-http");
     assert!(actix_web_position.is_some());
 
     // Get crate context using computed position
     let actix_http_context = crates_with_aliased_deps[actix_web_position.unwrap()].clone();
 
     assert!(actix_http_context.aliased_dependencies.len() == 1);
-    assert!(actix_http_context.aliased_dependencies[0].target ==  "@raze_test__failure__0_1_8//:failure");
+    assert!(
+      actix_http_context.aliased_dependencies[0].target == "@raze_test__failure__0_1_8//:failure"
+    );
     assert!(actix_http_context.aliased_dependencies[0].alias == "fail_ure");
   }
 
