@@ -39,12 +39,8 @@ impl BazelRenderer {
           include_str!("templates/partials/build_script.template"),
         ),
         (
-          "templates/partials/rust_binary.template",
-          include_str!("templates/partials/rust_binary.template"),
-        ),
-        (
-          "templates/partials/rust_library.template",
-          include_str!("templates/partials/rust_library.template"),
+          "templates/partials/rust_target.template",
+          include_str!("templates/partials/rust_target.template"),
         ),
         (
           "templates/workspace.BUILD.template",

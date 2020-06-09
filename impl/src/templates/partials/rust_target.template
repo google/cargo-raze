@@ -1,17 +1,34 @@
-{%- if target_name_sanitized != crate_name_sanitized %}
+{%- if target.kind != "bin" and target_name_sanitized != crate_name_sanitized %}
 alias(
   name = "{{ crate_name_sanitized }}",
   actual = ":{{ target_name_sanitized }}",
 )
 {%- endif %}
 
+{%- if target.kind == "bin" %}
+rust_binary(
+{%- else %}
+
 rust_library(
+{%- endif %}
+    {%- if target.kind == "bin" %}
+    # Prefix bin name to disambiguate from (probable) collision with lib name
+    # N.B.: The exact form of this is subject to change.
+    name = "cargo_bin_{{ target_name_sanitized }}",
+    {%- else %}
     name = "{{ target_name_sanitized }}",
+    {%- endif %}
     crate_root = "{{ target.path }}",
+    {%- if target.kind != "bin" %}
     crate_type = "{{ target.kind }}",
+    {%- endif %}
     edition = "{{ target.edition }}",
     srcs = glob(["**/*.rs"]),
     deps = [
+        {%- if target.kind == "bin" and crate.lib_target_name %}
+        # Binaries get an implicit dependency on their crate's lib
+        ":{{crate.lib_target_name | replace(from="-", to="_") }}",
+        {%- endif %}
         {%- if crate.build_script_target %}
         ":{{ crate_name_sanitized }}_build_script",
         {%- endif %}

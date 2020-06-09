@@ -31,15 +31,15 @@ load(
 {%- for target in crate.targets %}
 {%- set target_name_sanitized = target.name | replace(from="-", to="_") %}
 {%- if target.kind == "lib" %}
-{%- include "templates/partials/rust_library.template" %}
+{%- include "templates/partials/rust_target.template" %}
 {%- elif target.kind == "bin" %}
-{%- include "templates/partials/rust_binary.template" %}
+{%- include "templates/partials/rust_target.template" %}
 {%- elif target.kind == "proc-macro" %}
-{%- include "templates/partials/rust_library.template" %}
+{%- include "templates/partials/rust_target.template" %}
 {%- elif target.kind == "dylib" %}
-{%- include "templates/partials/rust_library.template" %}
+{%- include "templates/partials/rust_target.template" %}
 {%- elif target.kind == "rlib" %}
-{%- include "templates/partials/rust_library.template" %}
+{%- include "templates/partials/rust_target.template" %}
 {%- else %}
 # Unsupported target "{{ target.name }}" with type "{{ target.kind }}" omitted
 {%- endif %}
