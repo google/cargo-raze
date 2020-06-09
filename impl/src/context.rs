@@ -69,6 +69,7 @@ pub struct CrateContext {
   pub features: Vec<String>,
   pub workspace_path_to_crate: String,
   pub dependencies: Vec<BuildableDependency>,
+  pub proc_macro_dependencies: Vec<BuildableDependency>,
   pub build_dependencies: Vec<BuildableDependency>,
   pub dev_dependencies: Vec<BuildableDependency>,
   pub aliased_dependencies: Vec<DependencyAlias>,

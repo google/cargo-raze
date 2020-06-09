@@ -39,6 +39,13 @@ rust_library(
         "{{dependency}}",
         {%- endfor %}
     ],
+    {%- if crate.proc_macro_dependencies %}
+    proc_macro_deps = [
+    {%- for dependency in crate.proc_macro_dependencies %}
+        "{{dependency.buildable_target}}",
+    {%- endfor %}
+    ],
+    {%- endif %}
     rustc_flags = [
         "--cap-lints=allow",
         {%- for flag in crate.raze_settings.additional_flags %}

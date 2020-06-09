@@ -72,6 +72,7 @@ struct DependencyNames {
 struct DependencySet {
   // Dependencies that are required for all buildable targets of this crate
   normal_deps: Vec<BuildableDependency>,
+  proc_macro_deps: Vec<BuildableDependency>,
   // Dependencies that are required for build script only
   build_deps: Vec<BuildableDependency>,
   // Dependencies that are required for tests
@@ -473,6 +474,7 @@ impl<'planner> CrateSubplanner<'planner> {
   fn produce_context(&self) -> Result<CrateContext> {
     let DependencySet {
       build_deps,
+      proc_macro_deps,
       dev_deps,
       normal_deps,
       aliased_deps,
@@ -500,6 +502,7 @@ impl<'planner> CrateSubplanner<'planner> {
       features: self.node.features.clone(),
       is_root_dependency: self.crate_catalog_entry.is_root_dep(),
       dependencies: normal_deps,
+      proc_macro_dependencies: proc_macro_deps,
       build_dependencies: build_deps,
       dev_dependencies: dev_deps,
       aliased_dependencies: aliased_deps,
@@ -535,6 +538,7 @@ impl<'planner> CrateSubplanner<'planner> {
     } = self.identify_named_deps()?;
 
     let mut build_deps = Vec::new();
+    let mut proc_macro_deps = Vec::new();
     let mut dev_deps = Vec::new();
     let mut normal_deps = Vec::new();
     let mut aliased_deps = Vec::new();
@@ -581,27 +585,41 @@ impl<'planner> CrateSubplanner<'planner> {
       }
 
       if normal_dep_names.contains(&dep_package.name) {
-        normal_deps.push(buildable_dependency);
-        // Only add aliased normal deps to the Vec
-        if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
-          aliased_deps.push(DependencyAlias {
-            target: buildable_target.clone(),
-            alias: util::sanitize_ident(alias),
-          })
+        if self.is_proc_macro(dep_package) {
+          proc_macro_deps.push(buildable_dependency);
+        } else {
+          normal_deps.push(buildable_dependency);
+          // Only add aliased normal deps to the Vec
+          if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
+            aliased_deps.push(DependencyAlias {
+              target: buildable_target.clone(),
+              alias: util::sanitize_ident(alias),
+            })
+          }
         }
       }
     }
 
     build_deps.sort();
+    proc_macro_deps.sort();
     dev_deps.sort();
     normal_deps.sort();
 
     Ok(DependencySet {
       build_deps,
+      proc_macro_deps,
       dev_deps,
       normal_deps,
       aliased_deps,
     })
+  }
+
+  fn is_proc_macro(&self, package: &Package) -> bool {
+    package
+      .targets
+      .iter()
+      .flat_map(|target| target.crate_types.iter())
+      .any(|crate_type| crate_type.as_str() == "proc-macro")
   }
 
   /** Yields the list of dependencies as described by the manifest (without version). */
