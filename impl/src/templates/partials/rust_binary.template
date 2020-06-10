@@ -11,6 +11,9 @@ rust_binary(
         # Binaries get an implicit dependency on their crate's lib
         ":{{crate.lib_target_name | replace(from="-", to="_") }}",
         {%- endif %}
+        {%- if crate.build_script_target %}
+        ":{{ crate_name_sanitized }}_build_script",
+        {%- endif %}
         {%- for dependency in crate.dependencies %}
         "{{dependency.buildable_target}}",
         {%- endfor %}
@@ -30,9 +33,6 @@ rust_binary(
         "{{key}}": "{{value}}",
         {%- endfor %}
     },
-    {%- endif %}
-    {%- if crate.build_script_target %}
-    out_dir_tar = ":{{ crate.pkg_name | replace(from="-", to="_")}}_build_script_executor",
     {%- endif %}
     {%- if crate.raze_settings.data_attr %}
     data = {{crate.raze_settings.data_attr}},
