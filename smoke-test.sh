@@ -33,7 +33,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(
     name = "io_bazel_rules_rust",
-    commit = "57c6f4ec6b25b07958d91c658d0142dc0943e848",
+    commit = "6e5fa2c570ac2f17ac1df840d060fc8aab521a07",
     remote = "https://github.com/bazelbuild/rules_rust.git",
 )
 
