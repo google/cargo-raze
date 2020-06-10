@@ -35,7 +35,7 @@ where an organization decides upon a set of dependencies that everyone points
 at. It is intended that stakeholders in the dependencies collaborate to upgrade
 dependencies atomically, and fix breakages across their codebase simultaneously.
 In the event that this isn't feasible, it is still possible to use cargo-raze in
-a decentralized scenario, but its unlikely that such decoupled repositories
+a decentralized scenario, but it's unlikely that such decoupled repositories
 would interact well together with the current implementation.
 
 Regardless of the approach chosen, the rust_rules should be brought in to the
@@ -114,10 +114,10 @@ You can now depend on any *explicit* dependencies in any Rust rule by depending 
 
 ### Remote Dependency Mode
 
-In Remote mode a directory similiar to the vendoring mode is selected. In this
-case though it contains only BUILD files, a vendoring instruction for the WORKSPACE,
-and aliases to the explicit dependencies. Slightly different plumbing is
-required.
+In Remote mode, a directory similar to the vendoring mode is selected. In this
+case, though, it contains only BUILD files, a vendoring instruction for the
+WORKSPACE, and aliases to the explicit dependencies. Slightly different plumbing
+is required.
 
 #### Generate a Cargo.toml
 Generate a Cargo.toml, similar to Vendoring mode but add a new directive in the
@@ -271,7 +271,7 @@ binaries and libraries to share the same target name, Bazel disallows this.
 
 ## Why choose Bazel to build a Rust project?
 
-Bazel ("fast", "correct", choose two) is a battle tested build system used by
+Bazel ("fast", "correct", choose two) is a battle-tested build system used by
 Google to compile incredibly large, multilingual projects without duplicating
 effort, and without compromising on correctness. It accomplishes this in part by
 limiting what mechanisms a given compilation object can use to discover
