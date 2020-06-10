@@ -684,7 +684,7 @@ impl<'planner> CrateSubplanner<'planner> {
     &self,
     all_targets: &mut Vec<BuildableTarget>,
   ) -> Option<BuildableTarget> {
-    if !self.crate_settings.gen_buildrs {
+    if !self.crate_settings.gen_buildrs.unwrap_or(self.settings.default_gen_buildrs) {
       return None;
     }
 

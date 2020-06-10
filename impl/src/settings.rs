@@ -70,6 +70,14 @@ pub struct RazeSettings {
    */
   #[serde(default = "default_raze_settings_field_output_buildfile_suffix")]
   pub output_buildfile_suffix: String,
+
+  /**
+   * Default value for per-crate gen_buildrs setting if it's not explicitly for a crate.
+   *
+   * See that setting for more information.
+   */
+  #[serde(default = "default_raze_settings_field_gen_buildrs")]
+  pub default_gen_buildrs: bool,
 }
 
 /** Override settings for individual crates (as part of `RazeSettings`). */
@@ -120,7 +128,7 @@ pub struct CrateSettings {
    * scripts that merely generate files into OUT_DIR may be fully functional.
    */
   #[serde(default = "default_crate_settings_field_gen_buildrs")]
-  pub gen_buildrs: bool,
+  pub gen_buildrs: Option<bool>,
 
   /**
    * The verbatim `data` clause to be included for the generated build targets.
@@ -248,6 +256,7 @@ pub mod testing {
       gen_workspace_prefix: "raze_test".to_owned(),
       genmode: GenMode::Remote,
       output_buildfile_suffix: "BUILD".to_owned(),
+      default_gen_buildrs: default_raze_settings_field_gen_buildrs(),
     }
   }
 }
@@ -268,8 +277,12 @@ fn default_raze_settings_field_output_buildfile_suffix() -> String {
   "BUILD".to_owned()
 }
 
-fn default_crate_settings_field_gen_buildrs() -> bool {
+fn default_raze_settings_field_gen_buildrs() -> bool {
   false
+}
+
+fn default_crate_settings_field_gen_buildrs() -> Option<bool> {
+  None
 }
 
 fn default_crate_settings_field_data_attr() -> Option<String> {
