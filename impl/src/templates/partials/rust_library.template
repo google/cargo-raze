@@ -13,7 +13,7 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     deps = [
         {%- if crate.build_script_target %}
-        ":{{ crate.pkg_name | replace(from="-", to="_")}}_build_script",
+        ":{{ crate_name_sanitized }}_build_script",
         {%- endif %}
         {%- for dependency in crate.dependencies %}
         "{{dependency.buildable_target}}",
