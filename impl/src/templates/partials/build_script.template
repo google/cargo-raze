@@ -25,7 +25,7 @@ cargo_build_script(
       "{{feature}}",
       {%- endfor %}
     ],
-    data = glob(["*"]),
+    data = glob(["**"]),
     version = "{{ crate.pkg_version }}",
     visibility = ["//visibility:private"],
 )
