@@ -47,6 +47,10 @@ impl BazelRenderer {
           include_str!("templates/partials/rust_library.template"),
         ),
         (
+          "templates/partials/common_attrs.template",
+          include_str!("templates/partials/common_attrs.template"),
+        ),
+        (
           "templates/workspace.BUILD.template",
           include_str!("templates/workspace.BUILD.template"),
         ),
