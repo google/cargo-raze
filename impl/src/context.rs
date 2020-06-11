@@ -20,6 +20,7 @@ pub struct BuildableDependency {
   pub name: String,
   pub version: String,
   pub buildable_target: String,
+  pub is_proc_macro: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]

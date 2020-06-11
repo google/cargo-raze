@@ -570,10 +570,25 @@ impl<'planner> CrateSubplanner<'planner> {
         .unwrap()
         .workspace_path_and_default_target(&self.settings);
 
+      // Implicitly dependencies are on the [lib] target from Cargo.toml (of which there is
+      // guaranteed to be at most one).
+      // In this function, we don't explicitly narrow to be considering only the [lib] Target - we
+      // rely on the fact that only one [lib] is allowed in a Package, and so treat the Package
+      // synonymously with the [lib] Target therein.
+      // Only the [lib] target is allowed to be labelled as a proc-macro, so checking if "any"
+      // target is a proc-macro is equivalent to checking if the [lib] target is a proc-macro (and
+      // accordingly, whether we need to treat this dep like a proc-macro).
+      let is_proc_macro = dep_package
+        .targets
+        .iter()
+        .flat_map(|target| target.crate_types.iter())
+        .any(|crate_type| crate_type.as_str() == "proc-macro");
+
       let buildable_dependency = BuildableDependency {
         name: dep_package.name.clone(),
         version: dep_package.version.to_string(),
         buildable_target: buildable_target.clone(),
+        is_proc_macro,
       };
 
       if build_dep_names.contains(&dep_package.name) {
@@ -585,17 +600,17 @@ impl<'planner> CrateSubplanner<'planner> {
       }
 
       if normal_dep_names.contains(&dep_package.name) {
-        if self.is_proc_macro(dep_package) {
+        if buildable_dependency.is_proc_macro {
           proc_macro_deps.push(buildable_dependency);
         } else {
           normal_deps.push(buildable_dependency);
-          // Only add aliased normal deps to the Vec
-          if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
-            aliased_deps.push(DependencyAlias {
-              target: buildable_target.clone(),
-              alias: util::sanitize_ident(alias),
-            })
-          }
+        }
+        // Only add aliased normal deps to the Vec
+        if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
+          aliased_deps.push(DependencyAlias {
+            target: buildable_target.clone(),
+            alias: util::sanitize_ident(alias),
+          })
         }
       }
     }
@@ -612,14 +627,6 @@ impl<'planner> CrateSubplanner<'planner> {
       normal_deps,
       aliased_deps,
     })
-  }
-
-  fn is_proc_macro(&self, package: &Package) -> bool {
-    package
-      .targets
-      .iter()
-      .flat_map(|target| target.crate_types.iter())
-      .any(|crate_type| crate_type.as_str() == "proc-macro")
   }
 
   /** Yields the list of dependencies as described by the manifest (without version). */
