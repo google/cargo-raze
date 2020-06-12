@@ -581,6 +581,11 @@ impl<'planner> CrateSubplanner<'planner> {
       }
 
       if normal_dep_names.contains(&dep_package.name) {
+        // sys crates build files may generate DEP_* environment variables that
+        // need to be visible in their direct dependency build files.
+        if dep_package.name.ends_with("-sys") {
+          build_deps.push(buildable_dependency.clone());
+        }
         normal_deps.push(buildable_dependency);
         // Only add aliased normal deps to the Vec
         if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
