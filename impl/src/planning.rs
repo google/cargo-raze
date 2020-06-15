@@ -1353,6 +1353,54 @@ dependencies = [
     assert!(actix_http_context.aliased_dependencies[0].alias == "fail_ure");
   }
 
+  #[test]
+  fn test_plan_build_produces_proc_macro_dependencies() {
+    let toml_file = "
+    [package]
+    name = \"advanced_toml\"
+    version = \"0.1.0\"
+
+    [lib]
+    path = \"not_a_file.rs\"
+
+    [dependencies]
+    serde = { version = \"=1.0.112\", features = [\"derive\"] }
+        ";
+    let (_temp_dir, files) = make_workspace(toml_file, None);
+    let mut fetcher = WorkspaceCrateMetadataFetcher::default();
+    let mut settings = settings_testing::dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build = planner
+      .plan_build(
+        &settings,
+        files,
+        PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+      )
+      .unwrap();
+
+    let serde = planned_build
+      .crate_contexts
+      .iter()
+      .find(|ctx| ctx.pkg_name == "serde")
+      .unwrap();
+
+    let serde_derive_proc_macro_deps: Vec<_> = serde
+      .proc_macro_dependencies
+      .iter()
+      .filter(|dep| dep.name == "serde_derive")
+      .collect();
+    assert_eq!(serde_derive_proc_macro_deps.len(), 1);
+
+    let serde_derive_normal_deps: Vec<_> = serde
+      .dependencies
+      .iter()
+      .filter(|dep| dep.name == "serde_derive")
+      .collect();
+    assert_eq!(serde_derive_normal_deps.len(), 0);
+  }
+
   // TODO(acmcarther): Add tests:
   // TODO(acmcarther): Extra flags work
   // TODO(acmcarther): Extra deps work
