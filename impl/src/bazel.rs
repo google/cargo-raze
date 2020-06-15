@@ -47,6 +47,10 @@ impl BazelRenderer {
           include_str!("templates/partials/rust_library.template"),
         ),
         (
+          "templates/partials/common_attrs.template",
+          include_str!("templates/partials/common_attrs.template"),
+        ),
+        (
           "templates/workspace.BUILD.template",
           include_str!("templates/workspace.BUILD.template"),
         ),
@@ -319,6 +323,7 @@ mod tests {
       licenses: Vec::new(),
       raze_settings: CrateSettings::default(),
       dependencies: Vec::new(),
+      proc_macro_dependencies: Vec::new(),
       build_dependencies: Vec::new(),
       dev_dependencies: Vec::new(),
       aliased_dependencies: Vec::new(),
@@ -351,6 +356,7 @@ mod tests {
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
       expected_build_path: format!("vendor/test-library-1.1.1/{}", buildfile_suffix),
       dependencies: Vec::new(),
+      proc_macro_dependencies: Vec::new(),
       build_dependencies: Vec::new(),
       dev_dependencies: Vec::new(),
       aliased_dependencies: Vec::new(),

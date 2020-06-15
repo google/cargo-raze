@@ -20,6 +20,7 @@ pub struct BuildableDependency {
   pub name: String,
   pub version: String,
   pub buildable_target: String,
+  pub is_proc_macro: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -69,6 +70,7 @@ pub struct CrateContext {
   pub features: Vec<String>,
   pub workspace_path_to_crate: String,
   pub dependencies: Vec<BuildableDependency>,
+  pub proc_macro_dependencies: Vec<BuildableDependency>,
   pub build_dependencies: Vec<BuildableDependency>,
   pub dev_dependencies: Vec<BuildableDependency>,
   pub aliased_dependencies: Vec<DependencyAlias>,
