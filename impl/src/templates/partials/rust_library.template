@@ -7,10 +7,7 @@ alias(
 
 rust_library(
     name = "{{ target_name_sanitized }}",
-    crate_root = "{{ target.path }}",
     crate_type = "{{ target.kind }}",
-    edition = "{{ target.edition }}",
-    srcs = glob(["**/*.rs"]),
     deps = [
         {%- if crate.build_script_target %}
         ":{{ crate_name_sanitized }}_build_script",
@@ -22,33 +19,5 @@ rust_library(
         "{{dependency}}",
         {%- endfor %}
     ],
-    rustc_flags = [
-        "--cap-lints=allow",
-        {%- for flag in crate.raze_settings.additional_flags %}
-        "{{flag}}",
-        {%- endfor %}
-    ],
-    {%- if crate.raze_settings.additional_env %}
-    rustc_env = {
-        {%- for key, value in crate.raze_settings.additional_env %}
-        "{{key}}": "{{value}}",
-        {%- endfor %}
-    },
-    {%- endif %}
-    {%- if crate.raze_settings.data_attr %}
-    data = {{crate.raze_settings.data_attr}},
-    {%- endif %}
-    version = "{{ crate.pkg_version }}",
-    crate_features = [
-        {%- for feature in crate.features %}
-        "{{feature}}",
-        {%- endfor %}
-    ],
-    {%- if crate.aliased_dependencies | length != 0 %}
-    aliases = {
-        {%- for alias in crate.aliased_dependencies %}
-        "{{alias.target}}": "{{alias.alias}}",
-        {%- endfor %}
-    },
-    {%- endif %}
+{% include "templates/partials/common_attrs.template" %}
 )

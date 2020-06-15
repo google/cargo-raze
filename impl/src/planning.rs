@@ -72,6 +72,7 @@ struct DependencyNames {
 struct DependencySet {
   // Dependencies that are required for all buildable targets of this crate
   normal_deps: Vec<BuildableDependency>,
+  proc_macro_deps: Vec<BuildableDependency>,
   // Dependencies that are required for build script only
   build_deps: Vec<BuildableDependency>,
   // Dependencies that are required for tests
@@ -473,6 +474,7 @@ impl<'planner> CrateSubplanner<'planner> {
   fn produce_context(&self) -> Result<CrateContext> {
     let DependencySet {
       build_deps,
+      proc_macro_deps,
       dev_deps,
       normal_deps,
       aliased_deps,
@@ -500,6 +502,7 @@ impl<'planner> CrateSubplanner<'planner> {
       features: self.node.features.clone(),
       is_root_dependency: self.crate_catalog_entry.is_root_dep(),
       dependencies: normal_deps,
+      proc_macro_dependencies: proc_macro_deps,
       build_dependencies: build_deps,
       dev_dependencies: dev_deps,
       aliased_dependencies: aliased_deps,
@@ -535,6 +538,7 @@ impl<'planner> CrateSubplanner<'planner> {
     } = self.identify_named_deps()?;
 
     let mut build_deps = Vec::new();
+    let mut proc_macro_deps = Vec::new();
     let mut dev_deps = Vec::new();
     let mut normal_deps = Vec::new();
     let mut aliased_deps = Vec::new();
@@ -566,10 +570,25 @@ impl<'planner> CrateSubplanner<'planner> {
         .unwrap()
         .workspace_path_and_default_target(&self.settings);
 
+      // Implicitly dependencies are on the [lib] target from Cargo.toml (of which there is
+      // guaranteed to be at most one).
+      // In this function, we don't explicitly narrow to be considering only the [lib] Target - we
+      // rely on the fact that only one [lib] is allowed in a Package, and so treat the Package
+      // synonymously with the [lib] Target therein.
+      // Only the [lib] target is allowed to be labelled as a proc-macro, so checking if "any"
+      // target is a proc-macro is equivalent to checking if the [lib] target is a proc-macro (and
+      // accordingly, whether we need to treat this dep like a proc-macro).
+      let is_proc_macro = dep_package
+        .targets
+        .iter()
+        .flat_map(|target| target.crate_types.iter())
+        .any(|crate_type| crate_type.as_str() == "proc-macro");
+
       let buildable_dependency = BuildableDependency {
         name: dep_package.name.clone(),
         version: dep_package.version.to_string(),
         buildable_target: buildable_target.clone(),
+        is_proc_macro,
       };
 
       if build_dep_names.contains(&dep_package.name) {
@@ -586,7 +605,11 @@ impl<'planner> CrateSubplanner<'planner> {
         if dep_package.name.ends_with("-sys") {
           build_deps.push(buildable_dependency.clone());
         }
-        normal_deps.push(buildable_dependency);
+        if buildable_dependency.is_proc_macro {
+          proc_macro_deps.push(buildable_dependency);
+        } else {
+          normal_deps.push(buildable_dependency);
+        }
         // Only add aliased normal deps to the Vec
         if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
           aliased_deps.push(DependencyAlias {
@@ -598,11 +621,13 @@ impl<'planner> CrateSubplanner<'planner> {
     }
 
     build_deps.sort();
+    proc_macro_deps.sort();
     dev_deps.sort();
     normal_deps.sort();
 
     Ok(DependencySet {
       build_deps,
+      proc_macro_deps,
       dev_deps,
       normal_deps,
       aliased_deps,
@@ -1331,6 +1356,54 @@ dependencies = [
       actix_http_context.aliased_dependencies[0].target == "@raze_test__failure__0_1_8//:failure"
     );
     assert!(actix_http_context.aliased_dependencies[0].alias == "fail_ure");
+  }
+
+  #[test]
+  fn test_plan_build_produces_proc_macro_dependencies() {
+    let toml_file = "
+    [package]
+    name = \"advanced_toml\"
+    version = \"0.1.0\"
+
+    [lib]
+    path = \"not_a_file.rs\"
+
+    [dependencies]
+    serde = { version = \"=1.0.112\", features = [\"derive\"] }
+        ";
+    let (_temp_dir, files) = make_workspace(toml_file, None);
+    let mut fetcher = WorkspaceCrateMetadataFetcher::default();
+    let mut settings = settings_testing::dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build = planner
+      .plan_build(
+        &settings,
+        files,
+        PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+      )
+      .unwrap();
+
+    let serde = planned_build
+      .crate_contexts
+      .iter()
+      .find(|ctx| ctx.pkg_name == "serde")
+      .unwrap();
+
+    let serde_derive_proc_macro_deps: Vec<_> = serde
+      .proc_macro_dependencies
+      .iter()
+      .filter(|dep| dep.name == "serde_derive")
+      .collect();
+    assert_eq!(serde_derive_proc_macro_deps.len(), 1);
+
+    let serde_derive_normal_deps: Vec<_> = serde
+      .dependencies
+      .iter()
+      .filter(|dep| dep.name == "serde_derive")
+      .collect();
+    assert_eq!(serde_derive_normal_deps.len(), 0);
   }
 
   // TODO(acmcarther): Add tests:
