@@ -320,7 +320,7 @@ mod tests {
       edition: "2015".to_owned(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
       expected_build_path: format!("vendor/test-binary-1.1.1/{}", buildfile_suffix),
-      licenses: LicenseData {
+      license: LicenseData {
         name: "no license".into(),
         rating: "restricted".into(),
       },
@@ -354,7 +354,7 @@ mod tests {
       pkg_name: "test-library".to_owned(),
       pkg_version: "1.1.1".to_owned(),
       edition: "2015".to_owned(),
-      licenses: LicenseData {
+      license: LicenseData {
         name: "no license".into(),
         rating: "restricted".into(),
       },

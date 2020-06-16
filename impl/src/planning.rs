@@ -498,7 +498,7 @@ impl<'planner> CrateSubplanner<'planner> {
       pkg_name: package.name.clone(),
       pkg_version: package.version.to_string(),
       edition: package.edition.clone(),
-      licenses: self.produce_licenses(),
+      license: self.produce_license(),
       features: self.node.features.clone(),
       is_root_dependency: self.crate_catalog_entry.is_root_dep(),
       dependencies: normal_deps,
@@ -518,7 +518,7 @@ impl<'planner> CrateSubplanner<'planner> {
   }
 
   /** Generates license data from internal crate details. */
-  fn produce_licenses(&self) -> LicenseData {
+  fn produce_license(&self) -> LicenseData {
     let licenses_str = self
       .crate_catalog_entry
       .package()
@@ -528,7 +528,7 @@ impl<'planner> CrateSubplanner<'planner> {
 
     let bazel_license = license::get_available_licenses(licenses_str);
     LicenseData {
-      name: format!("{} from {}", bazel_license.name, bazel_license.expression),
+      name: format!("{} from expression \"{}\"", bazel_license.name, bazel_license.expression),
       rating: bazel_license.license.to_bazel_rating().into(),
     }
   }

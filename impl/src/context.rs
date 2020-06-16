@@ -66,7 +66,7 @@ pub struct CrateContext {
   pub pkg_version: String,
   pub edition: String,
   pub raze_settings: CrateSettings,
-  pub licenses: LicenseData,
+  pub license: LicenseData,
   pub features: Vec<String>,
   pub workspace_path_to_crate: String,
   pub dependencies: Vec<BuildableDependency>,
