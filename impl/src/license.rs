@@ -61,20 +61,20 @@ pub struct BazelSpdxLicense {
 }
 
 impl BazelSpdxLicense {
-  fn combine_license_expr(expr1: &Self, expr2: &Self, operator: &str) -> String {
+  fn combine_license_expr(license1: &Self, license2: &Self, operator: &str) -> String {
     // Surround license expressions with parenthesis if it isn't just the node name
     let expr_str1: String;
-    if expr1.name != expr1.expression {
-      expr_str1 = format!("({})", expr1.expression);
+    if license1.name != license1.expression {
+      expr_str1 = format!("({})", license1.expression);
     } else {
-      expr_str1 = expr1.expression.clone();
+      expr_str1 = license1.expression.clone();
     }
 
     let expr_str2: String;
-    if expr2.name != expr2.expression {
-      expr_str2 = format!("({})", expr2.name);
+    if license2.name != license2.expression {
+      expr_str2 = format!("({})", license2.expression);
     } else {
-      expr_str2 = expr2.expression.clone();
+      expr_str2 = license2.expression.clone();
     }
 
     // Combine them using the operator
@@ -87,7 +87,7 @@ impl BazelSpdxLicense {
    * new BazelSpdxLicense's expression will represent the "AND" of the two expressions.
    */
   pub fn and(&self, other_license: Self) -> Self {
-    let combined_expr = Self::combine_license_expr(&self, &other_license, "AND");
+    let combined_expr = Self::combine_license_expr(self, &other_license, "AND");
     if self.license >= other_license.license {
       Self {
         name: self.name.clone(),
@@ -145,7 +145,7 @@ pub fn get_available_licenses(cargo_license_str: &str) -> BazelSpdxLicense {
         cargo_license_str
       );
       return BazelSpdxLicense {
-        name: license_str.clone(),
+        name: cargo_license_str.into(),
         expression: license_str.clone(),
         license: BazelLicenseType::Restricted,
       };
@@ -564,7 +564,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn more_permissive_licenses_come_first() {
+  fn more_permissive_licenses_come_first_with_or() {
     let license = get_available_licenses("Unlicense/Apache-2.0");
     assert_eq!(license.name, "Unlicense");
     assert_eq!(license.expression, "Unlicense OR Apache-2.0");
@@ -572,8 +572,29 @@ mod tests {
 
     let flipped_license = get_available_licenses("Apache-2.0/Unlicense");
     assert_eq!(flipped_license.name, "Unlicense");
-    assert_eq!(flipped_license.expression, "Unlicense OR Apache-2.0");
+    assert_eq!(flipped_license.expression, "Apache-2.0 OR Unlicense");
     assert_eq!(flipped_license.license, BazelLicenseType::Unencumbered);
+  }
+
+  #[test]
+  fn less_permissive_licenses_come_first_with_and() {
+    let license = get_available_licenses("Unlicense AND Apache-2.0");
+    assert_eq!(license.name, "Apache-2.0");
+    assert_eq!(license.expression, "Unlicense AND Apache-2.0");
+    assert_eq!(license.license, BazelLicenseType::Notice);
+
+    let flipped_license = get_available_licenses("Apache-2.0 AND Unlicense");
+    assert_eq!(flipped_license.name, "Apache-2.0");
+    assert_eq!(flipped_license.expression, "Apache-2.0 AND Unlicense");
+    assert_eq!(flipped_license.license, BazelLicenseType::Notice);
+  }
+
+  #[test]
+  fn chained_or_works_properly() {
+    let license = get_available_licenses("MIT OR Apache-2.0 OR Unlicense");
+    assert_eq!(license.name, "Unlicense");
+    assert_eq!(license.expression, "MIT OR (Apache-2.0 OR Unlicense)");
+    assert_eq!(license.license, BazelLicenseType::Unencumbered);
   }
 
   #[test]
@@ -581,9 +602,9 @@ mod tests {
     let license = get_available_licenses("MIT5.0");
     assert_eq!(
       license.name,
-      "MIT5.0 (Failed to parse as an SPDX license string)"
+      "MIT5.0"
     );
-    assert_eq!(license.expression, "MIT5.0");
+    assert_eq!(license.expression, "MIT5.0 (Failed to parse as an SPDX license string)");
     assert_eq!(license.license, BazelLicenseType::Restricted);
   }
 
