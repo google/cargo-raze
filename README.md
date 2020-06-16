@@ -98,8 +98,7 @@ Then, generate a lock file for your dependencies
 $ cargo generate-lockfile
 ```
 
-Following that, vendor your dependencies from within the cargo/ directory (mind the `-x`, it guarantees the
-version is included in the file path).
+Following that, vendor your dependencies from within the cargo/ directory.
 ```bash
 $ cargo vendor --versioned-dirs --locked
 ```
@@ -120,10 +119,16 @@ WORKSPACE, and aliases to the explicit dependencies. Slightly different plumbing
 is required.
 
 #### Generate a Cargo.toml
-Generate a Cargo.toml, similar to Vendoring mode but add a new directive in the
+Generate a Cargo.toml, similar to Vendoring mode but add a new `genmode` directive in the
 `[raze]` section
 ```toml
 [raze]
+# The WORKSPACE relative path to the Cargo.toml working directory.
+workspace_path = "//cargo"
+
+# The target to generate BUILD rules for.
+target = "x86_64-unknown-linux-gnu"
+
 genmode = "Remote"
 ```
 
