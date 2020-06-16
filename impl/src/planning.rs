@@ -526,11 +526,7 @@ impl<'planner> CrateSubplanner<'planner> {
       .as_ref()
       .map_or("", String::as_str);
 
-    let bazel_license = license::get_available_licenses(licenses_str);
-    LicenseData {
-      name: format!("{} from expression \"{}\"", bazel_license.name, bazel_license.expression),
-      rating: bazel_license.license.to_bazel_rating().into(),
-    }
+    license::get_license_from_str(licenses_str)
   }
 
   /** Generates the set of dependencies for the contained crate. */
