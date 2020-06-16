@@ -63,19 +63,17 @@ pub struct BazelSpdxLicense {
 impl BazelSpdxLicense {
   fn combine_license_expr(license1: &Self, license2: &Self, operator: &str) -> String {
     // Surround license expressions with parenthesis if it isn't just the node name
-    let expr_str1: String;
-    if license1.name != license1.expression {
-      expr_str1 = format!("({})", license1.expression);
+    let expr_str1 = if license1.name != license1.expression {
+      format!("({})", license1.expression)
     } else {
-      expr_str1 = license1.expression.clone();
-    }
+      license1.expression.clone()
+    };
 
-    let expr_str2: String;
-    if license2.name != license2.expression {
-      expr_str2 = format!("({})", license2.expression);
+    let expr_str2 = if license2.name != license2.expression {
+      format!("({})", license2.expression)
     } else {
-      expr_str2 = license2.expression.clone();
-    }
+      license2.expression.clone()
+    };
 
     // Combine them using the operator
     format!("{} {} {}", expr_str1, operator, expr_str2)
