@@ -49,6 +49,15 @@ pub struct LicenseData {
   pub rating: String,
 }
 
+impl Default for LicenseData {
+  fn default() -> Self {
+    LicenseData {
+      name: "no license".into(),
+      rating: "restricted".into(),
+    }
+  }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct GitRepo {
   pub remote: String,
