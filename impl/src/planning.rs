@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{
-  collections::{BTreeMap, HashMap, HashSet},
+  collections::{HashMap, HashSet},
   path::PathBuf,
   str::{self, FromStr},
 };
@@ -498,7 +498,7 @@ impl<'planner> CrateSubplanner<'planner> {
       pkg_name: package.name.clone(),
       pkg_version: package.version.to_string(),
       edition: package.edition.clone(),
-      licenses: self.produce_licenses(),
+      license: self.produce_license(),
       features: self.node.features.clone(),
       is_root_dependency: self.crate_catalog_entry.is_root_dep(),
       dependencies: normal_deps,
@@ -518,14 +518,15 @@ impl<'planner> CrateSubplanner<'planner> {
   }
 
   /** Generates license data from internal crate details. */
-  fn produce_licenses(&self) -> Vec<LicenseData> {
+  fn produce_license(&self) -> LicenseData {
     let licenses_str = self
       .crate_catalog_entry
       .package()
       .license
       .as_ref()
       .map_or("", String::as_str);
-    load_and_dedup_licenses(licenses_str)
+
+    license::get_license_from_str(licenses_str)
   }
 
   /** Generates the set of dependencies for the contained crate. */
@@ -709,7 +710,11 @@ impl<'planner> CrateSubplanner<'planner> {
     &self,
     all_targets: &mut Vec<BuildableTarget>,
   ) -> Option<BuildableTarget> {
-    if !self.crate_settings.gen_buildrs.unwrap_or(self.settings.default_gen_buildrs) {
+    if !self
+      .crate_settings
+      .gen_buildrs
+      .unwrap_or(self.settings.default_gen_buildrs)
+    {
       return None;
     }
 
@@ -807,26 +812,6 @@ impl<'planner> CrateSubplanner<'planner> {
       )
     }
   }
-}
-
-fn load_and_dedup_licenses(licenses: &str) -> Vec<LicenseData> {
-  let mut rating_to_license_name = BTreeMap::new();
-  for (license_name, license_type) in license::get_available_licenses(licenses) {
-    let rating = license_type.to_bazel_rating();
-
-    rating_to_license_name
-      .entry(rating.to_string())
-      .and_modify(|license_names: &mut String| {
-        license_names.push_str(",");
-        license_names.push_str(&license_name);
-      })
-      .or_insert_with(|| license_name.to_owned());
-  }
-
-  rating_to_license_name
-    .into_iter()
-    .map(|(rating, name)| LicenseData { rating, name })
-    .collect::<Vec<_>>()
 }
 
 mod checks {
@@ -1052,35 +1037,6 @@ dependencies = [
     checks::check_resolve_matches_packages(&metadata).unwrap();
   }
 
-  #[test]
-  fn test_license_loading_works_with_no_license() {
-    let no_license_data = vec![LicenseData {
-      name: "no license".to_owned(),
-      rating: "restricted".to_owned(),
-    }];
-
-    assert_eq!(load_and_dedup_licenses(""), no_license_data);
-    assert_eq!(load_and_dedup_licenses("///"), no_license_data);
-  }
-
-  #[test]
-  fn test_license_loading_dedupes_equivalent_licenses() {
-    // WTFPL is "disallowed",but we map that down to the same thing as GPL
-    assert_eq!(
-      load_and_dedup_licenses("Unlicense/ WTFPL /GPL-3.0"),
-      vec![
-        LicenseData {
-          name: "GPL-3.0,WTFPL".to_owned(),
-          rating: "restricted".to_owned(),
-        },
-        LicenseData {
-          name: "Unlicense".to_owned(),
-          rating: "unencumbered".to_owned(),
-        },
-      ]
-    );
-  }
-
   // A wrapper around a MetadataFetcher which drops the
   // resolved dependency graph from the acquired metadata.
   #[derive(Default)]
@@ -1303,7 +1259,7 @@ dependencies = [
     [package]
     name = \"advanced_toml\"
     version = \"0.1.0\"
-    
+
     [lib]
     path = \"not_a_file.rs\"
 

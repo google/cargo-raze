@@ -12,12 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::context::LicenseData;
+
+use spdx::{
+  expression::{ExprNode, Operator},
+  Expression,
+};
+
 /**
  * The list of Bazel-known license types
  *
  * KEEP ORDERED: The order dictates the preference.
  */
-#[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Hash)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Hash, Clone)]
 pub enum BazelLicenseType {
   Unencumbered,
   Notice,
@@ -40,30 +47,139 @@ impl BazelLicenseType {
   }
 }
 
-/** Breaks apart a cargo license string and yields the available license types. */
-pub fn get_available_licenses(cargo_license_str: &str) -> Vec<(String, BazelLicenseType)> {
-  let mut available_licenses = Vec::new();
-  for license_name in cargo_license_str.split('/') {
-    if license_name.is_empty() {
-      continue;
+/**
+ * A data structure for calculating a crate's license restrictions
+ */
+#[derive(Debug)]
+struct BazelSpdxLicense {
+  // The name of the license this struct represents
+  pub name: String,
+  // The expression the node represents. At the beginning, this will be the same as name at the end
+  // this will contain the entire SPDX expression for the crate's license.
+  pub expression: String,
+  // The license of the name field. This represents the least restrictive license for the
+  // expression field.
+  pub license: BazelLicenseType,
+}
+
+impl BazelSpdxLicense {
+  fn combine_license_expr(license1: &Self, license2: &Self, operator: &str) -> String {
+    // Surround license expressions with parenthesis if it isn't just the node name
+    let expr_str1 = if license1.name != license1.expression {
+      format!("({})", license1.expression)
+    } else {
+      license1.expression.clone()
+    };
+
+    let expr_str2 = if license2.name != license2.expression {
+      format!("({})", license2.expression)
+    } else {
+      license2.expression.clone()
+    };
+
+    // Combine them using the operator
+    format!("{} {} {}", expr_str1, operator, expr_str2)
+  }
+
+  /**
+   * Takes a BazelSpdxLicense as an argument, and returns a new BazelSpdxLicense based on the more
+   * restrictive license. If both licenses are equally restrictive, self's license is used. The
+   * new BazelSpdxLicense's expression will represent the "AND" of the two expressions.
+   */
+  pub fn and(&self, other_license: Self) -> Self {
+    let combined_expr = Self::combine_license_expr(self, &other_license, "AND");
+    if self.license >= other_license.license {
+      Self {
+        name: self.name.clone(),
+        expression: combined_expr,
+        license: self.license.clone(),
+      }
+    } else {
+      Self {
+        name: other_license.name,
+        expression: combined_expr,
+        license: other_license.license,
+      }
     }
-
-    // Trimming motivated by reem/rust-unreachable
-    let trimmed_license_name = license_name.trim();
-
-    let license_type = get_bazel_license_type(trimmed_license_name);
-
-    available_licenses.push((trimmed_license_name.to_owned(), license_type));
   }
 
-  if available_licenses.is_empty() {
-    return vec![("no license".to_owned(), BazelLicenseType::Restricted)];
+  /**
+   * Takes a BazelSpdxLicense as an argument, and returns a new BazelSpdxLicense based on the less
+   * restrictive license. If both licenses are equally restrictive, self's license is used. The
+   * new BazelSpdxLicense's expression will represent the "OR" of the two expressions.
+   */
+  pub fn or(&self, other_license: Self) -> Self {
+    let combined_expr = Self::combine_license_expr(&self, &other_license, "OR");
+    if self.license <= other_license.license {
+      Self {
+        name: self.name.clone(),
+        expression: combined_expr,
+        license: self.license.clone(),
+      }
+    } else {
+      Self {
+        name: other_license.name,
+        expression: combined_expr,
+        license: other_license.license,
+      }
+    }
+  }
+}
+
+/** Breaks apart a cargo license string and yields the available license types. */
+pub fn get_license_from_str(cargo_license_str: &str) -> LicenseData {
+  if cargo_license_str.len() == 0 {
+    return LicenseData::default();
   }
 
-  // Order by license type
-  available_licenses.sort_by(|a, b| a.1.cmp(&b.1));
+  // Many crates have forward-slashes in their licenses. This requires Lax parsing mode
+  let license_expression = match Expression::parse_mode(&cargo_license_str, spdx::ParseMode::Lax) {
+    Ok(expression) => expression,
+    Err(_) => {
+      return LicenseData {
+        name: format!(
+          "{} (Failed to parse as an SPDX license string)",
+          cargo_license_str
+        ),
+        rating: BazelLicenseType::Restricted.to_bazel_rating().into(),
+      };
+    }
+  };
 
-  available_licenses
+  let mut license_stack: Vec<BazelSpdxLicense> = Vec::new();
+  // All of the unwraps are safe because we control the contents of the vector
+  for node in license_expression.iter() {
+    match node {
+      ExprNode::Op(operator) => match operator {
+        Operator::And => {
+          let node2 = license_stack.pop().unwrap();
+          let node1 = license_stack.pop().unwrap();
+          license_stack.push(node1.and(node2));
+        }
+        Operator::Or => {
+          let node2 = license_stack.pop().unwrap();
+          let node1 = license_stack.pop().unwrap();
+          license_stack.push(node1.or(node2));
+        }
+      },
+      ExprNode::Req(requirement) => {
+        // Unwrap is safe because there was no parse error so the license type must exist
+        let req_name = requirement.req.license.id().unwrap().name;
+        // Push requirement onto stack
+        license_stack.push(BazelSpdxLicense {
+          name: req_name.into(),
+          expression: req_name.into(),
+          license: get_bazel_license_type(&req_name),
+        });
+      }
+    };
+  }
+
+  let crate_license = license_stack.pop().unwrap();
+  LicenseData {
+    name: format!("{} from expression \"{}\"", crate_license.name, crate_license.expression),
+    rating: crate_license.license.to_bazel_rating().into(),
+  }
 }
 
 fn get_bazel_license_type(license_str: &str) -> BazelLicenseType {
@@ -446,39 +562,52 @@ mod tests {
   use super::*;
 
   #[test]
-  fn more_permissive_licenses_come_first() {
-    assert_eq!(
-      get_available_licenses("Unlicense/Apache-2.0"),
-      vec![
-        ("Unlicense".to_owned(), BazelLicenseType::Unencumbered),
-        ("Apache-2.0".to_owned(), BazelLicenseType::Notice),
-      ]
-    );
-    assert_eq!(
-      get_available_licenses("Apache-2.0/Unlicense"),
-      vec![
-        ("Unlicense".to_owned(), BazelLicenseType::Unencumbered),
-        ("Apache-2.0".to_owned(), BazelLicenseType::Notice),
-      ]
-    );
+  fn more_permissive_licenses_come_first_with_or() {
+    let license = get_license_from_str("Unlicense/Apache-2.0");
+    assert_eq!(license.name, "Unlicense from expression \"Unlicense OR Apache-2.0\"");
+    assert_eq!(license.rating, "unencumbered");
+
+    let flipped_license = get_license_from_str("Apache-2.0/Unlicense");
+    assert_eq!(flipped_license.name, "Unlicense from expression \"Apache-2.0 OR Unlicense\"");
+    assert_eq!(flipped_license.rating, "unencumbered");
+  }
+
+  #[test]
+  fn less_permissive_licenses_come_first_with_and() {
+    let license = get_license_from_str("Unlicense AND Apache-2.0");
+    assert_eq!(license.name, "Apache-2.0 from expression \"Unlicense AND Apache-2.0\"");
+    assert_eq!(license.rating, "notice");
+
+    let flipped_license = get_license_from_str("Apache-2.0 AND Unlicense");
+    assert_eq!(flipped_license.name, "Apache-2.0 from expression \"Apache-2.0 AND Unlicense\"");
+    assert_eq!(flipped_license.rating, "notice");
+  }
+
+  #[test]
+  fn chained_or_works_properly() {
+    let license = get_license_from_str("MIT OR Apache-2.0 OR Unlicense");
+    assert_eq!(license.name, "Unlicense from expression \"MIT OR (Apache-2.0 OR Unlicense)\"");
+    assert_eq!(license.rating, "unencumbered");
   }
 
   #[test]
   fn unknown_licenses_are_restricted() {
-    assert_eq!(
-      get_available_licenses("MIT5.0"),
-      vec![("MIT5.0".to_owned(), BazelLicenseType::Restricted)]
-    );
+    let license = get_license_from_str("MIT5.0");
+    assert_eq!(license.name, "MIT5.0 (Failed to parse as an SPDX license string)");
+    assert_eq!(license.rating, "restricted");
   }
 
   #[test]
   fn whitespace_laden_licenses_are_ok() {
-    assert_eq!(
-      get_available_licenses("MIT / Apache-2.0"),
-      vec![
-        ("MIT".to_owned(), BazelLicenseType::Notice),
-        ("Apache-2.0".to_owned(), BazelLicenseType::Notice),
-      ]
-    );
+    let license = get_license_from_str("MIT / Apache-2.0");
+    assert_eq!(license.name, "MIT from expression \"MIT OR Apache-2.0\"");
+    assert_eq!(license.rating, "notice");
+  }
+
+  #[test]
+  fn empty_license_is_restricted() {
+    let license = get_license_from_str("");
+    assert_eq!(license.name, "no license");
+    assert_eq!(license.rating, "restricted");
   }
 }

@@ -109,6 +109,7 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "slug",
+ "spdx",
  "tempdir",
  "tera",
  "toml 0.4.10",
@@ -761,6 +762,17 @@ name = "smallvec"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c7cb5678e1615754284ec264d9bb5b4c27d2018577fd90ac0ceb578591ed5ee4"
+
+[[package]]
+name = "spdx"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1a68f874c9aa7762aa10401e2ae004d977e7b6156074668eb4ce78dd0cb28255"
+dependencies = [
+ "lazy_static",
+ "regex",
+ "smallvec",
+]
 
 [[package]]
 name = "strsim"

@@ -49,6 +49,15 @@ pub struct LicenseData {
   pub rating: String,
 }
 
+impl Default for LicenseData {
+  fn default() -> Self {
+    LicenseData {
+      name: "no license".into(),
+      rating: "restricted".into(),
+    }
+  }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct GitRepo {
   pub remote: String,
@@ -66,7 +75,7 @@ pub struct CrateContext {
   pub pkg_version: String,
   pub edition: String,
   pub raze_settings: CrateSettings,
-  pub licenses: Vec<LicenseData>,
+  pub license: LicenseData,
   pub features: Vec<String>,
   pub workspace_path_to_crate: String,
   pub dependencies: Vec<BuildableDependency>,

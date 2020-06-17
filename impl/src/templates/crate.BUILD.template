@@ -12,9 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-{%- for license in crate.licenses %}
-  "{{license.rating}}", # "{{license.name}}"
-{%- endfor %}
+  "{{crate.license.rating}}", # {{crate.license.name}}
 ])
 
 load(
