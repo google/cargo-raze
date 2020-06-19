@@ -230,7 +230,7 @@ impl BuildRenderer for BazelRenderer {
 
     // N.B. File needs to exist so that contained xyz-1.2.3.BUILD can be referenced
     file_outputs.push(FileOutputs {
-      path: format!("remote/{}", buildfile_suffix),
+      path: format!("{}/remote/{}", path_prefix, buildfile_suffix),
       contents: String::new(),
     });
 
