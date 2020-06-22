@@ -25,6 +25,7 @@
     data = {{crate.raze_settings.data_attr}},
     {%- endif %}
     version = "{{ crate.pkg_version }}",
+    tags = ["cargo-raze"],
     crate_features = [
         {%- for feature in crate.features %}
         "{{feature}}",
