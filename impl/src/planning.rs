@@ -746,7 +746,9 @@ impl<'planner> CrateSubplanner<'planner> {
         .into_owned()
         // TODO(acmcarther): Is this even guaranteed to work? I don't think the `display` output
         // can be guaranteed....
-        .split_off(package_root_path.display().to_string().len() + 1);
+        .split_off(package_root_path.display().to_string().len() + 1)
+        // Handle Windows case where we end up here with backslashes
+        .replace("\\", "/");
 
       // Some crates have a weird prefix, trim that.
       if package_root_path_str.starts_with("./") {
