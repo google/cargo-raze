@@ -601,6 +601,11 @@ impl<'planner> CrateSubplanner<'planner> {
       }
 
       if normal_dep_names.contains(&dep_package.name) {
+        // sys crates build files may generate DEP_* environment variables that
+        // need to be visible in their direct dependency build files.
+        if dep_package.name.ends_with("-sys") {
+          build_deps.push(buildable_dependency.clone());
+        }
         if buildable_dependency.is_proc_macro {
           proc_macro_deps.push(buildable_dependency);
         } else {
