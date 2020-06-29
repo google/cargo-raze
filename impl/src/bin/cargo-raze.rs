@@ -43,6 +43,7 @@ struct Options {
   flag_target: Option<String>,
   flag_dryrun: Option<bool>,
   flag_cargo_bin_path: Option<String>,
+  flag_output: String,
 }
 
 const USAGE: &str = r#"
@@ -50,8 +51,9 @@ Generate BUILD files for your pre-vendored Cargo dependencies.
 
 Usage:
     cargo raze (-h | --help)
-    cargo raze [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>]
+    cargo raze [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>] [--output=<PATH>]
     cargo raze <buildprefix> [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>]
+                             [--output=<PATH>]
 
 Options:
     -h, --help                         Print this message
@@ -60,6 +62,7 @@ Options:
     --color=<WHEN>                     Coloring: auto, always, never
     -d, --dryrun                       Do not emit any files
     --cargo-bin-path=<PATH>            Path to the cargo binary to be used for loading workspace metadata
+    --output=<PATH>                    Path to output the generated into [default: .].
 "#;
 
 fn main() -> Result<()> {
@@ -90,23 +93,27 @@ fn main() -> Result<()> {
   let planned_build = planner.plan_build(&settings, files, platform_details)?;
   let mut bazel_renderer = BazelRenderer::new();
   let render_details = RenderDetails {
-    path_prefix: "./".to_owned(),
+    path_prefix: options.flag_output,
     buildfile_suffix: settings.output_buildfile_suffix,
   };
+
+  let dry_run = options.flag_dryrun.unwrap_or(false);
+  if !dry_run {
+    fs::create_dir_all(&render_details.path_prefix)?;
+  }
 
   let bazel_file_outputs = match settings.genmode {
     GenMode::Vendored => bazel_renderer.render_planned_build(&render_details, &planned_build)?,
     GenMode::Remote => {
-      // Create "remote/" if it doesn't exist
-      if fs::metadata("remote/").is_err() {
-        fs::create_dir("remote/")?;
+      if !dry_run {
+        // Create "remote/" if it doesn't exist
+        fs::create_dir_all(render_details.path_prefix.clone() + "/remote/")?;
       }
 
       bazel_renderer.render_remote_planned_build(&render_details, &planned_build)?
     } /* exhaustive, we control the definition */
   };
 
-  let dry_run = options.flag_dryrun.unwrap_or(false);
   for FileOutputs { path, contents } in bazel_file_outputs {
     if dry_run {
       println!("{}:\n{}", path, contents);
