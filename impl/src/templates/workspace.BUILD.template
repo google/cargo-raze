@@ -15,6 +15,7 @@ licenses([
 alias(
     name = "{{crate_name_sanitized}}",
     actual = "{{crate.workspace_path_to_crate}}:{{crate_name_sanitized}}",
+    tags = ["cargo-raze"],
 )
 {%- endif %}
 {%- for aliased_target in crate.raze_settings.extra_aliased_targets %}
@@ -23,6 +24,7 @@ alias(
     # N.B.: The exact form of this is subject to change.
     name = "{{aliased_target}}",
     actual = "{{crate.workspace_path_to_crate}}:{{aliased_target}}",
+    tags = ["cargo-raze"],
 )
 {%- endfor %}
 {%- endfor %}
