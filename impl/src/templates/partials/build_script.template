@@ -25,6 +25,11 @@ cargo_build_script(
       "{{feature}}",
       {%- endfor %}
     ],
+    build_script_env = {
+        {%- for key, value in crate.raze_settings.buildrs_additional_environment_variables %}	
+        "{{key}}": "{{value}}",
+        {%- endfor %}
+    },
     data = glob(["**"]),
     tags = ["cargo-raze"],
     version = "{{ crate.pkg_version }}",
