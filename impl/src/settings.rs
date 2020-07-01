@@ -140,8 +140,6 @@ pub struct CrateSettings {
 
   /**
    * Additional environment variables to add when running the build script.
-   *
-   * Values should looks like "KEY=VALUE".
    */
   #[serde(default)]
   pub buildrs_additional_environment_variables: HashMap<String, String>,
