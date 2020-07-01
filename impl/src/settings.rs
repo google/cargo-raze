@@ -144,7 +144,7 @@ pub struct CrateSettings {
    * Values should looks like "KEY=VALUE".
    */
   #[serde(default)]
-  pub buildrs_additional_environment_variables: Vec<String>,
+  pub buildrs_additional_environment_variables: HashMap<String, String>,
 
   /**
    * The arguments given to the patch tool.
@@ -233,7 +233,7 @@ impl Default for CrateSettings {
       additional_env: HashMap::new(),
       gen_buildrs: default_crate_settings_field_gen_buildrs(),
       data_attr: default_crate_settings_field_data_attr(),
-      buildrs_additional_environment_variables: Vec::new(),
+      buildrs_additional_environment_variables: HashMap::new(),
       patch_args: Vec::new(),
       patch_cmds: Vec::new(),
       patch_cmds_win: Vec::new(),
