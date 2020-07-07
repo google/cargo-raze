@@ -75,6 +75,8 @@ struct DependencySet {
   proc_macro_deps: Vec<BuildableDependency>,
   // Dependencies that are required for build script only
   build_deps: Vec<BuildableDependency>,
+  // Dependencies that proc macros and are required for the build script only
+  build_proc_macro_deps: Vec<BuildableDependency>,
   // Dependencies that are required for tests
   dev_deps: Vec<BuildableDependency>,
   // Dependencies that have been renamed and need to be aliased in the build rule
@@ -474,6 +476,7 @@ impl<'planner> CrateSubplanner<'planner> {
   fn produce_context(&self) -> Result<CrateContext> {
     let DependencySet {
       build_deps,
+      build_proc_macro_deps,
       proc_macro_deps,
       dev_deps,
       normal_deps,
@@ -504,6 +507,7 @@ impl<'planner> CrateSubplanner<'planner> {
       dependencies: normal_deps,
       proc_macro_dependencies: proc_macro_deps,
       build_dependencies: build_deps,
+      build_proc_macro_dependencies: build_proc_macro_deps,
       dev_dependencies: dev_deps,
       aliased_dependencies: aliased_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings),
@@ -539,6 +543,7 @@ impl<'planner> CrateSubplanner<'planner> {
     } = self.identify_named_deps()?;
 
     let mut build_deps = Vec::new();
+    let mut build_proc_macro_deps = Vec::new();
     let mut proc_macro_deps = Vec::new();
     let mut dev_deps = Vec::new();
     let mut normal_deps = Vec::new();
@@ -593,7 +598,11 @@ impl<'planner> CrateSubplanner<'planner> {
       };
 
       if build_dep_names.contains(&dep_package.name) {
-        build_deps.push(buildable_dependency.clone());
+        if buildable_dependency.is_proc_macro {
+          build_proc_macro_deps.push(buildable_dependency.clone());
+        } else {
+          build_deps.push(buildable_dependency.clone());
+        }
       }
 
       if dev_dep_names.contains(&dep_package.name) {
@@ -622,12 +631,14 @@ impl<'planner> CrateSubplanner<'planner> {
     }
 
     build_deps.sort();
+    build_proc_macro_deps.sort();
     proc_macro_deps.sort();
     dev_deps.sort();
     normal_deps.sort();
 
     Ok(DependencySet {
       build_deps,
+      build_proc_macro_deps,
       proc_macro_deps,
       dev_deps,
       normal_deps,
