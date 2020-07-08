@@ -75,6 +75,8 @@ struct DependencySet {
   proc_macro_deps: Vec<BuildableDependency>,
   // Dependencies that are required for build script only
   build_deps: Vec<BuildableDependency>,
+  // Dependencies that proc macros and are required for the build script only
+  build_proc_macro_deps: Vec<BuildableDependency>,
   // Dependencies that are required for tests
   dev_deps: Vec<BuildableDependency>,
   // Dependencies that have been renamed and need to be aliased in the build rule
@@ -474,6 +476,7 @@ impl<'planner> CrateSubplanner<'planner> {
   fn produce_context(&self) -> Result<CrateContext> {
     let DependencySet {
       build_deps,
+      build_proc_macro_deps,
       proc_macro_deps,
       dev_deps,
       normal_deps,
@@ -504,6 +507,7 @@ impl<'planner> CrateSubplanner<'planner> {
       dependencies: normal_deps,
       proc_macro_dependencies: proc_macro_deps,
       build_dependencies: build_deps,
+      build_proc_macro_dependencies: build_proc_macro_deps,
       dev_dependencies: dev_deps,
       aliased_dependencies: aliased_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings),
@@ -539,6 +543,7 @@ impl<'planner> CrateSubplanner<'planner> {
     } = self.identify_named_deps()?;
 
     let mut build_deps = Vec::new();
+    let mut build_proc_macro_deps = Vec::new();
     let mut proc_macro_deps = Vec::new();
     let mut dev_deps = Vec::new();
     let mut normal_deps = Vec::new();
@@ -593,7 +598,11 @@ impl<'planner> CrateSubplanner<'planner> {
       };
 
       if build_dep_names.contains(&dep_package.name) {
-        build_deps.push(buildable_dependency.clone());
+        if buildable_dependency.is_proc_macro {
+          build_proc_macro_deps.push(buildable_dependency.clone());
+        } else {
+          build_deps.push(buildable_dependency.clone());
+        }
       }
 
       if dev_dep_names.contains(&dep_package.name) {
@@ -622,12 +631,14 @@ impl<'planner> CrateSubplanner<'planner> {
     }
 
     build_deps.sort();
+    build_proc_macro_deps.sort();
     proc_macro_deps.sort();
     dev_deps.sort();
     normal_deps.sort();
 
     Ok(DependencySet {
       build_deps,
+      build_proc_macro_deps,
       proc_macro_deps,
       dev_deps,
       normal_deps,
@@ -1362,6 +1373,53 @@ dependencies = [
     assert_eq!(serde_derive_normal_deps.len(), 0);
   }
 
+  #[test]
+  fn test_plan_build_produces_build_proc_macro_dependencies() {
+    let toml_file = "
+    [package]
+    name = \"advanced_toml\"
+    version = \"0.1.0\"
+
+    [lib]
+    path = \"not_a_file.rs\"
+
+    [dependencies]
+    markup5ever = \"=0.10.0\"
+        ";
+    let (_temp_dir, files) = make_workspace(toml_file, None);
+    let mut fetcher = WorkspaceCrateMetadataFetcher::default();
+    let mut settings = settings_testing::dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build = planner
+      .plan_build(
+        &settings,
+        files,
+        PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+      )
+      .unwrap();
+
+    let markup = planned_build
+      .crate_contexts
+      .iter()
+      .find(|ctx| ctx.pkg_name == "markup5ever")
+      .unwrap();
+
+    let markup_proc_macro_deps: Vec<_> = markup
+      .proc_macro_dependencies
+      .iter()
+      .filter(|dep| dep.name == "serde_derive")
+      .collect();
+    assert_eq!(markup_proc_macro_deps.len(), 0);
+
+    let markup_build_proc_macro_deps: Vec<_> = markup
+      .build_proc_macro_dependencies
+      .iter()
+      .filter(|dep| dep.name == "serde_derive")
+      .collect();
+    assert_eq!(markup_build_proc_macro_deps.len(), 1);
+  }
   // TODO(acmcarther): Add tests:
   // TODO(acmcarther): Extra flags work
   // TODO(acmcarther): Extra deps work

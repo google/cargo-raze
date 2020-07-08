@@ -17,6 +17,13 @@ cargo_build_script(
         "{{dependency.buildable_target}}",
       {%- endfor %}
     ],
+    {%- if crate.build_proc_macro_dependencies %}
+    proc_macro_deps = [
+    {%- for dependency in crate.build_proc_macro_dependencies %}
+        "{{dependency.buildable_target}}",
+    {%- endfor %}
+    ],
+    {%- endif %}
     rustc_flags = [
         "--cap-lints=allow",
     ],
