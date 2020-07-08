@@ -12,7 +12,6 @@ libloading = "=0.5.2"
 regex = "=0.2.5"
 specs = "=0.10.0"
 security-framework-sys = "0.2.2"
-markup5ever = "0.10.0"
 
 [raze]
 workspace_path = "//remote/complicated_cargo_library/cargo"
@@ -25,9 +24,6 @@ output_buildfile_suffix = "BUILD.bazel"
 additional_flags = [
     "--cfg=use_proc_macro",
 ]
-
-[raze.crates.markup5ever.'0.10.0']
-gen_buildrs = true
 
 [raze.crates.libloading.'0.5.2']
 additional_deps = [":global_static"]

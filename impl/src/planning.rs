@@ -1373,6 +1373,53 @@ dependencies = [
     assert_eq!(serde_derive_normal_deps.len(), 0);
   }
 
+  #[test]
+  fn test_plan_build_produces_build_proc_macro_dependencies() {
+    let toml_file = "
+    [package]
+    name = \"advanced_toml\"
+    version = \"0.1.0\"
+
+    [lib]
+    path = \"not_a_file.rs\"
+
+    [dependencies]
+    markup5ever = \"=0.10.0\"
+        ";
+    let (_temp_dir, files) = make_workspace(toml_file, None);
+    let mut fetcher = WorkspaceCrateMetadataFetcher::default();
+    let mut settings = settings_testing::dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build = planner
+      .plan_build(
+        &settings,
+        files,
+        PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+      )
+      .unwrap();
+
+    let markup = planned_build
+      .crate_contexts
+      .iter()
+      .find(|ctx| ctx.pkg_name == "markup5ever")
+      .unwrap();
+
+    let markup_proc_macro_deps: Vec<_> = markup
+      .proc_macro_dependencies
+      .iter()
+      .filter(|dep| dep.name == "serde_derive")
+      .collect();
+    assert_eq!(markup_proc_macro_deps.len(), 0);
+
+    let markup_build_proc_macro_deps: Vec<_> = markup
+      .build_proc_macro_dependencies
+      .iter()
+      .filter(|dep| dep.name == "serde_derive")
+      .collect();
+    assert_eq!(markup_build_proc_macro_deps.len(), 1);
+  }
   // TODO(acmcarther): Add tests:
   // TODO(acmcarther): Extra flags work
   // TODO(acmcarther): Extra deps work
