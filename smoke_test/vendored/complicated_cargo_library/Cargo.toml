@@ -9,7 +9,7 @@ security-framework-sys = "0.2.2"
 specs = "0.10.0"
 
 [lib]
-path = "fake_lib.rs"
+path = "src/main.rs"
 
 [raze]
 workspace_path = "//vendored/complicated_cargo_library/cargo"

@@ -3,7 +3,7 @@ name = "compile_with_bazel"
 version = "0.1.0"
 
 [lib]
-path = "fake_lib.rs"
+path = "src/main.rs"
 
 [dependencies]
 # Newer versions of libloading don't depend on C code anymore, so we're using an older version to
@@ -27,7 +27,7 @@ additional_flags = [
 
 [raze.crates.libloading.'0.5.2']
 additional_deps = [":global_static"]
-additional_build_file = "libloading_global_static.BUILD"
+additional_build_file = "cargo/libloading_global_static.BUILD"
 
 [raze.crates.regex.'0.2.5']
 skipped_deps = [

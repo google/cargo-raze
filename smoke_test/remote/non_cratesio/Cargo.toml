@@ -12,7 +12,7 @@ env_logger = { git = "https://github.com/sebasmagri/env_logger.git", tag = "v0.5
 log = { git = "https://github.com/rust-lang-nursery/log.git", rev = "bf40d1f563c" }
 
 [lib]
-path = "fake_lib.rs"
+path = "src/main.rs"
 
 [raze]
 workspace_path = "//remote/non_cratesio/cargo"

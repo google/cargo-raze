@@ -28,6 +28,7 @@ use cargo_platform::Platform;
 use itertools::Itertools;
 
 use crate::{
+  bazel::find_workspace_root,
   context::{
     BuildableDependency, BuildableTarget, CrateContext, DependencyAlias, GitRepo, LicenseData,
     SourceDetails, WorkspaceContext,
@@ -195,8 +196,16 @@ impl CrateCatalogEntry {
    *
    * Not for use except during planning as path is local to run location.
    */
-  pub fn expected_vendored_path(&self) -> String {
-    format!("./{}{}", VENDOR_DIR, &self.package_ident)
+  pub fn expected_vendored_path(&self, workspace_path: &String) -> String {
+    let mut dir = find_workspace_root(None).unwrap_or(PathBuf::from("."));
+    dir.push(workspace_path.trim_start_matches('/'));
+
+    format!(
+      "{}/{}{}",
+      dir.display().to_string(),
+      VENDOR_DIR,
+      &self.package_ident
+    )
   }
 
   /** Yields the expected location of the build file (relative to execution path). */
@@ -368,7 +377,10 @@ impl<'planner> WorkspaceSubplanner<'planner> {
     checks::check_resolve_matches_packages(&self.metadata)?;
 
     if self.settings.genmode != GenMode::Remote {
-      checks::check_all_vendored(self.crate_catalog.entries())?;
+      checks::check_all_vendored(
+        self.crate_catalog.entries(),
+        &self.settings.workspace_path.to_string(),
+      )?;
     }
 
     checks::warn_unused_settings(&self.settings.crates, &self.metadata.packages);
@@ -864,13 +876,16 @@ mod checks {
   const MAX_DISPLAYED_MISSING_RESOLVE_PACKAGES: usize = 5;
 
   // Verifies that all provided packages are vendored (in VENDOR_DIR relative to CWD)
-  pub fn check_all_vendored(crate_catalog_entries: &[CrateCatalogEntry]) -> Result<()> {
+  pub fn check_all_vendored(
+    crate_catalog_entries: &[CrateCatalogEntry],
+    workspace_path: &String,
+  ) -> Result<()> {
     let missing_package_ident_iter = crate_catalog_entries
       .iter()
       // Root does not need to be vendored -- usually it is a wrapper package.
       .filter(|p| !p.is_root())
       .filter(|p| !p.is_workspace_crate())
-      .filter(|p| fs::metadata(p.expected_vendored_path()).is_err())
+      .filter(|p| fs::metadata(p.expected_vendored_path(workspace_path)).is_err())
       .map(|p| p.package_ident.clone());
 
     let limited_missing_crates = collect_up_to(

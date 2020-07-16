@@ -23,6 +23,35 @@ use crate::{
   util::RazeError,
 };
 
+use std::{
+  env,
+  path::{Path, PathBuf},
+};
+
+/** Returns a path to a Bazel workspace root if one could be found, otherwise None */
+pub fn find_workspace_root(current_dir: Option<&Path>) -> Option<PathBuf> {
+  let default = env::current_dir().unwrap();
+  let cwd: &Path = current_dir.unwrap_or(default.as_path());
+
+  let workspace_files = [
+    cwd.clone().join("WORKSPACE.bazel"),
+    cwd.clone().join("WORKSPACE"),
+  ];
+
+  for workspace in workspace_files.iter() {
+    if workspace.exists() {
+      return Some(cwd.to_path_buf());
+    }
+  }
+
+  match cwd.parent() {
+    None => {
+      return None;
+    }
+    Some(parent) => return find_workspace_root(Some(parent)),
+  };
+}
+
 #[derive(Default)]
 pub struct BazelRenderer {
   internal_renderer: Tera,
@@ -293,6 +322,10 @@ mod tests {
   };
 
   use super::*;
+
+  use std::fs::File;
+
+  use tempdir::TempDir;
 
   fn dummy_render_details(buildfile_suffix: &str) -> RenderDetails {
     RenderDetails {
@@ -573,5 +606,22 @@ mod tests {
       ),
     )
     .unwrap();
+  }
+
+  #[test]
+  fn detecting_workspace_root() {
+    let bazel_root = TempDir::new("find_workspace_root_test").unwrap();
+
+    // Starting within the temp directory, we'll find that there are no WORKSPACE.bazel files
+    // and thus return None to indicate a Bazel workspace root could not be found.
+    assert_eq!(find_workspace_root(Some(bazel_root.path())), None);
+
+    // After creating a WORKSPACE.bazel file in that directory, we expect to find to be 
+    // returned a path to the temporary directory
+    File::create(bazel_root.path().join("WORKSPACE.bazel")).unwrap();
+    assert_eq!(
+      find_workspace_root(Some(bazel_root.path())),
+      Some(bazel_root.into_path())
+    );
   }
 }
