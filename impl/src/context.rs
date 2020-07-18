@@ -14,11 +14,12 @@
 
 use crate::settings::CrateSettings;
 use serde_derive::Serialize;
+use semver::Version;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableDependency {
   pub name: String,
-  pub version: String,
+  pub version: Version,
   pub buildable_target: String,
   pub is_proc_macro: bool,
 }
@@ -40,7 +41,7 @@ pub struct BuildableTarget {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct Metadep {
   pub name: String,
-  pub min_version: String,
+  pub min_version: Version,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -72,7 +73,7 @@ pub struct SourceDetails {
 #[derive(Debug, Clone, Serialize)]
 pub struct CrateContext {
   pub pkg_name: String,
-  pub pkg_version: String,
+  pub pkg_version: Version,
   pub edition: String,
   pub raze_settings: CrateSettings,
   pub license: LicenseData,

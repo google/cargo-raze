@@ -14,6 +14,7 @@
 
 use std::{
   collections::{HashMap, HashSet},
+  iter,
   path::PathBuf,
   str::{self, FromStr},
 };
@@ -131,7 +132,7 @@ struct CrateSubplanner<'planner> {
   crate_catalog_entry: &'planner CrateCatalogEntry,
   source_id: &'planner Option<SourceId>,
   node: &'planner Node,
-  crate_settings: &'planner CrateSettings,
+  crate_settings: Option<&'planner CrateSettings>,
   sha256: &'planner Option<String>,
 }
 
@@ -150,7 +151,7 @@ impl CrateCatalogEntry {
     is_workspace_crate: bool,
   ) -> Self {
     let sanitized_name = package.name.replace("-", "_");
-    let sanitized_version = util::sanitize_ident(&package.version.clone().to_string());
+    let sanitized_version = util::sanitize_ident(&package.version.to_string());
 
     Self {
       package: package.clone(),
@@ -440,14 +441,6 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           return None;
         }
 
-        let crate_settings = self
-          .settings
-          .crates
-          .get(&own_package.name)
-          .and_then(|c| c.get(&own_package.version))
-          .cloned()
-          .unwrap_or_else(CrateSettings::default);
-
         // UNWRAP: Safe given unwrap during serialize step of metadata
         let own_source_id = own_package
           .source
@@ -461,13 +454,40 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           crate_catalog_entry: &own_crate_catalog_entry,
           source_id: &own_source_id,
           node: &node,
-          crate_settings: &crate_settings,
+          crate_settings: self.crate_settings(&own_package).unwrap(),
           sha256: &checksum_opt.map(|c| c.to_owned()),
         };
 
         Some(crate_subplanner.produce_context())
       })
       .collect()
+  }
+
+  fn crate_settings(&self, package: &Package) -> Result<Option<&CrateSettings>> {
+    self
+      .settings
+      .crates
+      .get(&package.name)
+      .map_or(Ok(None), |settings| {
+        let mut versions = settings
+          .iter()
+          .filter(|(ver_req, _)| ver_req.matches(&package.version))
+          .peekable();
+
+        match versions.next() {
+          None => Ok(None),
+          Some((_, settings)) if versions.peek().is_none() => Ok(Some(settings)),
+          Some(current) => Err(RazeError::Config {
+            field_path_opt: None,
+            message: format!(
+              "Multiple potential semver matches `[{}]` found for `{}`",
+              iter::once(current).chain(versions).map(|x| x.0).join(", "),
+              &package.name
+            )
+          })
+        }
+      })
+      .map_err(|e| e.into())
   }
 }
 
@@ -499,7 +519,7 @@ impl<'planner> CrateSubplanner<'planner> {
 
     Ok(CrateContext {
       pkg_name: package.name.clone(),
-      pkg_version: package.version.to_string(),
+      pkg_version: package.version.clone(),
       edition: package.edition.clone(),
       license: self.produce_license(),
       features: self.node.features.clone(),
@@ -512,7 +532,7 @@ impl<'planner> CrateSubplanner<'planner> {
       aliased_dependencies: aliased_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings),
       build_script_target: build_script_target_opt,
-      raze_settings: self.crate_settings.clone(),
+      raze_settings: self.crate_settings.cloned().unwrap_or_default(),
       source_details: self.produce_source_details(),
       expected_build_path: self.crate_catalog_entry.local_build_path(&self.settings),
       sha256: self.sha256.clone(),
@@ -551,9 +571,8 @@ impl<'planner> CrateSubplanner<'planner> {
 
     let all_skipped_deps = self
       .crate_settings
-      .skipped_deps
       .iter()
-      .cloned()
+      .flat_map(|pkg| pkg.skipped_deps.iter())
       .collect::<HashSet<_>>();
 
     for dep_id in &self.node.dependencies {
@@ -592,7 +611,7 @@ impl<'planner> CrateSubplanner<'planner> {
 
       let buildable_dependency = BuildableDependency {
         name: dep_package.name.clone(),
-        version: dep_package.version.to_string(),
+        version: dep_package.version.clone(),
         buildable_target: buildable_target.clone(),
         is_proc_macro,
       };
@@ -728,7 +747,7 @@ impl<'planner> CrateSubplanner<'planner> {
   ) -> Option<BuildableTarget> {
     if !self
       .crate_settings
-      .gen_buildrs
+      .and_then(|x| x.gen_buildrs)
       .unwrap_or(self.settings.default_gen_buildrs)
     {
       return None;
@@ -833,6 +852,7 @@ impl<'planner> CrateSubplanner<'planner> {
 mod checks {
   use std::{
     collections::{HashMap, HashSet},
+    iter::FromIterator,
     env, fs,
   };
 
@@ -924,42 +944,21 @@ mod checks {
     all_crate_settings: &HashMap<String, CrateSettingsPerVersion>,
     all_packages: &[Package],
   ) {
-    let mut known_versions_per_crate = HashMap::new();
-    for &Package {
-      ref name,
-      ref version,
-      ..
-    } in all_packages
-    {
-      known_versions_per_crate
-        .entry(name.clone())
-        .or_insert_with(HashSet::new)
-        .insert(version.clone());
-    }
+     // 1st check names
+     let pkg_names = all_packages.iter().map(|pkg| &pkg.name).collect::<HashSet<_>>();
+     let setting_names = HashSet::from_iter(all_crate_settings.keys());
+     for missing in setting_names.difference(&pkg_names) {
+       eprintln!("Found unused raze crate settings for `{}`", missing);
+     }
 
-    for (name, settings_per_version) in all_crate_settings {
-      if !known_versions_per_crate.contains_key(name) {
-        eprintln!(
-          "Found unused raze settings for all of {}-{:?}",
-          name,
-          settings_per_version.keys()
-        );
-        // No version introspection needed -- no known version of this crate
-        continue;
-      }
-
-      // UNWRAP: Guarded above
-      let all_known_versions = known_versions_per_crate.get(name).unwrap();
-
-      for version in settings_per_version.keys() {
-        if !all_known_versions.contains(version) {
-          eprintln!(
-            "Found unused raze settings for {}-{}, but {:?} were known",
-            name, version, all_known_versions
-          )
-        }
-      }
-    }
+     // Then check versions
+     all_crate_settings.iter()
+       .flat_map(|(name, settings)| settings.iter().map(move |x| (x.0, name)))
+       .filter(|(ver_req, _)| !all_packages.iter().any(|pkg| ver_req.matches(&pkg.version)))
+       .for_each(|(ver_req, name)| {
+         eprintln!("Found unused raze settings for version `{}` against crate `{}`",
+                   ver_req, name);
+       });
   }
 }
 

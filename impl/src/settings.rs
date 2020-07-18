@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use semver::Version;
+use semver::VersionReq;
 use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-pub type CrateSettingsPerVersion = HashMap<Version, CrateSettings>;
+pub type CrateSettingsPerVersion = HashMap<VersionReq, CrateSettings>;
 
 /**
  * A "deserializable struct" for the whole Cargo.toml
