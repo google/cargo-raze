@@ -24,8 +24,8 @@ use anyhow::Result;
 use cargo_lock::lockfile::Lockfile;
 use cargo_lock::SourceId;
 use cargo_platform::Platform;
-
 use itertools::Itertools;
+use semver::Version;
 
 use crate::{
   context::{
@@ -34,7 +34,8 @@ use crate::{
   },
   license,
   metadata::{
-    CargoWorkspaceFiles, DependencyKind, Metadata, MetadataFetcher, Node, Package, PackageId,
+    CargoWorkspaceFiles, Dependency, DependencyKind, Metadata, MetadataFetcher, Node, Package,
+    PackageId,
   },
   settings::{CrateSettings, GenMode, RazeSettings},
   util::{self, PlatformDetails, RazeError, PLEASE_FILE_A_BUG},
@@ -57,15 +58,14 @@ pub trait BuildPlanner {
 }
 
 /** A set of named dependencies (without version) derived from a package manifest. */
-struct DependencyNames {
+#[derive(Default)]
+struct NamedDepDecls<'planner> {
   // Dependencies that are required for all buildable targets of this crate
-  normal_dep_names: Vec<String>,
+  normal: HashMap<&'planner str, &'planner Dependency>,
   // Dependencies that are required for build script only
-  build_dep_names: Vec<String>,
+  build: HashMap<&'planner str, &'planner Dependency>,
   // Dependencies that are required for tests
-  dev_dep_names: Vec<String>,
-  // Dependencies that have been renamed and need to be aliased in the build rule
-  aliased_dep_names: HashMap<String, String>,
+  dev: HashMap<&'planner str, &'planner Dependency>,
 }
 
 // TODO(acmcarther): Remove this struct -- move it into CrateContext.
@@ -136,11 +136,17 @@ struct CrateSubplanner<'planner> {
   sha256: &'planner Option<String>,
 }
 
+type CrateContextProduction = (Vec<CrateContext>, Vec<DependencyAlias>);
+
 /** A ready-to-be-rendered build, containing renderable context for each crate. */
 #[derive(Debug)]
 pub struct PlannedBuild {
+  /// The overall context for this workspace
   pub workspace_context: WorkspaceContext,
+  /// The crates to build for
   pub crate_contexts: Vec<CrateContext>,
+  /// Any aliases that are defined as the root level
+  pub dependency_aliases: Vec<DependencyAlias>,
 }
 
 impl CrateCatalogEntry {
@@ -373,11 +379,12 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
     checks::warn_unused_settings(&self.settings.crates, &self.metadata.packages);
 
-    let crate_contexts = self.produce_crate_contexts()?;
+    let (crate_contexts, dependency_aliases) = self.produce_crate_contexts()?;
 
     Ok(PlannedBuild {
       workspace_context: self.produce_workspace_context(),
       crate_contexts,
+      dependency_aliases,
     })
   }
 
@@ -392,7 +399,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
   }
 
   /** Produces a crate context for each declared crate and dependency. */
-  fn produce_crate_contexts(&self) -> Result<Vec<CrateContext>> {
+  fn produce_crate_contexts(&self) -> Result<CrateContextProduction> {
     // Gather the checksums for all packages in the lockfile
     // which have them.
     //
@@ -403,64 +410,121 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       let lockfile = Lockfile::load(lock_path.as_path())?;
       for package in lockfile.packages {
         if let Some(checksum) = package.checksum {
-          package_to_checksum.insert(
-            (package.name.to_string(), package.version),
-            checksum.to_string(),
-          );
+          // HACK: Compat hack as cargo uses semver 0.10 and cargo-lock uses 0.9
+          let ver = Version::parse(&package.version.to_string())?;
+          package_to_checksum.insert((package.name.to_string(), ver), checksum.to_string());
         }
       }
     }
 
-    self
+    let nodes = self
       .metadata
       .resolve
       .as_ref()
       .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?
       .nodes
       .iter()
-      .sorted_by_key(|n| &n.id)
-      .filter_map(|node| {
-        // UNWRAP: Node packages guaranteed to exist by guard in `produce_planned_build`
-        let own_crate_catalog_entry = self.crate_catalog.entry_for_package_id(&node.id).unwrap();
-        let own_package = own_crate_catalog_entry.package();
+      .sorted_by_key(|n| &n.id);
 
-        let checksum_opt =
-          package_to_checksum.get(&(own_package.name.clone(), own_package.version.clone()));
+    let mut root_context = None;
+    let mut contexts = Vec::with_capacity(nodes.size_hint().0);
 
-        // Skip the root package (which is probably a junk package, by convention)
-        if own_crate_catalog_entry.is_root() {
-          return None;
+    for node in nodes {
+      // UNWRAP: Node packages guaranteed to exist by guard in `produce_planned_build`
+      let own_crate_catalog_entry = self.crate_catalog.entry_for_package_id(&node.id).unwrap();
+      let own_package = own_crate_catalog_entry.package();
+
+      let checksum_opt =
+        package_to_checksum.get(&(own_package.name.clone(), own_package.version.clone()));
+
+      // Skip workspace crates, since we haven't yet decided how they should be handled.
+      //
+      // Hey you, reader! If you have opinions about this please comment on the below bug, or file
+      // another bug.
+      // See Also: https://github.com/google/cargo-raze/issues/111
+      if !own_crate_catalog_entry.is_root() && own_crate_catalog_entry.is_workspace_crate() {
+        continue;
+      }
+
+      // UNWRAP: Safe given unwrap during serialize step of metadata
+      let own_source_id = own_package
+        .source
+        .as_ref()
+        .map(|s| SourceId::from_url(&s.to_string()))
+        .transpose()?;
+
+      let crate_subplanner = CrateSubplanner {
+        crate_catalog: &self.crate_catalog,
+        settings: self.settings,
+        platform_details: self.platform_details,
+        crate_catalog_entry: &own_crate_catalog_entry,
+        source_id: &own_source_id,
+        node: &node,
+        crate_settings: self.crate_settings(&own_package).unwrap(),
+        sha256: &checksum_opt.map(|c| c.to_owned()),
+      };
+
+      let context = crate_subplanner.produce_context()?;
+
+      if own_crate_catalog_entry.is_root() {
+        if root_context.replace(context).is_some() {
+          return Err(
+            RazeError::Generic(format!(
+              "Multiple root contexts found. {}",
+              PLEASE_FILE_A_BUG
+            ))
+            .into(),
+          );
         }
+      } else {
+        contexts.push(context);
+      }
+    }
 
-        // Skip workspace crates, since we haven't yet decided how they should be handled.
-        //
-        // Hey you, reader! If you have opinions about this please comment on the below bug, or file
-        // another bug.
-        // See Also: https://github.com/google/cargo-raze/issues/111
-        if own_crate_catalog_entry.is_workspace_crate() {
-          return None;
-        }
+    let root_context = root_context.ok_or_else(|| {
+      RazeError::Internal(format!("No root context found. {}", PLEASE_FILE_A_BUG))
+    })?;
 
-        // UNWRAP: Safe given unwrap during serialize step of metadata
-        let own_source_id = own_package
-          .source
+    let all_aliases = Self::all_aliases(root_context.aliased_dependencies, &contexts);
+
+    Ok((contexts, all_aliases))
+  }
+
+  fn all_aliases(
+    directly_named_aliases: Vec<DependencyAlias>,
+    contexts: &[CrateContext],
+  ) -> Vec<DependencyAlias> {
+    let mut aliases = HashSet::new();
+    aliases.extend(directly_named_aliases);
+
+    for context in contexts {
+      let workspace_path = &context.workspace_path_to_crate;
+      let pkg_name = &context.pkg_name;
+
+      aliases.extend(
+        context
+          .lib_target_name
           .as_ref()
-          .map(|s| SourceId::from_url(&s.to_string()).unwrap());
+          .filter(|_name| context.is_root_dependency)
+          .map(|name| DependencyAlias {
+            alias: pkg_name.clone().replace("-", "_"),
+            target: format!("{}:{}", &workspace_path, &name.replace("-", "_")),
+          }),
+      );
 
-        let crate_subplanner = CrateSubplanner {
-          crate_catalog: &self.crate_catalog,
-          settings: self.settings,
-          platform_details: self.platform_details,
-          crate_catalog_entry: &own_crate_catalog_entry,
-          source_id: &own_source_id,
-          node: &node,
-          crate_settings: self.crate_settings(&own_package).unwrap(),
-          sha256: &checksum_opt.map(|c| c.to_owned()),
-        };
+      aliases.extend(
+        context
+          .raze_settings
+          .extra_aliased_targets
+          .iter()
+          .map(|extra| DependencyAlias {
+            alias: extra.clone(),
+            target: format!("{}:{}", &workspace_path, &extra),
+          }),
+      );
+    }
 
-        Some(crate_subplanner.produce_context())
-      })
-      .collect()
+    aliases.into_iter().sorted().collect()
   }
 
   fn crate_settings(&self, package: &Package) -> Result<Option<&CrateSettings>> {
@@ -483,8 +547,8 @@ impl<'planner> WorkspaceSubplanner<'planner> {
               "Multiple potential semver matches `[{}]` found for `{}`",
               iter::once(current).chain(versions).map(|x| x.0).join(", "),
               &package.name
-            )
-          })
+            ),
+          }),
         }
       })
       .map_err(|e| e.into())
@@ -555,13 +619,7 @@ impl<'planner> CrateSubplanner<'planner> {
 
   /** Generates the set of dependencies for the contained crate. */
   fn produce_deps(&self) -> Result<DependencySet> {
-    let DependencyNames {
-      build_dep_names,
-      dev_dep_names,
-      normal_dep_names,
-      aliased_dep_names,
-    } = self.identify_named_deps()?;
-
+    let dep_decls = self.get_dep_decls()?;
     let mut build_deps = Vec::new();
     let mut build_proc_macro_deps = Vec::new();
     let mut proc_macro_deps = Vec::new();
@@ -575,11 +633,11 @@ impl<'planner> CrateSubplanner<'planner> {
       .flat_map(|pkg| pkg.skipped_deps.iter())
       .collect::<HashSet<_>>();
 
-    for dep_id in &self.node.dependencies {
+    for dep in &self.node.dependencies {
       // UNWRAP(s): Safe from verification of packages_by_id
       let dep_package = self
         .crate_catalog
-        .entry_for_package_id(&dep_id)
+        .entry_for_package_id(&dep)
         .unwrap()
         .package();
 
@@ -591,7 +649,7 @@ impl<'planner> CrateSubplanner<'planner> {
       // UNWRAP: Guaranteed to exist by checks in WorkspaceSubplanner#produce_build_plan
       let buildable_target = self
         .crate_catalog
-        .entry_for_package_id(dep_id)
+        .entry_for_package_id(&dep)
         .unwrap()
         .workspace_path_and_default_target(&self.settings);
 
@@ -616,7 +674,9 @@ impl<'planner> CrateSubplanner<'planner> {
         is_proc_macro,
       };
 
-      if build_dep_names.contains(&dep_package.name) {
+      let raw_pkg_name = &dep_package.name.as_str();
+
+      if dep_decls.build.contains_key(raw_pkg_name) {
         if buildable_dependency.is_proc_macro {
           build_proc_macro_deps.push(buildable_dependency.clone());
         } else {
@@ -624,11 +684,11 @@ impl<'planner> CrateSubplanner<'planner> {
         }
       }
 
-      if dev_dep_names.contains(&dep_package.name) {
+      if dep_decls.dev.contains_key(raw_pkg_name) {
         dev_deps.push(buildable_dependency.clone());
       }
 
-      if normal_dep_names.contains(&dep_package.name) {
+      if let Some(dep_decl) = dep_decls.normal.get(raw_pkg_name) {
         // sys crates build files may generate DEP_* environment variables that
         // need to be visible in their direct dependency build files.
         if dep_package.name.ends_with("-sys") {
@@ -639,12 +699,15 @@ impl<'planner> CrateSubplanner<'planner> {
         } else {
           normal_deps.push(buildable_dependency);
         }
-        // Only add aliased normal deps to the Vec
-        if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
-          aliased_deps.push(DependencyAlias {
-            target: buildable_target.clone(),
-            alias: util::sanitize_ident(alias),
-          })
+
+        // Only add aliased normal deps to the Vec and only for version matches
+        if let Some(ref rename) = dep_decl.rename {
+          if dep_decl.req.matches(&dep_package.version) {
+            aliased_deps.push(DependencyAlias {
+              target: buildable_target.clone(),
+              alias: util::sanitize_ident(&rename),
+            })
+          }
         }
       }
     }
@@ -666,33 +729,23 @@ impl<'planner> CrateSubplanner<'planner> {
   }
 
   /** Yields the list of dependencies as described by the manifest (without version). */
-  fn identify_named_deps(&self) -> Result<DependencyNames> {
-    // Resolve dependencies into types
-    let mut build_dep_names = Vec::new();
-    let mut dev_dep_names = Vec::new();
-    let mut normal_dep_names = Vec::new();
-
-    // Store aliased dependencies in a HashMap
-    let mut aliased_dep_names = HashMap::new();
-
+  fn get_dep_decls(&self) -> Result<NamedDepDecls> {
     let platform_attrs = self.platform_details.attrs();
     let package = self.crate_catalog_entry.package();
-    for dep in &package.dependencies {
-      if dep.target.is_some() {
-        // UNWRAP: Safe from above check
-        let target_str = format!("{}", dep.target.as_ref().unwrap());
-        let platform = Platform::from_str(&target_str)?;
+    let mut to_return = NamedDepDecls::default();
 
-        // Skip this dep if it doesn't match our platform attributes
+    for dep in &package.dependencies {
+      if let Some(ref target) = dep.target {
+        let platform = Platform::from_str(&target.repr)?;
         if !platform.matches(&self.settings.target, platform_attrs.as_ref()) {
           continue;
         }
       }
 
       match dep.kind {
-        DependencyKind::Normal => normal_dep_names.push(dep.name.clone()),
-        DependencyKind::Development => dev_dep_names.push(dep.name.clone()),
-        DependencyKind::Build => build_dep_names.push(dep.name.clone()),
+        DependencyKind::Normal => to_return.normal.insert(&dep.name, dep),
+        DependencyKind::Build => to_return.build.insert(&dep.name, dep),
+        DependencyKind::Development => to_return.dev.insert(&dep.name, dep),
         _ => {
           return Err(
             RazeError::Planning {
@@ -705,20 +758,10 @@ impl<'planner> CrateSubplanner<'planner> {
             .into(),
           )
         }
-      }
-
-      // Check if the dependency has been renamed
-      if let Some(alias) = dep.rename.as_ref() {
-        aliased_dep_names.insert(dep.name.clone(), alias.clone());
-      }
+      };
     }
 
-    Ok(DependencyNames {
-      build_dep_names,
-      dev_dep_names,
-      normal_dep_names,
-      aliased_dep_names,
-    })
+    Ok(to_return)
   }
 
   /** Generates source details for internal crate. */
@@ -852,8 +895,8 @@ impl<'planner> CrateSubplanner<'planner> {
 mod checks {
   use std::{
     collections::{HashMap, HashSet},
-    iter::FromIterator,
     env, fs,
+    iter::FromIterator,
   };
 
   use anyhow::Result;
@@ -944,21 +987,27 @@ mod checks {
     all_crate_settings: &HashMap<String, CrateSettingsPerVersion>,
     all_packages: &[Package],
   ) {
-     // 1st check names
-     let pkg_names = all_packages.iter().map(|pkg| &pkg.name).collect::<HashSet<_>>();
-     let setting_names = HashSet::from_iter(all_crate_settings.keys());
-     for missing in setting_names.difference(&pkg_names) {
-       eprintln!("Found unused raze crate settings for `{}`", missing);
-     }
+    // 1st check names
+    let pkg_names = all_packages
+      .iter()
+      .map(|pkg| &pkg.name)
+      .collect::<HashSet<_>>();
+    let setting_names = HashSet::from_iter(all_crate_settings.keys());
+    for missing in setting_names.difference(&pkg_names) {
+      eprintln!("Found unused raze crate settings for `{}`", missing);
+    }
 
-     // Then check versions
-     all_crate_settings.iter()
-       .flat_map(|(name, settings)| settings.iter().map(move |x| (x.0, name)))
-       .filter(|(ver_req, _)| !all_packages.iter().any(|pkg| ver_req.matches(&pkg.version)))
-       .for_each(|(ver_req, name)| {
-         eprintln!("Found unused raze settings for version `{}` against crate `{}`",
-                   ver_req, name);
-       });
+    // Then check versions
+    all_crate_settings
+      .iter()
+      .flat_map(|(name, settings)| settings.iter().map(move |x| (x.0, name)))
+      .filter(|(ver_req, _)| !all_packages.iter().any(|pkg| ver_req.matches(&pkg.version)))
+      .for_each(|(ver_req, name)| {
+        eprintln!(
+          "Found unused raze settings for version `{}` against crate `{}`",
+          ver_req, name
+        );
+      });
   }
 }
 

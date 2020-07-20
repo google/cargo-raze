@@ -15,6 +15,7 @@
 use crate::settings::CrateSettings;
 use serde_derive::Serialize;
 use semver::Version;
+use derivative::Derivative;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableDependency {
@@ -24,9 +25,11 @@ pub struct BuildableDependency {
   pub is_proc_macro: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
+#[derive(Debug, Clone, Derivative, Eq, PartialOrd, Ord, Serialize)]
+#[derivative(PartialEq, Hash)]
 pub struct DependencyAlias {
   pub target: String,
+  #[derivative(PartialEq="ignore", Hash="ignore")]
   pub alias: String,
 }
 

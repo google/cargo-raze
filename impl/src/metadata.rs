@@ -17,7 +17,7 @@ use std::{fs, path::PathBuf};
 use anyhow::Result;
 
 use cargo_metadata::MetadataCommand;
-pub use cargo_metadata::{DependencyKind, Metadata, Node, Package, PackageId};
+pub use cargo_metadata::{Dependency, DependencyKind, Metadata, Node, Package, PackageId};
 
 use tempdir::TempDir;
 

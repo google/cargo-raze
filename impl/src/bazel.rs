@@ -16,7 +16,7 @@ use anyhow::Result;
 use tera::{self, Context, Tera};
 
 use crate::{
-  context::{CrateContext, WorkspaceContext},
+  context::{CrateContext, WorkspaceContext, DependencyAlias},
   planning::PlannedBuild,
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
   util::RazeError,
@@ -86,12 +86,10 @@ impl BazelRenderer {
 
   pub fn render_aliases(
     &self,
-    workspace_context: &WorkspaceContext,
-    all_packages: &[CrateContext],
+    dependency_aliases: &[DependencyAlias],
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
-    context.insert("workspace", &workspace_context);
-    context.insert("crates", &all_packages);
+    context.insert("aliases", &dependency_aliases);
     self
       .internal_renderer
       .render("templates/workspace.BUILD.template", &context)
@@ -108,19 +106,6 @@ impl BazelRenderer {
     self
       .internal_renderer
       .render("templates/crate.BUILD.template", &context)
-  }
-
-  pub fn render_remote_aliases(
-    &self,
-    workspace_context: &WorkspaceContext,
-    all_packages: &[CrateContext],
-  ) -> Result<String, tera::Error> {
-    let mut context = Context::new();
-    context.insert("workspace", &workspace_context);
-    context.insert("crates", &all_packages);
-    self
-      .internal_renderer
-      .render("templates/workspace.BUILD.template", &context)
   }
 
   pub fn render_bzl_fetch(
@@ -173,6 +158,7 @@ impl BuildRenderer for BazelRenderer {
     let &PlannedBuild {
       ref workspace_context,
       ref crate_contexts,
+      ref dependency_aliases,
       ..
     } = planned_build;
     let mut file_outputs = Vec::new();
@@ -197,7 +183,7 @@ impl BuildRenderer for BazelRenderer {
 
     let build_file_path = format!("{}/{}", &path_prefix, buildfile_suffix);
     let rendered_alias_build_file = self
-      .render_aliases(&workspace_context, &crate_contexts)
+      .render_aliases(&dependency_aliases)
       .map_err(|e| RazeError::Rendering {
         crate_name_opt: None,
         message: e.to_string(),
@@ -223,6 +209,7 @@ impl BuildRenderer for BazelRenderer {
     let &PlannedBuild {
       ref workspace_context,
       ref crate_contexts,
+      ref dependency_aliases,
       ..
     } = planned_build;
     let mut file_outputs = Vec::new();
@@ -252,7 +239,7 @@ impl BuildRenderer for BazelRenderer {
 
     let alias_file_path = format!("{}/{}", &path_prefix, buildfile_suffix);
     let rendered_alias_build_file = self
-      .render_remote_aliases(&workspace_context, &crate_contexts)
+      .render_aliases(&dependency_aliases)
       .map_err(|e| RazeError::Rendering {
         crate_name_opt: None,
         message: e.to_string(),
@@ -301,7 +288,7 @@ mod tests {
     }
   }
 
-  fn dummy_planned_build(crate_contexts: Vec<CrateContext>) -> PlannedBuild {
+  fn dummy_planned_build(dependency_aliases: Vec<DependencyAlias>, crate_contexts: Vec<CrateContext>) -> PlannedBuild {
     PlannedBuild {
       workspace_context: WorkspaceContext {
         workspace_path: "//workspace/prefix".to_owned(),
@@ -309,6 +296,7 @@ mod tests {
         gen_workspace_prefix: "".to_owned(),
         output_buildfile_suffix: "BUILD".to_owned(),
       },
+      dependency_aliases,
       crate_contexts,
     }
   }
@@ -400,7 +388,7 @@ mod tests {
     BazelRenderer::new()
       .render_planned_build(
         &dummy_render_details(buildfile_suffix),
-        &dummy_planned_build(crate_contexts),
+        &dummy_planned_build(vec![], crate_contexts),
       )
       .unwrap()
   }
@@ -539,7 +527,7 @@ mod tests {
   fn additional_build_file_missing_file_failure() {
     let render_result = BazelRenderer::new().render_planned_build(
       &dummy_render_details("BUILD"),
-      &dummy_planned_build(vec![CrateContext {
+      &dummy_planned_build(vec![], vec![CrateContext {
         raze_settings: CrateSettings {
           additional_build_file: Some("non-existent-file".into()),
           ..Default::default()
