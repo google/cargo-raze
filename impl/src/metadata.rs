@@ -19,7 +19,7 @@ use anyhow::Result;
 use cargo_metadata::MetadataCommand;
 pub use cargo_metadata::{DependencyKind, Metadata, Node, Package, PackageId};
 
-use tempdir::TempDir;
+use tempfile::TempDir;
 
 const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
 
@@ -66,7 +66,7 @@ impl MetadataFetcher for CargoMetadataFetcher {
     // Copy files into a temp directory
     // UNWRAP: Guarded by function assertion
     let cargo_tempdir = {
-      let dir = TempDir::new("cargo_raze_metadata_dir")?;
+      let dir = TempDir::new()?;
 
       let dir_path = dir.path();
       let new_toml_path = dir_path.join(files.toml_path.file_name().unwrap());
@@ -123,7 +123,7 @@ dependencies = [
 
   #[test]
   fn test_cargo_subcommand_metadata_fetcher_works_without_lock() {
-    let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
+    let dir = TempDir::new().unwrap();
     let toml_path = dir.path().join("Cargo.toml");
     let mut toml = File::create(&toml_path).unwrap();
     toml.write_all(basic_toml().as_bytes()).unwrap();
@@ -139,7 +139,7 @@ dependencies = [
 
   #[test]
   fn test_cargo_subcommand_metadata_fetcher_works_with_lock() {
-    let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
+    let dir = TempDir::new().unwrap();
     let toml_path = {
       let path = dir.path().join("Cargo.toml");
       let mut toml = File::create(&path).unwrap();
@@ -164,7 +164,7 @@ dependencies = [
 
   #[test]
   fn test_cargo_subcommand_metadata_fetcher_handles_bad_files() {
-    let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
+    let dir = TempDir::new().unwrap();
     let toml_path = {
       let path = dir.path().join("Cargo.toml");
       let mut toml = File::create(&path).unwrap();

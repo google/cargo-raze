@@ -1,0 +1,21 @@
+[package]
+name = "regression_test"
+version = "0.1.0"
+authors = ["Alex McArther <acmcarther@gmail.com>"]
+
+[dependencies]
+log = "0.4.11"
+fern = "0.3.5"
+
+[lib]
+path = "fake_lib.rs"
+
+[raze]
+workspace_path = "//vendored/regression_test/cargo"
+target = "x86_64-unknown-linux-gnu"
+output_buildfile_suffix = "BUILD.bazel"
+
+[raze.crates.log.'0.4.11']
+additional_flags = [
+    "--cfg=atomic_cas",
+]

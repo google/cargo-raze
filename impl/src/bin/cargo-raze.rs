@@ -97,18 +97,24 @@ fn main() -> Result<()> {
   let mut prefix_path: PathBuf = PathBuf::new();
   prefix_path.push(".");
 
-  // Allow the command line option to take precidence
+  // Allow the command line option to take precedence
   if options.flag_output.is_empty() {
-    if let Some(workspace_root) = find_workspace_root(None) {
-      prefix_path.clear();
-      prefix_path.push(workspace_root);
-      prefix_path.push(
-        &planned_build
-          .workspace_context
-          .workspace_path
-          .trim_matches('/'),
-      );
+    if settings.incompatible_relative_workspace_path {
+      if let Some(workspace_root) = find_workspace_root() {
+        prefix_path.clear();
+        prefix_path.push(workspace_root);
+        prefix_path.push(
+          &planned_build
+            .workspace_context
+            .workspace_path
+            // Remove the leading "//" from the path
+            .trim_start_matches('/'),
+        );
+      }
     }
+  } else {
+    prefix_path.clear();
+    prefix_path.push(options.flag_output);
   }
 
   let render_details = RenderDetails {

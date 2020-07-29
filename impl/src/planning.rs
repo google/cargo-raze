@@ -197,15 +197,15 @@ impl CrateCatalogEntry {
    * Not for use except during planning as path is local to run location.
    */
   pub fn expected_vendored_path(&self, workspace_path: &String) -> String {
-    let mut dir = find_workspace_root(None).unwrap_or(PathBuf::from("."));
+    let mut dir = find_workspace_root().unwrap_or(PathBuf::from("."));
+
+    // Trim the absolute label identifier from the start of the workspace path
     dir.push(workspace_path.trim_start_matches('/'));
 
-    format!(
-      "{}/{}{}",
-      dir.display().to_string(),
-      VENDOR_DIR,
-      &self.package_ident
-    )
+    dir.push(VENDOR_DIR);
+    dir.push(&self.package_ident);
+    
+    return dir.display().to_string();
   }
 
   /** Yields the expected location of the build file (relative to execution path). */
@@ -1004,7 +1004,7 @@ mod tests {
   use semver::Version;
   use std::fs::File;
   use std::io::Write;
-  use tempdir::TempDir;
+  use tempfile::TempDir;
 
   fn basic_toml() -> &'static str {
     "
@@ -1031,7 +1031,7 @@ dependencies = [
     toml_file: &'static str,
     lock_file: Option<&'static str>,
   ) -> (TempDir, CargoWorkspaceFiles) {
-    let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
+    let dir = TempDir::new().unwrap();
     let toml_path = {
       let path = dir.path().join("Cargo.toml");
       let mut toml = File::create(&path).unwrap();
