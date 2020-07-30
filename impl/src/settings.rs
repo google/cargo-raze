@@ -265,6 +265,7 @@ pub mod testing {
       genmode: GenMode::Remote,
       output_buildfile_suffix: "BUILD".to_owned(),
       default_gen_buildrs: default_raze_settings_field_gen_buildrs(),
+      incompatible_relative_workspace_path: incompatible_relative_workspace_path(),
     }
   }
 }
