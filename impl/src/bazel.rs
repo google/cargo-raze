@@ -38,7 +38,9 @@ pub fn is_workspace_root(dir: &PathBuf) -> bool {
   return false;
 }
 
-/** Returns a path to a Bazel workspace root if one could be found, otherwise None */
+/** Returns a path to a Bazel workspace root based on the current working
+ * directory, otherwise None if not workspace is detected.
+ */
 pub fn find_workspace_root() -> Option<PathBuf> {
   let mut dir = match env::current_dir() {
     Ok(result) => Some(result),
