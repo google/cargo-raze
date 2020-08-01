@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,7 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "Apache-2.0,MIT"
+  "notice", # Apache-2.0 from expression "Apache-2.0 OR MIT"
 ])
 
 load(
@@ -27,17 +28,18 @@ load(
 
 rust_library(
     name = "rayon",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/rayon-core-1.4.1:rayon_core",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.8.2",
+    tags = ["cargo-raze"],
     crate_features = [
     ],
 )

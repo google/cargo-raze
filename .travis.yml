@@ -14,7 +14,7 @@ addons:
 before_install:
   - OS=linux
   - ARCH=x86_64
-  - V=3.1.0
+  - V="$(cat ./.bazelversion)"
   - GH_BASE="https://github.com/bazelbuild/bazel/releases/download/$V"
   - GH_ARTIFACT="bazel-$V-installer-$OS-$ARCH.sh"
   - URL="$GH_BASE/$GH_ARTIFACT"

@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,7 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT,Apache-2.0"
+  "notice", # MIT from expression "MIT OR Apache-2.0"
 ])
 
 load(
@@ -26,10 +27,7 @@ load(
 
 rust_library(
     name = "futures_executor",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/futures-channel-0.2.0:futures_channel",
         "//vendored/non_cratesio_library/cargo/vendor/futures-core-0.2.0:futures_core",
@@ -37,14 +35,15 @@ rust_library(
         "//vendored/non_cratesio_library/cargo/vendor/lazy_static-1.0.0:lazy_static",
         "//vendored/non_cratesio_library/cargo/vendor/num_cpus-1.8.0:num_cpus",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.2.0",
+    tags = ["cargo-raze"],
     crate_features = [
-        "futures-channel",
-        "futures-core",
-        "futures-util",
         "lazy_static",
         "num_cpus",
         "std",

@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,7 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT"
+  "notice", # MIT from expression "MIT"
 ])
 
 load(
@@ -41,18 +42,19 @@ load(
 
 rust_library(
     name = "termion",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@non_cratesio__libc__0_2_53//:libc",
         "@non_cratesio__numtoa__0_1_0//:numtoa",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "1.5.2",
+    tags = ["cargo-raze"],
     crate_features = [
     ],
 )

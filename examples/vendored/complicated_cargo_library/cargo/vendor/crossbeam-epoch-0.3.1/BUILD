@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,7 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT,Apache-2.0"
+  "notice", # MIT from expression "MIT OR Apache-2.0"
 ])
 
 load(
@@ -26,10 +27,7 @@ load(
 
 rust_library(
     name = "crossbeam_epoch",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/arrayvec-0.4.10:arrayvec",
         "//vendored/complicated_cargo_library/cargo/vendor/cfg-if-0.1.7:cfg_if",
@@ -39,12 +37,15 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/nodrop-0.1.13:nodrop",
         "//vendored/complicated_cargo_library/cargo/vendor/scopeguard-0.3.3:scopeguard",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.3.1",
+    tags = ["cargo-raze"],
     crate_features = [
-        "crossbeam-utils",
         "default",
         "lazy_static",
         "use_std",

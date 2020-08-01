@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,7 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "Apache-2.0"
+  "notice", # Apache-2.0 from expression "Apache-2.0"
 ])
 
 load(
@@ -34,25 +35,28 @@ load(
 
 rust_library(
     name = "specs",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/crossbeam-0.3.2:crossbeam",
-        "//vendored/complicated_cargo_library/cargo/vendor/derivative-1.0.2:derivative",
         "//vendored/complicated_cargo_library/cargo/vendor/fnv-1.0.6:fnv",
         "//vendored/complicated_cargo_library/cargo/vendor/hibitset-0.3.2:hibitset",
         "//vendored/complicated_cargo_library/cargo/vendor/mopa-0.2.2:mopa",
         "//vendored/complicated_cargo_library/cargo/vendor/rayon-0.8.2:rayon",
         "//vendored/complicated_cargo_library/cargo/vendor/shred-0.5.2:shred",
-        "//vendored/complicated_cargo_library/cargo/vendor/shred-derive-0.3.0:shred_derive",
         "//vendored/complicated_cargo_library/cargo/vendor/tuple_utils-0.2.0:tuple_utils",
+    ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
+    proc_macro_deps = [
+        "//vendored/complicated_cargo_library/cargo/vendor/derivative-1.0.2:derivative",
+        "//vendored/complicated_cargo_library/cargo/vendor/shred-derive-0.3.0:shred_derive",
     ],
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.10.0",
+    tags = ["cargo-raze"],
     crate_features = [
     ],
 )

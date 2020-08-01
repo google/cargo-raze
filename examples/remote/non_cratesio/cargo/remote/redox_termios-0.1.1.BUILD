@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,7 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT"
+  "notice", # MIT from expression "MIT"
 ])
 
 load(
@@ -26,17 +27,18 @@ load(
 
 rust_library(
     name = "redox_termios",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@non_cratesio__redox_syscall__0_1_54//:redox_syscall",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.1.1",
+    tags = ["cargo-raze"],
     crate_features = [
     ],
 )

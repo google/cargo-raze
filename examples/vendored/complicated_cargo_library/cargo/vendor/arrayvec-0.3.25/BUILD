@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,7 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT,Apache-2.0"
+  "notice", # MIT from expression "MIT OR Apache-2.0"
 ])
 
 load(
@@ -26,22 +27,21 @@ load(
 
 rust_library(
     name = "arrayvec",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/nodrop-0.1.13:nodrop",
         "//vendored/complicated_cargo_library/cargo/vendor/odds-0.2.26:odds",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.3.25",
+    tags = ["cargo-raze"],
     crate_features = [
         "default",
-        "nodrop",
-        "odds",
         "std",
     ],
 )

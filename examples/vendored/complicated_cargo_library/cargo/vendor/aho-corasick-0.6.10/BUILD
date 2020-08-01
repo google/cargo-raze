@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,8 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT"
-  "unencumbered", # "Unlicense"
+  "unencumbered", # Unlicense from expression "Unlicense OR MIT"
 ])
 
 load(
@@ -28,18 +28,19 @@ rust_binary(
     # Prefix bin name to disambiguate from (probable) collision with lib name
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_aho_corasick_dot",
-    crate_root = "src/main.rs",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         # Binaries get an implicit dependency on their crate's lib
         ":aho_corasick",
         "//vendored/complicated_cargo_library/cargo/vendor/memchr-2.2.0:memchr",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/main.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.6.10",
+    tags = ["cargo-raze"],
     crate_features = [
     ],
 )
@@ -47,17 +48,18 @@ rust_binary(
 
 rust_library(
     name = "aho_corasick",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/memchr-2.2.0:memchr",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.6.10",
+    tags = ["cargo-raze"],
     crate_features = [
     ],
 )

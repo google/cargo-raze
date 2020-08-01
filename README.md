@@ -42,13 +42,38 @@ Regardless of the approach chosen, the rust_rules should be brought in to the
 WORKSPACE. Here is an example:
 
 ```python
-git_repository(
-    name = "io_bazel_rules_rust",
-    commit = "f32695dcd02d9a19e42b9eb7f29a24a8ceb2b858",
-    remote = "https://github.com/bazelbuild/rules_rust.git",
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "bazel_skylib",
+    sha256 = "97e70364e9249702246c0e9444bccdc4b847bed1eb03c5a3ece4f83dfe6abc44",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
+    ],
 )
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
+bazel_skylib_workspace()
+
+http_archive(
+    name = "io_bazel_rules_rust",
+    sha256 = "5ed804fcd10a506a5b8e9e59bc6b3b7f43bc30c87ce4670e6f78df43604894fd",
+    strip_prefix = "rules_rust-fdf9655ba95616e0314b4e0ebab40bb0c5fe005c",
+    urls = [
+        # Master branch as of 2020-07-27
+        "https://github.com/bazelbuild/rules_rust/archive/fdf9655ba95616e0314b4e0ebab40bb0c5fe005c.tar.gz",
+    ],
+)
+
 load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
+
 rust_repositories()
+
+load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
+
+bazel_version(name = "bazel_version")
 ```
 
 ### Vendoring Mode
@@ -87,28 +112,33 @@ target = "x86_64-unknown-linux-gnu"
 ```
 
 #### Generate buildable targets
+
 First, install the required tools for vendoring and generating BUILDable
 targets.
+
 ```bash
 $ cargo install cargo-raze
 ```
 
 Then, generate a lock file for your dependencies
+
 ```bash
 $ cargo generate-lockfile
 ```
 
 Following that, vendor your dependencies from within the cargo/ directory.
+
 ```bash
 $ cargo vendor --versioned-dirs --locked
 ```
 
 Finally, generate your BUILD files, again from within the cargo/ directory
+
 ```bash
 $ cargo raze
 ```
 
-You can now depend on any *explicit* dependencies in any Rust rule by depending on
+You can now depend on any _explicit_ dependencies in any Rust rule by depending on
 `//cargo:your_dependency_name`.
 
 ### Remote Dependency Mode
@@ -119,8 +149,10 @@ WORKSPACE, and aliases to the explicit dependencies. Slightly different plumbing
 is required.
 
 #### Generate a Cargo.toml
+
 Generate a Cargo.toml, similar to Vendoring mode but add a new `genmode` directive in the
 `[raze]` section
+
 ```toml
 [raze]
 # The WORKSPACE relative path to the Cargo.toml working directory.
@@ -136,28 +168,33 @@ This tells Raze not to expect the dependencies to be vendored and to generate
 different files.
 
 #### Generate buildable targets
+
 First, install cargo-raze.
+
 ```bash
 $ cargo install cargo-raze
 ```
 
 Next, execute cargo raze from within the cargo directory
+
 ```bash
 $ cargo raze
 ```
 
 Finally, invoke the remote library fetching function within your WORKSPACE:
+
 ```python
 load("//cargo:crates.bzl", "raze_fetch_remote_crates")
 
 raze_fetch_remote_crates()
 ```
+
 This tells Bazel where to get the dependencies from, and how to build them:
 using the files generated into //cargo.
 
-*Note that this method's name depends on your `gen_workspace_prefix` setting*.
+_Note that this method's name depends on your `gen_workspace_prefix` setting_.
 
-You can depend on any *explicit* dependencies in any Rust rule by depending on
+You can depend on any _explicit_ dependencies in any Rust rule by depending on
 `//cargo:your_dependency_name`.
 
 ### Handling Unconventional Crates
@@ -183,6 +220,7 @@ This setting tells cargo-raze to generate a rust_binary target for the build
 script and to direct its generated (OUT_DIR-style) outputs to the parent crate.
 
 #### Crates that depend on certain flags being determined by a build script
+
 Some build scripts conditionally emit directives to stdout that Cargo knows how
 to propagate. Unfortunately, its not so simple to manage build-time generated
 dependency information, so if the flags are statically known (perhaps, since the
@@ -197,17 +235,19 @@ additional_flags = [
   "--cfg=__unicase__defauler_hasher",
 ]
 ```
+
 Flags provided in this manner are directly handed to rustc. It may be helpful to
 refer to the build-script section of the documentation to interpret build
 scripts and stdout directives that are encountered, available here:
 https://doc.rust-lang.org/cargo/reference/build-scripts.html
 
-
 #### Crates that need system libraries
+
 There are two ways to provide system libraries that a crate needs for
 compilation. The first is to vendor the system library directly, craft a BUILD
 rule for it, and add the dependency to the corresponding `-sys` crate. For
 openssl, this may in part look like:
+
 ```toml
 [raze.crates.openssl-sys.'0.9.24']
 additional_flags = [
@@ -233,6 +273,7 @@ In some cases, directly wiring up a local system dependency may be preferable.
 To do this, refer to the `new_local_repository` section of the Bazel
 documentation. For a precompiled version of llvm in a WORKSPACE, this may look
 something like:
+
 ```python
 new_local_repository(
     name = "llvm",
@@ -256,6 +297,7 @@ additional_deps = [
 ```
 
 #### Crates that supply useful binaries
+
 Some crates provide useful binaries that themselves can be used as part of a
 compilation process: Bindgen is a great example. Bindgen produces Rust source
 files by processing C or C++ files. A directive can be added to the Cargo.toml
@@ -269,7 +311,7 @@ extra_aliased_targets = [
 ]
 ```
 
-Cargo-raze prefixes binary targets with "cargo_bin_", as although Cargo permits
+Cargo-raze prefixes binary targets with `cargo_bin_`, as although Cargo permits
 binaries and libraries to share the same target name, Bazel disallows this.
 
 ## FAQ
@@ -334,15 +376,18 @@ https://github.com/acmcarther/cargo-raze-crater
 See these examples of providing crate configuration:
 
 **Using vendored mode**:
+
 - [hello-cargo-library](https://github.com/google/cargo-raze/tree/master/examples/vendored/hello_cargo_library)
 - [complicated-cargo-library](https://github.com/google/cargo-raze/tree/master/examples/vendored/complicated_cargo_library)
 - [non-cratesio](https://github.com/google/cargo-raze/tree/master/examples/vendored/non_cratesio_library)
 
 **Using remote mode**:
+
 - [complicated-example](https://github.com/google/cargo-raze/tree/master/examples/remote/complicated_cargo_library)
 - [non-cratesio](https://github.com/google/cargo-raze/tree/master/examples/remote/non_cratesio)
 
 **Compiling OpenSSL**:
+
 - [openssl](https://github.com/acmcarther/compile_openssl)
 
 The [raze] section is derived from a struct declared in [impl/src/settings.rs](./impl/src/settings.rs).

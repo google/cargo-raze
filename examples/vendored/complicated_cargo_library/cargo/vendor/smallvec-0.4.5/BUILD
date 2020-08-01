@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,7 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "reciprocal", # "MPL-2.0"
+  "reciprocal", # MPL-2.0 from expression "MPL-2.0"
 ])
 
 load(
@@ -27,16 +28,17 @@ load(
 
 rust_library(
     name = "smallvec",
-    crate_root = "lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.4.5",
+    tags = ["cargo-raze"],
     crate_features = [
         "default",
         "std",

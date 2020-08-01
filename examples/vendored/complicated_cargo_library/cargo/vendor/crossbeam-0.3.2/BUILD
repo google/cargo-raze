@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,7 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "Apache-2.0,MIT"
+  "notice", # Apache-2.0 from expression "Apache-2.0 OR MIT"
 ])
 
 load(
@@ -27,17 +28,18 @@ rust_binary(
     # Prefix bin name to disambiguate from (probable) collision with lib name
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_bench",
-    crate_root = "src/bin/bench.rs",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         # Binaries get an implicit dependency on their crate's lib
         ":crossbeam",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/bin/bench.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.3.2",
+    tags = ["cargo-raze"],
     crate_features = [
     ],
 )
@@ -45,16 +47,17 @@ rust_binary(
 
 rust_library(
     name = "crossbeam",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.3.2",
+    tags = ["cargo-raze"],
     crate_features = [
     ],
 )
@@ -63,17 +66,18 @@ rust_binary(
     # Prefix bin name to disambiguate from (probable) collision with lib name
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_stress_msq",
-    crate_root = "src/bin/stress-msq.rs",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         # Binaries get an implicit dependency on their crate's lib
         ":crossbeam",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/bin/stress-msq.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.3.2",
+    tags = ["cargo-raze"],
     crate_features = [
     ],
 )
