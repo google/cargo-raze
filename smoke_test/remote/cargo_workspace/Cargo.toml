@@ -6,7 +6,7 @@ members = [
 ]
 
 [raze]
-workspace_path = "//remote/cargo_workspace/cargo"
+workspace_path = "//remote/cargo_workspace"
 target = "x86_64-unknown-linux-gnu"
 gen_workspace_prefix = "cargo_workspace"
 genmode = "Remote"

@@ -291,6 +291,7 @@ mod tests {
     rendering::{FileOutputs, RenderDetails},
     settings::CrateSettings,
   };
+  use std::collections::HashSet;
 
   use super::*;
 
@@ -305,6 +306,7 @@ mod tests {
     PlannedBuild {
       workspace_context: WorkspaceContext {
         workspace_path: "//workspace/prefix".to_owned(),
+        workspace_members: HashSet::new(),
         platform_triple: "irrelevant".to_owned(),
         gen_workspace_prefix: "".to_owned(),
         output_buildfile_suffix: "BUILD".to_owned(),
@@ -330,6 +332,7 @@ mod tests {
       aliased_dependencies: Vec::new(),
       is_root_dependency: true,
       workspace_path_to_crate: "@raze__test_binary__1_1_1//".to_owned(),
+      is_workspace_crate: false,
       targets: vec![BuildableTarget {
         name: "some_binary".to_owned(),
         kind: "bin".to_owned(),
@@ -364,6 +367,7 @@ mod tests {
       aliased_dependencies: Vec::new(),
       is_root_dependency: true,
       workspace_path_to_crate: "@raze__test_library__1_1_1//".to_owned(),
+      is_workspace_crate: false,
       targets: vec![BuildableTarget {
         name: "some_library".to_owned(),
         kind: "lib".to_owned(),

@@ -98,7 +98,7 @@ pub struct CrateCatalogEntry {
   // Is this a dependency of the catalog root crate?
   is_root_dep: bool,
   // Is this a member of the root crate workspace?
-  is_workspace_crate: bool,
+  workspace_relative_path: Option<PathBuf>,
 }
 
 /** An intermediate structure that contains details about all crates in the workspace. */
@@ -147,7 +147,7 @@ impl CrateCatalogEntry {
     package: &Package,
     is_root: bool,
     is_root_dep: bool,
-    is_workspace_crate: bool,
+    workspace_relative_path: Option<PathBuf>,
   ) -> Self {
     let sanitized_name = package.name.replace("-", "_");
     let sanitized_version = util::sanitize_ident(&package.version.clone().to_string());
@@ -159,7 +159,7 @@ impl CrateCatalogEntry {
       sanitized_version,
       is_root,
       is_root_dep,
-      is_workspace_crate,
+      workspace_relative_path,
     }
   }
 
@@ -181,7 +181,12 @@ impl CrateCatalogEntry {
 
   /** Returns whether or not this is a member of the root workspace. */
   pub fn is_workspace_crate(&self) -> bool {
-    self.is_workspace_crate
+    self.workspace_relative_path.is_some()
+  }
+
+  /** Returns whether or not this is a member of the root workspace. */
+  pub fn workspace_relative_path(&self) -> Option<&PathBuf> {
+    self.workspace_relative_path.as_ref()
   }
 
   /** Returns whether or not this is a dependency of the workspace root crate.*/
@@ -200,6 +205,14 @@ impl CrateCatalogEntry {
 
   /** Yields the expected location of the build file (relative to execution path). */
   pub fn local_build_path(&self, settings: &RazeSettings) -> String {
+    if let Some(workspace_relative_path) = &self.workspace_relative_path {
+      return format!("{}/{}", workspace_relative_path.display(), settings.output_buildfile_suffix);
+    }
+    // if self.is_workspace_crate() {
+    //   let root_dir = settings.workspace_path.parent().unwrap();
+    //   let relative = self.package.manifest_path.parent().unwrap().strip_prefix(root_dir).unwrap();
+    //   return format!("{}/{}", relative, settings.output_buildfile_suffix);
+    // }
     match settings.genmode {
       GenMode::Remote => format!(
         "remote/{}.{}",
@@ -215,6 +228,9 @@ impl CrateCatalogEntry {
   /** Yields the precise path to this dependency for the provided settings. */
   #[allow(dead_code)]
   pub fn workspace_path(&self, settings: &RazeSettings) -> String {
+    if let Some(workspace_relative_path) = &self.workspace_relative_path {
+      return format!("{}/{}", settings.workspace_path, workspace_relative_path.display());
+    }
     match settings.genmode {
       GenMode::Remote => format!(
         "@{}__{}__{}//",
@@ -233,6 +249,9 @@ impl CrateCatalogEntry {
 
   /** Emits a complete path to this dependency and default target using the given settings. */
   pub fn workspace_path_and_default_target(&self, settings: &RazeSettings) -> String {
+    if let Some(workspace_relative_path) = &self.workspace_relative_path {
+      return format!("{}/{}:{}", settings.workspace_path, workspace_relative_path.display(), self.sanitized_name);
+    }
     match settings.genmode {
       GenMode::Remote => format!(
         "@{}__{}__{}//:{}",
@@ -304,11 +323,18 @@ impl CrateCatalog {
       .packages
       .iter()
       .map(|package| {
+        let workspace_relative_path = workspace_crates.get(&package.id).and_then(|_| {
+          let abs_package_dir = package.manifest_path.parent().unwrap();
+          println!("{} {}", &abs_package_dir.display(), &metadata.workspace_root.display());
+          let d = pathdiff::diff_paths(&abs_package_dir, &metadata.workspace_root);
+          println!("{:?}", d);
+          d
+        });
         CrateCatalogEntry::new(
           package,
           root_resolve_node.contains(&&package.id),
           root_direct_deps.contains(&package.id),
-          workspace_crates.contains(&package.id),
+          workspace_relative_path,
         )
       })
       .collect::<Vec<_>>();
@@ -393,6 +419,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
   fn produce_workspace_context(&self) -> WorkspaceContext {
     WorkspaceContext {
       workspace_path: self.settings.workspace_path.clone(),
+      workspace_members: self.metadata.workspace_members.iter().cloned().collect(),
       platform_triple: self.settings.target.clone(),
       gen_workspace_prefix: self.settings.gen_workspace_prefix.clone(),
       output_buildfile_suffix: self.settings.output_buildfile_suffix.clone(),
@@ -445,9 +472,9 @@ impl<'planner> WorkspaceSubplanner<'planner> {
         // Hey you, reader! If you have opinions about this please comment on the below bug, or file
         // another bug.
         // See Also: https://github.com/google/cargo-raze/issues/111
-        if own_crate_catalog_entry.is_workspace_crate() {
-          return None;
-        }
+        // if own_crate_catalog_entry.is_workspace_crate() {
+        //   return None;
+        // }
 
         let crate_settings = self
           .settings
@@ -520,6 +547,7 @@ impl<'planner> CrateSubplanner<'planner> {
       dev_dependencies: dev_deps,
       aliased_dependencies: aliased_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings),
+      is_workspace_crate: self.crate_catalog_entry.is_workspace_crate(),
       build_script_target: build_script_target_opt,
       raze_settings: self.crate_settings.clone(),
       source_details: self.produce_source_details(),

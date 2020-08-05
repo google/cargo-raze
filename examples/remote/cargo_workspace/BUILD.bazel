@@ -10,11 +10,6 @@ licenses([
 ])
 alias(
     name = "rand",
-    actual = "@cargo_workspace__rand__0_5_6//:rand",
-    tags = ["cargo-raze"],
-)
-alias(
-    name = "rand",
     actual = "@cargo_workspace__rand__0_7_3//:rand",
     tags = ["cargo-raze"],
 )

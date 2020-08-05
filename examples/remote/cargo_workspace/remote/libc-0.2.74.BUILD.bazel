@@ -6,7 +6,7 @@ DO NOT EDIT! Replaced on runs of cargo-raze
 package(default_visibility = [
   # Public for visibility by "@raze__crate__version//" targets.
   #
-  # Prefer access through "//remote/cargo_workspace/cargo", which limits external
+  # Prefer access through "//remote/cargo_workspace", which limits external
   # visibility to explicit Cargo.toml dependencies.
   "//visibility:public",
 ])
@@ -40,8 +40,6 @@ rust_library(
     version = "0.2.74",
     tags = ["cargo-raze"],
     crate_features = [
-        "default",
-        "std",
     ],
 )
 

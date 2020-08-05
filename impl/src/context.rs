@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::settings::CrateSettings;
+use crate::{
+  metadata::PackageId,
+  settings::CrateSettings
+};
+use std::collections::HashSet;
 use serde_derive::Serialize;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -78,6 +82,7 @@ pub struct CrateContext {
   pub license: LicenseData,
   pub features: Vec<String>,
   pub workspace_path_to_crate: String,
+  pub is_workspace_crate: bool,
   pub dependencies: Vec<BuildableDependency>,
   pub proc_macro_dependencies: Vec<BuildableDependency>,
   pub build_dependencies: Vec<BuildableDependency>,
@@ -102,10 +107,13 @@ pub struct CrateContext {
   pub lib_target_name: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct WorkspaceContext {
   // The bazel path prefix to the vendor directory
   pub workspace_path: String,
+
+  // The crates that are part of our workspace
+  pub workspace_members: HashSet<PackageId>,
 
   // The compilation target triple.
   pub platform_triple: String,

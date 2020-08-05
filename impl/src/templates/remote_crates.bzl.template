@@ -16,7 +16,8 @@ def _new_git_repository(name, **kwargs):
 
 def {{workspace.gen_workspace_prefix}}_fetch_remote_crates():
 {% for crate in crates %}
-    {%- if crate.source_details.git_data %}
+    {%- if crate.is_workspace_crate %}
+    {%- elif crate.source_details.git_data %}
     _new_git_repository(
         name = "{{workspace.gen_workspace_prefix}}__{{crate.pkg_name | replace(from="-", to="_")}}__{{crate.pkg_version | slugify | replace(from="-", to="_")}}",
         remote = "{{crate.source_details.git_data.remote}}",

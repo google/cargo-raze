@@ -63,7 +63,7 @@ for ex in $(find $TEST_DIR/remote -mindepth 1 -maxdepth 1 -type d -name "${FIND_
     name="$(basename "$ex")"
     echo "Updating WORKSPACE for ${name}"
     cat >> "$EXAMPLES_DIR/WORKSPACE" << EOF
-load("//remote/${name}/cargo:crates.bzl", "${name}_fetch_remote_crates")
+load("//remote/${name}:crates.bzl", "${name}_fetch_remote_crates")
 ${name}_fetch_remote_crates()
 
 EOF
@@ -83,7 +83,7 @@ cargo build --quiet
 RAZE="$IMPL_DIR/target/debug/cargo-raze raze"
 for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d -name "${FIND_PATTERN}"); do
     echo "Running Cargo Raze for $(basename $ex)"
-    cd "$ex/cargo"
+    cd "$ex" #/cargo"
     set +e
     eval "$RAZE"
     set -e
@@ -95,11 +95,11 @@ for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d -name "${FIND_PAT
     ex_name="$(basename "$ex")"
     ex_type="$(basename $(dirname "$ex"))"
     bazel_path="//$ex_type/$ex_name:all"
-    bazel_cargo_path="//$ex_type/$ex_name/cargo:all"
+    # bazel_cargo_path="//$ex_type/$ex_name:all"/cargo:all"
 
-    echo "Running Bazel build for $bazel_path, $bazel_cargo_path"
+    echo "Running Bazel build for $bazel_path" #, $bazel_cargo_path"
     bazel build "$bazel_path"
-    bazel build "$bazel_cargo_path"
+    # bazel build "$bazel_cargo_path"
 done
 
 cd "$PWD"
