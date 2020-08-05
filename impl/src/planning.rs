@@ -268,36 +268,45 @@ impl CrateCatalog {
       .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?;
 
     let root_resolve_node = {
-      let root_id = resolve
+      let root_id_opt = resolve
         .root
-        .as_ref()
-        .ok_or_else(|| RazeError::Generic("Missing root in resolve graph".into()))?;
+        .as_ref();
 
-      resolve
-        .nodes
-        .iter()
-        .find(|node| &node.id == root_id)
-        .ok_or_else(|| RazeError::Generic("Missing crate with root ID in resolve graph".into()))?
+      if let Some(root_id) = root_id_opt {
+        Some(resolve
+          .nodes
+          .iter()
+          .find(|node| &node.id == root_id)
+          .map(|n| &n.id)
+          .ok_or_else(|| RazeError::Generic("Missing crate with root ID in resolve graph".into()))?)
+      } else {
+        None
+      }
     };
 
-    let root_direct_deps = root_resolve_node
-      .dependencies
-      .iter()
-      .cloned()
-      .collect::<HashSet<_>>();
     let workspace_crates = metadata
       .workspace_members
       .iter()
       .cloned()
       .collect::<HashSet<_>>();
+    let root_direct_deps =
+    resolve
+      .nodes
+      .iter()
+      .filter(|n| workspace_crates.contains(&n.id))
+      .map(|n| &n.dependencies)
+      .flatten()
+      .cloned()
+      .collect::<HashSet<PackageId>>();
 
+    // TODO: handle name collisions due to version differences
     let entries = metadata
       .packages
       .iter()
       .map(|package| {
         CrateCatalogEntry::new(
           package,
-          root_resolve_node.id == package.id,
+          root_resolve_node.contains(&&package.id),
           root_direct_deps.contains(&package.id),
           workspace_crates.contains(&package.id),
         )

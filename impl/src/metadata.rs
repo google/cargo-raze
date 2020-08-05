@@ -184,7 +184,8 @@ impl MetadataFetcher for CargoMetadataFetcher {
 
     MetadataCommand::new()
       .cargo_path(&self.cargo_bin_path)
-      .current_dir(cargo_tempdir.path())
+      // .current_dir(cargo_tempdir.path())
+      .current_dir(files.root_toml_path.parent().unwrap())
       .exec()
       .map_err(|e| e.into())
   }
