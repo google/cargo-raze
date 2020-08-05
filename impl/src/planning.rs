@@ -1030,6 +1030,7 @@ dependencies = [
     let files = CargoWorkspaceFiles {
       lock_path_opt: lock_path,
       root_toml_path,
+      member_toml_paths: vec![],
     };
 
     (dir, files)
