@@ -2,9 +2,13 @@
 
 set -eu
 
+set -x
+
 function command_exists {
     command -v "$1" >/dev/null 2>&1 || ( echo "Command \`$1\` isn't available. Please install before continuing."; exit 1 )
 }
+
+FIND_PATTERN="${1:-*}"
 
 PWD="$(pwd)"
 
@@ -52,7 +56,7 @@ rust_repositories()
 
 EOF
 
-for ex in $(find $TEST_DIR/remote -maxdepth 1 -type d | tail -n+2); do
+for ex in $(find $TEST_DIR/remote -maxdepth 1 -type d -name "${FIND_PATTERN}" | tail -n+2); do
     name="$(basename "$ex")"
     cat >> "$EXAMPLES_DIR/WORKSPACE" << EOF
 load("//remote/${name}/cargo:crates.bzl", "${name}_fetch_remote_crates")
@@ -62,7 +66,7 @@ EOF
 done
 
 # Run Cargo Vendor over the appropriate projects
-for ex in $(find $EXAMPLES_DIR/vendored -maxdepth 1 -type d | tail -n+2); do
+for ex in $(find $EXAMPLES_DIR/vendored -maxdepth 1 -type d -name "${FIND_PATTERN}" | tail -n+2); do
     echo "Running Cargo Vendor for $(basename "$ex")"
     cd "$ex/cargo"
     cargo vendor -q --versioned-dirs
@@ -73,7 +77,7 @@ echo "Building local Cargo Raze"
 cd "$IMPL_DIR"
 cargo build --quiet
 RAZE="$IMPL_DIR/target/debug/cargo-raze raze"
-for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
+for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d -name "${FIND_PATTERN}"); do
     echo "Running Cargo Raze for $(basename $ex)"
     cd "$ex/cargo"
     eval "$RAZE"
@@ -81,7 +85,7 @@ done
 
 # Run the Bazel build for all targets
 cd "$EXAMPLES_DIR"
-for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
+for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d -name "${FIND_PATTERN}"); do
     ex_name="$(basename "$ex")"
     ex_type="$(basename $(dirname "$ex"))"
     bazel_path="//$ex_type/$ex_name:all"
