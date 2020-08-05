@@ -28,7 +28,7 @@ rust_library(
     name = "add_one",
     crate_type = "lib",
     deps = [
-        "@cargo_workspace__rand__0_7_3//:rand",
+        "@cargo_workspace__rand__0_6_5//:rand",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

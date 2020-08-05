@@ -23,6 +23,7 @@ command_exists "bazel"
 # Clean the `examples` directory
 # FIXME: Uncomment this, and maybe have it filtered by the find pattern too
 # rm -rf "$EXAMPLES_DIR/remote" "$EXAMPLES_DIR/vendored"
+rm -rf "$EXAMPLES_DIR/remote/cargo_workspace"
 cp -r "$TEST_DIR/remote" "$TEST_DIR/vendored" "$EXAMPLES_DIR"
 
 # Set up root BUILD file

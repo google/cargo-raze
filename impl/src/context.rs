@@ -77,6 +77,8 @@ pub struct SourceDetails {
 pub struct CrateContext {
   pub pkg_name: String,
   pub pkg_version: String,
+  pub sanitized_name: String,
+  pub sanitized_version: String,
   pub edition: String,
   pub raze_settings: CrateSettings,
   pub license: LicenseData,

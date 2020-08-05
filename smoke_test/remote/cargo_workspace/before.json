@@ -1,0 +1,1408 @@
+{
+  "packages": [
+    {
+      "name": "add-one",
+      "version": "0.1.0",
+      "id": "add-one 0.1.0 (path+file:///home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace/add-one)",
+      "license": null,
+      "license_file": null,
+      "description": null,
+      "source": null,
+      "dependencies": [
+        {
+          "name": "rand",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.7",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "add-one",
+          "src_path": "/home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace/add-one/src/lib.rs",
+          "edition": "2018",
+          "doctest": true
+        }
+      ],
+      "features": {},
+      "manifest_path": "/home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace/add-one/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "Sam Schlegel <git@lutin.us>"
+      ],
+      "categories": [],
+      "keywords": [],
+      "readme": null,
+      "repository": null,
+      "edition": "2018",
+      "links": null
+    },
+    {
+      "name": "adder",
+      "version": "0.1.0",
+      "id": "adder 0.1.0 (path+file:///home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace/adder)",
+      "license": null,
+      "license_file": null,
+      "description": null,
+      "source": null,
+      "dependencies": [
+        {
+          "name": "add-one",
+          "source": null,
+          "req": "*",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rand",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.7",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "bin"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "adder",
+          "src_path": "/home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace/adder/src/main.rs",
+          "edition": "2018",
+          "doctest": false
+        }
+      ],
+      "features": {},
+      "manifest_path": "/home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace/adder/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "Sam Schlegel <git@lutin.us>"
+      ],
+      "categories": [],
+      "keywords": [],
+      "readme": null,
+      "repository": null,
+      "edition": "2018",
+      "links": null
+    },
+    {
+      "name": "cfg-if",
+      "version": "0.1.10",
+      "id": "cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT/Apache-2.0",
+      "license_file": null,
+      "description": "A macro to ergonomically define an item depending on a large number of #[cfg]\nparameters. Structured like an if-else chain, the first matching branch is the\nitem that gets emitted.\n",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "compiler_builtins",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1.2",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rustc-std-workspace-core",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0.0",
+          "kind": null,
+          "rename": "core",
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "cfg-if",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/cfg-if-0.1.10/src/lib.rs",
+          "edition": "2018",
+          "doctest": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "xcrate",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/cfg-if-0.1.10/tests/xcrate.rs",
+          "edition": "2018",
+          "doctest": false
+        }
+      ],
+      "features": {
+        "rustc-dep-of-std": [
+          "core",
+          "compiler_builtins"
+        ]
+      },
+      "manifest_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/cfg-if-0.1.10/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "Alex Crichton <alex@alexcrichton.com>"
+      ],
+      "categories": [],
+      "keywords": [],
+      "readme": "README.md",
+      "repository": "https://github.com/alexcrichton/cfg-if",
+      "edition": "2018",
+      "links": null
+    },
+    {
+      "name": "getrandom",
+      "version": "0.1.14",
+      "id": "getrandom 0.1.14 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT OR Apache-2.0",
+      "license_file": null,
+      "description": "A small cross-platform library for retrieving random data from system source",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "cfg-if",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1.2",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "compiler_builtins",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rustc-std-workspace-core",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0",
+          "kind": null,
+          "rename": "core",
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "log",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.4",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "wasi",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.9",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": "cfg(target_os = \"wasi\")",
+          "registry": null
+        },
+        {
+          "name": "libc",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.2.64",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [],
+          "target": "cfg(unix)",
+          "registry": null
+        },
+        {
+          "name": "stdweb",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.4.18",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": "wasm32-unknown-unknown",
+          "registry": null
+        },
+        {
+          "name": "wasm-bindgen",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.2.29",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": "wasm32-unknown-unknown",
+          "registry": null
+        },
+        {
+          "name": "wasm-bindgen-test",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.2",
+          "kind": "dev",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": "wasm32-unknown-unknown",
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "getrandom",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.1.14/src/lib.rs",
+          "edition": "2018",
+          "doctest": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "common",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.1.14/tests/common.rs",
+          "edition": "2018",
+          "doctest": false
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "mod",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.1.14/benches/mod.rs",
+          "edition": "2018",
+          "doctest": false
+        },
+        {
+          "kind": [
+            "custom-build"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "build-script-build",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.1.14/build.rs",
+          "edition": "2018",
+          "doctest": false
+        }
+      ],
+      "features": {
+        "dummy": [],
+        "rustc-dep-of-std": [
+          "compiler_builtins",
+          "core"
+        ],
+        "std": [],
+        "test-in-browser": [
+          "wasm-bindgen"
+        ]
+      },
+      "manifest_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/getrandom-0.1.14/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "The Rand Project Developers"
+      ],
+      "categories": [
+        "os",
+        "no-std"
+      ],
+      "keywords": [],
+      "readme": "README.md",
+      "repository": "https://github.com/rust-random/getrandom",
+      "edition": "2018",
+      "links": null
+    },
+    {
+      "name": "libc",
+      "version": "0.2.74",
+      "id": "libc 0.2.74 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT OR Apache-2.0",
+      "license_file": null,
+      "description": "Raw FFI bindings to platform libraries like libc.\n",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "rustc-std-workspace-core",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0.0",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "libc",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/libc-0.2.74/src/lib.rs",
+          "edition": "2015",
+          "doctest": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "const_fn",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/libc-0.2.74/tests/const_fn.rs",
+          "edition": "2015",
+          "doctest": false
+        },
+        {
+          "kind": [
+            "custom-build"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "build-script-build",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/libc-0.2.74/build.rs",
+          "edition": "2015",
+          "doctest": false
+        }
+      ],
+      "features": {
+        "align": [],
+        "const-extern-fn": [],
+        "default": [
+          "std"
+        ],
+        "extra_traits": [],
+        "rustc-dep-of-std": [
+          "align",
+          "rustc-std-workspace-core"
+        ],
+        "std": [],
+        "use_std": [
+          "std"
+        ]
+      },
+      "manifest_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/libc-0.2.74/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "The Rust Project Developers"
+      ],
+      "categories": [
+        "external-ffi-bindings",
+        "no-std",
+        "os"
+      ],
+      "keywords": [
+        "libc",
+        "ffi",
+        "bindings",
+        "operating",
+        "system"
+      ],
+      "readme": "README.md",
+      "repository": "https://github.com/rust-lang/libc",
+      "edition": "2015",
+      "links": null
+    },
+    {
+      "name": "ppv-lite86",
+      "version": "0.2.8",
+      "id": "ppv-lite86 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT/Apache-2.0",
+      "license_file": null,
+      "description": "Implementation of the crypto-simd API for x86",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "ppv-lite86",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/ppv-lite86-0.2.8/src/lib.rs",
+          "edition": "2018",
+          "doctest": true
+        }
+      ],
+      "features": {
+        "default": [
+          "std"
+        ],
+        "no_simd": [],
+        "simd": [],
+        "std": []
+      },
+      "manifest_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/ppv-lite86-0.2.8/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "The CryptoCorrosion Contributors"
+      ],
+      "categories": [
+        "cryptography",
+        "no-std"
+      ],
+      "keywords": [
+        "crypto",
+        "simd",
+        "x86"
+      ],
+      "readme": null,
+      "repository": "https://github.com/cryptocorrosion/cryptocorrosion",
+      "edition": "2018",
+      "links": null
+    },
+    {
+      "name": "rand",
+      "version": "0.7.3",
+      "id": "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT OR Apache-2.0",
+      "license_file": null,
+      "description": "Random number generators and other randomness functionality.\n",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "getrandom",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1.1",
+          "kind": null,
+          "rename": "getrandom_package",
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "log",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.4.4",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "packed_simd",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.3",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            "into_bits"
+          ],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rand_core",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.5.1",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rand_pcg",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.2",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rand_hc",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.2",
+          "kind": "dev",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rand_pcg",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.2",
+          "kind": "dev",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rand_chacha",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.2.1",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [],
+          "target": "cfg(not(target_os = \"emscripten\"))",
+          "registry": null
+        },
+        {
+          "name": "rand_hc",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.2",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": "cfg(target_os = \"emscripten\")",
+          "registry": null
+        },
+        {
+          "name": "libc",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.2.22",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": false,
+          "features": [],
+          "target": "cfg(unix)",
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "rand",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.7.3/src/lib.rs",
+          "edition": "2018",
+          "doctest": true
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "monte-carlo",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.7.3/examples/monte-carlo.rs",
+          "edition": "2018",
+          "doctest": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "monty-hall",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.7.3/examples/monty-hall.rs",
+          "edition": "2018",
+          "doctest": false
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "seq",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.7.3/benches/seq.rs",
+          "edition": "2018",
+          "doctest": false
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "misc",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.7.3/benches/misc.rs",
+          "edition": "2018",
+          "doctest": false
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "weighted",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.7.3/benches/weighted.rs",
+          "edition": "2018",
+          "doctest": false
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "generators",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.7.3/benches/generators.rs",
+          "edition": "2018",
+          "doctest": false
+        }
+      ],
+      "features": {
+        "alloc": [
+          "rand_core/alloc"
+        ],
+        "default": [
+          "std"
+        ],
+        "getrandom": [
+          "getrandom_package",
+          "rand_core/getrandom"
+        ],
+        "nightly": [
+          "simd_support"
+        ],
+        "serde1": [],
+        "simd_support": [
+          "packed_simd"
+        ],
+        "small_rng": [
+          "rand_pcg"
+        ],
+        "std": [
+          "rand_core/std",
+          "rand_chacha/std",
+          "alloc",
+          "getrandom",
+          "libc"
+        ],
+        "stdweb": [
+          "getrandom_package/stdweb"
+        ],
+        "wasm-bindgen": [
+          "getrandom_package/wasm-bindgen"
+        ]
+      },
+      "manifest_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand-0.7.3/Cargo.toml",
+      "metadata": {
+        "docs": {
+          "rs": {
+            "all-features": true
+          }
+        }
+      },
+      "publish": null,
+      "authors": [
+        "The Rand Project Developers",
+        "The Rust Project Developers"
+      ],
+      "categories": [
+        "algorithms",
+        "no-std"
+      ],
+      "keywords": [
+        "random",
+        "rng"
+      ],
+      "readme": "README.md",
+      "repository": "https://github.com/rust-random/rand",
+      "edition": "2018",
+      "links": null
+    },
+    {
+      "name": "rand_chacha",
+      "version": "0.2.2",
+      "id": "rand_chacha 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT OR Apache-2.0",
+      "license_file": null,
+      "description": "ChaCha random number generator\n",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "ppv-lite86",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.2.6",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [
+            "simd"
+          ],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rand_core",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.5",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "rand_chacha",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand_chacha-0.2.2/src/lib.rs",
+          "edition": "2018",
+          "doctest": true
+        }
+      ],
+      "features": {
+        "default": [
+          "std",
+          "simd"
+        ],
+        "simd": [],
+        "std": [
+          "ppv-lite86/std"
+        ]
+      },
+      "manifest_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand_chacha-0.2.2/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "The Rand Project Developers",
+        "The Rust Project Developers",
+        "The CryptoCorrosion Contributors"
+      ],
+      "categories": [
+        "algorithms",
+        "no-std"
+      ],
+      "keywords": [
+        "random",
+        "rng",
+        "chacha"
+      ],
+      "readme": "README.md",
+      "repository": "https://github.com/rust-random/rand",
+      "edition": "2018",
+      "links": null
+    },
+    {
+      "name": "rand_core",
+      "version": "0.5.1",
+      "id": "rand_core 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT OR Apache-2.0",
+      "license_file": null,
+      "description": "Core random number generator traits and tools for implementation.\n",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "getrandom",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "serde",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [
+            "derive"
+          ],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "rand_core",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand_core-0.5.1/src/lib.rs",
+          "edition": "2018",
+          "doctest": true
+        }
+      ],
+      "features": {
+        "alloc": [],
+        "serde1": [
+          "serde"
+        ],
+        "std": [
+          "alloc",
+          "getrandom",
+          "getrandom/std"
+        ]
+      },
+      "manifest_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand_core-0.5.1/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "The Rand Project Developers",
+        "The Rust Project Developers"
+      ],
+      "categories": [
+        "algorithms",
+        "no-std"
+      ],
+      "keywords": [
+        "random",
+        "rng"
+      ],
+      "readme": "README.md",
+      "repository": "https://github.com/rust-random/rand",
+      "edition": "2018",
+      "links": null
+    },
+    {
+      "name": "rand_hc",
+      "version": "0.2.0",
+      "id": "rand_hc 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT/Apache-2.0",
+      "license_file": null,
+      "description": "HC128 random number generator\n",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "rand_core",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.5",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "rand_hc",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand_hc-0.2.0/src/lib.rs",
+          "edition": "2018",
+          "doctest": true
+        }
+      ],
+      "features": {},
+      "manifest_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/rand_hc-0.2.0/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "The Rand Project Developers"
+      ],
+      "categories": [
+        "algorithms",
+        "no-std"
+      ],
+      "keywords": [
+        "random",
+        "rng",
+        "hc128"
+      ],
+      "readme": "README.md",
+      "repository": "https://github.com/rust-random/rand",
+      "edition": "2018",
+      "links": null
+    },
+    {
+      "name": "wasi",
+      "version": "0.9.0+wasi-snapshot-preview1",
+      "id": "wasi 0.9.0+wasi-snapshot-preview1 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+      "license_file": null,
+      "description": "Experimental WASI API bindings for Rust",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "compiler_builtins",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rustc-std-workspace-core",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0",
+          "kind": null,
+          "rename": "core",
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rustc-std-workspace-alloc",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "wasi",
+          "src_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/wasi-0.9.0+wasi-snapshot-preview1/src/lib.rs",
+          "edition": "2018",
+          "doctest": true
+        }
+      ],
+      "features": {
+        "default": [
+          "std"
+        ],
+        "rustc-dep-of-std": [
+          "compiler_builtins",
+          "core",
+          "rustc-std-workspace-alloc"
+        ],
+        "std": []
+      },
+      "manifest_path": "/home/sam/.cargo/registry/src/github.com-1ecc6299db9ec823/wasi-0.9.0+wasi-snapshot-preview1/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "The Cranelift Project Developers"
+      ],
+      "categories": [
+        "no-std",
+        "wasm"
+      ],
+      "keywords": [
+        "webassembly",
+        "wasm"
+      ],
+      "readme": "README.md",
+      "repository": "https://github.com/bytecodealliance/wasi",
+      "edition": "2018",
+      "links": null
+    }
+  ],
+  "workspace_members": [
+    "adder 0.1.0 (path+file:///home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace/adder)",
+    "add-one 0.1.0 (path+file:///home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace/add-one)"
+  ],
+  "resolve": {
+    "nodes": [
+      {
+        "id": "add-one 0.1.0 (path+file:///home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace/add-one)",
+        "dependencies": [
+          "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)"
+        ],
+        "deps": [
+          {
+            "name": "rand",
+            "pkg": "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          }
+        ],
+        "features": []
+      },
+      {
+        "id": "adder 0.1.0 (path+file:///home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace/adder)",
+        "dependencies": [
+          "add-one 0.1.0 (path+file:///home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace/add-one)",
+          "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)"
+        ],
+        "deps": [
+          {
+            "name": "add_one",
+            "pkg": "add-one 0.1.0 (path+file:///home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace/add-one)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          },
+          {
+            "name": "rand",
+            "pkg": "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          }
+        ],
+        "features": []
+      },
+      {
+        "id": "cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [],
+        "deps": [],
+        "features": []
+      },
+      {
+        "id": "getrandom 0.1.14 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [
+          "cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
+          "libc 0.2.74 (registry+https://github.com/rust-lang/crates.io-index)",
+          "wasi 0.9.0+wasi-snapshot-preview1 (registry+https://github.com/rust-lang/crates.io-index)"
+        ],
+        "deps": [
+          {
+            "name": "cfg_if",
+            "pkg": "cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          },
+          {
+            "name": "libc",
+            "pkg": "libc 0.2.74 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": "cfg(unix)"
+              }
+            ]
+          },
+          {
+            "name": "wasi",
+            "pkg": "wasi 0.9.0+wasi-snapshot-preview1 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": "cfg(target_os = \"wasi\")"
+              }
+            ]
+          }
+        ],
+        "features": [
+          "std"
+        ]
+      },
+      {
+        "id": "libc 0.2.74 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [],
+        "deps": [],
+        "features": []
+      },
+      {
+        "id": "ppv-lite86 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [],
+        "deps": [],
+        "features": [
+          "simd",
+          "std"
+        ]
+      },
+      {
+        "id": "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [
+          "getrandom 0.1.14 (registry+https://github.com/rust-lang/crates.io-index)",
+          "libc 0.2.74 (registry+https://github.com/rust-lang/crates.io-index)",
+          "rand_chacha 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+          "rand_core 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+          "rand_hc 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)"
+        ],
+        "deps": [
+          {
+            "name": "getrandom_package",
+            "pkg": "getrandom 0.1.14 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          },
+          {
+            "name": "libc",
+            "pkg": "libc 0.2.74 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": "cfg(unix)"
+              }
+            ]
+          },
+          {
+            "name": "rand_chacha",
+            "pkg": "rand_chacha 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": "cfg(not(target_os = \"emscripten\"))"
+              }
+            ]
+          },
+          {
+            "name": "rand_core",
+            "pkg": "rand_core 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          },
+          {
+            "name": "rand_hc",
+            "pkg": "rand_hc 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": "cfg(target_os = \"emscripten\")"
+              }
+            ]
+          }
+        ],
+        "features": [
+          "alloc",
+          "default",
+          "getrandom",
+          "getrandom_package",
+          "libc",
+          "std"
+        ]
+      },
+      {
+        "id": "rand_chacha 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [
+          "ppv-lite86 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
+          "rand_core 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)"
+        ],
+        "deps": [
+          {
+            "name": "ppv_lite86",
+            "pkg": "ppv-lite86 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          },
+          {
+            "name": "rand_core",
+            "pkg": "rand_core 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          }
+        ],
+        "features": [
+          "std"
+        ]
+      },
+      {
+        "id": "rand_core 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [
+          "getrandom 0.1.14 (registry+https://github.com/rust-lang/crates.io-index)"
+        ],
+        "deps": [
+          {
+            "name": "getrandom",
+            "pkg": "getrandom 0.1.14 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          }
+        ],
+        "features": [
+          "alloc",
+          "getrandom",
+          "std"
+        ]
+      },
+      {
+        "id": "rand_hc 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [
+          "rand_core 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)"
+        ],
+        "deps": [
+          {
+            "name": "rand_core",
+            "pkg": "rand_core 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          }
+        ],
+        "features": []
+      },
+      {
+        "id": "wasi 0.9.0+wasi-snapshot-preview1 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [],
+        "deps": [],
+        "features": [
+          "default",
+          "std"
+        ]
+      }
+    ],
+    "root": null
+  },
+  "target_directory": "/home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace/target",
+  "version": 1,
+  "workspace_root": "/home/sam/code/cargo-raze/smoke_test/remote/cargo_workspace",
+  "metadata": null
+}

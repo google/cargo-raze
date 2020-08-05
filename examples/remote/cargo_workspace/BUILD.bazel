@@ -9,7 +9,14 @@ licenses([
   "notice" # See individual crates for specific licenses
 ])
 alias(
-    name = "rand",
+    # FIXME: We probably don't want to always specify the version
+    name = "rand__0_6_5",
+    actual = "@cargo_workspace__rand__0_6_5//:rand",
+    tags = ["cargo-raze"],
+)
+alias(
+    # FIXME: We probably don't want to always specify the version
+    name = "rand__0_7_3",
     actual = "@cargo_workspace__rand__0_7_3//:rand",
     tags = ["cargo-raze"],
 )

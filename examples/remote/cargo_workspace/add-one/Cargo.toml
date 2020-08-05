@@ -12,4 +12,4 @@ path = "src/lib.rs"
 [dependencies]
 # TODO: Handle this version conflict
 # rand = "0.5"
-rand = "0.7"
+rand = "0.6"

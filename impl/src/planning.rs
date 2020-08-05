@@ -536,6 +536,8 @@ impl<'planner> CrateSubplanner<'planner> {
     Ok(CrateContext {
       pkg_name: package.name.clone(),
       pkg_version: package.version.to_string(),
+      sanitized_name: self.crate_catalog_entry.sanitized_name.clone(),
+      sanitized_version: self.crate_catalog_entry.sanitized_version.clone(),
       edition: package.edition.clone(),
       license: self.produce_license(),
       features: self.node.features.clone(),

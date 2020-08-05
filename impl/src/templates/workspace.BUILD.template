@@ -14,7 +14,8 @@ licenses([
 {%- elif crate.is_root_dependency and crate.lib_target_name %}
 {%- set crate_name_sanitized = crate.pkg_name | replace(from="-", to="_") %}
 alias(
-    name = "{{crate_name_sanitized}}",
+    # FIXME: We probably don't want to always specify the version
+    name = "{{crate.sanitized_name}}__{{crate.sanitized_version}}",
     actual = "{{crate.workspace_path_to_crate}}:{{crate_name_sanitized}}",
     tags = ["cargo-raze"],
 )
