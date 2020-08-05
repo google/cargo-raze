@@ -38,6 +38,7 @@ serde_json = "1.0.34"
 tempdir = "0.3.7"
 spdx = "0.3.4"
 pathdiff = "0.2"
+glob = "0.3"
 
 [dev-dependencies]
 lazy_static = "1.2.0"

@@ -250,7 +250,11 @@ impl CrateCatalogEntry {
   /** Emits a complete path to this dependency and default target using the given settings. */
   pub fn workspace_path_and_default_target(&self, settings: &RazeSettings) -> String {
     if let Some(workspace_relative_path) = &self.workspace_relative_path {
-      return format!("{}/{}:{}", settings.workspace_path, workspace_relative_path.display(), self.sanitized_name);
+      if settings.workspace_path.ends_with("//") {
+        return format!("{}{}:{}", settings.workspace_path, workspace_relative_path.display(), self.sanitized_name);
+      } else {
+        return format!("{}/{}:{}", settings.workspace_path, workspace_relative_path.display(), self.sanitized_name);
+      }
     }
     match settings.genmode {
       GenMode::Remote => format!(

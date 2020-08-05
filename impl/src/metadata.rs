@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{borrow::Cow, env, fmt, fs, io::Read, path::PathBuf};
+use std::{borrow::Cow, env, fmt, fs, io::Read, path::{Path, PathBuf}};
 
 use anyhow::{Error, Result};
 
@@ -96,17 +96,37 @@ impl CargoWorkspaceFiles {
     root_toml.read_to_string(&mut toml_contents)?;
     let cargo_toml = toml::from_str::<CargoToml>(&toml_contents)?;
 
-    let member_toml_paths = cargo_toml.workspace
+    let globs = cargo_toml.workspace
       .map(|w| w.members)
       .unwrap_or_default()
       .iter()
-      .map(|m| {
-        abs_root_toml_path
+      .map(|member_glob| {
+        let dir_glob = abs_root_toml_path
           .parent()
           .unwrap() // CHECKED: Toml must live in a dir
-          .join(m)
-          .join("Cargo.toml")
-          .canonicalize()
+          .join(member_glob)
+          .join(".");
+          // .join("Cargo.toml");
+        let tomls = glob::glob(dir_glob.to_str().unwrap())
+          .unwrap()
+          .filter_map(Result::ok)
+          .map(|d| d.join("Cargo.toml"))
+          .collect::<Vec<PathBuf>>();
+        if tomls.is_empty() {
+          Err(MetadataError::RootToml(Error::msg("Glob didn't match anything"), PathBuf::from(member_glob)).into())
+        } else {
+          Ok(tomls)
+        }
+      })
+      .collect::<Result<Vec<Vec<PathBuf>>>>()?
+      .into_iter()
+      .flatten()
+      .collect::<Vec<PathBuf>>();
+
+    let member_toml_paths = globs
+      .iter()
+      .map(|m| {
+        m.canonicalize()
           .map_err(Error::from)
           .and_then(|p| p.strip_prefix(abs_root_toml_path.parent().unwrap()).map(PathBuf::from).map_err(Error::from))
           .map_err(|e| MetadataError::RootToml(e.into(), PathBuf::from(m)).into())
