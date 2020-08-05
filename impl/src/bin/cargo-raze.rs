@@ -81,14 +81,7 @@ fn main() -> Result<()> {
   };
   let mut planner = BuildPlannerImpl::new(&mut *metadata_fetcher);
 
-  let toml_path = PathBuf::from("./Cargo.toml");
-  let lock_path_opt = fs::metadata("./Cargo.lock")
-    .ok()
-    .map(|_| PathBuf::from("./Cargo.lock"));
-  let files = CargoWorkspaceFiles {
-    toml_path,
-    lock_path_opt,
-  };
+  let files = CargoWorkspaceFiles::new("./Cargo.toml", true)?;
   let platform_details = PlatformDetails::new_using_rustc(&settings.target)?;
   let planned_build = planner.plan_build(&settings, files, platform_details)?;
   let mut bazel_renderer = BazelRenderer::new();
@@ -154,12 +147,13 @@ fn write_to_file_loudly(path: &str, contents: &str) -> Result<()> {
   Ok(())
 }
 
-fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings> {
-  let path = cargo_toml_path.as_ref();
+fn load_settings<T: AsRef<Path>>(cargo_root_toml_path: T) -> Result<RazeSettings> {
+  let path = cargo_root_toml_path.as_ref();
   let mut toml = File::open(path)?;
   let mut toml_contents = String::new();
   toml.read_to_string(&mut toml_contents)?;
   toml::from_str::<CargoToml>(&toml_contents)
     .map_err(|e| e.into())
-    .map(|toml| toml.raze)
+    // FIXME: remove unwrap
+    .map(|toml| toml.raze.unwrap())
 }

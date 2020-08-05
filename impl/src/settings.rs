@@ -25,7 +25,15 @@ pub type CrateSettingsPerVersion = HashMap<Version, CrateSettings>;
  */
 #[derive(Debug, Clone, Deserialize)]
 pub struct CargoToml {
-  pub raze: RazeSettings,
+  #[serde(default, skip_serializing_if = "Option::is_none")]
+  pub workspace: Option<WorkspaceSettings>,
+  pub raze: Option<RazeSettings>,
+}
+
+#[derive(Debug, Default, Clone, Deserialize)]
+pub struct WorkspaceSettings {
+  #[serde(default)]
+  pub members: Vec<String>,
 }
 
 /** The configuration settings for `cargo-raze`, included in Cargo.toml. */

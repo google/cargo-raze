@@ -1003,7 +1003,7 @@ dependencies = [
     lock_file: Option<&'static str>,
   ) -> (TempDir, CargoWorkspaceFiles) {
     let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
-    let toml_path = {
+    let root_toml_path = {
       let path = dir.path().join("Cargo.toml");
       let mut toml = File::create(&path).unwrap();
       toml.write_all(toml_file.as_bytes()).unwrap();
@@ -1020,7 +1020,7 @@ dependencies = [
     };
     let files = CargoWorkspaceFiles {
       lock_path_opt: lock_path,
-      toml_path,
+      root_toml_path,
     };
 
     (dir, files)

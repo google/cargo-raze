@@ -34,7 +34,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::string::ToString;
 
-use cargo_raze::metadata::CargoInternalsMetadataFetcher;
+use cargo_raze::metadata::CargoMetadataFetcher;
 use cargo_raze::metadata::CargoWorkspaceFiles;
 use cargo_raze::metadata::MetadataFetcher;
 
@@ -91,54 +91,14 @@ fn validate_opts(options: &Options) -> Result<ValidatedOptions, String> {
   })
 }
 
-fn find_workspace_files(options: &ValidatedOptions) -> CargoResult<CargoWorkspaceFiles> {
-  let opt_toml_path = PathBuf::from(&options.path_to_toml);
+fn dump_metadata(options: ValidatedOptions) -> CargoResult<()> {
+  let workspace_files = CargoWorkspaceFiles::new(&options.path_to_toml, options.infer_lock_file)
+    .map_err(|e| CargoError::from_boxed_compat(e.into()))?;
 
-  // Find abs path to toml
-  let abs_toml_path = if opt_toml_path.is_absolute() {
-    opt_toml_path.canonicalize()?
-  } else {
-    env::current_dir()
-      .map_err(|e| CargoError::from(DumpError(e.to_string())))?
-      .join(opt_toml_path)
-      .canonicalize()?
-  };
+  println!("{:?}", workspace_files);
 
-  // Verify that toml file exists
-  {
-    File::open(&abs_toml_path).map_err(|e| {
-      CargoError::from(DumpError(format!(
-        "opening {:?}: {}",
-        abs_toml_path,
-        e.to_string()
-      )))
-    })?;
-  }
-
-  // Try to find an associated lock file
-  let mut abs_lock_path_opt = None;
-  if options.infer_lock_file {
-    let expected_abs_lock_path = abs_toml_path
-      .parent()
-      .unwrap() // CHECKED: Toml must live in a dir
-      .join("Cargo.lock");
-
-    if File::open(&abs_toml_path).is_ok() {
-      abs_lock_path_opt = Some(expected_abs_lock_path);
-    }
-  }
-
-  Ok(CargoWorkspaceFiles {
-    toml_path: abs_toml_path,
-    lock_path_opt: abs_lock_path_opt,
-  })
-}
-
-fn dump_metadata(options: ValidatedOptions, cargo_config: &mut Config) -> CargoResult<()> {
-  let workspace_files = find_workspace_files(&options)?;
-
-  let mut metadata_fetcher = CargoInternalsMetadataFetcher::new(&cargo_config);
-  let metadata = metadata_fetcher.fetch_metadata(workspace_files)?;
+  let mut metadata_fetcher = CargoMetadataFetcher::default();
+  let metadata = metadata_fetcher.fetch_metadata(&workspace_files).map_err(|e| CargoError::from_boxed_compat(e.into()))?;
   let output_text = if options.pretty_print {
     serde_json::to_string_pretty(&metadata)?
   } else {
@@ -156,8 +116,8 @@ fn dump_metadata(options: ValidatedOptions, cargo_config: &mut Config) -> CargoR
   Ok(())
 }
 
-fn real_main(validated_opts: ValidatedOptions, cargo_config: &mut Config) -> CliResult {
-  dump_metadata(validated_opts, cargo_config)?;
+fn real_main(validated_opts: ValidatedOptions) -> CliResult {
+  dump_metadata(validated_opts)?;
 
   Ok(())
 }
@@ -190,7 +150,7 @@ fn main() {
 
   let mut config = make_cargo_config(&validated_opts).unwrap();
 
-  let result = real_main(validated_opts, &mut config);
+  let result = real_main(validated_opts);
 
   if let Err(e) = result {
     cargo::exit_with_error(e, &mut *config.shell());

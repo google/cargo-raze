@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, path::PathBuf};
+use std::{borrow::Cow, env, fmt, fs, io::Read, path::PathBuf};
 
-use anyhow::Result;
+use anyhow::{Error, Result};
 
 use cargo_metadata::MetadataCommand;
 pub use cargo_metadata::{DependencyKind, Metadata, Node, Package, PackageId};
 
 use tempdir::TempDir;
+
+use crate::settings::CargoToml;
 
 const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
 
@@ -33,10 +35,103 @@ pub trait MetadataFetcher {
   fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata>;
 }
 
+#[derive(Debug)]
+enum MetadataError {
+  RootToml(Error, PathBuf),
+  MemberTomls(Error, Vec<PathBuf>),
+  CargoLock(Error, PathBuf),
+}
+
+impl std::error::Error for MetadataError {
+  fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+    match self {
+      MetadataError::RootToml(e, _) => Some(e.as_ref()),
+      MetadataError::MemberTomls(e, _) => Some(e.as_ref()),
+      MetadataError::CargoLock(e, _) => Some(e.as_ref()),
+    }
+  }
+}
+impl fmt::Display for MetadataError {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    match self {
+      MetadataError::RootToml(_, path) => write!(f, "couldn't open Cargo.toml at: \"{}\"", path.display()),
+      MetadataError::MemberTomls(_, members) => {
+        let s = members
+          .iter()
+          .map(|m| m.to_string_lossy())
+          .collect::<Vec<Cow<'_, str>>>()
+          .join(", ");
+        write!(f, "couldn't open Cargo.tomls for the following members: \"{}\"", s)
+      },
+      MetadataError::CargoLock(_, path) => write!(f, "couldn't open Cargo.lock at: \"{}\"", path.display()),
+    }
+  }
+}
+
 /** The local Cargo workspace files to be used for build planning .*/
+#[derive(Debug)]
 pub struct CargoWorkspaceFiles {
-  pub toml_path: PathBuf,
+  pub root_toml_path: PathBuf,
+  pub member_toml_paths: Vec<PathBuf>,
   pub lock_path_opt: Option<PathBuf>,
+}
+
+impl CargoWorkspaceFiles {
+  pub fn new<P: Into<PathBuf>>(root_toml_path: P, infer_lock_file: bool) -> Result<Self> {
+    let root_toml_path = root_toml_path.into();
+    // Find abs path to toml
+    // TODO: make nicer
+    let abs_root_toml_path = if root_toml_path.is_absolute() {
+      root_toml_path.canonicalize()?
+    } else {
+      env::current_dir()?
+        .join(root_toml_path)
+        .canonicalize()?
+    };
+
+    // Verify that toml file exists
+    let mut root_toml = fs::File::open(&abs_root_toml_path)
+      .map_err(|e| MetadataError::RootToml(e.into(), abs_root_toml_path.clone()))?;
+    let mut toml_contents = String::new();
+    root_toml.read_to_string(&mut toml_contents)?;
+    let cargo_toml = toml::from_str::<CargoToml>(&toml_contents)?;
+
+    let member_toml_paths = cargo_toml.workspace
+      .map(|w| w.members)
+      .unwrap_or_default()
+      .iter()
+      .map(|m| {
+        abs_root_toml_path
+          .parent()
+          .unwrap() // CHECKED: Toml must live in a dir
+          .join(m)
+          .join("Cargo.toml")
+          .canonicalize()
+          .map_err(Error::from)
+          .and_then(|p| p.strip_prefix(abs_root_toml_path.parent().unwrap()).map(PathBuf::from).map_err(Error::from))
+          .map_err(|e| MetadataError::RootToml(e.into(), PathBuf::from(m)).into())
+      })
+      .collect::<Result<Vec<PathBuf>>>()?;
+
+    // Try to find an associated lock file
+    let mut abs_lock_path_opt = None;
+    if infer_lock_file {
+      let expected_abs_lock_path = abs_root_toml_path
+        .parent()
+        .unwrap() // CHECKED: Toml must live in a dir
+        .join("Cargo.lock");
+
+      if fs::File::open(&expected_abs_lock_path).is_ok() {
+        abs_lock_path_opt = Some(expected_abs_lock_path);
+      }
+    }
+
+    Ok(CargoWorkspaceFiles {
+      root_toml_path: abs_root_toml_path,
+      member_toml_paths: member_toml_paths,
+      lock_path_opt: abs_lock_path_opt,
+    })
+  }
 }
 
 /** A workspace metadata fetcher that uses the Cargo Metadata subcommand. */
@@ -60,17 +155,25 @@ impl Default for CargoMetadataFetcher {
 
 impl MetadataFetcher for CargoMetadataFetcher {
   fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
-    assert!(files.toml_path.is_file());
+    assert!(files.root_toml_path.is_file());
     assert!(files.lock_path_opt.as_ref().map_or(true, |p| p.is_file()));
 
     // Copy files into a temp directory
     // UNWRAP: Guarded by function assertion
+    // TODO: Figure out why this is needed
     let cargo_tempdir = {
       let dir = TempDir::new("cargo_raze_metadata_dir")?;
 
       let dir_path = dir.path();
-      let new_toml_path = dir_path.join(files.toml_path.file_name().unwrap());
-      fs::copy(files.toml_path.as_path(), new_toml_path)?;
+      let new_root_toml_path = dir_path.join(files.root_toml_path.file_name().unwrap());
+      fs::copy(files.root_toml_path.as_path(), new_root_toml_path)?;
+      for member in &files.member_toml_paths {
+        let abs_member_toml_path = files.root_toml_path.parent().unwrap().join(member);
+        let new_member_toml_path = dir_path.join(member);
+        println!("Creating dirs for {:?}", new_member_toml_path);
+        fs::create_dir_all(new_member_toml_path.parent().unwrap())?;
+        fs::copy(abs_member_toml_path, new_member_toml_path)?;
+      }
       if let Some(lock_path) = files.lock_path_opt.as_ref() {
         let new_lock_path = dir_path.join(lock_path.file_name().unwrap());
         fs::copy(lock_path.as_path(), new_lock_path)?;
@@ -124,12 +227,13 @@ dependencies = [
   #[test]
   fn test_cargo_subcommand_metadata_fetcher_works_without_lock() {
     let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
-    let toml_path = dir.path().join("Cargo.toml");
-    let mut toml = File::create(&toml_path).unwrap();
+    let root_toml_path = dir.path().join("Cargo.toml");
+    let mut toml = File::create(&root_toml_path).unwrap();
     toml.write_all(basic_toml().as_bytes()).unwrap();
     let files = CargoWorkspaceFiles {
       lock_path_opt: None,
-      toml_path,
+      root_toml_path,
+      member_toml_paths: vec![],
     };
 
     let mut fetcher = CargoMetadataFetcher::default();
@@ -140,7 +244,7 @@ dependencies = [
   #[test]
   fn test_cargo_subcommand_metadata_fetcher_works_with_lock() {
     let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
-    let toml_path = {
+    let root_toml_path = {
       let path = dir.path().join("Cargo.toml");
       let mut toml = File::create(&path).unwrap();
       toml.write_all(basic_toml().as_bytes()).unwrap();
@@ -154,7 +258,8 @@ dependencies = [
     };
     let files = CargoWorkspaceFiles {
       lock_path_opt: Some(lock_path),
-      toml_path,
+      root_toml_path,
+      member_toml_paths: vec![],
     };
 
     let mut fetcher = CargoMetadataFetcher::default();
@@ -165,7 +270,7 @@ dependencies = [
   #[test]
   fn test_cargo_subcommand_metadata_fetcher_handles_bad_files() {
     let dir = TempDir::new("test_cargo_raze_metadata_dir").unwrap();
-    let toml_path = {
+    let root_toml_path = {
       let path = dir.path().join("Cargo.toml");
       let mut toml = File::create(&path).unwrap();
       toml.write_all(b"hello").unwrap();
@@ -173,7 +278,8 @@ dependencies = [
     };
     let files = CargoWorkspaceFiles {
       lock_path_opt: None,
-      toml_path,
+      root_toml_path,
+      member_toml_paths: vec![],
     };
 
     let mut fetcher = CargoMetadataFetcher::default();
