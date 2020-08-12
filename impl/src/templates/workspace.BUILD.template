@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze workspace build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze

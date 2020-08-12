@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate workspace functions
 
 DO NOT EDIT! Replaced on runs of cargo-raze
