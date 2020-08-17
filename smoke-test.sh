@@ -21,9 +21,7 @@ command_exists "cargo"
 command_exists "bazel"
 
 # Clean the `examples` directory
-# FIXME: Uncomment this, and maybe have it filtered by the find pattern too
-# rm -rf "$EXAMPLES_DIR/remote" "$EXAMPLES_DIR/vendored"
-rm -rf "$EXAMPLES_DIR/remote/cargo_workspace"
+rm -rf "$EXAMPLES_DIR/remote" "$EXAMPLES_DIR/vendored"
 cp -r "$TEST_DIR/remote" "$TEST_DIR/vendored" "$EXAMPLES_DIR"
 
 # Set up root BUILD file
@@ -85,9 +83,7 @@ RAZE="$IMPL_DIR/target/debug/cargo-raze raze"
 for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d -name "${FIND_PATTERN}"); do
     echo "Running Cargo Raze for $(basename $ex)"
     cd "$ex" #/cargo"
-    set +e
     eval "$RAZE"
-    set -e
 done
 
 # Run the Bazel build for all targets
@@ -95,12 +91,10 @@ cd "$EXAMPLES_DIR"
 for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d -name "${FIND_PATTERN}"); do
     ex_name="$(basename "$ex")"
     ex_type="$(basename $(dirname "$ex"))"
-    bazel_path="//$ex_type/$ex_name:all"
-    # bazel_cargo_path="//$ex_type/$ex_name:all"/cargo:all"
+    bazel_path="//$ex_type/$ex_name/..."
 
-    echo "Running Bazel build for $bazel_path" #, $bazel_cargo_path"
+    echo "Running Bazel build for $bazel_path"
     bazel build "$bazel_path"
-    # bazel build "$bazel_cargo_path"
 done
 
 cd "$PWD"

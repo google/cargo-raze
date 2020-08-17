@@ -319,6 +319,8 @@ mod tests {
     CrateContext {
       pkg_name: "test-binary".to_owned(),
       pkg_version: "1.1.1".to_owned(),
+      sanitized_name: "test_binary".to_owned(),
+      sanitized_version: "1_1_1".to_owned(),
       edition: "2015".to_owned(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
       expected_build_path: format!("vendor/test-binary-1.1.1/{}", buildfile_suffix),
@@ -354,6 +356,8 @@ mod tests {
     CrateContext {
       pkg_name: "test-library".to_owned(),
       pkg_version: "1.1.1".to_owned(),
+      sanitized_name: "test_library".to_owned(),
+      sanitized_version: "1_1_1".to_owned(),
       edition: "2015".to_owned(),
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
