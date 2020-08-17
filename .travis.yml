@@ -40,3 +40,5 @@ script:
   - cargo install --debug -f --path .
   - cd ../
   - ./smoke-test.sh
+  # Check that /examples has no changes
+  - "[ -z \"$(git status --porcelain)\" ]"
