@@ -334,9 +334,13 @@ impl CrateCatalog {
           println!("{:?}", d);
           d
         });
+        let is_root = match root_resolve_node {
+          Some(x) => x == &package.id,
+          None => false,
+        };
         CrateCatalogEntry::new(
           package,
-          root_resolve_node.contains(&&package.id),
+          is_root,
           root_direct_deps.contains(&package.id),
           workspace_relative_path,
         )
