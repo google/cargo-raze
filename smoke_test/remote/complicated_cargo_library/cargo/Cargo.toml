@@ -44,6 +44,3 @@ additional_flags = [
 ]
 # Add an unused environment variable
 additional_env = { NOT_USED_KEY = "not_used_value" }
-
-[raze.crates.clang-sys.'0.21.1']
-gen_buildrs = true

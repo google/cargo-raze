@@ -35,11 +35,11 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "io_bazel_rules_rust",
-    sha256 = "2e690b7d0caccc3000b98a9831adf2899b36268efec3ced8d3cfaec6322843d1",
-    strip_prefix = "rules_rust-6e5fa2c570ac2f17ac1df840d060fc8aab521a07",
+    sha256 = "5ed804fcd10a506a5b8e9e59bc6b3b7f43bc30c87ce4670e6f78df43604894fd",
+    strip_prefix = "rules_rust-fdf9655ba95616e0314b4e0ebab40bb0c5fe005c",
     urls = [
-        # Master branch as of 2020-06-06
-        "https://github.com/bazelbuild/rules_rust/archive/6e5fa2c570ac2f17ac1df840d060fc8aab521a07.tar.gz",
+        # Master branch as of 2020-07-27
+        "https://github.com/bazelbuild/rules_rust/archive/fdf9655ba95616e0314b4e0ebab40bb0c5fe005c.tar.gz",
     ],
 )
 
@@ -58,11 +58,30 @@ rust_repositories()
 
 EOF
 
-for ex in $(find $TEST_DIR/remote -mindepth 1 -maxdepth 1 -type d -name "${FIND_PATTERN}"); do
+ex_cargo_dir() {
+    if [ -d "$1/cargo" ]; then
+        echo "$1/cargo"
+    else
+        # Assume Cargo.toml is at root
+        echo "$1"
+    fi
+}
+
+ex_package() {
+    base_dir="$(realpath --relative-to $EXAMPLES_DIR $1)"
+    if [ -d "$1/cargo" ]; then
+        echo "//$base_dir/cargo"
+    else
+        # Assume Cargo.toml is at root
+        echo "//$base_dir"
+    fi
+}
+
+for ex in $(find $EXAMPLES_DIR/remote -mindepth 1 -maxdepth 1 -type d -name "${FIND_PATTERN}"); do
     name="$(basename "$ex")"
-    echo "Updating WORKSPACE for ${name}"
+    echo "Updating WORKSPACE for $name"
     cat >> "$EXAMPLES_DIR/WORKSPACE" << EOF
-load("//remote/${name}:crates.bzl", "${name}_fetch_remote_crates")
+load("$(ex_package "$ex"):crates.bzl", "${name}_fetch_remote_crates")
 ${name}_fetch_remote_crates()
 
 EOF
@@ -71,7 +90,7 @@ done
 # Run Cargo Vendor over the appropriate projects
 for ex in $(find $EXAMPLES_DIR/vendored -mindepth 1 -maxdepth 1 -type d -name "${FIND_PATTERN}"); do
     echo "Running Cargo Vendor for $(basename "$ex")"
-    cd "$ex/cargo"
+    cd "$(ex_cargo_dir $ex)"
     cargo vendor -q --versioned-dirs
 done
 
@@ -81,8 +100,8 @@ cd "$IMPL_DIR"
 cargo build --quiet
 RAZE="$IMPL_DIR/target/debug/cargo-raze raze"
 for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d -name "${FIND_PATTERN}"); do
-    echo "Running Cargo Raze for $(basename $ex)"
-    cd "$ex" #/cargo"
+    echo "Running Cargo Raze for $(basename "$ex")"
+    cd "$(ex_cargo_dir "$ex")"
     eval "$RAZE"
 done
 
@@ -91,10 +110,15 @@ cd "$EXAMPLES_DIR"
 for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d -name "${FIND_PATTERN}"); do
     ex_name="$(basename "$ex")"
     ex_type="$(basename $(dirname "$ex"))"
-    bazel_path="//$ex_type/$ex_name/..."
+    bazel_path="//$ex_type/$ex_name:all"
 
     echo "Running Bazel build for $bazel_path"
     bazel build "$bazel_path"
+    if [ -d "$ex/cargo" ]; then
+        bazel_path="//$ex_type/$ex_name/cargo:all"
+        echo "Running Bazel build for $bazel_path"
+        bazel build "$bazel_path"
+    fi
 done
 
 cd "$PWD"
