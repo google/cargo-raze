@@ -14,6 +14,7 @@
 
 use std::{
   collections::{HashMap, HashSet},
+  path,
   path::PathBuf,
   str::{self, FromStr},
 };
@@ -768,6 +769,11 @@ impl<'planner> CrateSubplanner<'planner> {
       if package_root_path_str.starts_with("./") {
         package_root_path_str = package_root_path_str.split_off(2);
       }
+
+      // Bazel wants forward slashes, but some operating systems don't use '/' as the path
+      // separator. For example, MacOS Classic uses ':', and Windows uses '\'. While Bazel
+      // doesn't and will never support the former, it does support the latter.
+      let package_root_path_str = package_root_path_str.replace(path::MAIN_SEPARATOR, "/");
 
       for kind in &target.kind {
         targets.push(BuildableTarget {
