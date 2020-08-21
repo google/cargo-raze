@@ -1434,6 +1434,36 @@ dependencies = [
       .collect();
     assert_eq!(markup_build_proc_macro_deps.len(), 1);
   }
+
+  #[test]
+  fn test_subplan_produces_crate_root_with_forward_slash() {
+    let toml_file = "
+    [package]
+    name = \"advanced_toml\"
+    version = \"0.1.0\"
+
+    [lib]
+    path = \"not_a_file.rs\"
+
+    [dependencies]
+    markup5ever = \"=0.10.0\"
+        ";
+    let (_temp_dir, files) = make_workspace(toml_file, None);
+    let mut fetcher = WorkspaceCrateMetadataFetcher::default();
+    let mut settings = settings_testing::dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build = planner
+      .plan_build(
+        &settings,
+        files,
+        PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+      )
+      .unwrap();
+
+      assert_eq!(planned_build.crate_contexts[0].targets[0].path, "src/lib.rs");
+  }
   // TODO(acmcarther): Add tests:
   // TODO(acmcarther): Extra flags work
   // TODO(acmcarther): Extra deps work
