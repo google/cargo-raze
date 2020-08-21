@@ -756,27 +756,30 @@ impl<'planner> CrateSubplanner<'planner> {
 
       let package_root_path = self.find_package_root_for_manifest(&manifest_path)?;
 
-      // Bazel uses / as a path delimiter, regardless of OS, so create a normalized
-      // path that doesn't begin with ./
+      // Bazel uses / as a path delimiter, but / is not the path delimiter on all
+      // operating systems (like Mac OS 9, or something people actually use like Windows).
+      // Strip off the package root, decompose the path into parts and rejoin
+      // them with '/'.
       let package_root_path_str = target
         .src_path
         .strip_prefix(package_root_path)
         .unwrap_or(&target.src_path)
         .components()
         .map(|c| {
-          c
-            .as_os_str()
-            .to_str()
-            .ok_or(
-              io::Error::new(
-                io::ErrorKind::InvalidData,
-                format!("{:?} isn't a valid path in Bazel", c)
-              )
-            )
+          c.as_os_str().to_str()
         })
-        .fold(Ok("".to_owned()), |res: Result<String>, v| {
-          Ok(format!("{}/{}", res?, v?))
-        })?
+        .try_fold("".to_owned(), |res, v| {
+          Some(format!("{}/{}", res, v?))
+        })
+        .ok_or(
+          io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!(
+              "{:?} contains non UTF-8 characters and is not a legal path in Bazel",
+              &target.src_path
+            )
+          )
+        )?
         .trim_start_matches("/")
         .to_owned();
 
