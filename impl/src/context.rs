@@ -33,6 +33,10 @@ pub struct DependencyAlias {
 pub struct BuildableTarget {
   pub name: String,
   pub kind: String,
+
+  /**
+   * The path in Bazel's format (i.e. with forward slashes) to the target's entry point.
+   */
   pub path: String,
   pub edition: String,
 }

@@ -14,6 +14,7 @@
 
 use std::{
   collections::{HashMap, HashSet},
+  io,
   path::PathBuf,
   str::{self, FromStr},
 };
@@ -755,19 +756,32 @@ impl<'planner> CrateSubplanner<'planner> {
 
       let package_root_path = self.find_package_root_for_manifest(&manifest_path)?;
 
-      // Trim the manifest_path parent dir from the target path (to give us the crate-local path)
-      let mut package_root_path_str = target
+      // Bazel uses / as a path delimiter, but / is not the path delimiter on all
+      // operating systems (like Mac OS 9, or something people actually use like Windows).
+      // Strip off the package root, decompose the path into parts and rejoin
+      // them with '/'.
+      let package_root_path_str = target
         .src_path
-        .to_string_lossy()
-        .into_owned()
-        // TODO(acmcarther): Is this even guaranteed to work? I don't think the `display` output
-        // can be guaranteed....
-        .split_off(package_root_path.display().to_string().len() + 1);
-
-      // Some crates have a weird prefix, trim that.
-      if package_root_path_str.starts_with("./") {
-        package_root_path_str = package_root_path_str.split_off(2);
-      }
+        .strip_prefix(package_root_path)
+        .unwrap_or(&target.src_path)
+        .components()
+        .map(|c| {
+          c.as_os_str().to_str()
+        })
+        .try_fold("".to_owned(), |res, v| {
+          Some(format!("{}/{}", res, v?))
+        })
+        .ok_or(
+          io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!(
+              "{:?} contains non UTF-8 characters and is not a legal path in Bazel",
+              &target.src_path
+            )
+          )
+        )?
+        .trim_start_matches("/")
+        .to_owned();
 
       for kind in &target.kind {
         targets.push(BuildableTarget {
@@ -1419,6 +1433,36 @@ dependencies = [
       .filter(|dep| dep.name == "serde_derive")
       .collect();
     assert_eq!(markup_build_proc_macro_deps.len(), 1);
+  }
+
+  #[test]
+  fn test_subplan_produces_crate_root_with_forward_slash() {
+    let toml_file = "
+    [package]
+    name = \"advanced_toml\"
+    version = \"0.1.0\"
+
+    [lib]
+    path = \"not_a_file.rs\"
+
+    [dependencies]
+    markup5ever = \"=0.10.0\"
+        ";
+    let (_temp_dir, files) = make_workspace(toml_file, None);
+    let mut fetcher = WorkspaceCrateMetadataFetcher::default();
+    let mut settings = settings_testing::dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build = planner
+      .plan_build(
+        &settings,
+        files,
+        PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+      )
+      .unwrap();
+
+      assert_eq!(planned_build.crate_contexts[0].targets[0].path, "src/lib.rs");
   }
   // TODO(acmcarther): Add tests:
   // TODO(acmcarther): Extra flags work
