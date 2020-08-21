@@ -14,7 +14,7 @@
 
 use std::{
   collections::{HashMap, HashSet},
-  path,
+  io,
   path::PathBuf,
   str::{self, FromStr},
 };
@@ -756,24 +756,29 @@ impl<'planner> CrateSubplanner<'planner> {
 
       let package_root_path = self.find_package_root_for_manifest(&manifest_path)?;
 
-      // Trim the manifest_path parent dir from the target path (to give us the crate-local path)
-      let mut package_root_path_str = target
+      // Bazel uses / as a path delimiter, regardless of OS, so create a normalized
+      // path that doesn't begin with ./
+      let package_root_path_str = target
         .src_path
-        .to_string_lossy()
-        .into_owned()
-        // TODO(acmcarther): Is this even guaranteed to work? I don't think the `display` output
-        // can be guaranteed....
-        .split_off(package_root_path.display().to_string().len() + 1);
-
-      // Some crates have a weird prefix, trim that.
-      if package_root_path_str.starts_with("./") {
-        package_root_path_str = package_root_path_str.split_off(2);
-      }
-
-      // Bazel wants forward slashes, but some operating systems don't use '/' as the path
-      // separator. For example, MacOS Classic uses ':', and Windows uses '\'. While Bazel
-      // doesn't and will never support the former, it does support the latter.
-      let package_root_path_str = package_root_path_str.replace(path::MAIN_SEPARATOR, "/");
+        .strip_prefix(package_root_path)
+        .unwrap_or(&target.src_path)
+        .components()
+        .map(|c| {
+          c
+            .as_os_str()
+            .to_str()
+            .ok_or(
+              io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("{:?} isn't a valid path in Bazel", c)
+              )
+            )
+        })
+        .fold(Ok("".to_owned()), |res: Result<String>, v| {
+          Ok(format!("{}/{}", res?, v?))
+        })?
+        .trim_start_matches("/")
+        .to_owned();
 
       for kind in &target.kind {
         targets.push(BuildableTarget {
