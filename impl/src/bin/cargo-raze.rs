@@ -23,7 +23,7 @@ use anyhow::Result;
 use docopt::Docopt;
 
 use cargo_raze::{
-  bazel::BazelRenderer,
+  bazel::{find_workspace_root, BazelRenderer},
   metadata::{CargoMetadataFetcher, CargoWorkspaceFiles, MetadataFetcher},
   planning::{BuildPlanner, BuildPlannerImpl},
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
@@ -62,7 +62,7 @@ Options:
     --color=<WHEN>                     Coloring: auto, always, never
     -d, --dryrun                       Do not emit any files
     --cargo-bin-path=<PATH>            Path to the cargo binary to be used for loading workspace metadata
-    --output=<PATH>                    Path to output the generated into [default: .].
+    --output=<PATH>                    Path to output the generated into.
 "#;
 
 fn main() -> Result<()> {
@@ -92,8 +92,33 @@ fn main() -> Result<()> {
   let platform_details = PlatformDetails::new_using_rustc(&settings.target)?;
   let planned_build = planner.plan_build(&settings, files, platform_details)?;
   let mut bazel_renderer = BazelRenderer::new();
+
+  // Default to the current directory '.'
+  let mut prefix_path: PathBuf = PathBuf::new();
+  prefix_path.push(".");
+
+  // Allow the command line option to take precedence
+  if options.flag_output.is_empty() {
+    if settings.incompatible_relative_workspace_path {
+      if let Some(workspace_root) = find_workspace_root() {
+        prefix_path.clear();
+        prefix_path.push(workspace_root);
+        prefix_path.push(
+          &planned_build
+            .workspace_context
+            .workspace_path
+            // Remove the leading "//" from the path
+            .trim_start_matches('/'),
+        );
+      }
+    }
+  } else {
+    prefix_path.clear();
+    prefix_path.push(options.flag_output);
+  }
+
   let render_details = RenderDetails {
-    path_prefix: options.flag_output,
+    path_prefix: prefix_path.display().to_string(),
     buildfile_suffix: settings.output_buildfile_suffix,
   };
 

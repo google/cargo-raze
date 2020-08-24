@@ -35,7 +35,7 @@ serde_derive = "1.0.84"
 serde = "1.0.84"
 toml = "0.4.10"
 serde_json = "1.0.34"
-tempdir = "0.3.7"
+tempfile = "3.1.0"
 spdx = "0.3.4"
 
 [dev-dependencies]

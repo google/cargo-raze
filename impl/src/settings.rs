@@ -37,6 +37,16 @@ pub struct RazeSettings {
   pub workspace_path: String,
 
   /**
+   * If true, will force the `workspace_path` setting will be treated as a Bazel label.
+   *
+   * When false, the `workspace_path` setting describes a path relative to the `Cargo.toml` file
+   * where raze will output content. Setting this field to true will instead interpret `workspace_path`
+   * to be a Bazel label and raze will generate content in the described Bazel package location.
+   */
+  #[serde(default = "incompatible_relative_workspace_path")]
+  pub incompatible_relative_workspace_path: bool,
+
+  /**
    * The platform target to generate BUILD rules for.
    *
    * This comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
@@ -255,6 +265,7 @@ pub mod testing {
       genmode: GenMode::Remote,
       output_buildfile_suffix: "BUILD".to_owned(),
       default_gen_buildrs: default_raze_settings_field_gen_buildrs(),
+      incompatible_relative_workspace_path: incompatible_relative_workspace_path(),
     }
   }
 }
@@ -285,4 +296,8 @@ fn default_crate_settings_field_gen_buildrs() -> Option<bool> {
 
 fn default_crate_settings_field_data_attr() -> Option<String> {
   None
+}
+
+fn incompatible_relative_workspace_path() -> bool {
+  false
 }

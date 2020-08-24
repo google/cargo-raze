@@ -23,6 +23,44 @@ use crate::{
   util::RazeError,
 };
 
+use std::{env, path::PathBuf};
+
+/** Returns whether or not the given path is a Bazel workspace root */
+pub fn is_workspace_root(dir: &PathBuf) -> bool {
+  let workspace_files = [dir.join("WORKSPACE.bazel"), dir.join("WORKSPACE")];
+
+  for workspace in workspace_files.iter() {
+    if workspace.exists() {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/** Returns a path to a Bazel workspace root based on the current working
+ * directory, otherwise None if not workspace is detected.
+ */
+pub fn find_workspace_root() -> Option<PathBuf> {
+  let mut dir = match env::current_dir() {
+    Ok(result) => Some(result),
+    Err(_) => None,
+  };
+
+  while let Some(current_dir) = dir {
+    if is_workspace_root(&current_dir) {
+      return Some(current_dir);
+    }
+
+    dir = match current_dir.parent() {
+      Some(parent) => Some(parent.to_path_buf()),
+      None => None,
+    };
+  }
+
+  return None;
+}
+
 #[derive(Default)]
 pub struct BazelRenderer {
   internal_renderer: Tera,
@@ -293,6 +331,10 @@ mod tests {
   };
 
   use super::*;
+
+  use std::fs::File;
+
+  use tempfile::TempDir;
 
   fn dummy_render_details(buildfile_suffix: &str) -> RenderDetails {
     RenderDetails {
@@ -573,5 +615,36 @@ mod tests {
       ),
     )
     .unwrap();
+  }
+
+  #[test]
+  fn detecting_workspace_root() {
+    // Cache the cwd
+    let cwd = env::current_dir().unwrap();
+
+    // Run test
+    let result = std::panic::catch_unwind(|| {
+      // Generate a temporary directory to do testing in
+      let bazel_root = TempDir::new().unwrap();
+      assert!(env::set_current_dir(&bazel_root).is_ok());
+
+      // Starting within the temp directory, we'll find that there are no WORKSPACE.bazel files
+      // and thus return None to indicate a Bazel workspace root could not be found.
+      assert_eq!(find_workspace_root(), None);
+
+      // After creating a WORKSPACE.bazel file in that directory, we expect to find to be
+      // returned a path to the temporary directory
+      File::create(bazel_root.path().join("WORKSPACE.bazel")).unwrap();
+      assert_eq!(
+        find_workspace_root().unwrap().canonicalize().unwrap(),
+        bazel_root.into_path().canonicalize().unwrap()
+      );
+    });
+
+    // Restore cwd
+    assert!(env::set_current_dir(&cwd).is_ok());
+
+    // Ensure test results were successful
+    assert!(result.is_ok());
   }
 }

@@ -64,8 +64,13 @@ done
 # Run Cargo Vendor over the appropriate projects
 for ex in $(find $EXAMPLES_DIR/vendored -maxdepth 1 -type d | tail -n+2); do
     echo "Running Cargo Vendor for $(basename "$ex")"
-    cd "$ex/cargo"
-    cargo vendor -q --versioned-dirs
+    if [ "$(basename $ex)" = "regression_test" ]; then
+        cd "$ex/cargo"
+        cargo vendor -q --versioned-dirs
+    else
+        cd "$ex"
+        cargo vendor -q --versioned-dirs "$ex/cargo/vendor"
+    fi
 done
 
 # Ensure Cargo Raze build is up-to-date
@@ -75,7 +80,11 @@ cargo build --quiet
 RAZE="$IMPL_DIR/target/debug/cargo-raze raze"
 for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
     echo "Running Cargo Raze for $(basename $ex)"
-    cd "$ex/cargo"
+    if [ "$(basename $ex)" = "regression_test" ]; then
+        cd "$ex/cargo"
+    else
+        cd "$ex"
+    fi
     eval "$RAZE"
 done
 
