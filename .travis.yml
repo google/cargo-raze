@@ -41,4 +41,4 @@ script:
   - cd ../
   - ./smoke-test.sh
   # Check that /examples has no changes
-  - if [ -n "$(git status --porcelain)" ] ; then echo "/examples is out of date. Please run `./smoke-test.sh` locally and commit the changes" >&2 ; exit 1 ; fi
+  - if [ -n "$(git status --porcelain)" ] ; then echo '/examples is out of date. Please run `./smoke-test.sh` locally and commit the changes' >&2 ; exit 1 ; fi
