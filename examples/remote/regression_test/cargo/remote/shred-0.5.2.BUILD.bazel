@@ -1,0 +1,63 @@
+"""
+@generated
+cargo-raze crate build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+package(default_visibility = [
+  # Public for visibility by "@raze__crate__version//" targets.
+  #
+  # Prefer access through "//remote/regression_test/cargo", which limits external
+  # visibility to explicit Cargo.toml dependencies.
+  "//visibility:public",
+])
+
+licenses([
+  "notice", # MIT from expression "MIT OR Apache-2.0"
+])
+
+load(
+    "@io_bazel_rules_rust//rust:rust.bzl",
+    "rust_library",
+    "rust_binary",
+    "rust_test",
+)
+
+
+# Unsupported target "basic_dispatch" with type "example" omitted
+# Unsupported target "bench" with type "bench" omitted
+# Unsupported target "custom_bundle" with type "example" omitted
+# Unsupported target "derive_bundle" with type "example" omitted
+# Unsupported target "dispatch" with type "test" omitted
+# Unsupported target "fetch_opt" with type "example" omitted
+# Unsupported target "generic_derive" with type "example" omitted
+# Unsupported target "par_seq" with type "example" omitted
+# Unsupported target "seq_dispatch" with type "example" omitted
+
+rust_library(
+    name = "shred",
+    crate_type = "lib",
+    deps = [
+        "@regression_test__arrayvec__0_3_25//:arrayvec",
+        "@regression_test__fnv__1_0_6//:fnv",
+        "@regression_test__mopa__0_2_2//:mopa",
+        "@regression_test__pulse__0_5_3//:pulse",
+        "@regression_test__rayon__0_8_2//:rayon",
+        "@regression_test__smallvec__0_4_5//:smallvec",
+    ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
+    proc_macro_deps = [
+        "@regression_test__shred_derive__0_3_0//:shred_derive",
+    ],
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    version = "0.5.2",
+    tags = ["cargo-raze"],
+    crate_features = [
+    ],
+)
+
+# Unsupported target "thread_local" with type "example" omitted

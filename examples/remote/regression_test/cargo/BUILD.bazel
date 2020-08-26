@@ -1,0 +1,31 @@
+"""
+@generated
+cargo-raze workspace build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+package(default_visibility = ["//visibility:public"])
+
+licenses([
+  "notice" # See individual crates for specific licenses
+])
+alias(
+    name = "libloading",
+    actual = "@regression_test__libloading__0_5_2//:libloading",
+    tags = ["cargo-raze"],
+)
+alias(
+    name = "regex",
+    actual = "@regression_test__regex__0_2_5//:regex",
+    tags = ["cargo-raze"],
+)
+alias(
+    name = "security_framework_sys",
+    actual = "@regression_test__security_framework_sys__0_2_3//:security_framework_sys",
+    tags = ["cargo-raze"],
+)
+alias(
+    name = "specs",
+    actual = "@regression_test__specs__0_10_0//:specs",
+    tags = ["cargo-raze"],
+)

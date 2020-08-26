@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,7 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT,Apache-2.0"
+  "notice", # MIT from expression "MIT OR Apache-2.0"
 ])
 
 load(
@@ -35,10 +36,7 @@ load(
 
 rust_library(
     name = "regex",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@non_cratesio__aho_corasick__0_6_10//:aho_corasick",
         "@non_cratesio__memchr__2_2_0//:memchr",
@@ -46,10 +44,14 @@ rust_library(
         "@non_cratesio__thread_local__0_3_6//:thread_local",
         "@non_cratesio__utf8_ranges__1_0_2//:utf8_ranges",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.2.11",
+    tags = ["cargo-raze"],
     crate_features = [
         "default",
     ],

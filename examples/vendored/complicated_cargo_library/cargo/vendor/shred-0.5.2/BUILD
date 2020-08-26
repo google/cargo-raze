@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,7 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT,Apache-2.0"
+  "notice", # MIT from expression "MIT OR Apache-2.0"
 ])
 
 load(
@@ -35,23 +36,26 @@ load(
 
 rust_library(
     name = "shred",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/arrayvec-0.3.25:arrayvec",
         "//vendored/complicated_cargo_library/cargo/vendor/fnv-1.0.6:fnv",
         "//vendored/complicated_cargo_library/cargo/vendor/mopa-0.2.2:mopa",
         "//vendored/complicated_cargo_library/cargo/vendor/pulse-0.5.3:pulse",
         "//vendored/complicated_cargo_library/cargo/vendor/rayon-0.8.2:rayon",
-        "//vendored/complicated_cargo_library/cargo/vendor/shred-derive-0.3.0:shred_derive",
         "//vendored/complicated_cargo_library/cargo/vendor/smallvec-0.4.5:smallvec",
+    ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
+    proc_macro_deps = [
+        "//vendored/complicated_cargo_library/cargo/vendor/shred-derive-0.3.0:shred_derive",
     ],
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.5.2",
+    tags = ["cargo-raze"],
     crate_features = [
     ],
 )

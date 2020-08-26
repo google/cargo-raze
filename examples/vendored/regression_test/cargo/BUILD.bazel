@@ -1,0 +1,21 @@
+"""
+@generated
+cargo-raze workspace build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+package(default_visibility = ["//visibility:public"])
+
+licenses([
+  "notice" # See individual crates for specific licenses
+])
+alias(
+    name = "fern",
+    actual = "//vendored/regression_test/cargo/vendor/fern-0.3.5:fern",
+    tags = ["cargo-raze"],
+)
+alias(
+    name = "log",
+    actual = "//vendored/regression_test/cargo/vendor/log-0.4.11:log",
+    tags = ["cargo-raze"],
+)

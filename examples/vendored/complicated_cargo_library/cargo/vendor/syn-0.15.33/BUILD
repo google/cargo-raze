@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,7 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT,Apache-2.0"
+  "notice", # MIT from expression "MIT OR Apache-2.0"
 ])
 
 load(
@@ -27,19 +28,20 @@ load(
 
 rust_library(
     name = "syn",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/proc-macro2-0.4.28:proc_macro2",
         "//vendored/complicated_cargo_library/cargo/vendor/quote-0.6.12:quote",
         "//vendored/complicated_cargo_library/cargo/vendor/unicode-xid-0.1.0:unicode_xid",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.15.33",
+    tags = ["cargo-raze"],
     crate_features = [
         "clone-impls",
         "default",
@@ -49,7 +51,6 @@ rust_library(
         "parsing",
         "printing",
         "proc-macro",
-        "proc-macro2",
         "quote",
         "visit",
     ],

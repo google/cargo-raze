@@ -1,4 +1,5 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
@@ -12,7 +13,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "Apache-2.0"
+  "notice", # Apache-2.0 from expression "Apache-2.0"
 ])
 
 load(
@@ -28,18 +29,19 @@ load(
 
 rust_library(
     name = "pulse",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/atom-0.3.5:atom",
         "//vendored/complicated_cargo_library/cargo/vendor/time-0.1.42:time",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.5.3",
+    tags = ["cargo-raze"],
     crate_features = [
         "default",
     ],

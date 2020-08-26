@@ -1,0 +1,41 @@
+[package]
+name = "compile_with_bazel"
+version = "0.1.0"
+
+[dependencies]
+conduit-mime-types = "0.7.3"
+regex = "0.2.5"
+security-framework-sys = "0.2.2"
+specs = "0.10.0"
+
+[[bin]]
+name = "complicated_cargo_library"
+path = "src/main.rs"
+
+[raze]
+workspace_path = "//vendored/complicated_cargo_library/cargo"
+target = "x86_64-unknown-linux-gnu"
+incompatible_relative_workspace_path = true
+
+[raze.crates.proc-macro2.'0.4.28']
+additional_flags = [
+    "--cfg=use_proc_macro",
+]
+
+[raze.crates.regex.'1.1.6']
+additional_deps = [
+  # Add an unused dep
+  "//complicated_cargo_library/cargo/vendor:specs"
+]
+additional_flags = [
+  # Add an unused flag
+  "--cfg=not_used"
+]
+# Add an unused environment variable
+additional_env = { NOT_USED_KEY = "not_used_value" }
+
+[raze.crates.clang-sys.'0.21.1']
+gen_buildrs = true
+
+[raze.crates.conduit-mime-types.'0.7.3']
+data_attr = "glob([\"data/**\"])"
