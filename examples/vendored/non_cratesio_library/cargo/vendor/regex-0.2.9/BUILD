@@ -4,26 +4,28 @@ cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
-package(default_visibility = [
-  # Public for visibility by "@raze__crate__version//" targets.
-  #
-  # Prefer access through "//vendored/non_cratesio_library/cargo", which limits external
-  # visibility to explicit Cargo.toml dependencies.
-  "//visibility:public",
-])
 
-licenses([
-  "notice", # MIT from expression "MIT OR Apache-2.0"
-])
-
+# buildifier: disable=load
 load(
     "@io_bazel_rules_rust//rust:rust.bzl",
-    "rust_library",
     "rust_binary",
+    "rust_library",
     "rust_test",
 )
 
+package(default_visibility = [
+    # Public for visibility by "@raze__crate__version//" targets.
+    #
+    # Prefer access through "//vendored/non_cratesio_library/cargo", which limits external
+    # visibility to explicit Cargo.toml dependencies.
+    "//visibility:public",
+])
 
+licenses([
+    "notice",  # MIT from expression "MIT OR Apache-2.0"
+])
+
+# Generated targets
 # Unsupported target "backtrack" with type "test" omitted
 # Unsupported target "backtrack-bytes" with type "test" omitted
 # Unsupported target "backtrack-utf8bytes" with type "test" omitted
@@ -34,6 +36,7 @@ load(
 # Unsupported target "nfa-bytes" with type "test" omitted
 # Unsupported target "nfa-utf8bytes" with type "test" omitted
 
+# buildifier: leave-alone
 rust_library(
     name = "regex",
     crate_type = "lib",
@@ -56,7 +59,6 @@ rust_library(
         "default",
     ],
 )
-
 # Unsupported target "shootout-regex-dna" with type "example" omitted
 # Unsupported target "shootout-regex-dna-bytes" with type "example" omitted
 # Unsupported target "shootout-regex-dna-cheat" with type "example" omitted

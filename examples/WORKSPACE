@@ -44,4 +44,3 @@ non_cratesio_fetch_remote_crates()
 load("//remote/regression_test/cargo:crates.bzl", "regression_test_fetch_remote_crates")
 
 regression_test_fetch_remote_crates()
-

@@ -4,27 +4,30 @@ cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
-package(default_visibility = [
-  # Public for visibility by "@raze__crate__version//" targets.
-  #
-  # Prefer access through "//remote/non_cratesio/cargo", which limits external
-  # visibility to explicit Cargo.toml dependencies.
-  "//visibility:public",
-])
 
-licenses([
-  "notice", # BSD-3-Clause from expression "BSD-3-Clause"
-])
-
+# buildifier: disable=load
 load(
     "@io_bazel_rules_rust//rust:rust.bzl",
-    "rust_library",
     "rust_binary",
+    "rust_library",
     "rust_test",
 )
 
+package(default_visibility = [
+    # Public for visibility by "@raze__crate__version//" targets.
+    #
+    # Prefer access through "//remote/non_cratesio/cargo", which limits external
+    # visibility to explicit Cargo.toml dependencies.
+    "//visibility:public",
+])
 
+licenses([
+    "notice",  # BSD-3-Clause from expression "BSD-3-Clause"
+])
 
+# Generated targets
+
+# buildifier: leave-alone
 rust_library(
     name = "fuchsia_zircon_sys",
     crate_type = "lib",
@@ -41,5 +44,4 @@ rust_library(
     crate_features = [
     ],
 )
-
 # Unsupported target "hello" with type "example" omitted

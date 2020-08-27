@@ -4,26 +4,28 @@ cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
-package(default_visibility = [
-  # Public for visibility by "@raze__crate__version//" targets.
-  #
-  # Prefer access through "//vendored/non_cratesio_library/cargo", which limits external
-  # visibility to explicit Cargo.toml dependencies.
-  "//visibility:public",
-])
 
-licenses([
-  "notice", # MIT from expression "MIT OR Apache-2.0"
-])
-
+# buildifier: disable=load
 load(
     "@io_bazel_rules_rust//rust:rust.bzl",
-    "rust_library",
     "rust_binary",
+    "rust_library",
     "rust_test",
 )
 
+package(default_visibility = [
+    # Public for visibility by "@raze__crate__version//" targets.
+    #
+    # Prefer access through "//vendored/non_cratesio_library/cargo", which limits external
+    # visibility to explicit Cargo.toml dependencies.
+    "//visibility:public",
+])
 
+licenses([
+    "notice",  # MIT from expression "MIT OR Apache-2.0"
+])
+
+# Generated targets
 # Unsupported target "all" with type "test" omitted
 # Unsupported target "async_await_tests" with type "test" omitted
 # Unsupported target "buffer_unordered" with type "test" omitted
@@ -32,6 +34,7 @@ load(
 # Unsupported target "fuse" with type "test" omitted
 # Unsupported target "future_flatten_stream" with type "test" omitted
 
+# buildifier: leave-alone
 rust_library(
     name = "futures",
     crate_type = "lib",
@@ -57,7 +60,6 @@ rust_library(
         "std",
     ],
 )
-
 # Unsupported target "futures_ordered" with type "test" omitted
 # Unsupported target "futures_unordered" with type "test" omitted
 # Unsupported target "inspect" with type "test" omitted
