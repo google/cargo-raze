@@ -16,7 +16,7 @@ def _new_git_repository(name, **kwargs):
         new_git_repository(name=name, **kwargs)
 
 def non_cratesio_fetch_remote_crates():
-
+    
     _new_http_archive(
         name = "non_cratesio__aho_corasick__0_6_10",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/aho-corasick/aho-corasick-0.6.10.crate",
@@ -25,7 +25,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "aho-corasick-0.6.10",
         build_file = Label("//remote/non_cratesio/cargo/remote:aho-corasick-0.6.10.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__atty__0_2_11",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/atty/atty-0.2.11.crate",
@@ -34,7 +34,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "atty-0.2.11",
         build_file = Label("//remote/non_cratesio/cargo/remote:atty-0.2.11.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__bitflags__1_0_4",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/bitflags/bitflags-1.0.4.crate",
@@ -43,7 +43,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "bitflags-1.0.4",
         build_file = Label("//remote/non_cratesio/cargo/remote:bitflags-1.0.4.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__cfg_if__0_1_7",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/cfg-if/cfg-if-0.1.7.crate",
@@ -52,7 +52,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "cfg-if-0.1.7",
         build_file = Label("//remote/non_cratesio/cargo/remote:cfg-if-0.1.7.BUILD"),
     )
-
+    
     _new_git_repository(
         name = "non_cratesio__env_logger__0_5_5",
         remote = "https://github.com/sebasmagri/env_logger.git",
@@ -60,7 +60,7 @@ def non_cratesio_fetch_remote_crates():
         build_file = Label("//remote/non_cratesio/cargo/remote:env_logger-0.5.5.BUILD"),
         init_submodules = True,
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__fuchsia_zircon__0_3_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/fuchsia-zircon/fuchsia-zircon-0.3.3.crate",
@@ -69,7 +69,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "fuchsia-zircon-0.3.3",
         build_file = Label("//remote/non_cratesio/cargo/remote:fuchsia-zircon-0.3.3.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__fuchsia_zircon_sys__0_3_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/fuchsia-zircon-sys/fuchsia-zircon-sys-0.3.3.crate",
@@ -78,7 +78,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "fuchsia-zircon-sys-0.3.3",
         build_file = Label("//remote/non_cratesio/cargo/remote:fuchsia-zircon-sys-0.3.3.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__humantime__1_2_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/humantime/humantime-1.2.0.crate",
@@ -87,7 +87,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "humantime-1.2.0",
         build_file = Label("//remote/non_cratesio/cargo/remote:humantime-1.2.0.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__lazy_static__1_3_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/lazy_static/lazy_static-1.3.0.crate",
@@ -96,7 +96,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "lazy_static-1.3.0",
         build_file = Label("//remote/non_cratesio/cargo/remote:lazy_static-1.3.0.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__libc__0_2_53",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/libc/libc-0.2.53.crate",
@@ -105,7 +105,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "libc-0.2.53",
         build_file = Label("//remote/non_cratesio/cargo/remote:libc-0.2.53.BUILD"),
     )
-
+    
     _new_git_repository(
         name = "non_cratesio__log__0_4_0",
         remote = "https://github.com/rust-lang-nursery/log.git",
@@ -113,7 +113,7 @@ def non_cratesio_fetch_remote_crates():
         build_file = Label("//remote/non_cratesio/cargo/remote:log-0.4.0.BUILD"),
         init_submodules = True,
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__log__0_4_6",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/log/log-0.4.6.crate",
@@ -122,7 +122,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "log-0.4.6",
         build_file = Label("//remote/non_cratesio/cargo/remote:log-0.4.6.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__memchr__2_2_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/memchr/memchr-2.2.0.crate",
@@ -131,7 +131,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "memchr-2.2.0",
         build_file = Label("//remote/non_cratesio/cargo/remote:memchr-2.2.0.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__numtoa__0_1_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/numtoa/numtoa-0.1.0.crate",
@@ -140,7 +140,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "numtoa-0.1.0",
         build_file = Label("//remote/non_cratesio/cargo/remote:numtoa-0.1.0.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__quick_error__1_2_2",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/quick-error/quick-error-1.2.2.crate",
@@ -149,7 +149,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "quick-error-1.2.2",
         build_file = Label("//remote/non_cratesio/cargo/remote:quick-error-1.2.2.BUILD"),
     )
-
+    
     _new_git_repository(
         name = "non_cratesio__rand__0_4_1",
         remote = "https://github.com/rust-random/rand.git",
@@ -157,7 +157,7 @@ def non_cratesio_fetch_remote_crates():
         build_file = Label("//remote/non_cratesio/cargo/remote:rand-0.4.1.BUILD"),
         init_submodules = True,
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__redox_syscall__0_1_54",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/redox_syscall/redox_syscall-0.1.54.crate",
@@ -166,7 +166,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "redox_syscall-0.1.54",
         build_file = Label("//remote/non_cratesio/cargo/remote:redox_syscall-0.1.54.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__redox_termios__0_1_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/redox_termios/redox_termios-0.1.1.crate",
@@ -175,7 +175,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "redox_termios-0.1.1",
         build_file = Label("//remote/non_cratesio/cargo/remote:redox_termios-0.1.1.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__regex__0_2_11",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/regex/regex-0.2.11.crate",
@@ -184,7 +184,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "regex-0.2.11",
         build_file = Label("//remote/non_cratesio/cargo/remote:regex-0.2.11.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__regex_syntax__0_5_6",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/regex-syntax/regex-syntax-0.5.6.crate",
@@ -193,7 +193,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "regex-syntax-0.5.6",
         build_file = Label("//remote/non_cratesio/cargo/remote:regex-syntax-0.5.6.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__termcolor__0_3_6",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/termcolor/termcolor-0.3.6.crate",
@@ -202,7 +202,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "termcolor-0.3.6",
         build_file = Label("//remote/non_cratesio/cargo/remote:termcolor-0.3.6.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__termion__1_5_2",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/termion/termion-1.5.2.crate",
@@ -211,7 +211,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "termion-1.5.2",
         build_file = Label("//remote/non_cratesio/cargo/remote:termion-1.5.2.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__thread_local__0_3_6",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/thread_local/thread_local-0.3.6.crate",
@@ -220,7 +220,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "thread_local-0.3.6",
         build_file = Label("//remote/non_cratesio/cargo/remote:thread_local-0.3.6.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__ucd_util__0_1_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/ucd-util/ucd-util-0.1.3.crate",
@@ -229,7 +229,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "ucd-util-0.1.3",
         build_file = Label("//remote/non_cratesio/cargo/remote:ucd-util-0.1.3.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__utf8_ranges__1_0_2",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/utf8-ranges/utf8-ranges-1.0.2.crate",
@@ -238,7 +238,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "utf8-ranges-1.0.2",
         build_file = Label("//remote/non_cratesio/cargo/remote:utf8-ranges-1.0.2.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__winapi__0_3_7",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/winapi/winapi-0.3.7.crate",
@@ -247,7 +247,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "winapi-0.3.7",
         build_file = Label("//remote/non_cratesio/cargo/remote:winapi-0.3.7.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__winapi_i686_pc_windows_gnu__0_4_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/winapi-i686-pc-windows-gnu/winapi-i686-pc-windows-gnu-0.4.0.crate",
@@ -256,7 +256,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "winapi-i686-pc-windows-gnu-0.4.0",
         build_file = Label("//remote/non_cratesio/cargo/remote:winapi-i686-pc-windows-gnu-0.4.0.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__winapi_x86_64_pc_windows_gnu__0_4_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/winapi-x86_64-pc-windows-gnu/winapi-x86_64-pc-windows-gnu-0.4.0.crate",
@@ -265,7 +265,7 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "winapi-x86_64-pc-windows-gnu-0.4.0",
         build_file = Label("//remote/non_cratesio/cargo/remote:winapi-x86_64-pc-windows-gnu-0.4.0.BUILD"),
     )
-
+    
     _new_http_archive(
         name = "non_cratesio__wincolor__0_1_6",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/wincolor/wincolor-0.1.6.crate",
@@ -274,4 +274,4 @@ def non_cratesio_fetch_remote_crates():
         strip_prefix = "wincolor-0.1.6",
         build_file = Label("//remote/non_cratesio/cargo/remote:wincolor-0.1.6.BUILD"),
     )
-
+    
