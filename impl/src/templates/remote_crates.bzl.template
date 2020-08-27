@@ -41,4 +41,4 @@ def {{workspace.gen_workspace_prefix}}_fetch_remote_crates():
 {%- else %}
     """No crates were detected in the source Cargo.toml. This is a no-op"""
     pass
-{%- endif %}
+{%- endif -%}
