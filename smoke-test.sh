@@ -61,16 +61,15 @@ rust_repositories()
 load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
 
 bazel_version(name = "bazel_version")
-
 EOF
 
 for ex in $(find $TEST_DIR/remote -maxdepth 1 -type d | tail -n+2 | sort); do
     name="$(basename "$ex")"
     cat >> "$EXAMPLES_DIR/WORKSPACE" << EOF
+
 load("//remote/${name}/cargo:crates.bzl", "${name}_fetch_remote_crates")
 
 ${name}_fetch_remote_crates()
-
 EOF
 done
 
