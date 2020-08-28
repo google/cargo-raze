@@ -283,7 +283,7 @@ fn default_raze_settings_field_genmode() -> GenMode {
 }
 
 fn default_raze_settings_field_output_buildfile_suffix() -> String {
-  "BUILD".to_owned()
+  "BUILD.bazel".to_owned()
 }
 
 fn default_raze_settings_field_gen_buildrs() -> bool {
