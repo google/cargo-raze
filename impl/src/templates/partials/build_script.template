@@ -1,8 +1,10 @@
+# buildifier: disable=load-on-top
 load(
     "@io_bazel_rules_rust//cargo:cargo_build_script.bzl",
     "cargo_build_script",
 )
 
+# buildifier: leave-alone
 cargo_build_script(
     name = "{{ crate_name_sanitized }}_build_script",
     srcs = glob(["**/*.rs"]),
@@ -12,6 +14,7 @@ cargo_build_script(
     crate_root = "build.rs",
     {%- endif %}
     edition = "{{ crate.edition }}",
+    # buildifier: leave-alone
     deps = [
       {%- for dependency in crate.build_dependencies %}
         "{{dependency.buildable_target}}",

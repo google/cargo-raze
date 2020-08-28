@@ -6,6 +6,6 @@ rust_binary(
     deps = [
         "//remote/non_cratesio/cargo:env_logger",
         "//remote/non_cratesio/cargo:log",
-        "//remote/non_cratesio/cargo:rand"
+        "//remote/non_cratesio/cargo:rand",
     ],
 )
