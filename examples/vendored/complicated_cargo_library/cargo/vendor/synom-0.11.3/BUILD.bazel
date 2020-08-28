@@ -41,7 +41,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.11.3",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

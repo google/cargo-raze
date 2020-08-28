@@ -15,17 +15,26 @@ licenses([
 alias(
     name = "env_logger",
     actual = "//vendored/non_cratesio_library/cargo/vendor/env_logger-0.5.5:env_logger",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
 )
 
 alias(
     name = "futures",
     actual = "//vendored/non_cratesio_library/cargo/vendor/futures-0.2.0:futures",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
 )
 
 alias(
     name = "log",
     actual = "//vendored/non_cratesio_library/cargo/vendor/log-0.4.0:log",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
 )

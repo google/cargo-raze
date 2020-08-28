@@ -32,7 +32,7 @@ rust_library(
     name = "wincolor",
     crate_type = "lib",
     deps = [
-        "@non_cratesio__winapi__0_3_7//:winapi",
+        "@remote_non_cratesio__winapi__0_3_7//:winapi",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -41,7 +41,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.1.6",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

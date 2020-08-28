@@ -32,7 +32,7 @@ rust_library(
     name = "num_cpus",
     crate_type = "lib",
     deps = [
-        "@complicated_cargo_library__libc__0_2_53//:libc",
+        "@remote_complicated_cargo_library__libc__0_2_53//:libc",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -41,7 +41,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "1.10.0",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

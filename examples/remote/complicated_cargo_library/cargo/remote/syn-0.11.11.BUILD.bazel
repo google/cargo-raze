@@ -32,9 +32,9 @@ rust_library(
     name = "syn",
     crate_type = "lib",
     deps = [
-        "@complicated_cargo_library__quote__0_3_15//:quote",
-        "@complicated_cargo_library__synom__0_11_3//:synom",
-        "@complicated_cargo_library__unicode_xid__0_0_4//:unicode_xid",
+        "@remote_complicated_cargo_library__quote__0_3_15//:quote",
+        "@remote_complicated_cargo_library__synom__0_11_3//:synom",
+        "@remote_complicated_cargo_library__unicode_xid__0_0_4//:unicode_xid",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -43,7 +43,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.11.11",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
         "default",
         "parsing",

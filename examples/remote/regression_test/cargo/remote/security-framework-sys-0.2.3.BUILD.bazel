@@ -33,9 +33,9 @@ rust_library(
     name = "security_framework_sys",
     crate_type = "lib",
     deps = [
-        "@regression_test__MacTypes_sys__2_1_0//:MacTypes_sys",
-        "@regression_test__core_foundation_sys__0_5_1//:core_foundation_sys",
-        "@regression_test__libc__0_2_53//:libc",
+        "@remote_regression_test__MacTypes_sys__2_1_0//:MacTypes_sys",
+        "@remote_regression_test__core_foundation_sys__0_5_1//:core_foundation_sys",
+        "@remote_regression_test__libc__0_2_53//:libc",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -44,7 +44,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.2.3",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

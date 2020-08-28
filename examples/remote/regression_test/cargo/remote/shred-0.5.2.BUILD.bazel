@@ -41,24 +41,27 @@ rust_library(
     name = "shred",
     crate_type = "lib",
     deps = [
-        "@regression_test__arrayvec__0_3_25//:arrayvec",
-        "@regression_test__fnv__1_0_6//:fnv",
-        "@regression_test__mopa__0_2_2//:mopa",
-        "@regression_test__pulse__0_5_3//:pulse",
-        "@regression_test__rayon__0_8_2//:rayon",
-        "@regression_test__smallvec__0_4_5//:smallvec",
+        "@remote_regression_test__arrayvec__0_3_25//:arrayvec",
+        "@remote_regression_test__fnv__1_0_6//:fnv",
+        "@remote_regression_test__mopa__0_2_2//:mopa",
+        "@remote_regression_test__pulse__0_5_3//:pulse",
+        "@remote_regression_test__rayon__0_8_2//:rayon",
+        "@remote_regression_test__smallvec__0_4_5//:smallvec",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
     edition = "2015",
     proc_macro_deps = [
-        "@regression_test__shred_derive__0_3_0//:shred_derive",
+        "@remote_regression_test__shred_derive__0_3_0//:shred_derive",
     ],
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.5.2",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

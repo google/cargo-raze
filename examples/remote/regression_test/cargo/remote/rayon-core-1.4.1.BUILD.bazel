@@ -35,10 +35,10 @@ rust_library(
     name = "rayon_core",
     crate_type = "lib",
     deps = [
-        "@regression_test__crossbeam_deque__0_2_0//:crossbeam_deque",
-        "@regression_test__lazy_static__1_3_0//:lazy_static",
-        "@regression_test__libc__0_2_53//:libc",
-        "@regression_test__num_cpus__1_10_0//:num_cpus",
+        "@remote_regression_test__crossbeam_deque__0_2_0//:crossbeam_deque",
+        "@remote_regression_test__lazy_static__1_3_0//:lazy_static",
+        "@remote_regression_test__libc__0_2_53//:libc",
+        "@remote_regression_test__num_cpus__1_10_0//:num_cpus",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -47,7 +47,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "1.4.1",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

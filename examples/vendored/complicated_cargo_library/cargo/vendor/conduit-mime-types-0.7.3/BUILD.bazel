@@ -42,7 +42,10 @@ rust_library(
     ],
     data = glob(["data/**"]),
     version = "0.7.3",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

@@ -32,8 +32,8 @@ rust_library(
     name = "fuchsia_zircon",
     crate_type = "lib",
     deps = [
-        "@non_cratesio__bitflags__1_0_4//:bitflags",
-        "@non_cratesio__fuchsia_zircon_sys__0_3_3//:fuchsia_zircon_sys",
+        "@remote_non_cratesio__bitflags__1_0_4//:bitflags",
+        "@remote_non_cratesio__fuchsia_zircon_sys__0_3_3//:fuchsia_zircon_sys",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -42,7 +42,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.3.3",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

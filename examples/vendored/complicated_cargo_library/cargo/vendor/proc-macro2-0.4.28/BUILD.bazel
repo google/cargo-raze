@@ -44,7 +44,10 @@ rust_library(
         "--cfg=use_proc_macro",
     ],
     version = "0.4.28",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
         "default",
         "proc-macro",

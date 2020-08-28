@@ -35,7 +35,7 @@ rust_binary(
     deps = [
         # Binaries get an implicit dependency on their crate's lib
         ":aho_corasick",
-        "@non_cratesio__memchr__2_2_0//:memchr",
+        "@remote_non_cratesio__memchr__2_2_0//:memchr",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/main.rs",
@@ -44,7 +44,10 @@ rust_binary(
         "--cap-lints=allow",
     ],
     version = "0.6.10",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )
@@ -54,7 +57,7 @@ rust_library(
     name = "aho_corasick",
     crate_type = "lib",
     deps = [
-        "@non_cratesio__memchr__2_2_0//:memchr",
+        "@remote_non_cratesio__memchr__2_2_0//:memchr",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -63,7 +66,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.6.10",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

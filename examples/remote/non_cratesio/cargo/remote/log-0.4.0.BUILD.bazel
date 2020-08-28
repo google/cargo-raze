@@ -33,7 +33,7 @@ rust_library(
     name = "log",
     crate_type = "lib",
     deps = [
-        "@non_cratesio__cfg_if__0_1_7//:cfg_if",
+        "@remote_non_cratesio__cfg_if__0_1_7//:cfg_if",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -42,7 +42,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.4.0",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

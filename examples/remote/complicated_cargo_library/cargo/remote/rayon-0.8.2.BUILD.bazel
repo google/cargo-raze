@@ -33,7 +33,7 @@ rust_library(
     name = "rayon",
     crate_type = "lib",
     deps = [
-        "@complicated_cargo_library__rayon_core__1_4_1//:rayon_core",
+        "@remote_complicated_cargo_library__rayon_core__1_4_1//:rayon_core",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -42,7 +42,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.8.2",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

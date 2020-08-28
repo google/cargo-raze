@@ -43,7 +43,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.5.2",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )
@@ -51,6 +54,9 @@ rust_library(
 # Unsupported target "windows" with type "test" omitted
 
 # Additional content from libloading_global_static.BUILD
+# buildifier: disable=load-on-top
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 cc_library(
     name = "global_static",
     srcs = ["src/os/unix/global_static.c"],

@@ -41,24 +41,27 @@ rust_library(
     name = "shred",
     crate_type = "lib",
     deps = [
-        "@complicated_cargo_library__arrayvec__0_3_25//:arrayvec",
-        "@complicated_cargo_library__fnv__1_0_6//:fnv",
-        "@complicated_cargo_library__mopa__0_2_2//:mopa",
-        "@complicated_cargo_library__pulse__0_5_3//:pulse",
-        "@complicated_cargo_library__rayon__0_8_2//:rayon",
-        "@complicated_cargo_library__smallvec__0_4_5//:smallvec",
+        "@remote_complicated_cargo_library__arrayvec__0_3_25//:arrayvec",
+        "@remote_complicated_cargo_library__fnv__1_0_6//:fnv",
+        "@remote_complicated_cargo_library__mopa__0_2_2//:mopa",
+        "@remote_complicated_cargo_library__pulse__0_5_3//:pulse",
+        "@remote_complicated_cargo_library__rayon__0_8_2//:rayon",
+        "@remote_complicated_cargo_library__smallvec__0_4_5//:smallvec",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
     edition = "2015",
     proc_macro_deps = [
-        "@complicated_cargo_library__shred_derive__0_3_0//:shred_derive",
+        "@remote_complicated_cargo_library__shred_derive__0_3_0//:shred_derive",
     ],
     rustc_flags = [
         "--cap-lints=allow",
     ],
     version = "0.5.2",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

@@ -47,8 +47,8 @@ rust_library(
     name = "termion",
     crate_type = "lib",
     deps = [
-        "@non_cratesio__libc__0_2_53//:libc",
-        "@non_cratesio__numtoa__0_1_0//:numtoa",
+        "@remote_non_cratesio__libc__0_2_53//:libc",
+        "@remote_non_cratesio__numtoa__0_1_0//:numtoa",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -57,7 +57,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "1.5.2",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

@@ -33,7 +33,7 @@ rust_library(
     name = "regex_syntax",
     crate_type = "lib",
     deps = [
-        "@non_cratesio__ucd_util__0_1_3//:ucd_util",
+        "@remote_non_cratesio__ucd_util__0_1_3//:ucd_util",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -42,7 +42,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.5.6",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

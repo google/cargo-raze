@@ -34,8 +34,8 @@ rust_library(
     name = "pulse",
     crate_type = "lib",
     deps = [
-        "@complicated_cargo_library__atom__0_3_5//:atom",
-        "@complicated_cargo_library__time__0_1_42//:time",
+        "@remote_complicated_cargo_library__atom__0_3_5//:atom",
+        "@remote_complicated_cargo_library__time__0_1_42//:time",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -44,7 +44,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.5.3",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
         "default",
     ],

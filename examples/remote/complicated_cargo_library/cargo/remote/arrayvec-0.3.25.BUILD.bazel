@@ -32,8 +32,8 @@ rust_library(
     name = "arrayvec",
     crate_type = "lib",
     deps = [
-        "@complicated_cargo_library__nodrop__0_1_13//:nodrop",
-        "@complicated_cargo_library__odds__0_2_26//:odds",
+        "@remote_complicated_cargo_library__nodrop__0_1_13//:nodrop",
+        "@remote_complicated_cargo_library__odds__0_2_26//:odds",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -42,7 +42,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.3.25",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
         "default",
         "std",

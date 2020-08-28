@@ -37,11 +37,11 @@ rust_library(
     name = "env_logger",
     crate_type = "lib",
     deps = [
-        "@non_cratesio__atty__0_2_11//:atty",
-        "@non_cratesio__humantime__1_2_0//:humantime",
-        "@non_cratesio__log__0_4_6//:log",
-        "@non_cratesio__regex__0_2_11//:regex",
-        "@non_cratesio__termcolor__0_3_6//:termcolor",
+        "@remote_non_cratesio__atty__0_2_11//:atty",
+        "@remote_non_cratesio__humantime__1_2_0//:humantime",
+        "@remote_non_cratesio__log__0_4_6//:log",
+        "@remote_non_cratesio__regex__0_2_11//:regex",
+        "@remote_non_cratesio__termcolor__0_3_6//:termcolor",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -50,7 +50,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.5.5",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
         "default",
         "regex",
