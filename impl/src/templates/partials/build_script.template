@@ -41,7 +41,10 @@ cargo_build_script(
         {%- endfor %}
     },
     data = glob(["**"]),
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     version = "{{ crate.pkg_version }}",
     visibility = ["//visibility:private"],
 )
