@@ -65,11 +65,12 @@ EOF
 
 for ex in $(find $TEST_DIR/remote -maxdepth 1 -type d | tail -n+2 | sort); do
     name="$(basename "$ex")"
+    gen_mode="$(basename "$(dirname "$ex")")"
     cat >> "$EXAMPLES_DIR/WORKSPACE" << EOF
 
-load("//remote/${name}/cargo:crates.bzl", "${name}_fetch_remote_crates")
+load("//remote/${name}/cargo:crates.bzl", "${gen_mode}_${name}_fetch_remote_crates")
 
-${name}_fetch_remote_crates()
+${gen_mode}_${name}_fetch_remote_crates()
 EOF
 done
 
