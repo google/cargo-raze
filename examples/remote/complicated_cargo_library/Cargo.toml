@@ -16,10 +16,8 @@ security-framework-sys = "0.2.2"
 
 [raze]
 workspace_path = "//remote/complicated_cargo_library/cargo"
-target = "x86_64-unknown-linux-gnu"
 gen_workspace_prefix = "remote_complicated_cargo_library"
 genmode = "Remote"
-output_buildfile_suffix = "BUILD.bazel"
 incompatible_relative_workspace_path = true
 
 [raze.crates.proc-macro2.'0.4.28']
