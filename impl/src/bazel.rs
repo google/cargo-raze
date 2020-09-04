@@ -23,7 +23,7 @@ use crate::{
   util::RazeError,
 };
 
-use std::{env, path::PathBuf};
+use std::{env, error::Error, path::PathBuf};
 
 /** Returns whether or not the given path is a Bazel workspace root */
 pub fn is_workspace_root(dir: &PathBuf) -> bool {
@@ -198,6 +198,18 @@ fn include_additional_build_file(
   }
 }
 
+macro_rules! unwind_tera_error {
+  ($err:ident) => {{
+    let mut messages = vec![$err.to_string()];
+    let mut cause = $err.source();
+    while let Some(e) = cause {
+      messages.push(e.to_string());
+      cause = e.source();
+    }
+    messages.join("\n└─")
+  }};
+}
+
 impl BuildRenderer for BazelRenderer {
   fn render_planned_build(
     &mut self,
@@ -222,7 +234,7 @@ impl BuildRenderer for BazelRenderer {
           .render_crate(&workspace_context, &package)
           .map_err(|e| RazeError::Rendering {
             crate_name_opt: None,
-            message: e.to_string(),
+            message: unwind_tera_error!(e),
           })?;
 
       let final_crate_build_file =
@@ -239,7 +251,7 @@ impl BuildRenderer for BazelRenderer {
       .render_aliases(&workspace_context, &crate_contexts)
       .map_err(|e| RazeError::Rendering {
         crate_name_opt: None,
-        message: e.to_string(),
+        message: unwind_tera_error!(e),
       })?;
 
     file_outputs.push(FileOutputs {
@@ -277,7 +289,7 @@ impl BuildRenderer for BazelRenderer {
         .render_remote_crate(&workspace_context, &package)
         .map_err(|e| RazeError::Rendering {
           crate_name_opt: Some(package.pkg_name.to_owned()),
-          message: e.to_string(),
+          message: unwind_tera_error!(e),
         })?;
 
       let final_crate_build_file =
@@ -294,7 +306,7 @@ impl BuildRenderer for BazelRenderer {
       .render_remote_aliases(&workspace_context, &crate_contexts)
       .map_err(|e| RazeError::Rendering {
         crate_name_opt: None,
-        message: e.to_string(),
+        message: unwind_tera_error!(e),
       })?;
 
     file_outputs.push(FileOutputs {
@@ -307,7 +319,7 @@ impl BuildRenderer for BazelRenderer {
       .render_bzl_fetch(&workspace_context, &crate_contexts)
       .map_err(|e| RazeError::Rendering {
         crate_name_opt: None,
-        message: e.to_string(),
+        message: unwind_tera_error!(e),
       })?;
 
     file_outputs.push(FileOutputs {
