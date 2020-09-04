@@ -37,7 +37,16 @@ rust_library(
     crate_type = "lib",
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/libc-0.2.53:libc",
-    ],
+    ] + selects.with_or({
+        # cfg(windows)
+        (
+            "@io_bazel_rules_rust//rust/platform:i686-pc-windows-gnu",
+            "@io_bazel_rules_rust//rust/platform:x86_64-pc-windows-gnu",
+        ): [
+            "//vendored/complicated_cargo_library/cargo/vendor/winapi-0.3.7:winapi",
+        ],
+        "//conditions:default": [],
+    }),
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
     edition = "2015",
