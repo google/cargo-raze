@@ -3,7 +3,10 @@
 alias(
     name = "{{ crate_name_sanitized }}",
     actual = ":{{ target_name_sanitized }}",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
 )
 
 {% endif -%}

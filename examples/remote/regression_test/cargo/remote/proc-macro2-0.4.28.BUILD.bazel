@@ -34,7 +34,7 @@ rust_library(
     name = "proc_macro2",
     crate_type = "lib",
     deps = [
-        "@regression_test__unicode_xid__0_1_0//:unicode_xid",
+        "@remote_regression_test__unicode_xid__0_1_0//:unicode_xid",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -44,7 +44,10 @@ rust_library(
         "--cfg=use_proc_macro",
     ],
     version = "0.4.28",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
         "default",
         "proc-macro",

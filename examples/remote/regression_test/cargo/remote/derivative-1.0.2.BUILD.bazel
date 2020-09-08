@@ -33,9 +33,9 @@ rust_library(
     name = "derivative",
     crate_type = "proc-macro",
     deps = [
-        "@regression_test__proc_macro2__0_4_28//:proc_macro2",
-        "@regression_test__quote__0_6_12//:quote",
-        "@regression_test__syn__0_15_33//:syn",
+        "@remote_regression_test__proc_macro2__0_4_28//:proc_macro2",
+        "@remote_regression_test__quote__0_6_12//:quote",
+        "@remote_regression_test__syn__0_15_33//:syn",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -44,7 +44,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "1.0.2",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

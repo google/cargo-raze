@@ -33,8 +33,8 @@ rust_library(
     name = "hibitset",
     crate_type = "lib",
     deps = [
-        "@complicated_cargo_library__atom__0_3_5//:atom",
-        "@complicated_cargo_library__rayon__0_8_2//:rayon",
+        "@remote_complicated_cargo_library__atom__0_3_5//:atom",
+        "@remote_complicated_cargo_library__rayon__0_8_2//:rayon",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -43,7 +43,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.3.2",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
         "default",
         "parallel",

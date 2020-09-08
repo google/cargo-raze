@@ -33,9 +33,9 @@ rust_library(
     name = "syn",
     crate_type = "lib",
     deps = [
-        "@complicated_cargo_library__proc_macro2__0_4_28//:proc_macro2",
-        "@complicated_cargo_library__quote__0_6_12//:quote",
-        "@complicated_cargo_library__unicode_xid__0_1_0//:unicode_xid",
+        "@remote_complicated_cargo_library__proc_macro2__0_4_28//:proc_macro2",
+        "@remote_complicated_cargo_library__quote__0_6_12//:quote",
+        "@remote_complicated_cargo_library__unicode_xid__0_1_0//:unicode_xid",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -44,7 +44,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.15.33",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
         "clone-impls",
         "default",

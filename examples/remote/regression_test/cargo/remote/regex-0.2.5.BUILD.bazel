@@ -40,12 +40,12 @@ rust_library(
     name = "regex",
     crate_type = "lib",
     deps = [
-        "@regression_test__aho_corasick__0_6_10//:aho_corasick",
-        "@regression_test__memchr__2_2_0//:memchr",
-        "@regression_test__regex_syntax__0_4_2//:regex_syntax",
-        "@regression_test__thread_local__0_3_6//:thread_local",
-        "@regression_test__utf8_ranges__1_0_2//:utf8_ranges",
-        "@complicated_cargo_library__specs__0_10_0//:specs",
+        "@remote_regression_test__aho_corasick__0_6_10//:aho_corasick",
+        "@remote_regression_test__memchr__2_2_0//:memchr",
+        "@remote_regression_test__regex_syntax__0_4_2//:regex_syntax",
+        "@remote_regression_test__thread_local__0_3_6//:thread_local",
+        "@remote_regression_test__utf8_ranges__1_0_2//:utf8_ranges",
+        "@remote_complicated_cargo_library__specs__0_10_0//:specs",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -58,7 +58,10 @@ rust_library(
         "NOT_USED_KEY": "not_used_value",
     },
     version = "0.2.5",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

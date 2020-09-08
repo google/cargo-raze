@@ -32,7 +32,7 @@ rust_library(
     name = "quote",
     crate_type = "lib",
     deps = [
-        "@complicated_cargo_library__proc_macro2__0_4_28//:proc_macro2",
+        "@remote_complicated_cargo_library__proc_macro2__0_4_28//:proc_macro2",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -41,7 +41,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.6.12",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
         "default",
         "proc-macro",

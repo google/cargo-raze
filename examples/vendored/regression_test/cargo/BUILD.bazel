@@ -15,11 +15,17 @@ licenses([
 alias(
     name = "fern",
     actual = "//vendored/regression_test/cargo/vendor/fern-0.3.5:fern",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
 )
 
 alias(
     name = "log",
     actual = "//vendored/regression_test/cargo/vendor/log-0.4.11:log",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
 )

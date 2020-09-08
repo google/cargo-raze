@@ -33,14 +33,14 @@ load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
 
 bazel_version(name = "bazel_version")
 
-load("//remote/complicated_cargo_library/cargo:crates.bzl", "complicated_cargo_library_fetch_remote_crates")
+load("//remote/complicated_cargo_library/cargo:crates.bzl", "remote_complicated_cargo_library_fetch_remote_crates")
 
-complicated_cargo_library_fetch_remote_crates()
+remote_complicated_cargo_library_fetch_remote_crates()
 
-load("//remote/non_cratesio/cargo:crates.bzl", "non_cratesio_fetch_remote_crates")
+load("//remote/non_cratesio/cargo:crates.bzl", "remote_non_cratesio_fetch_remote_crates")
 
-non_cratesio_fetch_remote_crates()
+remote_non_cratesio_fetch_remote_crates()
 
-load("//remote/regression_test/cargo:crates.bzl", "regression_test_fetch_remote_crates")
+load("//remote/regression_test/cargo:crates.bzl", "remote_regression_test_fetch_remote_crates")
 
-regression_test_fetch_remote_crates()
+remote_regression_test_fetch_remote_crates()

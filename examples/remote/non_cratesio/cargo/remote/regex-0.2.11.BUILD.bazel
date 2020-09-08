@@ -41,11 +41,11 @@ rust_library(
     name = "regex",
     crate_type = "lib",
     deps = [
-        "@non_cratesio__aho_corasick__0_6_10//:aho_corasick",
-        "@non_cratesio__memchr__2_2_0//:memchr",
-        "@non_cratesio__regex_syntax__0_5_6//:regex_syntax",
-        "@non_cratesio__thread_local__0_3_6//:thread_local",
-        "@non_cratesio__utf8_ranges__1_0_2//:utf8_ranges",
+        "@remote_non_cratesio__aho_corasick__0_6_10//:aho_corasick",
+        "@remote_non_cratesio__memchr__2_2_0//:memchr",
+        "@remote_non_cratesio__regex_syntax__0_5_6//:regex_syntax",
+        "@remote_non_cratesio__thread_local__0_3_6//:thread_local",
+        "@remote_non_cratesio__utf8_ranges__1_0_2//:utf8_ranges",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -54,7 +54,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.2.11",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
         "default",
     ],

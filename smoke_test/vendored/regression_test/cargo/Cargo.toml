@@ -14,6 +14,7 @@ path = "fake_lib.rs"
 workspace_path = "//vendored/regression_test/cargo"
 target = "x86_64-unknown-linux-gnu"
 output_buildfile_suffix = "BUILD.bazel"
+gen_workspace_prefix = "vendored_regression_test_library"
 
 [raze.crates.log.'0.4.11']
 additional_flags = [

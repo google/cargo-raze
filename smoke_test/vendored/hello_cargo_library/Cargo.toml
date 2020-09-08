@@ -16,3 +16,4 @@ workspace_path = "//vendored/hello_cargo_library/cargo"
 target = "x86_64-unknown-linux-gnu"
 output_buildfile_suffix = "BUILD.bazel"
 incompatible_relative_workspace_path = true
+gen_workspace_prefix = "vendored_hello_cargo_library"

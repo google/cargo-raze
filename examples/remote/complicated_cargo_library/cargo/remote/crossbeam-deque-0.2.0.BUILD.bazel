@@ -32,8 +32,8 @@ rust_library(
     name = "crossbeam_deque",
     crate_type = "lib",
     deps = [
-        "@complicated_cargo_library__crossbeam_epoch__0_3_1//:crossbeam_epoch",
-        "@complicated_cargo_library__crossbeam_utils__0_2_2//:crossbeam_utils",
+        "@remote_complicated_cargo_library__crossbeam_epoch__0_3_1//:crossbeam_epoch",
+        "@remote_complicated_cargo_library__crossbeam_utils__0_2_2//:crossbeam_utils",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -42,7 +42,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.2.0",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

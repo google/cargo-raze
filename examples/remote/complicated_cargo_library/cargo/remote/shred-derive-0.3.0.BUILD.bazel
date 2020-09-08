@@ -32,8 +32,8 @@ rust_library(
     name = "shred_derive",
     crate_type = "proc-macro",
     deps = [
-        "@complicated_cargo_library__quote__0_3_15//:quote",
-        "@complicated_cargo_library__syn__0_11_11//:syn",
+        "@remote_complicated_cargo_library__quote__0_3_15//:quote",
+        "@remote_complicated_cargo_library__syn__0_11_11//:syn",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -42,7 +42,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.3.0",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

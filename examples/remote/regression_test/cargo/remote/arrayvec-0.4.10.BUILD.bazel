@@ -33,7 +33,7 @@ rust_library(
     name = "arrayvec",
     crate_type = "lib",
     deps = [
-        "@regression_test__nodrop__0_1_13//:nodrop",
+        "@remote_regression_test__nodrop__0_1_13//:nodrop",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
@@ -42,7 +42,10 @@ rust_library(
         "--cap-lints=allow",
     ],
     version = "0.4.10",
-    tags = ["cargo-raze"],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )

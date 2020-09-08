@@ -16,6 +16,7 @@ path = "src/main.rs"
 workspace_path = "//vendored/complicated_cargo_library/cargo"
 target = "x86_64-unknown-linux-gnu"
 incompatible_relative_workspace_path = true
+gen_workspace_prefix = "vendored_complicated_cargo_library"
 
 [raze.crates.proc-macro2.'0.4.28']
 additional_flags = [
@@ -25,7 +26,7 @@ additional_flags = [
 [raze.crates.regex.'1.1.6']
 additional_deps = [
   # Add an unused dep
-  "//complicated_cargo_library/cargo/vendor:specs"
+  "//vendored_complicated_cargo_library/cargo/vendor:specs"
 ]
 additional_flags = [
   # Add an unused flag
