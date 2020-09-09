@@ -18,7 +18,14 @@ TEST_DIR="$REPO_ROOT/smoke_test"
 command_exists "cargo"
 command_exists "bazel"
 
+# Ensure Cargo Raze build is up-to-date
+echo "Building local Cargo Raze"
+cd "$IMPL_DIR"
+cargo build --quiet
+RAZE="$IMPL_DIR/target/debug/cargo-raze raze"
+
 # Clean the `examples` directory
+echo "Cleaning examples directory"
 rm -rf "$EXAMPLES_DIR/remote" "$EXAMPLES_DIR/vendored"
 cp -r "$TEST_DIR/remote" "$TEST_DIR/vendored" "$EXAMPLES_DIR"
 
@@ -74,10 +81,6 @@ ${gen_mode}_${name}_fetch_remote_crates()
 EOF
 done
 
-# Print Bazel version info
-echo "Bazel version info"
-bazel version
-
 # Run Cargo Vendor over the appropriate projects
 for ex in $(find $EXAMPLES_DIR/vendored -maxdepth 1 -type d | tail -n+2); do
     echo "Running Cargo Vendor for $(basename "$ex")"
@@ -90,11 +93,6 @@ for ex in $(find $EXAMPLES_DIR/vendored -maxdepth 1 -type d | tail -n+2); do
     fi
 done
 
-# Ensure Cargo Raze build is up-to-date
-echo "Building local Cargo Raze"
-cd "$IMPL_DIR"
-cargo build --quiet
-RAZE="$IMPL_DIR/target/debug/cargo-raze raze"
 for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
     echo "Running Cargo Raze for $(basename $ex)"
     if [ "$(basename $ex)" = "regression_test" ]; then
@@ -104,6 +102,11 @@ for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
     fi
     eval "$RAZE"
 done
+
+# Print Bazel version info
+export USE_BAZEL_VERSION="$(cat $REPO_ROOT/.bazelversion)"
+echo "Bazel version info"
+bazel version
 
 # Run the Bazel build for all targets
 cd "$EXAMPLES_DIR"
