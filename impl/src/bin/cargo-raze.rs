@@ -14,8 +14,8 @@
 
 use std::{
   fs::{self, File},
-  io::{Read, Write},
-  path::{Path, PathBuf},
+  io::Write,
+  path::PathBuf,
 };
 
 use anyhow::Result;
@@ -27,8 +27,8 @@ use cargo_raze::{
   metadata::{CargoMetadataFetcher, CargoWorkspaceFiles, MetadataFetcher},
   planning::{BuildPlanner, BuildPlannerImpl},
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
-  settings::{CargoToml, GenMode, RazeSettings},
-  util::{PlatformDetails, RazeError},
+  settings::{load_settings, GenMode},
+  util::PlatformDetails,
 };
 
 use serde_derive::Deserialize;
@@ -70,10 +70,8 @@ fn main() -> Result<()> {
     .and_then(|d| d.deserialize())
     .unwrap_or_else(|e| e.exit());
 
-  let mut settings = load_settings("Cargo.toml")?;
+  let settings = load_settings("Cargo.toml")?;
   println!("Loaded override settings: {:#?}", settings);
-
-  validate_settings(&mut settings)?;
 
   let mut metadata_fetcher: Box<dyn MetadataFetcher> = match options.flag_cargo_bin_path {
     Some(ref p) => Box::new(CargoMetadataFetcher::new(p)),
@@ -136,10 +134,14 @@ fn main() -> Result<()> {
       }
 
       bazel_renderer.render_remote_planned_build(&render_details, &planned_build)?
-    } /* exhaustive, we control the definition */
+    }, /* exhaustive, we control the definition */
   };
 
-  for FileOutputs { path, contents } in bazel_file_outputs {
+  for FileOutputs {
+    path,
+    contents,
+  } in bazel_file_outputs
+  {
     if dry_run {
       println!("{}:\n{}", path, contents);
     } else {
@@ -150,41 +152,8 @@ fn main() -> Result<()> {
   Ok(())
 }
 
-/** Verifies that the provided settings make sense. */
-fn validate_settings(settings: &mut RazeSettings) -> Result<()> {
-  if !settings.workspace_path.starts_with("//") {
-    return Err(
-      RazeError::Config {
-        field_path_opt: Some("raze.workspace_path".to_owned()),
-        message: concat!(
-          "Path must start with \"//\". Paths into local repositories (such as ",
-          "@local//path) are currently unsupported."
-        )
-        .to_owned(),
-      }
-      .into(),
-    );
-  }
-
-  if settings.workspace_path != "//" && settings.workspace_path.ends_with('/') {
-    settings.workspace_path.pop();
-  }
-
-  Ok(())
-}
-
 fn write_to_file_loudly(path: &str, contents: &str) -> Result<()> {
   File::create(&path).and_then(|mut f| f.write_all(contents.as_bytes()))?;
   println!("Generated {} successfully", path);
   Ok(())
-}
-
-fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings> {
-  let path = cargo_toml_path.as_ref();
-  let mut toml = File::open(path)?;
-  let mut toml_contents = String::new();
-  toml.read_to_string(&mut toml_contents)?;
-  toml::from_str::<CargoToml>(&toml_contents)
-    .map_err(|e| e.into())
-    .map(|toml| toml.raze)
 }

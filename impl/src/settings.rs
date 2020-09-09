@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use super::util::RazeError;
 use semver::Version;
 use serde_derive::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, fs::File, io::Read, path::Path};
 
 pub type CrateSettingsPerVersion = HashMap<Version, CrateSettings>;
 
@@ -252,24 +253,6 @@ impl Default for CrateSettings {
   }
 }
 
-#[cfg(test)]
-pub mod testing {
-  use super::*;
-
-  pub fn dummy_raze_settings() -> RazeSettings {
-    RazeSettings {
-      workspace_path: "//cargo".to_owned(),
-      target: "x86_64-unknown-linux-gnu".to_owned(),
-      crates: HashMap::new(),
-      gen_workspace_prefix: "raze_test".to_owned(),
-      genmode: GenMode::Remote,
-      output_buildfile_suffix: "BUILD".to_owned(),
-      default_gen_buildrs: default_raze_settings_field_gen_buildrs(),
-      incompatible_relative_workspace_path: incompatible_relative_workspace_path(),
-    }
-  }
-}
-
 fn default_raze_settings_field_target() -> String {
   "x86_64-unknown-linux-gnu".to_owned()
 }
@@ -300,4 +283,108 @@ fn default_crate_settings_field_data_attr() -> Option<String> {
 
 fn incompatible_relative_workspace_path() -> bool {
   false
+}
+
+/** Verifies that the provided settings make sense. */
+fn validate_settings(settings: &mut RazeSettings) -> Result<(), RazeError> {
+  if !settings.workspace_path.starts_with("//") {
+    return Err(
+      RazeError::Config {
+        field_path_opt: Some("raze.workspace_path".to_owned()),
+        message: concat!(
+          "Path must start with \"//\". Paths into local repositories (such as ",
+          "@local//path) are currently unsupported."
+        )
+        .to_owned(),
+      }
+      .into(),
+    );
+  }
+
+  if settings.workspace_path != "//" && settings.workspace_path.ends_with('/') {
+    settings.workspace_path.pop();
+  }
+
+  Ok(())
+}
+
+pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings, RazeError> {
+  let path = cargo_toml_path.as_ref();
+  let mut toml = match File::open(path) {
+    Ok(handle) => handle,
+    Err(err) => {
+      return Err(RazeError::Generic(err.to_string()));
+    },
+  };
+
+  let mut toml_contents = String::new();
+  let result = toml.read_to_string(&mut toml_contents);
+  if let Some(err) = result.err() {
+    return Err(RazeError::Generic(err.to_string()));
+  }
+  let mut settings = match toml::from_str::<CargoToml>(&toml_contents) {
+    Ok(toml) => toml.raze,
+    Err(err) => {
+      return Err(RazeError::Generic(err.to_string()));
+    },
+  };
+
+  validate_settings(&mut settings)?;
+
+  Ok(settings)
+}
+
+#[cfg(test)]
+pub mod testing {
+  use super::*;
+  use std::io::Write;
+  use tempfile::TempDir;
+
+  pub fn dummy_raze_settings() -> RazeSettings {
+    RazeSettings {
+      workspace_path: "//cargo".to_owned(),
+      target: "x86_64-unknown-linux-gnu".to_owned(),
+      crates: HashMap::new(),
+      gen_workspace_prefix: "raze_test".to_owned(),
+      genmode: GenMode::Remote,
+      output_buildfile_suffix: "BUILD".to_owned(),
+      default_gen_buildrs: default_raze_settings_field_gen_buildrs(),
+      incompatible_relative_workspace_path: incompatible_relative_workspace_path(),
+    }
+  }
+
+  #[test]
+  fn test_loading_settings() {
+    let toml_contents = "
+    [package]
+    name = \"load_settings_test\"
+    version = \"0.1.0\"
+
+    [lib]
+    path = \"not_a_file.rs\"
+
+    [dependencies]
+    actix-web = \"2.0.0\"
+    actix-rt = \"1.0.0\"
+
+    [target.x86_64-apple-ios.dependencies]
+    [target.x86_64-linux-android.dependencies]
+    bitflags = \"1.2.1\"
+
+    [raze]
+    workspace_path = \"//workspace_path/raze\"
+    genmode = \"Remote\"
+    incompatible_relative_workspace_path = true
+    ";
+    let temp_workspace_dir = TempDir::new()
+      .ok()
+      .expect("Failed to set up temporary directory");
+    let cargo_toml_path = temp_workspace_dir.path().join("Cargo.toml");
+    let mut toml = File::create(&cargo_toml_path).unwrap();
+    toml.write_all(toml_contents.as_bytes()).unwrap();
+
+    let settings = load_settings(cargo_toml_path).unwrap();
+
+    assert_eq!(settings.target, default_raze_settings_field_target());
+  }
 }
