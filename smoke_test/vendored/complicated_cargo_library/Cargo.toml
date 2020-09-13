@@ -14,7 +14,6 @@ path = "src/main.rs"
 
 [raze]
 workspace_path = "//vendored/complicated_cargo_library/cargo"
-target = "x86_64-unknown-linux-gnu"
 incompatible_relative_workspace_path = true
 gen_workspace_prefix = "vendored_complicated_cargo_library"
 

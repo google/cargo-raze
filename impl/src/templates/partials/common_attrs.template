@@ -1,9 +1,9 @@
     srcs = glob(["**/*.rs"]),
     crate_root = "{{ target.path }}",
     edition = "{{ target.edition }}",
-    {%- if crate.proc_macro_dependencies %}
+    {%- if crate.default_deps.proc_macro_dependencies %}
     proc_macro_deps = [
-    {%- for dependency in crate.proc_macro_dependencies %}
+    {%- for dependency in crate.default_deps.proc_macro_dependencies %}
         "{{dependency.buildable_target}}",
     {%- endfor %}
     ],
@@ -34,9 +34,9 @@
         "{{feature}}",
         {%- endfor %}
     ],
-    {%- if crate.aliased_dependencies | length != 0 %}
+    {%- if crate.default_deps.aliased_dependencies | length != 0 %}
     aliases = {
-        {%- for alias in crate.aliased_dependencies %}
+        {%- for alias in crate.default_deps.aliased_dependencies %}
         "{{alias.target}}": "{{alias.alias}}",
         {%- endfor %}
     },

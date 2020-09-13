@@ -73,21 +73,33 @@ pub struct SourceDetails {
   pub git_data: Option<GitRepo>,
 }
 
-#[derive(Debug, Clone, Serialize)]
-pub struct CrateContext {
-  pub pkg_name: String,
-  pub pkg_version: String,
-  pub edition: String,
-  pub raze_settings: CrateSettings,
-  pub license: LicenseData,
-  pub features: Vec<String>,
-  pub workspace_path_to_crate: String,
+#[derive(Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+pub struct CrateDependencyContext {
   pub dependencies: Vec<BuildableDependency>,
   pub proc_macro_dependencies: Vec<BuildableDependency>,
   pub build_dependencies: Vec<BuildableDependency>,
   pub build_proc_macro_dependencies: Vec<BuildableDependency>,
   pub dev_dependencies: Vec<BuildableDependency>,
   pub aliased_dependencies: Vec<DependencyAlias>,
+}
+#[derive(Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+pub struct CrateTargetedDepContext {
+  pub target: String,
+  pub deps: CrateDependencyContext,
+  pub conditions: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct CrateContext {
+  pub pkg_name: String,
+  pub pkg_version: String,
+  pub edition: String,
+  pub raze_settings: CrateSettings,
+  pub default_deps: CrateDependencyContext,
+  pub targeted_deps: Vec<CrateTargetedDepContext>,
+  pub license: LicenseData,
+  pub features: Vec<String>,
+  pub workspace_path_to_crate: String,
   pub is_root_dependency: bool,
   pub targets: Vec<BuildableTarget>,
   pub build_script_target: Option<BuildableTarget>,
@@ -110,9 +122,6 @@ pub struct CrateContext {
 pub struct WorkspaceContext {
   // The bazel path prefix to the vendor directory
   pub workspace_path: String,
-
-  // The compilation target triple.
-  pub platform_triple: String,
 
   // The generated new_http_library Bazel workspace prefix.
   //

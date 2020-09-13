@@ -100,6 +100,7 @@ dependencies = [
  "cargo-lock",
  "cargo-platform",
  "cargo_metadata",
+ "cfg-expr",
  "docopt",
  "hamcrest2",
  "itertools",
@@ -125,6 +126,15 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
+]
+
+[[package]]
+name = "cfg-expr"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c2be76f06820200669a77ae59a8328c6b8fe4496e8fb7fed02f2806a442c5ff"
+dependencies = [
+ "smallvec",
 ]
 
 [[package]]
@@ -770,9 +780,9 @@ dependencies = [
 
 [[package]]
 name = "tera"
-version = "1.2.0"
+version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19d25bed9d2cf684de6ffdaa9ac35373739eeed0d6bef1de545bbe6cf571ad07"
+checksum = "1381c83828bedd5ce4e59473110afa5381ffe523406d9ade4b77c9f7be70ff9a"
 dependencies = [
  "chrono",
  "chrono-tz",

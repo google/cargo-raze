@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 
 use tera::{self, Context, Tera};
 
@@ -24,6 +24,167 @@ use crate::{
 };
 
 use std::{env, error::Error, path::PathBuf};
+
+use cfg_expr::{targets::get_builtin_target_by_triple, Expression, Predicate};
+
+macro_rules! get_platform_triples {
+  () => {
+    [
+      // SUPPORTED_T1_PLATFORM_TRIPLES
+      get_builtin_target_by_triple("i686-apple-darwin").unwrap(),
+      get_builtin_target_by_triple("i686-pc-windows-gnu").unwrap(),
+      get_builtin_target_by_triple("i686-unknown-linux-gnu").unwrap(),
+      get_builtin_target_by_triple("x86_64-apple-darwin").unwrap(),
+      get_builtin_target_by_triple("x86_64-pc-windows-gnu").unwrap(),
+      get_builtin_target_by_triple("x86_64-unknown-linux-gnu").unwrap(),
+      // SUPPORTED_T2_PLATFORM_TRIPLES
+      get_builtin_target_by_triple("aarch64-apple-ios").unwrap(),
+      get_builtin_target_by_triple("aarch64-linux-android").unwrap(),
+      get_builtin_target_by_triple("aarch64-unknown-linux-gnu").unwrap(),
+      get_builtin_target_by_triple("arm-unknown-linux-gnueabi").unwrap(),
+      get_builtin_target_by_triple("i686-linux-android").unwrap(),
+      get_builtin_target_by_triple("i686-unknown-freebsd").unwrap(),
+      get_builtin_target_by_triple("powerpc-unknown-linux-gnu").unwrap(),
+      get_builtin_target_by_triple("s390x-unknown-linux-gnu").unwrap(),
+      get_builtin_target_by_triple("wasm32-unknown-unknown").unwrap(),
+      get_builtin_target_by_triple("x86_64-apple-ios").unwrap(),
+      get_builtin_target_by_triple("x86_64-linux-android").unwrap(),
+      get_builtin_target_by_triple("x86_64-unknown-freebsd").unwrap(),
+    ]
+  };
+}
+
+/** Determines if the target matches those supported by and defined in rules_rust
+ *
+ * Examples can be seen below:
+ *
+ * | target                                | returns          | reason                                           |
+ * | ------------------------------------- | ---------------- | ------------------------------------------------ |
+ * | `cfg(not(fuchsia))`                   | `(true, true)`   | `fuchsia` would be considered a 'default'        |
+ * |                                       |                  | dependency since no supported target maps to it. |
+ * |                                       |                  |                                                  |
+ * | `cfg(unix)`                           | `(true, false)`  | There are supported platforms from the `unix`    |
+ * |                                       |                  | `target_family` but not all platforms are of     |
+ * |                                       |                  | the `unix` family.                               |
+ * |                                       |                  |                                                  |
+ * | `cfg(not(windows))`                   | `(true, false)`  | There are supported platforms in addition to     |
+ * |                                       |                  | those in the `windows` `target_family`           |
+ * |                                       |                  |                                                  |
+ * | `x86_64-apple-darwin`                 | `(true, false)`  | This is a supported target triple but obviously  |
+ * |                                       |                  | won't match with other triples.                  |
+ * |                                       |                  |                                                  |
+ * | `unknown-unknown-unknown`             | `(false, false)` | This will not match any triple.                  |
+ * |                                       |                  |                                                  |
+ * | `cfg(foo)`                            | `(false, false)` | `foo` is not a strongly defined cfg value.       |
+ * | `cfg(target_os = "redox")`            | `(false, false)` | `redox` is not a supported platform.             |
+ */
+pub fn is_bazel_supported_platform(target: &String) -> (bool, bool) {
+  // Ensure the target is represented as an expression
+  let target_exp = match target.starts_with("cfg(") {
+    true => target.clone(),
+    false => format!("cfg(target = \"{}\")", target),
+  };
+
+  let expression = match Expression::parse(&target_exp) {
+    Ok(exp) => exp,
+    // If the target expression cannot be parsed it is not considered a Bazel platform
+    Err(_) => {
+      return (false, false);
+    },
+  };
+
+  let mut is_supported = false;
+  let mut matches_all = true;
+
+  // Attempt to match the expression
+  for target_info in get_platform_triples!().iter() {
+    if expression.eval(|pred| {
+      match pred {
+        Predicate::Target(tp) => tp.matches(*target_info),
+        Predicate::KeyValue {
+          key,
+          val,
+        } => (*key == "target") && (*val == target_info.triple),
+        // For now there is no other kind of matching
+        _ => false,
+      }
+    }) {
+      is_supported = true;
+    } else {
+      matches_all = false;
+    }
+  }
+
+  (is_supported, matches_all)
+}
+
+/** Maps a Rust cfg target to a Bazel supported triples.
+ *
+ * Note, the Bazel triples must be defined in:
+ * https://github.com/bazelbuild/rules_rust/blob/master/rust/platform/platform.bzl
+ */
+pub fn get_matching_bazel_triples(target: &String) -> Result<Vec<String>> {
+  let target_exp = match target.starts_with("cfg(") {
+    true => target.clone(),
+    false => format!("cfg(target=\"{}\")", target),
+  };
+
+  let expression = Expression::parse(&target_exp)?;
+  let triples: Vec<String> = get_platform_triples!()
+    .iter()
+    .filter_map(|target_info| {
+      match expression.eval(|pred| {
+        match pred {
+          Predicate::Target(tp) => tp.matches(*target_info),
+          // For now there is no other kind of matching
+          _ => false,
+        }
+      }) {
+        true => Some(String::from((*target_info).triple)),
+        false => None,
+      }
+    })
+    .collect();
+
+  Ok(triples)
+}
+
+/** Produces a list of triples based on a provided whitelist */
+pub fn filter_bazel_triples(triples: &mut Vec<String>, triples_whitelist: &Vec<String>) {
+  // Early-out if the filter list is empty
+  if triples_whitelist.len() == 0 {
+    return;
+  }
+
+  // Prune everything that's not found in the whitelist
+  triples.retain(|triple| triples_whitelist.iter().any(|i| i == triple));
+
+  triples.sort();
+}
+
+/** Returns a list of Bazel targets for use in `select` statements based on a
+ * given list of triples.
+ */
+pub fn generate_bazel_conditions(triples: &Vec<String>) -> Result<Vec<String>> {
+  // Sanity check ensuring all strings represent real triples
+  for triple in triples.iter() {
+    match get_builtin_target_by_triple(triple) {
+      None => {
+        return Err(anyhow!("Not a triple: '{}'", triple));
+      },
+      _ => {},
+    }
+  }
+
+  let mut bazel_triples: Vec<String> = triples
+    .iter()
+    .map(|triple| format!("@io_bazel_rules_rust//rust/platform:{}", triple))
+    .collect();
+
+  bazel_triples.sort();
+
+  Ok(bazel_triples)
+}
 
 /** Returns whether or not the given path is a Bazel workspace root */
 pub fn is_workspace_root(dir: &PathBuf) -> bool {
@@ -104,10 +265,16 @@ impl BazelRenderer {
           "templates/partials/remote_crates_patch.template",
           include_str!("templates/partials/remote_crates_patch.template"),
         ),
+        (
+          "templates/partials/targeted_dependencies.template",
+          include_str!("templates/partials/targeted_dependencies.template"),
+        ),
       ])
       .unwrap();
 
-    Self { internal_renderer }
+    Self {
+      internal_renderer,
+    }
   }
 
   pub fn render_crate(
@@ -192,7 +359,7 @@ fn include_additional_build_file(
         "{}\n# Additional content from {}\n{}",
         existing_contents, file_path, additional_content
       ))
-    }
+    },
 
     None => Ok(existing_contents),
   }
@@ -359,7 +526,6 @@ mod tests {
     PlannedBuild {
       workspace_context: WorkspaceContext {
         workspace_path: "//workspace/prefix".to_owned(),
-        platform_triple: "irrelevant".to_owned(),
         gen_workspace_prefix: "".to_owned(),
         output_buildfile_suffix: "BUILD".to_owned(),
       },
@@ -376,12 +542,15 @@ mod tests {
       expected_build_path: format!("vendor/test-binary-1.1.1/{}", buildfile_suffix),
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
-      dependencies: Vec::new(),
-      proc_macro_dependencies: Vec::new(),
-      build_dependencies: Vec::new(),
-      build_proc_macro_dependencies: Vec::new(),
-      dev_dependencies: Vec::new(),
-      aliased_dependencies: Vec::new(),
+      default_deps: CrateDependencyContext {
+        dependencies: Vec::new(),
+        proc_macro_dependencies: Vec::new(),
+        build_dependencies: Vec::new(),
+        build_proc_macro_dependencies: Vec::new(),
+        dev_dependencies: Vec::new(),
+        aliased_dependencies: Vec::new(),
+      },
+      targeted_deps: Vec::new(),
       is_root_dependency: true,
       workspace_path_to_crate: "@raze__test_binary__1_1_1//".to_owned(),
       targets: vec![BuildableTarget {
@@ -391,7 +560,9 @@ mod tests {
         edition: "2015".to_owned(),
       }],
       build_script_target: None,
-      source_details: SourceDetails { git_data: None },
+      source_details: SourceDetails {
+        git_data: None,
+      },
       sha256: None,
       lib_target_name: None,
     }
@@ -410,12 +581,15 @@ mod tests {
       raze_settings: CrateSettings::default(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
       expected_build_path: format!("vendor/test-library-1.1.1/{}", buildfile_suffix),
-      dependencies: Vec::new(),
-      proc_macro_dependencies: Vec::new(),
-      build_dependencies: Vec::new(),
-      build_proc_macro_dependencies: Vec::new(),
-      dev_dependencies: Vec::new(),
-      aliased_dependencies: Vec::new(),
+      default_deps: CrateDependencyContext {
+        dependencies: Vec::new(),
+        proc_macro_dependencies: Vec::new(),
+        build_dependencies: Vec::new(),
+        build_proc_macro_dependencies: Vec::new(),
+        dev_dependencies: Vec::new(),
+        aliased_dependencies: Vec::new(),
+      },
+      targeted_deps: Vec::new(),
       is_root_dependency: true,
       workspace_path_to_crate: "@raze__test_library__1_1_1//".to_owned(),
       targets: vec![BuildableTarget {
@@ -425,7 +599,9 @@ mod tests {
         edition: "2015".to_owned(),
       }],
       build_script_target: None,
-      source_details: SourceDetails { git_data: None },
+      source_details: SourceDetails {
+        git_data: None,
+      },
       sha256: None,
       lib_target_name: Some("test_library".to_owned()),
     }
@@ -622,7 +798,8 @@ mod tests {
     expect(
       crate_build_contents.contains("# Additional content from README.md"),
       format!(
-        "expected crate build contents to include additional_build_file, but it just contained [{}]",
+        "expected crate build contents to include additional_build_file, but it just contained \
+         [{}]",
         crate_build_contents
       ),
     )
@@ -658,5 +835,80 @@ mod tests {
 
     // Ensure test results were successful
     assert!(result.is_ok());
+  }
+
+  #[test]
+  fn detect_bazel_platforms() {
+    assert_eq!(
+      is_bazel_supported_platform(&"cfg(not(fuchsia))".to_string()),
+      (true, true)
+    );
+    assert_eq!(
+      is_bazel_supported_platform(&"cfg(not(target_os = \"redox\"))".to_string()),
+      (true, true)
+    );
+    assert_eq!(
+      is_bazel_supported_platform(&"cfg(unix)".to_string()),
+      (true, false)
+    );
+    assert_eq!(
+      is_bazel_supported_platform(&"cfg(not(windows))".to_string()),
+      (true, false)
+    );
+    assert_eq!(
+      is_bazel_supported_platform(&"cfg(target = \"x86_64-apple-darwin\")".to_string()),
+      (true, false)
+    );
+    assert_eq!(
+      is_bazel_supported_platform(&"x86_64-apple-darwin".to_string()),
+      (true, false)
+    );
+    assert_eq!(
+      is_bazel_supported_platform(&"unknown-unknown-unknown".to_string()),
+      (false, false)
+    );
+    assert_eq!(
+      is_bazel_supported_platform(&"cfg(foo)".to_string()),
+      (false, false)
+    );
+    assert_eq!(
+      is_bazel_supported_platform(&"cfg(target_os = \"redox\")".to_string()),
+      (false, false)
+    );
+  }
+
+  #[test]
+  fn generate_condition_strings() {
+    assert_eq!(
+      generate_bazel_conditions(&vec![
+        "aarch64-unknown-linux-gnu".to_string(),
+        "aarch64-apple-ios".to_string(),
+      ])
+      .unwrap(),
+      vec![
+        "@io_bazel_rules_rust//rust/platform:aarch64-apple-ios",
+        "@io_bazel_rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+      ]
+    );
+
+    assert_eq!(
+      generate_bazel_conditions(&vec!["aarch64-unknown-linux-gnu".to_string()]).unwrap(),
+      vec!["@io_bazel_rules_rust//rust/platform:aarch64-unknown-linux-gnu"]
+    );
+
+    assert!(generate_bazel_conditions(&vec![
+      "aarch64-unknown-linux-gnu".to_string(),
+      "unknown-unknown-unknown".to_string(),
+    ])
+    .is_err());
+
+    assert!(generate_bazel_conditions(&vec!["unknown-unknown-unknown".to_string()]).is_err());
+
+    assert!(generate_bazel_conditions(&vec![
+      "foo".to_string(),
+      "bar".to_string(),
+      "baz".to_string()
+    ])
+    .is_err());
   }
 }
