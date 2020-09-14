@@ -23,36 +23,35 @@ use crate::{
   util::RazeError,
 };
 
-use std::{env, error::Error, path::PathBuf};
+use std::{env, error::Error, iter::Iterator, path::PathBuf};
 
-use cfg_expr::{targets::get_builtin_target_by_triple, Expression, Predicate};
+use cfg_expr::{
+  targets::get_builtin_target_by_triple,
+  Expression, Predicate,
+};
 
-macro_rules! get_platform_triples {
-  () => {
-    [
-      // SUPPORTED_T1_PLATFORM_TRIPLES
-      get_builtin_target_by_triple("i686-apple-darwin").unwrap(),
-      get_builtin_target_by_triple("i686-pc-windows-gnu").unwrap(),
-      get_builtin_target_by_triple("i686-unknown-linux-gnu").unwrap(),
-      get_builtin_target_by_triple("x86_64-apple-darwin").unwrap(),
-      get_builtin_target_by_triple("x86_64-pc-windows-gnu").unwrap(),
-      get_builtin_target_by_triple("x86_64-unknown-linux-gnu").unwrap(),
-      // SUPPORTED_T2_PLATFORM_TRIPLES
-      get_builtin_target_by_triple("aarch64-apple-ios").unwrap(),
-      get_builtin_target_by_triple("aarch64-linux-android").unwrap(),
-      get_builtin_target_by_triple("aarch64-unknown-linux-gnu").unwrap(),
-      get_builtin_target_by_triple("arm-unknown-linux-gnueabi").unwrap(),
-      get_builtin_target_by_triple("i686-linux-android").unwrap(),
-      get_builtin_target_by_triple("i686-unknown-freebsd").unwrap(),
-      get_builtin_target_by_triple("powerpc-unknown-linux-gnu").unwrap(),
-      get_builtin_target_by_triple("s390x-unknown-linux-gnu").unwrap(),
-      get_builtin_target_by_triple("wasm32-unknown-unknown").unwrap(),
-      get_builtin_target_by_triple("x86_64-apple-ios").unwrap(),
-      get_builtin_target_by_triple("x86_64-linux-android").unwrap(),
-      get_builtin_target_by_triple("x86_64-unknown-freebsd").unwrap(),
-    ]
-  };
-}
+static SUPPORTED_PLATFORM_TRIPLES: &'static [&'static str] = &[
+  // SUPPORTED_T1_PLATFORM_TRIPLES
+  "i686-apple-darwin",
+  "i686-pc-windows-gnu",
+  "i686-unknown-linux-gnu",
+  "x86_64-apple-darwin",
+  "x86_64-pc-windows-gnu",
+  "x86_64-unknown-linux-gnu",
+  // SUPPORTED_T2_PLATFORM_TRIPLES
+  "aarch64-apple-ios",
+  "aarch64-linux-android",
+  "aarch64-unknown-linux-gnu",
+  "arm-unknown-linux-gnueabi",
+  "i686-linux-android",
+  "i686-unknown-freebsd",
+  "powerpc-unknown-linux-gnu",
+  "s390x-unknown-linux-gnu",
+  "wasm32-unknown-unknown",
+  "x86_64-apple-ios",
+  "x86_64-linux-android",
+  "x86_64-unknown-freebsd",
+];
 
 /** Determines if the target matches those supported by and defined in rules_rust
  *
@@ -97,10 +96,13 @@ pub fn is_bazel_supported_platform(target: &String) -> (bool, bool) {
   let mut matches_all = true;
 
   // Attempt to match the expression
-  for target_info in get_platform_triples!().iter() {
+  for target_info in SUPPORTED_PLATFORM_TRIPLES
+    .iter()
+    .map(|x| get_builtin_target_by_triple(x).unwrap())
+  {
     if expression.eval(|pred| {
       match pred {
-        Predicate::Target(tp) => tp.matches(*target_info),
+        Predicate::Target(tp) => tp.matches(target_info),
         Predicate::KeyValue {
           key,
           val,
@@ -130,12 +132,13 @@ pub fn get_matching_bazel_triples(target: &String) -> Result<Vec<String>> {
   };
 
   let expression = Expression::parse(&target_exp)?;
-  let triples: Vec<String> = get_platform_triples!()
+  let triples: Vec<String> = SUPPORTED_PLATFORM_TRIPLES
     .iter()
-    .filter_map(|target_info| {
+    .filter_map(|triple| {
+      let target_info = get_builtin_target_by_triple(triple).unwrap();
       match expression.eval(|pred| {
         match pred {
-          Predicate::Target(tp) => tp.matches(*target_info),
+          Predicate::Target(tp) => tp.matches(target_info),
           // For now there is no other kind of matching
           _ => false,
         }
@@ -875,6 +878,13 @@ mod tests {
       is_bazel_supported_platform(&"cfg(target_os = \"redox\")".to_string()),
       (false, false)
     );
+  }
+
+  #[test]
+  fn all_supported_platform_triples_unwrap() {
+    for triple in SUPPORTED_PLATFORM_TRIPLES.iter() {
+      get_builtin_target_by_triple(triple).unwrap();
+    }
   }
 
   #[test]
