@@ -1,6 +1,6 @@
 [package]
 name = "cargo-raze"
-version = "0.3.9"
+version = "0.5.0"
 authors = ["Alex McArther <acmcarther@google.com>"]
 readme = "README.md"
 keywords = ["subcommand"]
