@@ -120,16 +120,11 @@ targets.
 $ cargo install cargo-raze
 ```
 
-Then, generate a lock file for your dependencies
+Following that, vendor your dependencies from within the cargo/ directory. This
+will also update your `Cargo.lock` file.
 
 ```bash
-$ cargo generate-lockfile
-```
-
-Following that, vendor your dependencies from within the cargo/ directory.
-
-```bash
-$ cargo vendor --versioned-dirs --locked
+$ cargo vendor --versioned-dirs
 ```
 
 Finally, generate your BUILD files, again from within the cargo/ directory
