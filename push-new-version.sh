@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+set -eu
+
+command_exists() {
+    command -v "$1" >/dev/null 2>&1 || ( echo "Command \`$1\` isn't available. Please install before continuing."; exit 1 )
+}
+
+update_cargo_toml_version() {
+  crate_version=$1
+  sed -i "s/^version =.*/version = \"$crate_version\"/g" Cargo.toml
+}
+
+cargo_build_crate() {
+  cargo build
+}
+
+git_commit_changes() {
+  crate_version=$1
+  git add . && git commit -m "Up to $crate_version [via publish-new-version.sh]"
+}
+
+git_last_commit() {
+  echo $(git rev-parse --short HEAD)
+}
+
+git_tag_commit_with_version() {
+  last_commit_hash=$1
+  crate_version=$2
+  git tag "v$crate_version" $last_commit_hash
+}
+
+cargo_publish_crate() {
+  cargo publish
+}
+
+git_push_changes_and_tags() {
+  git push origin master && git push origin --tags
+}
+
+publish_crate_version() {
+  crate_version=$1
+  update_cargo_toml_version $crate_version
+  cargo_build_crate
+  git_commit_changes $crate_version
+  last_commit_hash=$(git_last_commit)
+  git_tag_commit_with_version $last_commit_hash $crate_version
+  cargo_publish_crate
+  git_push_changes_and_tags
+}
+
+
+command_exists "cargo"
+
+if [ -z "$NEXT_CRATE_VERSION" ]
+then
+  echo "\$NEXT_CRATE_VERSION must be set (maybe via export NEXT_CRATE_VERSION=\"your-value\")"
+  exit 1
+fi
+
+if ! [ -z "$(git status --porcelain)" ]; then
+  echo "Working directory is not clean. Commit pending changes before running command."
+  exit 1
+fi
+
+PWD="$(pwd)"
+
+REPO_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$REPO_ROOT/impl"
+
+publish_crate_version "$NEXT_CRATE_VERSION"
+
+cd $PWD
