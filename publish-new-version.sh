@@ -49,7 +49,6 @@ publish_crate_version() {
   git_push_changes_and_tags
 }
 
-
 command_exists "cargo"
 
 if [ -z "$NEXT_CRATE_VERSION" ]
