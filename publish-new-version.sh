@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 
+# publish-new-version.sh 
+# EXAMPLE USAGE: publish-new-version.sh 0.1.1
+#
+# This script updates the Cargo.toml version of the repository to the given
+# version, builds the crate, commits the changes, publishes the crate, and then
+# pushes the crate to github.
+#
+# The script performs some types of sanity checking, but in general you should
+# read and understand this script before running it.
+#
+# This script assumes that your git upstream is called "origin".
+
 set -eu
 
 command_exists() {
@@ -51,9 +63,11 @@ publish_crate_version() {
 
 command_exists "cargo"
 
+NEXT_CRATE_VERSION=$1
 if [ -z "$NEXT_CRATE_VERSION" ]
 then
-  echo "\$NEXT_CRATE_VERSION must be set (maybe via export NEXT_CRATE_VERSION=\"your-value\")"
+  echo "A version argument must be provided, of the form X.Y.Z."
+  echo "Example Usage: ./publish-new-version.sh 0.1.1"
   exit 1
 fi
 
