@@ -3,9 +3,10 @@
 # publish-new-version.sh 
 # EXAMPLE USAGE: publish-new-version.sh 0.1.1
 #
-# This script updates the Cargo.toml version of the repository to the given
-# version, builds the crate, commits the changes, publishes the crate, and then
-# pushes the crate to github.
+# This script accepts a desired new crate version as an argument and updates 
+# the Cargo.toml version of the repository to the given version, builds the 
+# crate, commits the changes, publishes the crate, and then pushes the crate 
+# to github.
 #
 # The script performs some types of sanity checking, but in general you should
 # read and understand this script before running it.
