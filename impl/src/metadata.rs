@@ -63,9 +63,25 @@ impl MetadataFetcher for CargoMetadataFetcher {
     assert!(files.toml_path.is_file());
     assert!(files.lock_path_opt.as_ref().map_or(true, |p| p.is_file()));
 
-    // Copy files into a temp directory
     // UNWRAP: Guarded by function assertion
-    let cargo_tempdir = {
+    let toml_dir = files.toml_path.parent().unwrap().to_path_buf();
+
+    // If the Cargo.lock file is specified and is in a different directory to the Cargo.toml,
+    // we need to copy them to a tempdir so that they're adjacent and cargo picks them up.
+    // Note that this breaks Workspace support, as the child Cargo.toml files will not be copied
+    // over into the right place.
+    let can_operate_inplace = if let Some(lock_path) = files.lock_path_opt.as_ref() {
+      lock_path.parent() == files.toml_path.parent()
+    } else {
+      !toml_dir.join("Cargo.lock").exists()
+    };
+
+    // Keep _tempdir alive until the end of the function so that the dir doesn't get deleted until
+    // the cargo-metadata process exits.
+    let (working_directory, _tempdir) = if can_operate_inplace {
+      (toml_dir, None)
+    } else {
+      // Copy files into a temp directory
       let dir = TempDir::new()?;
 
       let dir_path = dir.path();
@@ -76,12 +92,12 @@ impl MetadataFetcher for CargoMetadataFetcher {
         fs::copy(lock_path.as_path(), new_lock_path)?;
       }
 
-      dir
+      (dir.path().to_path_buf(), Some(dir))
     };
 
     MetadataCommand::new()
       .cargo_path(&self.cargo_bin_path)
-      .current_dir(cargo_tempdir.path())
+      .current_dir(working_directory)
       .exec()
       .map_err(|e| e.into())
   }
