@@ -246,6 +246,28 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       .collect();
     files.push(self.files);
 
+    let package_to_checksum = self.populate_sha256_index(&files)?;
+
+    let contexts = catalogs
+      .iter()
+      .map(|catalog| {
+        (*catalog)
+          .metadata
+          .resolve
+          .as_ref()
+          .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?
+          .nodes
+          .iter()
+          .sorted_by_key(|n| &n.id)
+          .filter_map(|node| self.create_crate_context(node, &package_to_checksum, catalog))
+          .collect::<Result<Vec<CrateContext>>>()
+      })
+      .collect::<Result<Vec<Vec<CrateContext>>>>()?;
+
+    Ok(contexts.iter().flat_map(|i| i.clone()).collect())
+  }
+
+  fn populate_sha256_index(&self, files: &[&CargoWorkspaceFiles]) -> Result<HashMap<(String, Version), String>> {
     // Gather the checksums for all packages in the lockfile
     // which have them.
     //
@@ -279,23 +301,19 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       }
     }
 
-    let contexts = catalogs
-      .iter()
-      .map(|catalog| {
-        (*catalog)
-          .metadata
-          .resolve
-          .as_ref()
-          .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?
-          .nodes
-          .iter()
-          .sorted_by_key(|n| &n.id)
-          .filter_map(|node| self.create_crate_context(node, &package_to_checksum, catalog))
-          .collect::<Result<Vec<CrateContext>>>()
-      })
-      .collect::<Result<Vec<Vec<CrateContext>>>>()?;
+    // If there's no lockfile, the above will miss packages - fill them in here.
+    for entry in &self.crate_catalog.entries {
+      let package = &entry.package;
+      let key = (package.name.to_string(), package.version.clone());
+      if package_to_checksum.get(&key).is_some() {
+        continue;
+      }
+      if let Ok(checksum) = fetch_crate_checksum(&self.settings.index_url, &package.name, &package.version.to_string()) {
+        package_to_checksum.insert(key, checksum);
+      }
+    }
 
-    Ok(contexts.iter().flat_map(|i| i.clone()).collect())
+    Ok(package_to_checksum)
   }
 }
 
@@ -757,5 +775,54 @@ impl<'planner> CrateSubplanner<'planner> {
         .into(),
       )
     }
+  }
+}
+
+
+#[cfg(test)]
+mod tests {
+  use crate::testing::make_workspace;
+  use crate::metadata::CargoMetadataFetcher;
+  use crate::planning::{BuildPlannerImpl, BuildPlanner};
+  use std::path::PathBuf;
+  use crate::settings::{GenMode, RazeSettings};
+  use std::collections::HashMap;
+
+  #[test]
+  fn sha256s() {
+    let settings = RazeSettings {
+      genmode: GenMode::Remote,
+      index_url: "https://github.com/rust-lang/crates.io-index".to_string(),
+
+      workspace_path: String::default(),
+      incompatible_relative_workspace_path: bool::default(),
+      target: None,
+      targets: None,
+      binary_deps: HashMap::default(),
+      crates: HashMap::default(),
+      gen_workspace_prefix: String::default(),
+      output_buildfile_suffix: String::default(),
+      default_gen_buildrs: bool::default(),
+      registry: String::default(),
+    };
+
+    let cargo_toml = r#"[package]
+  name = "test"
+  version = "0.0.1"
+
+  [lib]
+  path = "not_a_file.rs"
+
+  [dependencies]
+  lazy_static = "=1.4.0"
+  "#;
+
+    let (_tempdir, files) = make_workspace(cargo_toml, None);
+
+    let mut fetcher = CargoMetadataFetcher::default();
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build = planner.plan_build(&settings, &PathBuf::new(), files, None).unwrap();
+    assert_eq!(planned_build.crate_contexts.len(), 1);
+    assert_eq!(planned_build.crate_contexts[0].sha256, Some("e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646".to_string()));
   }
 }

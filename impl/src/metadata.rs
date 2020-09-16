@@ -206,11 +206,10 @@ pub fn fetch_crate_checksum(index_url: &str, name: &str, version: &str) -> Resul
       .ok_or(anyhow!("Failed to find crate '{}' in index", name))?
   };
 
-  let (_index, crate_version) = crate_index_path
+  let crate_version = crate_index_path
     .versions()
     .iter()
-    .enumerate()
-    .find(|(_, ver)| ver.version() == version)
+    .find(|ver| ver.version() == version)
     .ok_or(anyhow!(
       "Failed to find version {} for crate {}",
       version,
