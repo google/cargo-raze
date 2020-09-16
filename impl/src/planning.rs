@@ -21,17 +21,20 @@ use std::{
 
 use anyhow::Result;
 
-use cargo_lock::lockfile::Lockfile;
-use cargo_lock::SourceId;
+use cargo_lock::{lockfile::Lockfile, SourceId};
 use cargo_platform::Platform;
 
 use itertools::Itertools;
 
 use crate::{
-  bazel::find_workspace_root,
+  bazel::{
+    filter_bazel_triples, find_workspace_root, generate_bazel_conditions,
+    get_matching_bazel_triples, is_bazel_supported_platform,
+  },
   context::{
-    BuildableDependency, BuildableTarget, CrateContext, DependencyAlias, GitRepo, LicenseData,
-    SourceDetails, WorkspaceContext,
+    BuildableDependency, BuildableTarget, CrateContext, CrateDependencyContext,
+    CrateTargetedDepContext, DependencyAlias, GitRepo, LicenseData, SourceDetails,
+    WorkspaceContext,
   },
   license,
   metadata::{
@@ -53,7 +56,7 @@ pub trait BuildPlanner {
     &mut self,
     settings: &RazeSettings,
     files: CargoWorkspaceFiles,
-    platform_details: PlatformDetails,
+    platform_details: Option<PlatformDetails>,
   ) -> Result<PlannedBuild>;
 }
 
@@ -83,6 +86,11 @@ struct DependencySet {
   dev_deps: Vec<BuildableDependency>,
   // Dependencies that have been renamed and need to be aliased in the build rule
   aliased_deps: Vec<DependencyAlias>,
+}
+
+struct TargetedDependencySet {
+  target: String,
+  dependencies: DependencySet,
 }
 
 /** An entry in the Crate catalog for a single crate. */
@@ -118,7 +126,7 @@ pub struct BuildPlannerImpl<'fetcher> {
 struct WorkspaceSubplanner<'planner> {
   metadata: &'planner Metadata,
   settings: &'planner RazeSettings,
-  platform_details: &'planner PlatformDetails,
+  platform_details: &'planner Option<PlatformDetails>,
   crate_catalog: &'planner CrateCatalog,
   files: &'planner CargoWorkspaceFiles,
 }
@@ -127,7 +135,7 @@ struct WorkspaceSubplanner<'planner> {
 struct CrateSubplanner<'planner> {
   // Workspace-Wide details
   settings: &'planner RazeSettings,
-  platform_details: &'planner PlatformDetails,
+  platform_details: &'planner Option<PlatformDetails>,
   crate_catalog: &'planner CrateCatalog,
   // Crate specific content
   crate_catalog_entry: &'planner CrateCatalogEntry,
@@ -204,7 +212,7 @@ impl CrateCatalogEntry {
 
     dir.push(VENDOR_DIR);
     dir.push(&self.package_ident);
-    
+
     return dir.display().to_string();
   }
 
@@ -237,7 +245,7 @@ impl CrateCatalogEntry {
         } else {
           format!("{}/vendor/{}", settings.workspace_path, &self.package_ident)
         }
-      }
+      },
     }
   }
 
@@ -264,7 +272,7 @@ impl CrateCatalogEntry {
             settings.workspace_path, &self.package_ident, &self.sanitized_name
           )
         }
-      }
+      },
     }
   }
 }
@@ -348,10 +356,12 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
     &mut self,
     settings: &RazeSettings,
     files: CargoWorkspaceFiles,
-    platform_details: PlatformDetails,
+    platform_details: Option<PlatformDetails>,
   ) -> Result<PlannedBuild> {
     let metadata = self.metadata_fetcher.fetch_metadata(&files)?;
     let crate_catalog = CrateCatalog::new(&metadata)?;
+
+    // Generate additional PlatformDetails
 
     let workspace_subplanner = WorkspaceSubplanner {
       crate_catalog: &crate_catalog,
@@ -367,7 +377,9 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
 
 impl<'fetcher> BuildPlannerImpl<'fetcher> {
   pub fn new(metadata_fetcher: &'fetcher mut dyn MetadataFetcher) -> Self {
-    Self { metadata_fetcher }
+    Self {
+      metadata_fetcher,
+    }
   }
 }
 
@@ -397,7 +409,6 @@ impl<'planner> WorkspaceSubplanner<'planner> {
   fn produce_workspace_context(&self) -> WorkspaceContext {
     WorkspaceContext {
       workspace_path: self.settings.workspace_path.clone(),
-      platform_triple: self.settings.target.clone(),
       gen_workspace_prefix: self.settings.gen_workspace_prefix.clone(),
       output_buildfile_suffix: self.settings.output_buildfile_suffix.clone(),
     }
@@ -487,14 +498,17 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 impl<'planner> CrateSubplanner<'planner> {
   /** Builds a crate context from internal state. */
   fn produce_context(&self) -> Result<CrateContext> {
-    let DependencySet {
-      build_deps,
-      build_proc_macro_deps,
-      proc_macro_deps,
-      dev_deps,
-      normal_deps,
-      aliased_deps,
-    } = self.produce_deps()?;
+    let (
+      DependencySet {
+        build_deps,
+        build_proc_macro_deps,
+        proc_macro_deps,
+        dev_deps,
+        normal_deps,
+        aliased_deps,
+      },
+      targeted_deps,
+    ) = self.produce_deps()?;
 
     let mut targets = self.produce_targets()?;
     let build_script_target_opt = self.take_build_script_target(&mut targets);
@@ -510,19 +524,55 @@ impl<'planner> CrateSubplanner<'planner> {
       }
     }
 
-    Ok(CrateContext {
+    // Build a list of dependencies while addression a potential whitelist of target triples
+    let mut filtered_deps = Vec::new();
+    for dep_set in targeted_deps.iter() {
+      let mut target_triples = get_matching_bazel_triples(&dep_set.target)?;
+      filter_bazel_triples(
+        &mut target_triples,
+        self
+          .settings
+          .targets
+          .as_ref()
+          .unwrap_or(&Vec::<String>::new()),
+      );
+
+      if target_triples.len() == 0 {
+        continue;
+      }
+
+      filtered_deps.push(CrateTargetedDepContext {
+        target: dep_set.target.clone(),
+        deps: CrateDependencyContext {
+          dependencies: dep_set.dependencies.normal_deps.clone(),
+          proc_macro_dependencies: dep_set.dependencies.proc_macro_deps.clone(),
+          build_dependencies: dep_set.dependencies.build_deps.clone(),
+          build_proc_macro_dependencies: dep_set.dependencies.build_proc_macro_deps.clone(),
+          dev_dependencies: dep_set.dependencies.dev_deps.clone(),
+          aliased_dependencies: dep_set.dependencies.aliased_deps.clone(),
+        },
+        conditions: generate_bazel_conditions(&target_triples)?,
+      });
+    }
+
+    filtered_deps.sort();
+
+    let context = CrateContext {
       pkg_name: package.name.clone(),
       pkg_version: package.version.to_string(),
       edition: package.edition.clone(),
       license: self.produce_license(),
       features: self.node.features.clone(),
       is_root_dependency: self.crate_catalog_entry.is_root_dep(),
-      dependencies: normal_deps,
-      proc_macro_dependencies: proc_macro_deps,
-      build_dependencies: build_deps,
-      build_proc_macro_dependencies: build_proc_macro_deps,
-      dev_dependencies: dev_deps,
-      aliased_dependencies: aliased_deps,
+      default_deps: CrateDependencyContext {
+        dependencies: normal_deps,
+        proc_macro_dependencies: proc_macro_deps,
+        build_dependencies: build_deps,
+        build_proc_macro_dependencies: build_proc_macro_deps,
+        dev_dependencies: dev_deps,
+        aliased_dependencies: aliased_deps,
+      },
+      targeted_deps: filtered_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings),
       build_script_target: build_script_target_opt,
       raze_settings: self.crate_settings.clone(),
@@ -531,7 +581,9 @@ impl<'planner> CrateSubplanner<'planner> {
       sha256: self.sha256.clone(),
       lib_target_name,
       targets,
-    })
+    };
+
+    Ok(context)
   }
 
   /** Generates license data from internal crate details. */
@@ -546,14 +598,11 @@ impl<'planner> CrateSubplanner<'planner> {
     license::get_license_from_str(licenses_str)
   }
 
-  /** Generates the set of dependencies for the contained crate. */
-  fn produce_deps(&self) -> Result<DependencySet> {
-    let DependencyNames {
-      build_dep_names,
-      dev_dep_names,
-      normal_dep_names,
-      aliased_dep_names,
-    } = self.identify_named_deps()?;
+  fn _produce_deps(&self, names: &DependencyNames) -> Result<DependencySet> {
+    let build_dep_names = &names.build_dep_names;
+    let dev_dep_names = &names.dev_dep_names;
+    let normal_dep_names = &names.normal_dep_names;
+    let aliased_dep_names = &names.aliased_dep_names;
 
     let mut build_deps = Vec::new();
     let mut build_proc_macro_deps = Vec::new();
@@ -659,34 +708,87 @@ impl<'planner> CrateSubplanner<'planner> {
     })
   }
 
+  /** Generates the set of dependencies for the contained crate. */
+  fn produce_deps(&self) -> Result<(DependencySet, Vec<TargetedDependencySet>)> {
+    let (default_deps, targeted_deps) = self.identify_named_deps()?;
+
+    let targeted_set = targeted_deps
+      .iter()
+      .map(|(target, deps)| TargetedDependencySet {
+        target: target.clone(),
+        dependencies: self._produce_deps(deps).unwrap(),
+      })
+      .collect::<Vec<TargetedDependencySet>>();
+
+    Ok((self._produce_deps(&default_deps)?, targeted_set))
+  }
+
   /** Yields the list of dependencies as described by the manifest (without version). */
-  fn identify_named_deps(&self) -> Result<DependencyNames> {
+  fn identify_named_deps(&self) -> Result<(DependencyNames, HashMap<String, DependencyNames>)> {
     // Resolve dependencies into types
-    let mut build_dep_names = Vec::new();
-    let mut dev_dep_names = Vec::new();
-    let mut normal_dep_names = Vec::new();
+    let mut default_dep_names = DependencyNames {
+      build_dep_names: Vec::new(),
+      dev_dep_names: Vec::new(),
+      normal_dep_names: Vec::new(),
+      aliased_dep_names: HashMap::new(),
+    };
 
-    // Store aliased dependencies in a HashMap
-    let mut aliased_dep_names = HashMap::new();
+    let mut targeted_dep_names: HashMap<String, DependencyNames> = HashMap::new();
 
-    let platform_attrs = self.platform_details.attrs();
     let package = self.crate_catalog_entry.package();
     for dep in &package.dependencies {
+      // This shadow allow for dependencies with target restrictions to override where
+      // to write data about itself.
+      let mut dep_names = &mut default_dep_names;
+
       if dep.target.is_some() {
         // UNWRAP: Safe from above check
         let target_str = format!("{}", dep.target.as_ref().unwrap());
-        let platform = Platform::from_str(&target_str)?;
 
-        // Skip this dep if it doesn't match our platform attributes
-        if !platform.matches(&self.settings.target, platform_attrs.as_ref()) {
+        // Legacy behavior
+        if let Some(platform_details) = &self.platform_details {
+          if let Some(settings_target) = &self.settings.target {
+            let platform = Platform::from_str(&target_str)?;
+
+            // Skip this dep if it doesn't match our platform attributes
+            if !platform.matches(settings_target, platform_details.attrs().as_ref()) {
+              continue;
+            }
+          }
+        }
+
+        let (is_bazel_platform, matches_all_platforms) = is_bazel_supported_platform(&target_str);
+        // If the target is not supported by Bazel, we ignore it
+        if !is_bazel_platform {
           continue;
         }
-      }
 
+        // In cases where the cfg target matches all platforms, we consider it a default dependency
+        if !matches_all_platforms {
+          // Ensure an entry is created for the 'conditional' dependency
+          dep_names = match targeted_dep_names.get_mut(&target_str) {
+            Some(targeted) => targeted,
+            None => {
+              // Create a new entry if one was not found
+              targeted_dep_names.insert(
+                target_str.clone(),
+                DependencyNames {
+                  normal_dep_names: Vec::new(),
+                  build_dep_names: Vec::new(),
+                  dev_dep_names: Vec::new(),
+                  aliased_dep_names: HashMap::new(),
+                },
+              );
+              // This unwrap should be safe given the insert above
+              targeted_dep_names.get_mut(&target_str).unwrap()
+            },
+          };
+        }
+      }
       match dep.kind {
-        DependencyKind::Normal => normal_dep_names.push(dep.name.clone()),
-        DependencyKind::Development => dev_dep_names.push(dep.name.clone()),
-        DependencyKind::Build => build_dep_names.push(dep.name.clone()),
+        DependencyKind::Normal => dep_names.normal_dep_names.push(dep.name.clone()),
+        DependencyKind::Development => dep_names.dev_dep_names.push(dep.name.clone()),
+        DependencyKind::Build => dep_names.build_dep_names.push(dep.name.clone()),
         _ => {
           return Err(
             RazeError::Planning {
@@ -698,21 +800,18 @@ impl<'planner> CrateSubplanner<'planner> {
             }
             .into(),
           )
-        }
+        },
       }
 
       // Check if the dependency has been renamed
       if let Some(alias) = dep.rename.as_ref() {
-        aliased_dep_names.insert(dep.name.clone(), alias.clone());
+        dep_names
+          .aliased_dep_names
+          .insert(dep.name.clone(), alias.clone());
       }
     }
 
-    Ok(DependencyNames {
-      build_dep_names,
-      dev_dep_names,
-      normal_dep_names,
-      aliased_dep_names,
-    })
+    Ok((default_dep_names, targeted_dep_names))
   }
 
   /** Generates source details for internal crate. */
@@ -777,21 +876,15 @@ impl<'planner> CrateSubplanner<'planner> {
         .strip_prefix(package_root_path)
         .unwrap_or(&target.src_path)
         .components()
-        .map(|c| {
-          c.as_os_str().to_str()
-        })
-        .try_fold("".to_owned(), |res, v| {
-          Some(format!("{}/{}", res, v?))
-        })
-        .ok_or(
-          io::Error::new(
-            io::ErrorKind::InvalidData,
-            format!(
-              "{:?} contains non UTF-8 characters and is not a legal path in Bazel",
-              &target.src_path
-            )
-          )
-        )?
+        .map(|c| c.as_os_str().to_str())
+        .try_fold("".to_owned(), |res, v| Some(format!("{}/{}", res, v?)))
+        .ok_or(io::Error::new(
+          io::ErrorKind::InvalidData,
+          format!(
+            "{:?} contains non UTF-8 characters and is not a legal path in Bazel",
+            &target.src_path
+          ),
+        ))?
         .trim_start_matches("/")
         .to_owned();
 
@@ -902,13 +995,18 @@ mod checks {
       .unwrap()
       .join(format!("./{}", VENDOR_DIR));
 
-    Err(RazeError::Planning {
-      dependency_name_opt: None,
-      message: format!(
-        "Failed to find expected vendored crates in {:?}: {:?}. Did you forget to run cargo vendor?",
-        expected_full_path.to_str(),
-        limited_missing_crates)
-      }.into())
+    Err(
+      RazeError::Planning {
+        dependency_name_opt: None,
+        message: format!(
+          "Failed to find expected vendored crates in {:?}: {:?}. Did you forget to run cargo \
+           vendor?",
+          expected_full_path.to_str(),
+          limited_missing_crates
+        ),
+      }
+      .into(),
+    )
   }
 
   pub fn check_resolve_matches_packages(metadata: &Metadata) -> Result<()> {
@@ -1044,7 +1142,7 @@ dependencies = [
         let mut lock = File::create(&path).unwrap();
         lock.write_all(lock_file.as_bytes()).unwrap();
         Some(path)
-      }
+      },
       None => None,
     };
     let files = CargoWorkspaceFiles {
@@ -1106,7 +1204,10 @@ dependencies = [
     let res = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
       files,
-      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+      Some(PlatformDetails::new(
+        "some_target_triple".to_owned(),
+        Vec::new(), /* attrs */
+      )),
     );
     assert!(res.is_err());
   }
@@ -1134,7 +1235,10 @@ dependencies = [
     let planned_build_res = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
       files,
-      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+      Some(PlatformDetails::new(
+        "some_target_triple".to_owned(),
+        Vec::new(), /* attrs */
+      )),
     );
 
     println!("{:#?}", planned_build_res);
@@ -1149,7 +1253,10 @@ dependencies = [
     let planned_build_res = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
       files,
-      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+      Some(PlatformDetails::new(
+        "some_target_triple".to_owned(),
+        Vec::new(), /* attrs */
+      )),
     );
 
     println!("{:#?}", planned_build_res);
@@ -1210,7 +1317,10 @@ dependencies = [
     let planned_build_res = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
       files,
-      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+      Some(PlatformDetails::new(
+        "some_target_triple".to_owned(),
+        Vec::new(), /* attrs */
+      )),
     );
 
     println!("{:#?}", planned_build_res);
@@ -1242,7 +1352,10 @@ dependencies = [
     let planned_build_res = planner.plan_build(
       &settings,
       files,
-      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+      Some(PlatformDetails::new(
+        "some_target_triple".to_owned(),
+        Vec::new(), /* attrs */
+      )),
     );
 
     println!("{:#?}", planned_build_res);
@@ -1293,7 +1406,10 @@ dependencies = [
     let planned_build_res = planner.plan_build(
       &settings,
       files,
-      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+      Some(PlatformDetails::new(
+        "some_target_triple".to_owned(),
+        Vec::new(), /* attrs */
+      )),
     );
     assert!(planned_build_res.unwrap().crate_contexts.is_empty());
   }
@@ -1322,14 +1438,17 @@ dependencies = [
     let planned_build_res = planner.plan_build(
       &settings,
       files,
-      PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+      Some(PlatformDetails::new(
+        "some_target_triple".to_owned(),
+        Vec::new(), /* attrs */
+      )),
     );
 
     let crates_with_aliased_deps: Vec<CrateContext> = planned_build_res
       .unwrap()
       .crate_contexts
       .into_iter()
-      .filter(|krate| krate.aliased_dependencies.len() != 0)
+      .filter(|krate| krate.default_deps.aliased_dependencies.len() != 0)
       .collect();
 
     // Vec length shouldn't be 0
@@ -1347,11 +1466,12 @@ dependencies = [
     // Get crate context using computed position
     let actix_http_context = crates_with_aliased_deps[actix_web_position.unwrap()].clone();
 
-    assert!(actix_http_context.aliased_dependencies.len() == 1);
+    assert!(actix_http_context.default_deps.aliased_dependencies.len() == 1);
     assert!(
-      actix_http_context.aliased_dependencies[0].target == "@raze_test__failure__0_1_8//:failure"
+      actix_http_context.default_deps.aliased_dependencies[0].target
+        == "@raze_test__failure__0_1_8//:failure"
     );
-    assert!(actix_http_context.aliased_dependencies[0].alias == "fail_ure");
+    assert!(actix_http_context.default_deps.aliased_dependencies[0].alias == "fail_ure");
   }
 
   #[test]
@@ -1377,7 +1497,10 @@ dependencies = [
       .plan_build(
         &settings,
         files,
-        PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+        Some(PlatformDetails::new(
+          "some_target_triple".to_owned(),
+          Vec::new(), /* attrs */
+        )),
       )
       .unwrap();
 
@@ -1388,6 +1511,7 @@ dependencies = [
       .unwrap();
 
     let serde_derive_proc_macro_deps: Vec<_> = serde
+      .default_deps
       .proc_macro_dependencies
       .iter()
       .filter(|dep| dep.name == "serde_derive")
@@ -1395,6 +1519,7 @@ dependencies = [
     assert_eq!(serde_derive_proc_macro_deps.len(), 1);
 
     let serde_derive_normal_deps: Vec<_> = serde
+      .default_deps
       .dependencies
       .iter()
       .filter(|dep| dep.name == "serde_derive")
@@ -1425,7 +1550,10 @@ dependencies = [
       .plan_build(
         &settings,
         files,
-        PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+        Some(PlatformDetails::new(
+          "some_target_triple".to_owned(),
+          Vec::new(), /* attrs */
+        )),
       )
       .unwrap();
 
@@ -1436,6 +1564,7 @@ dependencies = [
       .unwrap();
 
     let markup_proc_macro_deps: Vec<_> = markup
+      .default_deps
       .proc_macro_dependencies
       .iter()
       .filter(|dep| dep.name == "serde_derive")
@@ -1443,6 +1572,7 @@ dependencies = [
     assert_eq!(markup_proc_macro_deps.len(), 0);
 
     let markup_build_proc_macro_deps: Vec<_> = markup
+      .default_deps
       .build_proc_macro_dependencies
       .iter()
       .filter(|dep| dep.name == "serde_derive")
@@ -1473,11 +1603,17 @@ dependencies = [
       .plan_build(
         &settings,
         files,
-        PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
+        Some(PlatformDetails::new(
+          "some_target_triple".to_owned(),
+          Vec::new(), /* attrs */
+        )),
       )
       .unwrap();
 
-      assert_eq!(planned_build.crate_contexts[0].targets[0].path, "src/lib.rs");
+    assert_eq!(
+      planned_build.crate_contexts[0].targets[0].path,
+      "src/lib.rs"
+    );
   }
   // TODO(acmcarther): Add tests:
   // TODO(acmcarther): Extra flags work

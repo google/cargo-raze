@@ -13,6 +13,9 @@ load(
     "rust_test",
 )
 
+# buildifier: disable=load
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
 package(default_visibility = [
     # Public for visibility by "@raze__crate__version//" targets.
     #

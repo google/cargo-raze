@@ -14,15 +14,14 @@ cargo_build_script(
     crate_root = "build.rs",
     {%- endif %}
     edition = "{{ crate.edition }}",
-    # buildifier: leave-alone
     deps = [
-      {%- for dependency in crate.build_dependencies %}
+      {%- for dependency in crate.default_deps.build_dependencies %}
         "{{dependency.buildable_target}}",
       {%- endfor %}
     ],
-    {%- if crate.build_proc_macro_dependencies %}
+    {%- if crate.default_deps.build_proc_macro_dependencies %}
     proc_macro_deps = [
-    {%- for dependency in crate.build_proc_macro_dependencies %}
+    {%- for dependency in crate.default_deps.build_proc_macro_dependencies %}
         "{{dependency.buildable_target}}",
     {%- endfor %}
     ],

@@ -52,8 +52,16 @@ pub struct RazeSettings {
    *
    * This comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
    */
-  #[serde(default = "default_raze_settings_field_target")]
-  pub target: String,
+  #[serde(default)]
+  pub target: Option<String>,
+
+  /**
+   * A list of targets to generate BUILD rules for.
+   *
+   * Each item comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
+   */
+  #[serde(default)]
+  pub targets: Option<Vec<String>>,
 
   /** Any crate-specific configuration. See CrateSettings for details. */
   #[serde(default)]
@@ -253,10 +261,6 @@ impl Default for CrateSettings {
   }
 }
 
-fn default_raze_settings_field_target() -> String {
-  "x86_64-unknown-linux-gnu".to_owned()
-}
-
 fn default_raze_settings_field_gen_workspace_prefix() -> String {
   "raze".to_owned()
 }
@@ -343,7 +347,8 @@ pub mod testing {
   pub fn dummy_raze_settings() -> RazeSettings {
     RazeSettings {
       workspace_path: "//cargo".to_owned(),
-      target: "x86_64-unknown-linux-gnu".to_owned(),
+      target: Some("x86_64-unknown-linux-gnu".to_owned()),
+      targets: None,
       crates: HashMap::new(),
       gen_workspace_prefix: "raze_test".to_owned(),
       genmode: GenMode::Remote,
@@ -383,8 +388,6 @@ pub mod testing {
     let mut toml = File::create(&cargo_toml_path).unwrap();
     toml.write_all(toml_contents.as_bytes()).unwrap();
 
-    let settings = load_settings(cargo_toml_path).unwrap();
-
-    assert_eq!(settings.target, default_raze_settings_field_target());
+    load_settings(cargo_toml_path).unwrap();
   }
 }

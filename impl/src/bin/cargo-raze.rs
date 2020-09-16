@@ -87,7 +87,12 @@ fn main() -> Result<()> {
     toml_path,
     lock_path_opt,
   };
-  let platform_details = PlatformDetails::new_using_rustc(&settings.target)?;
+
+  let platform_details = match &settings.target {
+    Some(target) => Some(PlatformDetails::new_using_rustc(target)?),
+    None => None,
+  };
+
   let planned_build = planner.plan_build(&settings, files, platform_details)?;
   let mut bazel_renderer = BazelRenderer::new();
 
