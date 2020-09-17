@@ -34,13 +34,13 @@ git_commit_changes() {
 }
 
 git_last_commit() {
-  echo $(git rev-parse --short HEAD)
+  echo "$(git rev-parse --short HEAD)"
 }
 
 git_tag_commit_with_version() {
   last_commit_hash=$1
   crate_version=$2
-  git tag "v$crate_version" $last_commit_hash
+  git tag "v$crate_version" "$last_commit_hash"
 }
 
 cargo_publish_crate() {
@@ -53,11 +53,11 @@ git_push_changes_and_tags() {
 
 publish_crate_version() {
   crate_version=$1
-  update_cargo_toml_version $crate_version
+  update_cargo_toml_version "$crate_version"
   cargo_build_crate
-  git_commit_changes $crate_version
+  git_commit_changes "$crate_version"
   last_commit_hash=$(git_last_commit)
-  git_tag_commit_with_version $last_commit_hash $crate_version
+  git_tag_commit_with_version "$last_commit_hash" "$crate_version"
   cargo_publish_crate
   git_push_changes_and_tags
 }
@@ -65,14 +65,14 @@ publish_crate_version() {
 command_exists "cargo"
 
 NEXT_CRATE_VERSION=$1
-if [ -z "$NEXT_CRATE_VERSION" ]
+if [[ -z "$NEXT_CRATE_VERSION" ]]
 then
   echo "A version argument must be provided, of the form X.Y.Z."
   echo "Example Usage: ./publish-new-version.sh 0.1.1"
   exit 1
 fi
 
-if ! [ -z "$(git status --porcelain)" ]; then
+if ! [[ -z "$(git status --porcelain)" ]]; then
   echo "Working directory is not clean. Commit pending changes before running command."
   exit 1
 fi
@@ -82,6 +82,7 @@ PWD="$(pwd)"
 REPO_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$REPO_ROOT/impl"
 
+set -x
 publish_crate_version "$NEXT_CRATE_VERSION"
 
-cd $PWD
+cd "$PWD"
