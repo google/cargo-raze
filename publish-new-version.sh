@@ -25,6 +25,7 @@ update_cargo_toml_version() {
 }
 
 cargo_build_crate() {
+  # Build so that our `Cargo.lock` gets updated (before we commit).
   cargo build --release
 }
 
