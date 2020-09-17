@@ -25,7 +25,7 @@ update_cargo_toml_version() {
 }
 
 cargo_build_crate() {
-  cargo build
+  cargo build --release
 }
 
 git_commit_changes() {
