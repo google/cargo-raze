@@ -1,0 +1,6 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_binary")
+
+rust_binary(
+    name = "no_deps",
+    srcs = ["src/main.rs"],
+)
