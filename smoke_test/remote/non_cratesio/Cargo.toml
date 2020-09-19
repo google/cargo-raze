@@ -21,3 +21,8 @@ target = "x86_64-unknown-linux-gnu"
 genmode = "Remote"
 incompatible_relative_workspace_path = true
 gen_workspace_prefix = "remote_non_cratesio"
+
+[raze.crates.log.'0.4.11']
+additional_flags = [
+    "--cfg=atomic_cas"
+]

@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = ["Alex McArther <acmcarther@gmail.com>"]
 
 [dependencies]
-log = "0.3.6"
-fern = "0.3.5"
+log = "=0.3.6"
+fern = "=0.3.5"
 
 [[bin]]
 name = "hello_cargo_library"
