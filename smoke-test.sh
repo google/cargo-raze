@@ -27,7 +27,7 @@ RAZE="$IMPL_DIR/target/debug/cargo-raze raze"
 # Clean the `examples` directory
 echo "Cleaning examples directory"
 rm -rf "$EXAMPLES_DIR/remote" "$EXAMPLES_DIR/vendored"
-cp -r "$TEST_DIR/remote" "$TEST_DIR/vendored" "$EXAMPLES_DIR"
+cp -r "$TEST_DIR/remote" "$TEST_DIR/vendored" "$TEST_DIR/tests" "$REPO_ROOT/.bazelversion" $"$EXAMPLES_DIR"
 
 # Set up root BUILD file
 touch "$EXAMPLES_DIR/BUILD"
@@ -104,7 +104,6 @@ for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
 done
 
 # Print Bazel version info
-export USE_BAZEL_VERSION="$(cat $REPO_ROOT/.bazelversion)"
 echo "Bazel version info"
 bazel version
 

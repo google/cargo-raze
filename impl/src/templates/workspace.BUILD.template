@@ -10,6 +10,7 @@ package(default_visibility = ["//visibility:public"])
 licenses([
     "notice",  # See individual crates for specific licenses
 ])
+{%- if crates %}
 
 # Aliased targets
 {%- for crate in crates %}
@@ -37,3 +38,7 @@ alias(
 )
 {%  endfor %}
 {%- endfor %}
+{%- else %}
+
+# No targets defined
+{% endif %}
