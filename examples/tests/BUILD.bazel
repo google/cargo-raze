@@ -1,0 +1,18 @@
+"""All executable targets within this workspace should have a launch_test
+within this file to ensure the targets not only build successfully but run
+successfully as well
+"""
+
+load("//tests:launch_test.bzl", "launch_test")
+
+launch_test(target = "//remote/complicated_cargo_library")
+
+launch_test(target = "//remote/no_deps")
+
+launch_test(target = "//remote/non_cratesio:non_cratesio_remote")
+
+launch_test(target = "//vendored/complicated_cargo_library")
+
+launch_test(target = "//vendored/hello_cargo_library")
+
+launch_test(target = "//vendored/non_cratesio_library")
