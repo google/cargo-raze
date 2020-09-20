@@ -36,7 +36,7 @@ rust_library(
     name = "fern",
     crate_type = "lib",
     deps = [
-        "//vendored/hello_cargo_library/cargo/vendor/log-0.3.9:log",
+        "//vendored/hello_cargo_library/cargo/vendor/log-0.3.6:log",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

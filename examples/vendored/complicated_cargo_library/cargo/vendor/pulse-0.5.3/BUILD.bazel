@@ -38,7 +38,7 @@ rust_library(
     crate_type = "lib",
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/atom-0.3.5:atom",
-        "//vendored/complicated_cargo_library/cargo/vendor/time-0.1.42:time",
+        "//vendored/complicated_cargo_library/cargo/vendor/time-0.1.44:time",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

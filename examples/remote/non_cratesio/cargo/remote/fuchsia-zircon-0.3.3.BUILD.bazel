@@ -35,7 +35,7 @@ rust_library(
     name = "fuchsia_zircon",
     crate_type = "lib",
     deps = [
-        "@remote_non_cratesio__bitflags__1_0_4//:bitflags",
+        "@remote_non_cratesio__bitflags__1_2_1//:bitflags",
         "@remote_non_cratesio__fuchsia_zircon_sys__0_3_3//:fuchsia_zircon_sys",
     ],
     srcs = glob(["**/*.rs"]),

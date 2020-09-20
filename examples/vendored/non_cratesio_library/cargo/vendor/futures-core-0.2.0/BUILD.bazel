@@ -35,7 +35,7 @@ rust_library(
     name = "futures_core",
     crate_type = "lib",
     deps = [
-        "//vendored/non_cratesio_library/cargo/vendor/either-1.4.0:either",
+        "//vendored/non_cratesio_library/cargo/vendor/either-1.6.1:either",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

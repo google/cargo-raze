@@ -36,7 +36,7 @@ rust_library(
     name = "futures_util",
     crate_type = "lib",
     deps = [
-        "//vendored/non_cratesio_library/cargo/vendor/either-1.4.0:either",
+        "//vendored/non_cratesio_library/cargo/vendor/either-1.6.1:either",
         "//vendored/non_cratesio_library/cargo/vendor/futures-channel-0.2.0:futures_channel",
         "//vendored/non_cratesio_library/cargo/vendor/futures-core-0.2.0:futures_core",
         "//vendored/non_cratesio_library/cargo/vendor/futures-io-0.2.0:futures_io",

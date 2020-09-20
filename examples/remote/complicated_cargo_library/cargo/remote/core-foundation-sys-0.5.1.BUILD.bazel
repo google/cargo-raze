@@ -36,7 +36,7 @@ rust_library(
     name = "core_foundation_sys",
     crate_type = "lib",
     deps = [
-        "@remote_complicated_cargo_library__libc__0_2_53//:libc",
+        "@remote_complicated_cargo_library__libc__0_2_77//:libc",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
