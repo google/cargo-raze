@@ -37,6 +37,10 @@ load("//remote/complicated_cargo_library/cargo:crates.bzl", "remote_complicated_
 
 remote_complicated_cargo_library_fetch_remote_crates()
 
+load("//remote/no_deps/cargo:crates.bzl", "remote_no_deps_fetch_remote_crates")
+
+remote_no_deps_fetch_remote_crates()
+
 load("//remote/non_cratesio/cargo:crates.bzl", "remote_non_cratesio_fetch_remote_crates")
 
 remote_non_cratesio_fetch_remote_crates()

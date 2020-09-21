@@ -27,7 +27,7 @@ RAZE="$IMPL_DIR/target/debug/cargo-raze raze"
 # Clean the `examples` directory
 echo "Cleaning examples directory"
 rm -rf "$EXAMPLES_DIR/remote" "$EXAMPLES_DIR/vendored"
-cp -r "$TEST_DIR/remote" "$TEST_DIR/vendored" "$EXAMPLES_DIR"
+cp -r "$TEST_DIR/remote" "$TEST_DIR/vendored" "$TEST_DIR/tests" "$REPO_ROOT/.bazelversion" $"$EXAMPLES_DIR"
 
 # Set up root BUILD file
 touch "$EXAMPLES_DIR/BUILD"
@@ -104,21 +104,13 @@ for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
 done
 
 # Print Bazel version info
-export USE_BAZEL_VERSION="$(cat $REPO_ROOT/.bazelversion)"
 echo "Bazel version info"
 bazel version
 
 # Run the Bazel build for all targets
 cd "$EXAMPLES_DIR"
-for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
-    ex_name="$(basename "$ex")"
-    ex_type="$(basename $(dirname "$ex"))"
-    bazel_path="//$ex_type/$ex_name:all"
-    bazel_cargo_path="//$ex_type/$ex_name/cargo:all"
-
-    echo "Running Bazel build for $bazel_path, $bazel_cargo_path"
-    bazel build "$bazel_path"
-    bazel build "$bazel_cargo_path"
-done
+echo "Running Bazel 'build' and 'test' for all examples"
+bazel build //...
+bazel test //...
 
 cd "$PWD"
