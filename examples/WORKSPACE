@@ -20,6 +20,10 @@ load("@io_bazel_rules_rust//:workspace.bzl", "rust_workspace")
 
 rust_workspace()
 
+load("//remote/binary_dependencies/cargo:crates.bzl", "remote_binary_dependencies_fetch_remote_crates")
+
+remote_binary_dependencies_fetch_remote_crates()
+
 load("//remote/complicated_cargo_library/cargo:crates.bzl", "remote_complicated_cargo_library_fetch_remote_crates")
 
 remote_complicated_cargo_library_fetch_remote_crates()
