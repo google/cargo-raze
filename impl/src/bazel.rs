@@ -567,6 +567,7 @@ mod tests {
         git_data: None,
       },
       sha256: None,
+      registry_url: "https://crates.io/api/v1/crates/test-binary/1.1.1/download".to_string(),
       lib_target_name: None,
     }
   }
@@ -606,6 +607,7 @@ mod tests {
         git_data: None,
       },
       sha256: None,
+      registry_url: "https://crates.io/api/v1/crates/test-binary/1.1.1/download".to_string(),
       lib_target_name: Some("test_library".to_owned()),
     }
   }

@@ -40,7 +40,7 @@ use crate::{
   metadata::{
     CargoWorkspaceFiles, DependencyKind, Metadata, MetadataFetcher, Node, Package, PackageId,
   },
-  settings::{CrateSettings, GenMode, RazeSettings},
+  settings::{format_registry_url, CrateSettings, GenMode, RazeSettings},
   util::{self, PlatformDetails, RazeError, PLEASE_FILE_A_BUG},
 };
 
@@ -579,6 +579,11 @@ impl<'planner> CrateSubplanner<'planner> {
       source_details: self.produce_source_details(),
       expected_build_path: self.crate_catalog_entry.local_build_path(&self.settings),
       sha256: self.sha256.clone(),
+      registry_url: format_registry_url(
+        &self.settings.registry,
+        &package.name,
+        &package.version.to_string(),
+      ),
       lib_target_name,
       targets,
     };

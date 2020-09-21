@@ -97,6 +97,16 @@ pub struct RazeSettings {
    */
   #[serde(default = "default_raze_settings_field_gen_buildrs")]
   pub default_gen_buildrs: bool,
+
+  /**
+   * The default crates registry.
+   * 
+   * The patterns `{crate}` and `{version}` will be used to fill
+   * in the package's name (eg: rand) and version (eg: 0.7.1).
+   * See https://doc.rust-lang.org/cargo/reference/registries.html#index-format
+   */
+  #[serde(default = "default_raze_settings_registry")]
+  pub registry: String,
 }
 
 /** Override settings for individual crates (as part of `RazeSettings`). */
@@ -277,6 +287,10 @@ fn default_raze_settings_field_gen_buildrs() -> bool {
   false
 }
 
+fn default_raze_settings_registry() -> String {
+  "https://crates-io.s3-us-west-1.amazonaws.com/crates/{crate}/{crate}-{version}.crate".to_string()
+}
+
 fn default_crate_settings_field_gen_buildrs() -> Option<bool> {
   None
 }
@@ -287,6 +301,13 @@ fn default_crate_settings_field_data_attr() -> Option<String> {
 
 fn incompatible_relative_workspace_path() -> bool {
   false
+}
+
+/** Formats a registry url to include the name and version fo the target package */
+pub fn format_registry_url(registry_url: &String, name: &String, version: &String) -> String {
+  registry_url
+    .replace("{crate}", name)
+    .replace("{version}", version)
 }
 
 /** Verifies that the provided settings make sense. */
@@ -355,6 +376,7 @@ pub mod testing {
       output_buildfile_suffix: "BUILD".to_owned(),
       default_gen_buildrs: default_raze_settings_field_gen_buildrs(),
       incompatible_relative_workspace_path: incompatible_relative_workspace_path(),
+      registry: default_raze_settings_registry(),
     }
   }
 
@@ -389,5 +411,26 @@ pub mod testing {
     toml.write_all(toml_contents.as_bytes()).unwrap();
 
     load_settings(cargo_toml_path).unwrap();
+  }
+
+  #[test]
+  fn test_formatting_registry_url() {
+    assert_eq!(
+      format_registry_url(
+        &default_raze_settings_registry(),
+        &"foo".to_string(),
+        &"0.0.1".to_string()
+      ),
+      "https://crates-io.s3-us-west-1.amazonaws.com/crates/foo/foo-0.0.1.crate"
+    );
+
+    assert_eq!(
+      format_registry_url(
+        &"https://registry.io/{crate}/{crate}/{version}/{version}".to_string(),
+        &"foo".to_string(),
+        &"0.0.1".to_string()
+      ),
+      "https://registry.io/foo/foo/0.0.1/0.0.1"
+    );
   }
 }
