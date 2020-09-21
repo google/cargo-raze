@@ -38,7 +38,7 @@ rust_library(
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/MacTypes-sys-2.1.0:MacTypes_sys",
         "//vendored/complicated_cargo_library/cargo/vendor/core-foundation-sys-0.5.1:core_foundation_sys",
-        "//vendored/complicated_cargo_library/cargo/vendor/libc-0.2.53:libc",
+        "//vendored/complicated_cargo_library/cargo/vendor/libc-0.2.77:libc",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

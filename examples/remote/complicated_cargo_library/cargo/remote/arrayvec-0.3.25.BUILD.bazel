@@ -35,7 +35,7 @@ rust_library(
     name = "arrayvec",
     crate_type = "lib",
     deps = [
-        "@remote_complicated_cargo_library__nodrop__0_1_13//:nodrop",
+        "@remote_complicated_cargo_library__nodrop__0_1_14//:nodrop",
         "@remote_complicated_cargo_library__odds__0_2_26//:odds",
     ],
     srcs = glob(["**/*.rs"]),

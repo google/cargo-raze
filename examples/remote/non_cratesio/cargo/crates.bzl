@@ -23,32 +23,32 @@ def remote_non_cratesio_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "remote_non_cratesio__atty__0_2_11",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/atty/atty-0.2.11.crate",
+        name = "remote_non_cratesio__atty__0_2_14",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/atty/atty-0.2.14.crate",
         type = "tar.gz",
-        sha256 = "9a7d5b8723950951411ee34d271d99dddcc2035a16ab25310ea2c8cfd4369652",
-        strip_prefix = "atty-0.2.11",
-        build_file = Label("//remote/non_cratesio/cargo/remote:atty-0.2.11.BUILD.bazel"),
+        sha256 = "d9b39be18770d11421cdb1b9947a45dd3f37e93092cbf377614828a319d5fee8",
+        strip_prefix = "atty-0.2.14",
+        build_file = Label("//remote/non_cratesio/cargo/remote:atty-0.2.14.BUILD.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "remote_non_cratesio__bitflags__1_0_4",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/bitflags/bitflags-1.0.4.crate",
+        name = "remote_non_cratesio__bitflags__1_2_1",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/bitflags/bitflags-1.2.1.crate",
         type = "tar.gz",
-        sha256 = "228047a76f468627ca71776ecdebd732a3423081fcf5125585bcd7c49886ce12",
-        strip_prefix = "bitflags-1.0.4",
-        build_file = Label("//remote/non_cratesio/cargo/remote:bitflags-1.0.4.BUILD.bazel"),
+        sha256 = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693",
+        strip_prefix = "bitflags-1.2.1",
+        build_file = Label("//remote/non_cratesio/cargo/remote:bitflags-1.2.1.BUILD.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "remote_non_cratesio__cfg_if__0_1_7",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/cfg-if/cfg-if-0.1.7.crate",
+        name = "remote_non_cratesio__cfg_if__0_1_10",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/cfg-if/cfg-if-0.1.10.crate",
         type = "tar.gz",
-        sha256 = "11d43355396e872eefb45ce6342e4374ed7bc2b3a502d1b28e36d6e23c05d1f4",
-        strip_prefix = "cfg-if-0.1.7",
-        build_file = Label("//remote/non_cratesio/cargo/remote:cfg-if-0.1.7.BUILD.bazel"),
+        sha256 = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822",
+        strip_prefix = "cfg-if-0.1.10",
+        build_file = Label("//remote/non_cratesio/cargo/remote:cfg-if-0.1.10.BUILD.bazel"),
     )
 
     maybe(
@@ -82,32 +82,42 @@ def remote_non_cratesio_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "remote_non_cratesio__humantime__1_2_0",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/humantime/humantime-1.2.0.crate",
+        name = "remote_non_cratesio__hermit_abi__0_1_15",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/hermit-abi/hermit-abi-0.1.15.crate",
         type = "tar.gz",
-        sha256 = "3ca7e5f2e110db35f93b837c81797f3714500b81d517bf20c431b16d3ca4f114",
-        strip_prefix = "humantime-1.2.0",
-        build_file = Label("//remote/non_cratesio/cargo/remote:humantime-1.2.0.BUILD.bazel"),
+        sha256 = "3deed196b6e7f9e44a2ae8d94225d80302d81208b1bb673fd21fe634645c85a9",
+        strip_prefix = "hermit-abi-0.1.15",
+        build_file = Label("//remote/non_cratesio/cargo/remote:hermit-abi-0.1.15.BUILD.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "remote_non_cratesio__lazy_static__1_3_0",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/lazy_static/lazy_static-1.3.0.crate",
+        name = "remote_non_cratesio__humantime__1_3_0",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/humantime/humantime-1.3.0.crate",
         type = "tar.gz",
-        sha256 = "bc5729f27f159ddd61f4df6228e827e86643d4d3e7c32183cb30a1c08f604a14",
-        strip_prefix = "lazy_static-1.3.0",
-        build_file = Label("//remote/non_cratesio/cargo/remote:lazy_static-1.3.0.BUILD.bazel"),
+        sha256 = "df004cfca50ef23c36850aaaa59ad52cc70d0e90243c3c7737a4dd32dc7a3c4f",
+        strip_prefix = "humantime-1.3.0",
+        build_file = Label("//remote/non_cratesio/cargo/remote:humantime-1.3.0.BUILD.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "remote_non_cratesio__libc__0_2_53",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/libc/libc-0.2.53.crate",
+        name = "remote_non_cratesio__lazy_static__1_4_0",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/lazy_static/lazy_static-1.4.0.crate",
         type = "tar.gz",
-        sha256 = "ec350a9417dfd244dc9a6c4a71e13895a4db6b92f0b106f07ebbc3f3bc580cee",
-        strip_prefix = "libc-0.2.53",
-        build_file = Label("//remote/non_cratesio/cargo/remote:libc-0.2.53.BUILD.bazel"),
+        sha256 = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646",
+        strip_prefix = "lazy_static-1.4.0",
+        build_file = Label("//remote/non_cratesio/cargo/remote:lazy_static-1.4.0.BUILD.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "remote_non_cratesio__libc__0_2_77",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/libc/libc-0.2.77.crate",
+        type = "tar.gz",
+        sha256 = "f2f96b10ec2560088a8e76961b00d47107b3a625fecb76dedb29ee7ccbf98235",
+        strip_prefix = "libc-0.2.77",
+        build_file = Label("//remote/non_cratesio/cargo/remote:libc-0.2.77.BUILD.bazel"),
     )
 
     maybe(
@@ -121,42 +131,32 @@ def remote_non_cratesio_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "remote_non_cratesio__log__0_4_6",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/log/log-0.4.6.crate",
+        name = "remote_non_cratesio__log__0_4_11",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/log/log-0.4.11.crate",
         type = "tar.gz",
-        sha256 = "c84ec4b527950aa83a329754b01dbe3f58361d1c5efacd1f6d68c494d08a17c6",
-        strip_prefix = "log-0.4.6",
-        build_file = Label("//remote/non_cratesio/cargo/remote:log-0.4.6.BUILD.bazel"),
+        sha256 = "4fabed175da42fed1fa0746b0ea71f412aa9d35e76e95e59b192c64b9dc2bf8b",
+        strip_prefix = "log-0.4.11",
+        build_file = Label("//remote/non_cratesio/cargo/remote:log-0.4.11.BUILD.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "remote_non_cratesio__memchr__2_2_0",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/memchr/memchr-2.2.0.crate",
+        name = "remote_non_cratesio__memchr__2_3_3",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/memchr/memchr-2.3.3.crate",
         type = "tar.gz",
-        sha256 = "2efc7bc57c883d4a4d6e3246905283d8dae951bb3bd32f49d6ef297f546e1c39",
-        strip_prefix = "memchr-2.2.0",
-        build_file = Label("//remote/non_cratesio/cargo/remote:memchr-2.2.0.BUILD.bazel"),
+        sha256 = "3728d817d99e5ac407411fa471ff9800a778d88a24685968b36824eaf4bee400",
+        strip_prefix = "memchr-2.3.3",
+        build_file = Label("//remote/non_cratesio/cargo/remote:memchr-2.3.3.BUILD.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "remote_non_cratesio__numtoa__0_1_0",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/numtoa/numtoa-0.1.0.crate",
+        name = "remote_non_cratesio__quick_error__1_2_3",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/quick-error/quick-error-1.2.3.crate",
         type = "tar.gz",
-        sha256 = "b8f8bdf33df195859076e54ab11ee78a1b208382d3a26ec40d142ffc1ecc49ef",
-        strip_prefix = "numtoa-0.1.0",
-        build_file = Label("//remote/non_cratesio/cargo/remote:numtoa-0.1.0.BUILD.bazel"),
-    )
-
-    maybe(
-        http_archive,
-        name = "remote_non_cratesio__quick_error__1_2_2",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/quick-error/quick-error-1.2.2.crate",
-        type = "tar.gz",
-        sha256 = "9274b940887ce9addde99c4eee6b5c44cc494b182b97e73dc8ffdcb3397fd3f0",
-        strip_prefix = "quick-error-1.2.2",
-        build_file = Label("//remote/non_cratesio/cargo/remote:quick-error-1.2.2.BUILD.bazel"),
+        sha256 = "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0",
+        strip_prefix = "quick-error-1.2.3",
+        build_file = Label("//remote/non_cratesio/cargo/remote:quick-error-1.2.3.BUILD.bazel"),
     )
 
     maybe(
@@ -166,26 +166,6 @@ def remote_non_cratesio_fetch_remote_crates():
         commit = "b333d687138b5cb9b225f49ba80bf1bfef01e068",
         build_file = Label("//remote/non_cratesio/cargo/remote:rand-0.4.1.BUILD.bazel"),
         init_submodules = True,
-    )
-
-    maybe(
-        http_archive,
-        name = "remote_non_cratesio__redox_syscall__0_1_54",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/redox_syscall/redox_syscall-0.1.54.crate",
-        type = "tar.gz",
-        sha256 = "12229c14a0f65c4f1cb046a3b52047cdd9da1f4b30f8a39c5063c8bae515e252",
-        strip_prefix = "redox_syscall-0.1.54",
-        build_file = Label("//remote/non_cratesio/cargo/remote:redox_syscall-0.1.54.BUILD.bazel"),
-    )
-
-    maybe(
-        http_archive,
-        name = "remote_non_cratesio__redox_termios__0_1_1",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/redox_termios/redox_termios-0.1.1.crate",
-        type = "tar.gz",
-        sha256 = "7e891cfe48e9100a70a3b6eb652fef28920c117d366339687bd5576160db0f76",
-        strip_prefix = "redox_termios-0.1.1",
-        build_file = Label("//remote/non_cratesio/cargo/remote:redox_termios-0.1.1.BUILD.bazel"),
     )
 
     maybe(
@@ -220,16 +200,6 @@ def remote_non_cratesio_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "remote_non_cratesio__termion__1_5_2",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/termion/termion-1.5.2.crate",
-        type = "tar.gz",
-        sha256 = "dde0593aeb8d47accea5392b39350015b5eccb12c0d98044d856983d89548dea",
-        strip_prefix = "termion-1.5.2",
-        build_file = Label("//remote/non_cratesio/cargo/remote:termion-1.5.2.BUILD.bazel"),
-    )
-
-    maybe(
-        http_archive,
         name = "remote_non_cratesio__thread_local__0_3_6",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/thread_local/thread_local-0.3.6.crate",
         type = "tar.gz",
@@ -240,32 +210,32 @@ def remote_non_cratesio_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "remote_non_cratesio__ucd_util__0_1_3",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/ucd-util/ucd-util-0.1.3.crate",
+        name = "remote_non_cratesio__ucd_util__0_1_8",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/ucd-util/ucd-util-0.1.8.crate",
         type = "tar.gz",
-        sha256 = "535c204ee4d8434478593480b8f86ab45ec9aae0e83c568ca81abf0fd0e88f86",
-        strip_prefix = "ucd-util-0.1.3",
-        build_file = Label("//remote/non_cratesio/cargo/remote:ucd-util-0.1.3.BUILD.bazel"),
+        sha256 = "c85f514e095d348c279b1e5cd76795082cf15bd59b93207832abe0b1d8fed236",
+        strip_prefix = "ucd-util-0.1.8",
+        build_file = Label("//remote/non_cratesio/cargo/remote:ucd-util-0.1.8.BUILD.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "remote_non_cratesio__utf8_ranges__1_0_2",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/utf8-ranges/utf8-ranges-1.0.2.crate",
+        name = "remote_non_cratesio__utf8_ranges__1_0_4",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/utf8-ranges/utf8-ranges-1.0.4.crate",
         type = "tar.gz",
-        sha256 = "796f7e48bef87609f7ade7e06495a87d5cd06c7866e6a5cbfceffc558a243737",
-        strip_prefix = "utf8-ranges-1.0.2",
-        build_file = Label("//remote/non_cratesio/cargo/remote:utf8-ranges-1.0.2.BUILD.bazel"),
+        sha256 = "b4ae116fef2b7fea257ed6440d3cfcff7f190865f170cdad00bb6465bf18ecba",
+        strip_prefix = "utf8-ranges-1.0.4",
+        build_file = Label("//remote/non_cratesio/cargo/remote:utf8-ranges-1.0.4.BUILD.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "remote_non_cratesio__winapi__0_3_7",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/winapi/winapi-0.3.7.crate",
+        name = "remote_non_cratesio__winapi__0_3_9",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/winapi/winapi-0.3.9.crate",
         type = "tar.gz",
-        sha256 = "f10e386af2b13e47c89e7236a7a14a086791a2b88ebad6df9bf42040195cf770",
-        strip_prefix = "winapi-0.3.7",
-        build_file = Label("//remote/non_cratesio/cargo/remote:winapi-0.3.7.BUILD.bazel"),
+        sha256 = "5c839a674fcd7a98952e593242ea400abe93992746761e38641405d28b00f419",
+        strip_prefix = "winapi-0.3.9",
+        build_file = Label("//remote/non_cratesio/cargo/remote:winapi-0.3.9.BUILD.bazel"),
     )
 
     maybe(

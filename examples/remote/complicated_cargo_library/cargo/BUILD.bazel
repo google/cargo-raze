@@ -32,7 +32,7 @@ alias(
 
 alias(
     name = "security_framework_sys",
-    actual = "@remote_complicated_cargo_library__security_framework_sys__0_2_3//:security_framework_sys",
+    actual = "@remote_complicated_cargo_library__security_framework_sys__0_2_2//:security_framework_sys",
     tags = [
         "cargo-raze",
         "manual",

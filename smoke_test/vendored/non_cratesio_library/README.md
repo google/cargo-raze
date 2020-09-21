@@ -1,16 +1,11 @@
 # non_cratesio_library
 
+## How to build
 
-## Manual steps run (that you would use to replicate this)
+In order to build this example, the dependencies must be vendored. This can be achieved by performing the following:
 
-1. Run `cargo install cargo-raze`
-2. Generate a Cargo.toml with desired dependencies into cargo/Cargo.toml
-3. Add a [raze] section with your desired options (see cargo-raze `settings::CargoToml` for
-   the exact details)
-4. Run `cargo generate-lockfile` from `cargo/`
-5. Run `cargo vendor --versioned-dirs --locked` from `cargo/`
-6. Run `cargo raze` from `cargo/`
+1. Navigate to `./examples/vendored/non_cratesio_library` from the root of the `cargo-raze` checkout
+2. Run `cargo vendor --versioned-dirs --locked cargo/vendor`
+3. Rerun `cargo raze` to regenerate the Bazel BUILD files
 
-At this point you will have a dependency specification that Bazel can understand. You will also have starter BUILD files that referene the specified dependencies and generate rust_library rules.
-
-To expose those dependencies, `alias` entries are created for the explicit Cargo dependencies. It is important to only expose explicit dependencies for the sake of hygiene.
+At this point you should now be able to run `bazel build ...` to compile the source code.

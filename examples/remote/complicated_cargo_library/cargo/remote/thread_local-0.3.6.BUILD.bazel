@@ -36,7 +36,7 @@ rust_library(
     name = "thread_local",
     crate_type = "lib",
     deps = [
-        "@remote_complicated_cargo_library__lazy_static__1_3_0//:lazy_static",
+        "@remote_complicated_cargo_library__lazy_static__1_4_0//:lazy_static",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

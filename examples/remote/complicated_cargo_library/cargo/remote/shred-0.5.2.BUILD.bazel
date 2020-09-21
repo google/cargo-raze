@@ -45,7 +45,7 @@ rust_library(
     crate_type = "lib",
     deps = [
         "@remote_complicated_cargo_library__arrayvec__0_3_25//:arrayvec",
-        "@remote_complicated_cargo_library__fnv__1_0_6//:fnv",
+        "@remote_complicated_cargo_library__fnv__1_0_7//:fnv",
         "@remote_complicated_cargo_library__mopa__0_2_2//:mopa",
         "@remote_complicated_cargo_library__pulse__0_5_3//:pulse",
         "@remote_complicated_cargo_library__rayon__0_8_2//:rayon",

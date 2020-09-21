@@ -38,7 +38,7 @@ rust_binary(
     deps = [
         # Binaries get an implicit dependency on their crate's lib
         ":aho_corasick",
-        "@remote_complicated_cargo_library__memchr__2_2_0//:memchr",
+        "@remote_complicated_cargo_library__memchr__2_3_3//:memchr",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/main.rs",
@@ -60,7 +60,7 @@ rust_library(
     name = "aho_corasick",
     crate_type = "lib",
     deps = [
-        "@remote_complicated_cargo_library__memchr__2_2_0//:memchr",
+        "@remote_complicated_cargo_library__memchr__2_3_3//:memchr",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

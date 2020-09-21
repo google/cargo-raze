@@ -44,7 +44,7 @@ rust_library(
     crate_type = "lib",
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/crossbeam-0.3.2:crossbeam",
-        "//vendored/complicated_cargo_library/cargo/vendor/fnv-1.0.6:fnv",
+        "//vendored/complicated_cargo_library/cargo/vendor/fnv-1.0.7:fnv",
         "//vendored/complicated_cargo_library/cargo/vendor/hibitset-0.3.2:hibitset",
         "//vendored/complicated_cargo_library/cargo/vendor/mopa-0.2.2:mopa",
         "//vendored/complicated_cargo_library/cargo/vendor/rayon-0.8.2:rayon",
@@ -55,7 +55,7 @@ rust_library(
     crate_root = "src/lib.rs",
     edition = "2015",
     proc_macro_deps = [
-        "//vendored/complicated_cargo_library/cargo/vendor/derivative-1.0.2:derivative",
+        "//vendored/complicated_cargo_library/cargo/vendor/derivative-1.0.4:derivative",
         "//vendored/complicated_cargo_library/cargo/vendor/shred-derive-0.3.0:shred_derive",
     ],
     rustc_flags = [

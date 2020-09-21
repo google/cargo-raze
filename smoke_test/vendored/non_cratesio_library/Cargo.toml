@@ -21,3 +21,8 @@ workspace_path = "//vendored/non_cratesio_library/cargo"
 target = "x86_64-unknown-linux-gnu"
 incompatible_relative_workspace_path = true
 gen_workspace_prefix = "vendored_non_cratesio_library"
+
+[raze.crates.log.'0.4.11']
+additional_flags = [
+    "--cfg=atomic_cas"
+]

@@ -35,7 +35,7 @@ rust_library(
     name = "wincolor",
     crate_type = "lib",
     deps = [
-        "//vendored/non_cratesio_library/cargo/vendor/winapi-0.3.4:winapi",
+        "//vendored/non_cratesio_library/cargo/vendor/winapi-0.3.9:winapi",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

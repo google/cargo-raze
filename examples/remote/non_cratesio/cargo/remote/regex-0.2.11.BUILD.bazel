@@ -45,10 +45,10 @@ rust_library(
     crate_type = "lib",
     deps = [
         "@remote_non_cratesio__aho_corasick__0_6_10//:aho_corasick",
-        "@remote_non_cratesio__memchr__2_2_0//:memchr",
+        "@remote_non_cratesio__memchr__2_3_3//:memchr",
         "@remote_non_cratesio__regex_syntax__0_5_6//:regex_syntax",
         "@remote_non_cratesio__thread_local__0_3_6//:thread_local",
-        "@remote_non_cratesio__utf8_ranges__1_0_2//:utf8_ranges",
+        "@remote_non_cratesio__utf8_ranges__1_0_4//:utf8_ranges",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

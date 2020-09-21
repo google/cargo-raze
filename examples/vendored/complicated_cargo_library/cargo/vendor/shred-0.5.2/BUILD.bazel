@@ -45,7 +45,7 @@ rust_library(
     crate_type = "lib",
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/arrayvec-0.3.25:arrayvec",
-        "//vendored/complicated_cargo_library/cargo/vendor/fnv-1.0.6:fnv",
+        "//vendored/complicated_cargo_library/cargo/vendor/fnv-1.0.7:fnv",
         "//vendored/complicated_cargo_library/cargo/vendor/mopa-0.2.2:mopa",
         "//vendored/complicated_cargo_library/cargo/vendor/pulse-0.5.3:pulse",
         "//vendored/complicated_cargo_library/cargo/vendor/rayon-0.8.2:rayon",

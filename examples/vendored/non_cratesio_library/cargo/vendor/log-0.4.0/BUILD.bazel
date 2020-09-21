@@ -36,7 +36,7 @@ rust_library(
     name = "log",
     crate_type = "lib",
     deps = [
-        "//vendored/non_cratesio_library/cargo/vendor/cfg-if-0.1.2:cfg_if",
+        "//vendored/non_cratesio_library/cargo/vendor/cfg-if-0.1.10:cfg_if",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

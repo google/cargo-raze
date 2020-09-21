@@ -36,7 +36,7 @@ rust_library(
     name = "log",
     crate_type = "lib",
     deps = [
-        "@remote_non_cratesio__cfg_if__0_1_7//:cfg_if",
+        "@remote_non_cratesio__cfg_if__0_1_10//:cfg_if",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

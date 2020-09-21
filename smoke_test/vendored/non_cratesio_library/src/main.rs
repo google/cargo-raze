@@ -1,15 +1,14 @@
 #[macro_use]
 extern crate log;
-extern crate futures;
 extern crate env_logger;
+extern crate futures;
 
-use futures::future::ok;
 use futures::executor::block_on;
+use futures::future::ok;
 use futures::Future;
 
-fn return_a_future() -> Box<Future<Item=u64, Error=()>> {
-
-    Box::new(ok(42))
+fn return_a_future() -> Box<dyn Future<Item = u64, Error = ()>> {
+  Box::new(ok(42))
 }
 
 pub fn main() {

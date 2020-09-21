@@ -36,7 +36,7 @@ rust_library(
     name = "regex_syntax",
     crate_type = "lib",
     deps = [
-        "//vendored/complicated_cargo_library/cargo/vendor/ucd-util-0.1.3:ucd_util",
+        "//vendored/complicated_cargo_library/cargo/vendor/ucd-util-0.1.8:ucd_util",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

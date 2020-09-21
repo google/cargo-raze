@@ -45,10 +45,10 @@ rust_library(
     crate_type = "lib",
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/aho-corasick-0.6.10:aho_corasick",
-        "//vendored/complicated_cargo_library/cargo/vendor/memchr-2.2.0:memchr",
+        "//vendored/complicated_cargo_library/cargo/vendor/memchr-2.3.3:memchr",
         "//vendored/complicated_cargo_library/cargo/vendor/regex-syntax-0.5.6:regex_syntax",
         "//vendored/complicated_cargo_library/cargo/vendor/thread_local-0.3.6:thread_local",
-        "//vendored/complicated_cargo_library/cargo/vendor/utf8-ranges-1.0.2:utf8_ranges",
+        "//vendored/complicated_cargo_library/cargo/vendor/utf8-ranges-1.0.4:utf8_ranges",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

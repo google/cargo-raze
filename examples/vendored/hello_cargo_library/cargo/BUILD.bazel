@@ -23,7 +23,7 @@ alias(
 
 alias(
     name = "log",
-    actual = "//vendored/hello_cargo_library/cargo/vendor/log-0.3.9:log",
+    actual = "//vendored/hello_cargo_library/cargo/vendor/log-0.3.6:log",
     tags = [
         "cargo-raze",
         "manual",
