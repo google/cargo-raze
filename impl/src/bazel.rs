@@ -77,10 +77,10 @@ static SUPPORTED_PLATFORM_TRIPLES: &'static [&'static str] = &[
  * | `cfg(foo)`                            | `(false, false)` | `foo` is not a strongly defined cfg value.       |
  * | `cfg(target_os = "redox")`            | `(false, false)` | `redox` is not a supported platform.             |
  */
-pub fn is_bazel_supported_platform(target: &String) -> (bool, bool) {
+pub fn is_bazel_supported_platform(target: &str) -> (bool, bool) {
   // Ensure the target is represented as an expression
   let target_exp = match target.starts_with("cfg(") {
-    true => target.clone(),
+    true => target.to_owned(),
     false => format!("cfg(target = \"{}\")", target),
   };
 
@@ -125,9 +125,9 @@ pub fn is_bazel_supported_platform(target: &String) -> (bool, bool) {
  * Note, the Bazel triples must be defined in:
  * https://github.com/bazelbuild/rules_rust/blob/master/rust/platform/platform.bzl
  */
-pub fn get_matching_bazel_triples(target: &String) -> Result<Vec<String>> {
+pub fn get_matching_bazel_triples(target: &str) -> Result<Vec<String>> {
   let target_exp = match target.starts_with("cfg(") {
-    true => target.clone(),
+    true => target.to_owned(),
     false => format!("cfg(target=\"{}\")", target),
   };
 
@@ -845,39 +845,39 @@ mod tests {
   #[test]
   fn detect_bazel_platforms() {
     assert_eq!(
-      is_bazel_supported_platform(&"cfg(not(fuchsia))".to_string()),
+      is_bazel_supported_platform("cfg(not(fuchsia))"),
       (true, true)
     );
     assert_eq!(
-      is_bazel_supported_platform(&"cfg(not(target_os = \"redox\"))".to_string()),
+      is_bazel_supported_platform("cfg(not(target_os = \"redox\"))"),
       (true, true)
     );
     assert_eq!(
-      is_bazel_supported_platform(&"cfg(unix)".to_string()),
+      is_bazel_supported_platform("cfg(unix)"),
       (true, false)
     );
     assert_eq!(
-      is_bazel_supported_platform(&"cfg(not(windows))".to_string()),
+      is_bazel_supported_platform("cfg(not(windows))"),
       (true, false)
     );
     assert_eq!(
-      is_bazel_supported_platform(&"cfg(target = \"x86_64-apple-darwin\")".to_string()),
+      is_bazel_supported_platform("cfg(target = \"x86_64-apple-darwin\")"),
       (true, false)
     );
     assert_eq!(
-      is_bazel_supported_platform(&"x86_64-apple-darwin".to_string()),
+      is_bazel_supported_platform("x86_64-apple-darwin"),
       (true, false)
     );
     assert_eq!(
-      is_bazel_supported_platform(&"unknown-unknown-unknown".to_string()),
+      is_bazel_supported_platform("unknown-unknown-unknown"),
       (false, false)
     );
     assert_eq!(
-      is_bazel_supported_platform(&"cfg(foo)".to_string()),
+      is_bazel_supported_platform("cfg(foo)"),
       (false, false)
     );
     assert_eq!(
-      is_bazel_supported_platform(&"cfg(target_os = \"redox\")".to_string()),
+      is_bazel_supported_platform("cfg(target_os = \"redox\")"),
       (false, false)
     );
   }
