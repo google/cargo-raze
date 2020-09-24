@@ -204,7 +204,7 @@ impl CrateCatalogEntry {
    *
    * Not for use except during planning as path is local to run location.
    */
-  pub fn expected_vendored_path(&self, workspace_path: &String) -> String {
+  pub fn expected_vendored_path(&self, workspace_path: &str) -> String {
     let mut dir = find_workspace_root().unwrap_or(PathBuf::from("."));
 
     // Trim the absolute label identifier from the start of the workspace path
@@ -391,7 +391,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
     if self.settings.genmode != GenMode::Remote {
       checks::check_all_vendored(
         self.crate_catalog.entries(),
-        &self.settings.workspace_path.to_string(),
+        &self.settings.workspace_path,
       )?;
     }
 
@@ -976,7 +976,7 @@ mod checks {
   // Verifies that all provided packages are vendored (in VENDOR_DIR relative to CWD)
   pub fn check_all_vendored(
     crate_catalog_entries: &[CrateCatalogEntry],
-    workspace_path: &String,
+    workspace_path: &str,
   ) -> Result<()> {
     let missing_package_ident_iter = crate_catalog_entries
       .iter()

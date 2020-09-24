@@ -304,7 +304,7 @@ fn incompatible_relative_workspace_path() -> bool {
 }
 
 /** Formats a registry url to include the name and version fo the target package */
-pub fn format_registry_url(registry_url: &String, name: &String, version: &String) -> String {
+pub fn format_registry_url(registry_url: &str, name: &str, version: &str) -> String {
   registry_url
     .replace("{crate}", name)
     .replace("{version}", version)
