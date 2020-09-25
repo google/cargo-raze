@@ -314,6 +314,24 @@ extra_aliased_targets = [
 Cargo-raze prefixes binary targets with `cargo_bin_`, as although Cargo permits
 binaries and libraries to share the same target name, Bazel disallows this.
 
+#### Crates that only provide binaries
+
+Currently, cargo does not gather metadata about crates that do not provide any
+libraries. This means that these specifying them in the `[dependencies]` section
+of your `Cargo.toml` file will not result in generated Bazel targets. Cargo-raze
+has a special field to handle these crates when using `genmode = "Remote"`:
+
+```toml
+[raze.binary_deps]
+wasm-bindgen-cli = "0.2.68"
+```
+
+In the snippet above, the `wasm-bindgen-cli` crate is defined as binary dependency
+and Cargo-raze will ensure metadata for this and any other crate defined here are
+included in the resulting output directory. Lockfiles for targets specified under
+`[raze.binary_deps]` will be generated into a `lockfiles` directory inside the path
+specified by `workspace_path`.
+
 ## FAQ
 
 ## Why choose Bazel to build a Rust project?

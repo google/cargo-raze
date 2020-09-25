@@ -19,12 +19,13 @@ use std::{
   str::{self, FromStr},
 };
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 
-use cargo_lock::{lockfile::Lockfile, SourceId};
+use cargo_lock::{SourceId, Version, lockfile::Lockfile};
 use cargo_platform::Platform;
 
 use itertools::Itertools;
+use tempfile::TempDir;
 
 use crate::{
   bazel::{
@@ -38,7 +39,8 @@ use crate::{
   },
   license,
   metadata::{
-    CargoWorkspaceFiles, DependencyKind, Metadata, MetadataFetcher, Node, Package, PackageId,
+    fetch_crate_checksum, gather_binary_dep_info, BinaryDependencyInfo, CargoWorkspaceFiles,
+    DependencyKind, Metadata, MetadataFetcher, Node, Package, PackageId,
   },
   settings::{format_registry_url, CrateSettings, GenMode, RazeSettings},
   util::{self, PlatformDetails, RazeError, PLEASE_FILE_A_BUG},
@@ -55,6 +57,7 @@ pub trait BuildPlanner {
   fn plan_build(
     &mut self,
     settings: &RazeSettings,
+    path_prefix: &PathBuf,
     files: CargoWorkspaceFiles,
     platform_details: Option<PlatformDetails>,
   ) -> Result<PlannedBuild>;
@@ -113,6 +116,7 @@ pub struct CrateCatalogEntry {
 
 /** An intermediate structure that contains details about all crates in the workspace. */
 pub struct CrateCatalog {
+  metadata: Metadata,
   entries: Vec<CrateCatalogEntry>,
   package_id_to_entries_idx: HashMap<PackageId, usize>,
 }
@@ -120,15 +124,17 @@ pub struct CrateCatalog {
 /** The default implementation of a `BuildPlanner`. */
 pub struct BuildPlannerImpl<'fetcher> {
   metadata_fetcher: &'fetcher mut dyn MetadataFetcher,
+  binary_deps_tempdir: Result<TempDir, io::Error>,
 }
 
 /** An internal working planner for generating context for a whole workspace. */
 struct WorkspaceSubplanner<'planner> {
-  metadata: &'planner Metadata,
   settings: &'planner RazeSettings,
   platform_details: &'planner Option<PlatformDetails>,
   crate_catalog: &'planner CrateCatalog,
   files: &'planner CargoWorkspaceFiles,
+  binary_dependencies: &'planner Vec<CrateCatalog>,
+  binary_deps_files: &'planner HashMap<String, CargoWorkspaceFiles>,
 }
 
 /** An internal working planner for generating context for an individual crate. */
@@ -150,6 +156,7 @@ struct CrateSubplanner<'planner> {
 pub struct PlannedBuild {
   pub workspace_context: WorkspaceContext,
   pub crate_contexts: Vec<CrateContext>,
+  pub binary_crate_files: HashMap<String, CargoWorkspaceFiles>,
 }
 
 impl CrateCatalogEntry {
@@ -324,12 +331,14 @@ impl CrateCatalog {
 
     let mut package_id_to_entries_idx = HashMap::new();
 
+    // This loop also ensures there are no duplicates
     for (idx, entry) in entries.iter().enumerate() {
       let existing_value = package_id_to_entries_idx.insert(entry.package.id.clone(), idx);
       assert!(None == existing_value);
     }
 
     Ok(Self {
+      metadata: metadata.clone(),
       entries,
       package_id_to_entries_idx,
     })
@@ -355,20 +364,49 @@ impl<'fetcher> BuildPlanner for BuildPlannerImpl<'fetcher> {
   fn plan_build(
     &mut self,
     settings: &RazeSettings,
+    path_prefix: &PathBuf,
     files: CargoWorkspaceFiles,
     platform_details: Option<PlatformDetails>,
   ) -> Result<PlannedBuild> {
     let metadata = self.metadata_fetcher.fetch_metadata(&files)?;
+
+    // Create one combined metadata object which includes all dependencies and binaries
     let crate_catalog = CrateCatalog::new(&metadata)?;
 
-    // Generate additional PlatformDetails
+    // Additionally, fetch metadata for the list of binaries present in raze settings. This
+    // is only supported in Remote mode as it's expected that `vendor` has provided all the sources.
+    let bin_dep_info = match settings.genmode {
+      GenMode::Remote => gather_binary_dep_info(
+        &settings.binary_deps,
+        &settings.registry,
+        &path_prefix.join("lockfiles"),
+        match &self.binary_deps_tempdir {
+          Ok(path) => path.as_ref(),
+          Err(err) => {
+            return Err(anyhow!(err.to_string()));
+          },
+        },
+      )?,
+      _ => BinaryDependencyInfo {
+        metadata: Vec::new(),
+        files: HashMap::new(),
+      },
+    };
 
+    // Create combined metadata objects for each binary
+    let mut bin_crate_catalogs: Vec<CrateCatalog> = Vec::new();
+    for bin_metadata in bin_dep_info.metadata.iter() {
+      bin_crate_catalogs.push(CrateCatalog::new(bin_metadata)?);
+    }
+
+    // Generate additional PlatformDetails
     let workspace_subplanner = WorkspaceSubplanner {
       crate_catalog: &crate_catalog,
-      metadata: &metadata,
       settings: &settings,
       platform_details: &platform_details,
       files: &files,
+      binary_dependencies: &bin_crate_catalogs,
+      binary_deps_files: &bin_dep_info.files,
     };
 
     workspace_subplanner.produce_planned_build()
@@ -379,6 +417,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
   pub fn new(metadata_fetcher: &'fetcher mut dyn MetadataFetcher) -> Self {
     Self {
       metadata_fetcher,
+      binary_deps_tempdir: TempDir::new(),
     }
   }
 }
@@ -386,22 +425,35 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
 impl<'planner> WorkspaceSubplanner<'planner> {
   /** Produces a planned build using internal state. */
   pub fn produce_planned_build(&self) -> Result<PlannedBuild> {
-    checks::check_resolve_matches_packages(&self.metadata)?;
+    checks::check_resolve_matches_packages(&self.crate_catalog.metadata)?;
 
-    if self.settings.genmode != GenMode::Remote {
-      checks::check_all_vendored(
-        self.crate_catalog.entries(),
-        &self.settings.workspace_path,
-      )?;
+    let mut packages: Vec<&Package> = self
+      .crate_catalog
+      .metadata
+      .packages
+      .iter()
+      .collect();
+
+    match self.settings.genmode {
+      GenMode::Remote => {
+        for bin_dep in self.binary_dependencies {
+          checks::check_resolve_matches_packages(&bin_dep.metadata)?;
+          packages.extend(bin_dep.metadata.packages.iter());
+        }
+      },
+      GenMode::Vendored => {
+        checks::check_all_vendored(self.crate_catalog.entries(), &self.settings.workspace_path)?;
+      },
     }
 
-    checks::warn_unused_settings(&self.settings.crates, &self.metadata.packages);
+    checks::warn_unused_settings(&self.settings.crates, &packages);
 
     let crate_contexts = self.produce_crate_contexts()?;
 
     Ok(PlannedBuild {
       workspace_context: self.produce_workspace_context(),
       crate_contexts,
+      binary_crate_files: self.binary_deps_files.clone(),
     })
   }
 
@@ -414,84 +466,125 @@ impl<'planner> WorkspaceSubplanner<'planner> {
     }
   }
 
+  fn create_crate_context(&self, node: &Node, package_to_checksum: &HashMap<(String, Version), String>, catalog: &CrateCatalog) -> Option<Result<CrateContext>> {
+    let own_crate_catalog_entry = catalog.entry_for_package_id(&node.id)?;
+    let own_package = own_crate_catalog_entry.package();
+
+    let checksum_opt =
+      package_to_checksum.get(&(own_package.name.clone(), own_package.version.clone()));
+
+    let is_binary_dep = self
+      .settings
+      .binary_deps
+      .keys()
+      .any(|key| key == &own_package.name);
+
+    // Skip the root package (which is probably a junk package, by convention) unless it's a binary dir
+    if !is_binary_dep && own_crate_catalog_entry.is_root() {
+      return None;
+    }
+
+    // Skip workspace crates, since we haven't yet decided how they should be handled.
+    //
+    // Except in the case of binary dependencies. They can handle these no problem
+    //
+    // Hey you, reader! If you have opinions about this please comment on the below bug, or file
+    // another bug.
+    // See Also: https://github.com/google/cargo-raze/issues/111
+    if !is_binary_dep && own_crate_catalog_entry.is_workspace_crate() {
+      return None;
+    }
+
+    let crate_settings = self
+      .settings
+      .crates
+      .get(&own_package.name)
+      .and_then(|c| c.get(&own_package.version))
+      .cloned()
+      .unwrap_or_else(CrateSettings::default);
+
+    // UNWRAP: Safe given unwrap during serialize step of metadata
+    let own_source_id = own_package
+      .source
+      .as_ref()
+      .map(|s| SourceId::from_url(&s.to_string()).unwrap());
+
+    let crate_subplanner = CrateSubplanner {
+      crate_catalog: &catalog,
+      settings: self.settings,
+      platform_details: self.platform_details,
+      crate_catalog_entry: &own_crate_catalog_entry,
+      source_id: &own_source_id,
+      node: &node,
+      crate_settings: &crate_settings,
+      sha256: &checksum_opt.map(|c| c.to_owned()),
+    };
+
+    Some(crate_subplanner.produce_context())
+  }
+
   /** Produces a crate context for each declared crate and dependency. */
   fn produce_crate_contexts(&self) -> Result<Vec<CrateContext>> {
+    // Build a list of all catalogs we want the context for
+    let mut catalogs = vec![self.crate_catalog];
+    for catalog in self.binary_dependencies.iter() {
+      catalogs.push(catalog);
+    }
+
+    // Build a list of all workspace files
+    let mut files: Vec<&CargoWorkspaceFiles> = self
+      .binary_deps_files
+      .iter()
+      .map(|(_key, val)| val)
+      .collect();
+    files.push(self.files);
+
     // Gather the checksums for all packages in the lockfile
     // which have them.
     //
     // Store the representation of the package as a tuple
     // of (name, version) -> checksum.
     let mut package_to_checksum = HashMap::new();
-    if let Some(lock_path) = self.files.lock_path_opt.as_ref() {
-      let lockfile = Lockfile::load(lock_path.as_path())?;
-      for package in lockfile.packages {
-        if let Some(checksum) = package.checksum {
-          package_to_checksum.insert(
-            (package.name.to_string(), package.version),
-            checksum.to_string(),
-          );
+    for workspace_files in files.iter() {
+      if let Some(lock_path) = workspace_files.lock_path_opt.as_ref() {
+        let lockfile = Lockfile::load(lock_path.as_path())?;
+        for package in lockfile.packages {
+          if let Some(checksum) = package.checksum {
+            package_to_checksum.insert(
+              (package.name.to_string(), package.version),
+              checksum.to_string(),
+            );
+          }
         }
       }
     }
 
-    self
-      .metadata
-      .resolve
-      .as_ref()
-      .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?
-      .nodes
+    // Additionally, the binary dependencies need to have their checksums added as well
+    for (pkg, info) in self.settings.binary_deps.iter() {
+      let version = cargo_lock::Version::parse(info.req())?;
+      package_to_checksum.insert(
+        (pkg.clone(), version.clone()),
+        fetch_crate_checksum(&self.settings.index_url, pkg, &version.to_string())?,
+      );
+    }
+
+    let contexts = catalogs
       .iter()
-      .sorted_by_key(|n| &n.id)
-      .filter_map(|node| {
-        // UNWRAP: Node packages guaranteed to exist by guard in `produce_planned_build`
-        let own_crate_catalog_entry = self.crate_catalog.entry_for_package_id(&node.id).unwrap();
-        let own_package = own_crate_catalog_entry.package();
-
-        let checksum_opt =
-          package_to_checksum.get(&(own_package.name.clone(), own_package.version.clone()));
-
-        // Skip the root package (which is probably a junk package, by convention)
-        if own_crate_catalog_entry.is_root() {
-          return None;
-        }
-
-        // Skip workspace crates, since we haven't yet decided how they should be handled.
-        //
-        // Hey you, reader! If you have opinions about this please comment on the below bug, or file
-        // another bug.
-        // See Also: https://github.com/google/cargo-raze/issues/111
-        if own_crate_catalog_entry.is_workspace_crate() {
-          return None;
-        }
-
-        let crate_settings = self
-          .settings
-          .crates
-          .get(&own_package.name)
-          .and_then(|c| c.get(&own_package.version))
-          .cloned()
-          .unwrap_or_else(CrateSettings::default);
-
-        // UNWRAP: Safe given unwrap during serialize step of metadata
-        let own_source_id = own_package
-          .source
+      .map(|catalog| {
+        (*catalog)
+          .metadata
+          .resolve
           .as_ref()
-          .map(|s| SourceId::from_url(&s.to_string()).unwrap());
-
-        let crate_subplanner = CrateSubplanner {
-          crate_catalog: &self.crate_catalog,
-          settings: self.settings,
-          platform_details: self.platform_details,
-          crate_catalog_entry: &own_crate_catalog_entry,
-          source_id: &own_source_id,
-          node: &node,
-          crate_settings: &crate_settings,
-          sha256: &checksum_opt.map(|c| c.to_owned()),
-        };
-
-        Some(crate_subplanner.produce_context())
+          .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?
+          .nodes
+          .iter()
+          .sorted_by_key(|n| &n.id)
+          .filter_map(|node| self.create_crate_context(node, &package_to_checksum, catalog))
+          .collect::<Result<Vec<CrateContext>>>()
       })
-      .collect()
+      .collect::<Result<Vec<Vec<CrateContext>>>>()?;
+
+    Ok(contexts.iter().flat_map(|i| i.clone()).collect())
   }
 }
 
@@ -1054,7 +1147,7 @@ mod checks {
 
   pub fn warn_unused_settings(
     all_crate_settings: &HashMap<String, CrateSettingsPerVersion>,
-    all_packages: &[Package],
+    all_packages: &[&Package],
   ) {
     let mut known_versions_per_crate = HashMap::new();
     for &Package {
@@ -1150,11 +1243,12 @@ mod tests {
 
   #[test]
   fn test_plan_build_missing_resolve_returns_error() {
-    let (_temp_dir, files) = make_basic_workspace();
+    let (temp_dir, files) = make_basic_workspace();
     let mut fetcher = ResolveDroppingMetadataFetcher::default();
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     let res = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
+      &temp_dir.into_path(),
       files,
       Some(PlatformDetails::new(
         "some_target_triple".to_owned(),
@@ -1181,11 +1275,12 @@ mod tests {
 
   #[test]
   fn test_plan_build_missing_package_in_metadata() {
-    let (_temp_dir, files) = make_basic_workspace();
+    let (temp_dir, files) = make_basic_workspace();
     let mut fetcher = PackageDroppingMetadataFetcher::default();
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     let planned_build_res = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
+      &temp_dir.into_path(),
       files,
       Some(PlatformDetails::new(
         "some_target_triple".to_owned(),
@@ -1199,11 +1294,12 @@ mod tests {
 
   #[test]
   fn test_plan_build_minimum_workspace() {
-    let (_temp_dir, files) = make_basic_workspace();
+    let (temp_dir, files) = make_basic_workspace();
     let mut fetcher = CargoMetadataFetcher::default();
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     let planned_build_res = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
+      &temp_dir.into_path(),
       files,
       Some(PlatformDetails::new(
         "some_target_triple".to_owned(),
@@ -1263,11 +1359,12 @@ mod tests {
 
   #[test]
   fn test_plan_build_minimum_root_dependency() {
-    let (_temp_dir, files) = make_basic_workspace();
+    let (temp_dir, files) = make_basic_workspace();
     let mut fetcher = DependencyInjectingMetadataFetcher::default();
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     let planned_build_res = planner.plan_build(
       &settings_testing::dummy_raze_settings(),
+      &temp_dir.into_path(),
       files,
       Some(PlatformDetails::new(
         "some_target_triple".to_owned(),
@@ -1295,7 +1392,7 @@ mod tests {
 
   #[test]
   fn test_plan_build_verifies_vendored_state() {
-    let (_temp_dir, files) = make_basic_workspace();
+    let (temp_dir, files) = make_basic_workspace();
     let mut fetcher = DependencyInjectingMetadataFetcher::default();
 
     let mut settings = settings_testing::dummy_raze_settings();
@@ -1303,6 +1400,7 @@ mod tests {
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     let planned_build_res = planner.plan_build(
       &settings,
+      &temp_dir.into_path(),
       files,
       Some(PlatformDetails::new(
         "some_target_triple".to_owned(),
@@ -1348,7 +1446,7 @@ mod tests {
 
   #[test]
   fn test_plan_build_ignores_workspace_crates() {
-    let (_temp_dir, files) = make_basic_workspace();
+    let (temp_dir, files) = make_basic_workspace();
     let mut fetcher = WorkspaceCrateMetadataFetcher::default();
     let mut settings = settings_testing::dummy_raze_settings();
     settings.genmode = GenMode::Vendored;
@@ -1357,6 +1455,7 @@ mod tests {
     // N.B. This will fail if we don't correctly ignore workspace crates.
     let planned_build_res = planner.plan_build(
       &settings,
+      &temp_dir.into_path(),
       files,
       Some(PlatformDetails::new(
         "some_target_triple".to_owned(),
@@ -1380,7 +1479,7 @@ mod tests {
     actix-web = \"2.0.0\"
     actix-rt = \"1.0.0\"
         ";
-    let (_temp_dir, files) = make_workspace(toml_file, None);
+    let (temp_dir, files) = make_workspace(toml_file, None);
     let mut fetcher = WorkspaceCrateMetadataFetcher::default();
     let mut settings = settings_testing::dummy_raze_settings();
     settings.genmode = GenMode::Remote;
@@ -1389,6 +1488,7 @@ mod tests {
     // N.B. This will fail if we don't correctly ignore workspace crates.
     let planned_build_res = planner.plan_build(
       &settings,
+      &temp_dir.into_path(),
       files,
       Some(PlatformDetails::new(
         "some_target_triple".to_owned(),
@@ -1439,7 +1539,7 @@ mod tests {
     [dependencies]
     serde = { version = \"=1.0.112\", features = [\"derive\"] }
         ";
-    let (_temp_dir, files) = make_workspace(toml_file, None);
+    let (temp_dir, files) = make_workspace(toml_file, None);
     let mut fetcher = WorkspaceCrateMetadataFetcher::default();
     let mut settings = settings_testing::dummy_raze_settings();
     settings.genmode = GenMode::Remote;
@@ -1448,6 +1548,7 @@ mod tests {
     let planned_build = planner
       .plan_build(
         &settings,
+        &temp_dir.into_path(),
         files,
         Some(PlatformDetails::new(
           "some_target_triple".to_owned(),
@@ -1492,7 +1593,7 @@ mod tests {
     [dependencies]
     markup5ever = \"=0.10.0\"
         ";
-    let (_temp_dir, files) = make_workspace(toml_file, None);
+    let (temp_dir, files) = make_workspace(toml_file, None);
     let mut fetcher = WorkspaceCrateMetadataFetcher::default();
     let mut settings = settings_testing::dummy_raze_settings();
     settings.genmode = GenMode::Remote;
@@ -1501,6 +1602,7 @@ mod tests {
     let planned_build = planner
       .plan_build(
         &settings,
+        &temp_dir.into_path(),
         files,
         Some(PlatformDetails::new(
           "some_target_triple".to_owned(),
@@ -1545,15 +1647,13 @@ mod tests {
     [dependencies]
     markup5ever = \"=0.10.0\"
         ";
-    let (_temp_dir, files) = make_workspace(toml_file, None);
+    let (temp_dir, files) = make_workspace(toml_file, None);
     let mut fetcher = WorkspaceCrateMetadataFetcher::default();
-    let mut settings = settings_testing::dummy_raze_settings();
-    settings.genmode = GenMode::Remote;
-
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     let planned_build = planner
       .plan_build(
-        &settings,
+        &settings_testing::dummy_raze_settings(),
+        &temp_dir.into_path(),
         files,
         Some(PlatformDetails::new(
           "some_target_triple".to_owned(),
@@ -1566,6 +1666,79 @@ mod tests {
       planned_build.crate_contexts[0].targets[0].path,
       "src/lib.rs"
     );
+  }
+
+  #[test]
+  fn test_binary_dependencies_remote_genmode() {
+    let (temp_dir, files) = make_workspace(basic_toml(), None);
+    let mut settings = settings_testing::dummy_raze_settings();
+    settings.binary_deps.insert(
+      "wasm-bindgen-cli".to_string(),
+      cargo_toml::Dependency::Simple("0.2.68".to_string()),
+    );
+    settings.genmode = GenMode::Remote;
+
+    let mut fetcher = WorkspaceCrateMetadataFetcher::default();
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build = planner
+      .plan_build(
+        &settings,
+        &std::path::PathBuf::from(temp_dir.as_ref()),
+        files,
+        Some(PlatformDetails::new(
+          "some_target_triple".to_owned(),
+          Vec::new(), /* attrs */
+        )),
+      )
+      .unwrap();
+
+    // We expect to have a crate context for the binary dependency
+    let context = planned_build
+      .crate_contexts
+      .iter()
+      .find(|ctx| ctx.pkg_name == "wasm-bindgen-cli" && ctx.pkg_version == "0.2.68")
+      .unwrap();
+
+    // It's also expected to have a checksum
+    assert!(context.sha256.is_some());
+    assert_eq!(planned_build.binary_crate_files.len(), 1);
+    for (_name, files) in planned_build.binary_crate_files.iter() {
+      assert!(files.toml_path.exists());
+      assert!(files.lock_path_opt.as_ref().unwrap().exists());
+    }
+  }
+
+  #[test]
+  fn test_binary_dependencies_vendored_genmode() {
+    let (temp_dir, files) = make_workspace(basic_toml(), None);
+    let mut settings = settings_testing::dummy_raze_settings();
+    settings.genmode = GenMode::Vendored;
+
+    settings.binary_deps.insert(
+      "wasm-bindgen-cli".to_string(),
+      cargo_toml::Dependency::Simple("0.2.68".to_string()),
+    );
+
+    let mut fetcher = WorkspaceCrateMetadataFetcher::default();
+    let mut planner = BuildPlannerImpl::new(&mut fetcher);
+    let planned_build = planner
+      .plan_build(
+        &settings,
+        &temp_dir.into_path(),
+        files,
+        Some(PlatformDetails::new(
+          "some_target_triple".to_owned(),
+          Vec::new(), /* attrs */
+        )),
+      )
+      .unwrap();
+
+    // Vendored builds do not use binary dependencies and should not alter the outputs
+    assert!(planned_build
+      .crate_contexts
+      .iter()
+      .find(|ctx| ctx.pkg_name == "wasm-bindgen-cli" && ctx.pkg_version == "0.2.68")
+      .is_none());
   }
   // TODO(acmcarther): Add tests:
   // TODO(acmcarther): Extra flags work

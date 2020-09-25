@@ -74,7 +74,7 @@ fn main() -> Result<()> {
   println!("Loaded override settings: {:#?}", settings);
 
   let mut metadata_fetcher: Box<dyn MetadataFetcher> = match options.flag_cargo_bin_path {
-    Some(ref p) => Box::new(CargoMetadataFetcher::new(p)),
+    Some(ref p) => Box::new(CargoMetadataFetcher::new(p, /*use_tempdir: */ true)),
     None => Box::new(CargoMetadataFetcher::default()),
   };
   let mut planner = BuildPlannerImpl::new(&mut *metadata_fetcher);
@@ -102,7 +102,7 @@ fn main() -> Result<()> {
     settings.incompatible_relative_workspace_path,
   )?;
 
-  let planned_build = planner.plan_build(&settings, files, platform_details)?;
+  let planned_build = planner.plan_build(&settings, &prefix_path, files, platform_details)?;
   let mut bazel_renderer = BazelRenderer::new();
 
   let render_details = RenderDetails {
@@ -121,6 +121,16 @@ fn main() -> Result<()> {
       if !dry_run {
         // Create the "remote" directory if it doesn't exist
         fs::create_dir_all(render_details.path_prefix.as_path().join("remote"))?;
+
+        if !settings.binary_deps.is_empty() {
+          fs::create_dir_all(
+            render_details
+              .path_prefix
+              .clone()
+              .as_path()
+              .join("lockfiles"),
+          )?;
+        }
       }
 
       bazel_renderer.render_remote_planned_build(&render_details, &planned_build)?

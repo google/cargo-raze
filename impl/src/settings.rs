@@ -63,6 +63,12 @@ pub struct RazeSettings {
   #[serde(default)]
   pub targets: Option<Vec<String>>,
 
+  /**
+   * A list of binary dependencies.
+   */
+  #[serde(default)]
+  pub binary_deps: HashMap<String, cargo_toml::Dependency>,
+
   /** Any crate-specific configuration. See CrateSettings for details. */
   #[serde(default)]
   pub crates: HashMap<String, CrateSettingsPerVersion>,
@@ -100,13 +106,19 @@ pub struct RazeSettings {
 
   /**
    * The default crates registry.
-   * 
+   *
    * The patterns `{crate}` and `{version}` will be used to fill
    * in the package's name (eg: rand) and version (eg: 0.7.1).
    * See https://doc.rust-lang.org/cargo/reference/registries.html#index-format
    */
   #[serde(default = "default_raze_settings_registry")]
   pub registry: String,
+
+  /**
+   * The index url to use for Binary dependencies
+   */
+  #[serde(default = "default_raze_settings_index_url")]
+  pub index_url: String,
 }
 
 /** Override settings for individual crates (as part of `RazeSettings`). */
@@ -291,6 +303,10 @@ fn default_raze_settings_registry() -> String {
   "https://crates.io/api/v1/crates/{crate}/{version}/download".to_string()
 }
 
+fn default_raze_settings_index_url() -> String {
+  "https://github.com/rust-lang/crates.io-index".to_string()
+}
+
 fn default_crate_settings_field_gen_buildrs() -> Option<bool> {
   None
 }
@@ -376,7 +392,9 @@ pub mod testing {
       output_buildfile_suffix: "BUILD".to_owned(),
       default_gen_buildrs: default_raze_settings_field_gen_buildrs(),
       incompatible_relative_workspace_path: incompatible_relative_workspace_path(),
+      binary_deps: HashMap::new(),
       registry: default_raze_settings_registry(),
+      index_url: default_raze_settings_index_url(),
     }
   }
 
@@ -402,6 +420,9 @@ pub mod testing {
     workspace_path = \"//workspace_path/raze\"
     genmode = \"Remote\"
     incompatible_relative_workspace_path = true
+
+    [raze.binary_deps]
+    wasm-bindgen-cli =\"0.2.68\"
     ";
     let temp_workspace_dir = TempDir::new()
       .ok()
@@ -410,7 +431,8 @@ pub mod testing {
     let mut toml = File::create(&cargo_toml_path).unwrap();
     toml.write_all(toml_contents.as_bytes()).unwrap();
 
-    load_settings(cargo_toml_path).unwrap();
+    let settings = load_settings(cargo_toml_path).unwrap();
+    assert!(settings.binary_deps.len() > 0);
   }
 
   #[test]
