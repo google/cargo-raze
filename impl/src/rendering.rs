@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use crate::planning::PlannedBuild;
+use std::path::PathBuf;
 use anyhow::Result;
 
 /**
@@ -34,12 +35,12 @@ pub trait BuildRenderer {
 
 #[derive(Debug, Clone)]
 pub struct FileOutputs {
-  pub path: String,
+  pub path: PathBuf,
   pub contents: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct RenderDetails {
-  pub path_prefix: String,
+  pub path_prefix: PathBuf,
   pub buildfile_suffix: String,
 }
