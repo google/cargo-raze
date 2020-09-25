@@ -15,7 +15,7 @@
 use std::{
   fs::{self, File},
   io::Write,
-  path::PathBuf,
+  path::{Path, PathBuf},
 };
 
 use anyhow::Result;
@@ -93,35 +93,20 @@ fn main() -> Result<()> {
     None => None,
   };
 
+  let prefix_path = calculate_workspace_root(
+    &settings.workspace_path,
+    match !options.flag_output.is_empty() {
+      true => Some(&options.flag_output),
+      false => None,
+    },
+    settings.incompatible_relative_workspace_path,
+  )?;
+
   let planned_build = planner.plan_build(&settings, files, platform_details)?;
   let mut bazel_renderer = BazelRenderer::new();
 
-  // Default to the current directory '.'
-  let mut prefix_path: PathBuf = PathBuf::new();
-  prefix_path.push(".");
-
-  // Allow the command line option to take precedence
-  if options.flag_output.is_empty() {
-    if settings.incompatible_relative_workspace_path {
-      if let Some(workspace_root) = find_workspace_root() {
-        prefix_path.clear();
-        prefix_path.push(workspace_root);
-        prefix_path.push(
-          &planned_build
-            .workspace_context
-            .workspace_path
-            // Remove the leading "//" from the path
-            .trim_start_matches('/'),
-        );
-      }
-    }
-  } else {
-    prefix_path.clear();
-    prefix_path.push(options.flag_output);
-  }
-
   let render_details = RenderDetails {
-    path_prefix: prefix_path.display().to_string(),
+    path_prefix: prefix_path,
     buildfile_suffix: settings.output_buildfile_suffix,
   };
 
@@ -134,8 +119,8 @@ fn main() -> Result<()> {
     GenMode::Vendored => bazel_renderer.render_planned_build(&render_details, &planned_build)?,
     GenMode::Remote => {
       if !dry_run {
-        // Create "remote/" if it doesn't exist
-        fs::create_dir_all(render_details.path_prefix.clone() + "/remote/")?;
+        // Create the "remote" directory if it doesn't exist
+        fs::create_dir_all(render_details.path_prefix.as_path().join("remote"))?;
       }
 
       bazel_renderer.render_remote_planned_build(&render_details, &planned_build)?
@@ -148,7 +133,7 @@ fn main() -> Result<()> {
   } in bazel_file_outputs
   {
     if dry_run {
-      println!("{}:\n{}", path, contents);
+      println!("{}:\n{}", path.display(), contents);
     } else {
       write_to_file_loudly(&path, &contents)?;
     }
@@ -157,8 +142,58 @@ fn main() -> Result<()> {
   Ok(())
 }
 
-fn write_to_file_loudly(path: &str, contents: &str) -> Result<()> {
+fn write_to_file_loudly(path: &Path, contents: &str) -> Result<()> {
   File::create(&path).and_then(|mut f| f.write_all(contents.as_bytes()))?;
-  println!("Generated {} successfully", path);
+  println!("Generated {} successfully", path.display());
   Ok(())
+}
+
+fn calculate_workspace_root(
+  path: &str,
+  output_override: Option<&str>,
+  new_behavior: bool,
+) -> Result<PathBuf> {
+  // Default to the current directory '.'
+  let mut prefix_path: PathBuf = std::env::current_dir()?;
+
+  // Allow the command line option to take precedence
+  match output_override {
+    Some(output) => {
+      prefix_path.clear();
+      prefix_path.push(output);
+    },
+    None => {
+      if new_behavior {
+        if let Some(workspace_root) = find_workspace_root() {
+          prefix_path.clear();
+          prefix_path.push(workspace_root);
+          prefix_path.push(
+            path
+              // Remove the leading "//" from the path
+              .trim_start_matches('/'),
+          );
+        }
+      }
+    },
+  }
+
+  Ok(prefix_path)
+}
+
+#[test]
+fn test_calculate_workspace_root() {
+  assert_eq!(
+    calculate_workspace_root(&"path_a".to_string(), None, true).unwrap(),
+    std::env::current_dir().unwrap()
+  );
+
+  assert_eq!(
+    calculate_workspace_root(
+      &"path_b".to_string(),
+      Some(&"direct/path".to_string()),
+      true
+    )
+    .unwrap(),
+    std::path::Path::new("direct").join("path")
+  );
 }

@@ -25,10 +25,7 @@ use crate::{
 
 use std::{env, error::Error, iter::Iterator, path::PathBuf};
 
-use cfg_expr::{
-  targets::get_builtin_target_by_triple,
-  Expression, Predicate,
-};
+use cfg_expr::{targets::get_builtin_target_by_triple, Expression, Predicate};
 
 static SUPPORTED_PLATFORM_TRIPLES: &'static [&'static str] = &[
   // SUPPORTED_T1_PLATFORM_TRIPLES
@@ -411,12 +408,14 @@ impl BuildRenderer for BazelRenderer {
         include_additional_build_file(package, rendered_crate_build_file)?;
 
       file_outputs.push(FileOutputs {
-        path: format!("{}/{}", path_prefix, package.expected_build_path),
+        path: path_prefix
+          .as_path()
+          .join(&package.expected_build_path),
         contents: final_crate_build_file,
       })
     }
 
-    let build_file_path = format!("{}/{}", &path_prefix, buildfile_suffix);
+    let build_file_path = path_prefix.as_path().join(buildfile_suffix);
     let rendered_alias_build_file = self
       .render_aliases(&workspace_context, &crate_contexts)
       .map_err(|e| RazeError::Rendering {
@@ -446,11 +445,14 @@ impl BuildRenderer for BazelRenderer {
       ref crate_contexts,
       ..
     } = planned_build;
-    let mut file_outputs = Vec::new();
+    let mut file_outputs: Vec<FileOutputs> = Vec::new();
 
     // N.B. File needs to exist so that contained xyz-1.2.3.BUILD can be referenced
     file_outputs.push(FileOutputs {
-      path: format!("{}/remote/{}", path_prefix, buildfile_suffix),
+      path: path_prefix
+        .as_path()
+        .join("remote")
+        .join(buildfile_suffix),
       contents: String::new(),
     });
 
@@ -466,12 +468,14 @@ impl BuildRenderer for BazelRenderer {
         include_additional_build_file(package, rendered_crate_build_file)?;
 
       file_outputs.push(FileOutputs {
-        path: format!("{}/{}", path_prefix, package.expected_build_path),
+        path: path_prefix
+          .as_path()
+          .join(&package.expected_build_path),
         contents: final_crate_build_file,
       })
     }
 
-    let alias_file_path = format!("{}/{}", &path_prefix, buildfile_suffix);
+    let alias_file_path = path_prefix.as_path().join(buildfile_suffix);
     let rendered_alias_build_file = self
       .render_remote_aliases(&workspace_context, &crate_contexts)
       .map_err(|e| RazeError::Rendering {
@@ -484,7 +488,7 @@ impl BuildRenderer for BazelRenderer {
       contents: rendered_alias_build_file,
     });
 
-    let bzl_fetch_file_path = format!("{}/crates.bzl", &path_prefix);
+    let bzl_fetch_file_path = path_prefix.as_path().join("crates.bzl");
     let rendered_bzl_fetch_file = self
       .render_bzl_fetch(&workspace_context, &crate_contexts)
       .map_err(|e| RazeError::Rendering {
@@ -520,7 +524,7 @@ mod tests {
 
   fn dummy_render_details(buildfile_suffix: &str) -> RenderDetails {
     RenderDetails {
-      path_prefix: "./some_render_prefix".to_owned(),
+      path_prefix: PathBuf::from("./some_render_prefix"),
       buildfile_suffix: buildfile_suffix.to_owned(),
     }
   }
@@ -649,12 +653,12 @@ mod tests {
     let file_outputs = render_crates_for_test(Vec::new());
     let file_names = file_outputs
       .iter()
-      .map(|output| output.path.as_ref())
-      .collect::<Vec<&str>>();
+      .map(|output| output.path.display().to_string())
+      .collect::<Vec<String>>();
 
     assert_that!(
       &file_names,
-      contains(vec!["./some_render_prefix/BUILD"]).exactly()
+      contains(vec!["./some_render_prefix/BUILD".to_string()]).exactly()
     );
   }
 
@@ -663,14 +667,14 @@ mod tests {
     let file_outputs = render_crates_for_test(vec![dummy_library_crate()]);
     let file_names = file_outputs
       .iter()
-      .map(|output| output.path.as_ref())
-      .collect::<Vec<&str>>();
+      .map(|output| output.path.display().to_string())
+      .collect::<Vec<String>>();
 
     assert_that!(
       &file_names,
       contains(vec![
-        "./some_render_prefix/vendor/test-library-1.1.1/BUILD",
-        "./some_render_prefix/BUILD",
+        "./some_render_prefix/vendor/test-library-1.1.1/BUILD".to_string(),
+        "./some_render_prefix/BUILD".to_string(),
       ])
       .exactly()
     );
@@ -684,14 +688,14 @@ mod tests {
     );
     let file_names = file_outputs
       .iter()
-      .map(|output| output.path.as_ref())
-      .collect::<Vec<&str>>();
+      .map(|output| output.path.display().to_string())
+      .collect::<Vec<String>>();
 
     assert_that!(
       &file_names,
       contains(vec![
-        "./some_render_prefix/vendor/test-library-1.1.1/BUILD.bazel",
-        "./some_render_prefix/BUILD.bazel",
+        "./some_render_prefix/vendor/test-library-1.1.1/BUILD.bazel".to_string(),
+        "./some_render_prefix/BUILD.bazel".to_string(),
       ])
       .exactly()
     );
@@ -852,10 +856,7 @@ mod tests {
       is_bazel_supported_platform("cfg(not(target_os = \"redox\"))"),
       (true, true)
     );
-    assert_eq!(
-      is_bazel_supported_platform("cfg(unix)"),
-      (true, false)
-    );
+    assert_eq!(is_bazel_supported_platform("cfg(unix)"), (true, false));
     assert_eq!(
       is_bazel_supported_platform("cfg(not(windows))"),
       (true, false)
@@ -872,10 +873,7 @@ mod tests {
       is_bazel_supported_platform("unknown-unknown-unknown"),
       (false, false)
     );
-    assert_eq!(
-      is_bazel_supported_platform("cfg(foo)"),
-      (false, false)
-    );
+    assert_eq!(is_bazel_supported_platform("cfg(foo)"), (false, false));
     assert_eq!(
       is_bazel_supported_platform("cfg(target_os = \"redox\")"),
       (false, false)
