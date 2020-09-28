@@ -117,7 +117,7 @@ pub fn is_bazel_supported_platform(target: &str) -> (bool, bool) {
   (is_supported, matches_all)
 }
 
-/** Maps a Rust cfg target to a Bazel supported triples.
+/** Maps a Rust cfg or triple target to Bazel supported triples.
  *
  * Note, the Bazel triples must be defined in:
  * https://github.com/bazelbuild/rules_rust/blob/master/rust/platform/platform.bzl
@@ -125,7 +125,7 @@ pub fn is_bazel_supported_platform(target: &str) -> (bool, bool) {
 pub fn get_matching_bazel_triples(target: &str) -> Result<Vec<String>> {
   let target_exp = match target.starts_with("cfg(") {
     true => target.to_owned(),
-    false => format!("cfg(target=\"{}\")", target),
+    false => format!("cfg(target = \"{}\")", target),
   };
 
   let expression = Expression::parse(&target_exp)?;
@@ -136,6 +136,10 @@ pub fn get_matching_bazel_triples(target: &str) -> Result<Vec<String>> {
       match expression.eval(|pred| {
         match pred {
           Predicate::Target(tp) => tp.matches(target_info),
+          Predicate::KeyValue {
+            key,
+            val,
+          } => (*key == "target") && (*val == target_info.triple),
           // For now there is no other kind of matching
           _ => false,
         }
