@@ -94,26 +94,7 @@ mod tests {
   use std::fs::File;
   use std::io::Write;
 
-  fn basic_toml() -> &'static str {
-    "
-[package]
-name = \"test\"
-version = \"0.0.1\"
-
-[lib]
-path = \"not_a_file.rs\"
-    "
-  }
-
-  fn basic_lock() -> &'static str {
-    "
-[[package]]
-name = \"test\"
-version = \"0.0.1\"
-dependencies = [
-]
-    "
-  }
+  use crate::testing::*;
 
   #[test]
   fn test_metadata_deserializes_correctly() {

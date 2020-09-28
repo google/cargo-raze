@@ -20,3 +20,6 @@ pub mod planning;
 pub mod rendering;
 pub mod settings;
 pub mod util;
+
+#[cfg(test)]
+mod testing;
