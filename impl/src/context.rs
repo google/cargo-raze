@@ -87,8 +87,12 @@ pub struct SourceDetails {
 pub struct CrateDependencyContext {
   pub dependencies: Vec<BuildableDependency>,
   pub proc_macro_dependencies: Vec<BuildableDependency>,
+  // data_dependencies can only be set when using cargo-raze as a library at the moment.
+  pub data_dependencies: Vec<BuildableDependency>,
   pub build_dependencies: Vec<BuildableDependency>,
   pub build_proc_macro_dependencies: Vec<BuildableDependency>,
+  // build_data_dependencies can only be set when using cargo-raze as a library at the moment.
+  pub build_data_dependencies: Vec<BuildableDependency>,
   pub dev_dependencies: Vec<BuildableDependency>,
   pub aliased_dependencies: Vec<DependencyAlias>,
 }
