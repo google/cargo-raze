@@ -30,7 +30,7 @@ const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
  * <https://github.com/rust-lang/cargo/pull/5122>
  */
 pub trait MetadataFetcher {
-  fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata>;
+  fn fetch_metadata(&self, files: &CargoWorkspaceFiles) -> Result<Metadata>;
 }
 
 /** The local Cargo workspace files to be used for build planning .*/
@@ -59,7 +59,7 @@ impl Default for CargoMetadataFetcher {
 }
 
 impl MetadataFetcher for CargoMetadataFetcher {
-  fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
+  fn fetch_metadata(&self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
     assert!(files.toml_path.is_file());
     assert!(files.lock_path_opt.as_ref().map_or(true, |p| p.is_file()));
 
@@ -113,9 +113,9 @@ mod tests {
       toml_path,
     };
 
-    let mut fetcher = CargoMetadataFetcher::default();
-
-    fetcher.fetch_metadata(&files).unwrap();
+    CargoMetadataFetcher::default()
+      .fetch_metadata(&files)
+      .unwrap();
   }
 
   #[test]
@@ -138,9 +138,9 @@ mod tests {
       toml_path,
     };
 
-    let mut fetcher = CargoMetadataFetcher::default();
-
-    fetcher.fetch_metadata(&files).unwrap();
+    CargoMetadataFetcher::default()
+      .fetch_metadata(&files)
+      .unwrap();
   }
 
   #[test]
@@ -157,7 +157,7 @@ mod tests {
       toml_path,
     };
 
-    let mut fetcher = CargoMetadataFetcher::default();
+    let fetcher = CargoMetadataFetcher::default();
     assert!(fetcher.fetch_metadata(&files).is_err());
   }
 }
