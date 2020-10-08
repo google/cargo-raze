@@ -288,7 +288,7 @@ fn default_raze_settings_field_gen_buildrs() -> bool {
 }
 
 fn default_raze_settings_registry() -> String {
-  "https://crates-io.s3-us-west-1.amazonaws.com/crates/{crate}/{crate}-{version}.crate".to_string()
+  "https://crates.io/api/v1/crates/{crate}/{version}/download".to_string()
 }
 
 fn default_crate_settings_field_gen_buildrs() -> Option<bool> {
@@ -421,7 +421,7 @@ pub mod testing {
         &"foo".to_string(),
         &"0.0.1".to_string()
       ),
-      "https://crates-io.s3-us-west-1.amazonaws.com/crates/foo/foo-0.0.1.crate"
+      "https://crates.io/api/v1/crates/foo/0.0.1/download"
     );
 
     assert_eq!(
