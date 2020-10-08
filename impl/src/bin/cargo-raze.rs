@@ -31,7 +31,7 @@ use cargo_raze::{
   util::PlatformDetails,
 };
 
-use serde_derive::Deserialize;
+use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 struct Options {

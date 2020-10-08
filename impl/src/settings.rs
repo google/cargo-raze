@@ -14,7 +14,7 @@
 
 use super::util::RazeError;
 use semver::Version;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs::File, io::Read, path::Path};
 
 pub type CrateSettingsPerVersion = HashMap<Version, CrateSettings>;
