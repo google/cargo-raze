@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use crate::settings::CrateSettings;
-use serde_derive::Serialize;
+use serde::Serialize;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableDependency {
