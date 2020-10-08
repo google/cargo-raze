@@ -1111,8 +1111,9 @@ mod tests {
   #[allow(non_snake_case)]
   fn test__checks__check_resolve_matches_packages_fails_correctly() {
     let (_temp_dir, files) = make_basic_workspace();
-    let mut fetcher = CargoMetadataFetcher::default();
-    let mut metadata = fetcher.fetch_metadata(&files).unwrap();
+    let mut metadata = CargoMetadataFetcher::default()
+      .fetch_metadata(&files)
+      .unwrap();
 
     // Invalidate the metadata, expect an error.
     metadata.packages = Vec::new();
@@ -1123,8 +1124,9 @@ mod tests {
   #[allow(non_snake_case)]
   fn test__checks__check_resolve_matches_packages_works_correctly() {
     let (_temp_dir, files) = make_basic_workspace();
-    let mut fetcher = CargoMetadataFetcher::default();
-    let metadata = fetcher.fetch_metadata(&files).unwrap();
+    let metadata = CargoMetadataFetcher::default()
+      .fetch_metadata(&files)
+      .unwrap();
 
     // Should not panic with valid metadata.
     checks::check_resolve_matches_packages(&metadata).unwrap();
@@ -1138,7 +1140,7 @@ mod tests {
   }
 
   impl MetadataFetcher for ResolveDroppingMetadataFetcher {
-    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
+    fn fetch_metadata(&self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
       let mut metadata = self.fetcher.fetch_metadata(&files)?;
       assert!(metadata.resolve.is_some());
       metadata.resolve = None;
@@ -1170,7 +1172,7 @@ mod tests {
   }
 
   impl MetadataFetcher for PackageDroppingMetadataFetcher {
-    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
+    fn fetch_metadata(&self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
       let mut metadata = self.fetcher.fetch_metadata(&files)?;
       metadata.packages.clear();
       Ok(metadata)
@@ -1221,7 +1223,7 @@ mod tests {
   }
 
   impl MetadataFetcher for DependencyInjectingMetadataFetcher {
-    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
+    fn fetch_metadata(&self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
       let mut metadata = self.fetcher.fetch_metadata(&files)?;
 
       // Phase 1: Add a dummy dependency to the dependency graph.
@@ -1320,7 +1322,7 @@ mod tests {
   }
 
   impl MetadataFetcher for WorkspaceCrateMetadataFetcher {
-    fn fetch_metadata(&mut self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
+    fn fetch_metadata(&self, files: &CargoWorkspaceFiles) -> Result<Metadata> {
       let mut metadata = self.fetcher.fetch_metadata(&files)?;
 
       // Phase 1: Create a workspace package, add it to the packages list.
