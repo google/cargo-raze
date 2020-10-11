@@ -29,10 +29,10 @@ use cfg_expr::{targets::get_builtin_target_by_triple, Expression, Predicate};
 static SUPPORTED_PLATFORM_TRIPLES: &'static [&'static str] = &[
   // SUPPORTED_T1_PLATFORM_TRIPLES
   "i686-apple-darwin",
-  "i686-pc-windows-gnu",
+  "i686-pc-windows-msvc",
   "i686-unknown-linux-gnu",
   "x86_64-apple-darwin",
-  "x86_64-pc-windows-gnu",
+  "x86_64-pc-windows-msvc",
   "x86_64-unknown-linux-gnu",
   // SUPPORTED_T2_PLATFORM_TRIPLES
   "aarch64-apple-ios",
