@@ -66,6 +66,10 @@ impl Default for LicenseData {
 pub struct GitRepo {
   pub remote: String,
   pub commit: String,
+
+  // Directory containing the crate's Cargo.toml file, relative to the git repo root.
+  // Will be None iff the crate lives at the root of the git repo.
+  pub path_to_crate_root: Option<String>
 }
 
 #[derive(Debug, Clone, Serialize)]

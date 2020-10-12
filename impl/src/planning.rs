@@ -15,7 +15,7 @@
 use std::{
   collections::{HashMap, HashSet},
   io,
-  path::PathBuf,
+  path::{Path, PathBuf},
   str::{self, FromStr},
 };
 
@@ -510,10 +510,15 @@ impl<'planner> CrateSubplanner<'planner> {
       targeted_deps,
     ) = self.produce_deps()?;
 
-    let mut targets = self.produce_targets()?;
+    let package = self.crate_catalog_entry.package();
+
+    let manifest_path = PathBuf::from(&package.manifest_path);
+    assert!(manifest_path.is_absolute());
+    let package_root = self.find_package_root_for_manifest(&manifest_path)?;
+
+    let mut targets = self.produce_targets(&package_root)?;
     let build_script_target_opt = self.take_build_script_target(&mut targets);
 
-    let package = self.crate_catalog_entry.package();
     let mut lib_target_name = None;
     {
       for target in &targets {
@@ -576,7 +581,7 @@ impl<'planner> CrateSubplanner<'planner> {
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings),
       build_script_target: build_script_target_opt,
       raze_settings: self.crate_settings.clone(),
-      source_details: self.produce_source_details(),
+      source_details: self.produce_source_details(&package, &package_root),
       expected_build_path: self.crate_catalog_entry.local_build_path(&self.settings),
       sha256: self.sha256.clone(),
       registry_url: format_registry_url(
@@ -820,15 +825,25 @@ impl<'planner> CrateSubplanner<'planner> {
   }
 
   /** Generates source details for internal crate. */
-  fn produce_source_details(&self) -> SourceDetails {
+  fn produce_source_details(&self, package: &Package, package_root: &Path) -> SourceDetails {
     SourceDetails {
       git_data: self
         .source_id
         .as_ref()
         .filter(|id| id.is_git())
-        .map(|id| GitRepo {
-          remote: id.url().to_string(),
-          commit: id.precise().unwrap().to_owned(),
+        .map(|id| {
+          let manifest_parent = package.manifest_path.parent().unwrap();
+          let path_to_crate_root = manifest_parent.strip_prefix(package_root).unwrap();
+          let path_to_crate_root = if path_to_crate_root.components().next().is_some() {
+            Some(path_to_crate_root.to_string_lossy().to_string())
+          } else {
+            None
+          };
+          GitRepo {
+            remote: id.url().to_string(),
+            commit: id.precise().unwrap().to_owned(),
+            path_to_crate_root,
+          }
         }),
     }
   }
@@ -863,15 +878,10 @@ impl<'planner> CrateSubplanner<'planner> {
    * This function may access the file system. See #find_package_root_for_manifest for more
    * details.
    */
-  fn produce_targets(&self) -> Result<Vec<BuildableTarget>> {
+  fn produce_targets(&self, package_root_path: &Path) -> Result<Vec<BuildableTarget>> {
     let mut targets = Vec::new();
     let package = self.crate_catalog_entry.package();
     for target in &package.targets {
-      let manifest_path = PathBuf::from(&package.manifest_path);
-      assert!(manifest_path.is_absolute());
-
-      let package_root_path = self.find_package_root_for_manifest(&manifest_path)?;
-
       // Bazel uses / as a path delimiter, but / is not the path delimiter on all
       // operating systems (like Mac OS 9, or something people actually use like Windows).
       // Strip off the package root, decompose the path into parts and rejoin
