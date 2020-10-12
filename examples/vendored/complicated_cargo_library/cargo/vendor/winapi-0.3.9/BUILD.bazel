@@ -73,4 +73,6 @@ rust_library(
         "sysinfoapi",
         "timezoneapi",
     ],
+    aliases = {
+    },
 )

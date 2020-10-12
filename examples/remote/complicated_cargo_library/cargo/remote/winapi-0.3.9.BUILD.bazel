@@ -76,4 +76,6 @@ rust_library(
         "timezoneapi",
         "winerror",
     ],
+    aliases = {
+    },
 )
