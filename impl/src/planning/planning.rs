@@ -34,11 +34,11 @@ use crate::{
     WorkspaceContext,
   },
   error::{RazeError, PLEASE_FILE_A_BUG},
-  license,
   metadata::{
     fetch_crate_checksum, gather_binary_dep_info, BinaryDependencyInfo, CargoWorkspaceFiles,
     DependencyKind, Metadata, MetadataFetcher, Node, Package, PackageId,
   },
+  planning::license,
   settings::{format_registry_url, CrateSettings, GenMode, RazeSettings},
   util::{
     self, filter_bazel_triples, find_bazel_workspace_root, generate_bazel_conditions,
@@ -1199,7 +1199,6 @@ mod checks {
 mod tests {
   use crate::{
     metadata::{CargoMetadataFetcher, Metadata, MetadataFetcher},
-    planning::checks,
     settings::testing as settings_testing,
     testing::*,
   };

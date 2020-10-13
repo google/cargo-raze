@@ -14,9 +14,12 @@
 
 pub mod context;
 pub mod error;
-pub mod license;
 pub mod metadata;
-pub mod planning;
+pub mod planning {
+    mod license;
+    mod planning;
+    pub use planning::*;
+}
 pub mod rendering {
     pub mod bazel;
     mod rendering;
