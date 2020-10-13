@@ -22,10 +22,11 @@ use anyhow::Result;
 use crate::{
   error::RazeError,
   metadata::{Metadata, Package, PackageId},
-  planning::{CrateCatalogEntry, VENDOR_DIR},
   settings::CrateSettingsPerVersion,
   util::collect_up_to,
 };
+
+use super::crate_catalog::{CrateCatalogEntry, VENDOR_DIR};
 
 // TODO(acmcarther): Consider including a switch to disable limiting
 const MAX_DISPLAYED_MISSING_VENDORED_CRATES: usize = 5;
@@ -149,5 +150,38 @@ pub fn warn_unused_settings(
         )
       }
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::{
+    metadata::CargoMetadataFetcher, metadata::MetadataFetcher, testing::make_basic_workspace,
+  };
+
+  #[test]
+  #[allow(non_snake_case)]
+  fn test__checks__check_resolve_matches_packages_fails_correctly() {
+    let (_temp_dir, files) = make_basic_workspace();
+    let mut metadata = CargoMetadataFetcher::default()
+      .fetch_metadata(&files)
+      .unwrap();
+
+    // Invalidate the metadata, expect an error.
+    metadata.packages = Vec::new();
+    assert!(check_resolve_matches_packages(&metadata).is_err());
+  }
+
+  #[test]
+  #[allow(non_snake_case)]
+  fn test__checks__check_resolve_matches_packages_works_correctly() {
+    let (_temp_dir, files) = make_basic_workspace();
+    let metadata = CargoMetadataFetcher::default()
+      .fetch_metadata(&files)
+      .unwrap();
+
+    // Should not panic with valid metadata.
+    check_resolve_matches_packages(&metadata).unwrap();
   }
 }
