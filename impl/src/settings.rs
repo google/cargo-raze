@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use super::util::RazeError;
+use crate::error::RazeError;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs::File, io::Read, path::Path};
