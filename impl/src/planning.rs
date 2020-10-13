@@ -21,17 +21,13 @@ use std::{
 
 use anyhow::{anyhow, Result};
 
-use cargo_lock::{SourceId, Version, lockfile::Lockfile};
+use cargo_lock::{lockfile::Lockfile, SourceId, Version};
 use cargo_platform::Platform;
 
 use itertools::Itertools;
 use tempfile::TempDir;
 
 use crate::{
-  bazel::{
-    filter_bazel_triples, find_workspace_root, generate_bazel_conditions,
-    get_matching_bazel_triples, is_bazel_supported_platform,
-  },
   context::{
     BuildableDependency, BuildableTarget, CrateContext, CrateDependencyContext,
     CrateTargetedDepContext, DependencyAlias, GitRepo, LicenseData, SourceDetails,
@@ -43,7 +39,11 @@ use crate::{
     DependencyKind, Metadata, MetadataFetcher, Node, Package, PackageId,
   },
   settings::{format_registry_url, CrateSettings, GenMode, RazeSettings},
-  util::{self, PlatformDetails, RazeError, PLEASE_FILE_A_BUG},
+  util::{
+    self, filter_bazel_triples, find_bazel_workspace_root, generate_bazel_conditions,
+    get_matching_bazel_triples, is_bazel_supported_platform, PlatformDetails, RazeError,
+    PLEASE_FILE_A_BUG,
+  },
 };
 
 pub const VENDOR_DIR: &str = "vendor/";
@@ -212,7 +212,7 @@ impl CrateCatalogEntry {
    * Not for use except during planning as path is local to run location.
    */
   pub fn expected_vendored_path(&self, workspace_path: &str) -> String {
-    let mut dir = find_workspace_root().unwrap_or(PathBuf::from("."));
+    let mut dir = find_bazel_workspace_root().unwrap_or(PathBuf::from("."));
 
     // Trim the absolute label identifier from the start of the workspace path
     dir.push(workspace_path.trim_start_matches('/'));
@@ -427,12 +427,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
   pub fn produce_planned_build(&self) -> Result<PlannedBuild> {
     checks::check_resolve_matches_packages(&self.crate_catalog.metadata)?;
 
-    let mut packages: Vec<&Package> = self
-      .crate_catalog
-      .metadata
-      .packages
-      .iter()
-      .collect();
+    let mut packages: Vec<&Package> = self.crate_catalog.metadata.packages.iter().collect();
 
     match self.settings.genmode {
       GenMode::Remote => {
@@ -466,7 +461,12 @@ impl<'planner> WorkspaceSubplanner<'planner> {
     }
   }
 
-  fn create_crate_context(&self, node: &Node, package_to_checksum: &HashMap<(String, Version), String>, catalog: &CrateCatalog) -> Option<Result<CrateContext>> {
+  fn create_crate_context(
+    &self,
+    node: &Node,
+    package_to_checksum: &HashMap<(String, Version), String>,
+    catalog: &CrateCatalog,
+  ) -> Option<Result<CrateContext>> {
     let own_crate_catalog_entry = catalog.entry_for_package_id(&node.id)?;
     let own_package = own_crate_catalog_entry.package();
 
@@ -920,24 +920,20 @@ impl<'planner> CrateSubplanner<'planner> {
   /** Generates source details for internal crate. */
   fn produce_source_details(&self, package: &Package, package_root: &Path) -> SourceDetails {
     SourceDetails {
-      git_data: self
-        .source_id
-        .as_ref()
-        .filter(|id| id.is_git())
-        .map(|id| {
-          let manifest_parent = package.manifest_path.parent().unwrap();
-          let path_to_crate_root = manifest_parent.strip_prefix(package_root).unwrap();
-          let path_to_crate_root = if path_to_crate_root.components().next().is_some() {
-            Some(path_to_crate_root.to_string_lossy().to_string())
-          } else {
-            None
-          };
-          GitRepo {
-            remote: id.url().to_string(),
-            commit: id.precise().unwrap().to_owned(),
-            path_to_crate_root,
-          }
-        }),
+      git_data: self.source_id.as_ref().filter(|id| id.is_git()).map(|id| {
+        let manifest_parent = package.manifest_path.parent().unwrap();
+        let path_to_crate_root = manifest_parent.strip_prefix(package_root).unwrap();
+        let path_to_crate_root = if path_to_crate_root.components().next().is_some() {
+          Some(path_to_crate_root.to_string_lossy().to_string())
+        } else {
+          None
+        };
+        GitRepo {
+          remote: id.url().to_string(),
+          commit: id.precise().unwrap().to_owned(),
+          path_to_crate_root,
+        }
+      }),
     }
   }
 

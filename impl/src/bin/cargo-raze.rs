@@ -23,12 +23,12 @@ use anyhow::Result;
 use docopt::Docopt;
 
 use cargo_raze::{
-  bazel::{find_workspace_root, BazelRenderer},
+  bazel::BazelRenderer,
   metadata::{CargoMetadataFetcher, CargoWorkspaceFiles, MetadataFetcher},
   planning::{BuildPlanner, BuildPlannerImpl},
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
   settings::{load_settings, GenMode},
-  util::PlatformDetails,
+  util::{find_bazel_workspace_root, PlatformDetails},
 };
 
 use serde::Deserialize;
@@ -174,7 +174,7 @@ fn calculate_workspace_root(
     },
     None => {
       if new_behavior {
-        if let Some(workspace_root) = find_workspace_root() {
+        if let Some(workspace_root) = find_bazel_workspace_root() {
           prefix_path.clear();
           prefix_path.push(workspace_root);
           prefix_path.push(

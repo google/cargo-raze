@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 
 use tera::{self, Context, Tera};
 
@@ -23,208 +23,7 @@ use crate::{
   util::RazeError,
 };
 
-use std::{env, error::Error, iter::Iterator, path::PathBuf};
-
-use cfg_expr::{targets::get_builtin_target_by_triple, Expression, Predicate};
-
-static SUPPORTED_PLATFORM_TRIPLES: &'static [&'static str] = &[
-  // SUPPORTED_T1_PLATFORM_TRIPLES
-  "i686-apple-darwin",
-  "i686-pc-windows-gnu",
-  "i686-unknown-linux-gnu",
-  "x86_64-apple-darwin",
-  "x86_64-pc-windows-gnu",
-  "x86_64-unknown-linux-gnu",
-  // SUPPORTED_T2_PLATFORM_TRIPLES
-  "aarch64-apple-ios",
-  "aarch64-linux-android",
-  "aarch64-unknown-linux-gnu",
-  "arm-unknown-linux-gnueabi",
-  "i686-linux-android",
-  "i686-unknown-freebsd",
-  "powerpc-unknown-linux-gnu",
-  "s390x-unknown-linux-gnu",
-  "wasm32-unknown-unknown",
-  "x86_64-apple-ios",
-  "x86_64-linux-android",
-  "x86_64-unknown-freebsd",
-];
-
-/** Determines if the target matches those supported by and defined in rules_rust
- *
- * Examples can be seen below:
- *
- * | target                                | returns          | reason                                           |
- * | ------------------------------------- | ---------------- | ------------------------------------------------ |
- * | `cfg(not(fuchsia))`                   | `(true, true)`   | `fuchsia` would be considered a 'default'        |
- * |                                       |                  | dependency since no supported target maps to it. |
- * |                                       |                  |                                                  |
- * | `cfg(unix)`                           | `(true, false)`  | There are supported platforms from the `unix`    |
- * |                                       |                  | `target_family` but not all platforms are of     |
- * |                                       |                  | the `unix` family.                               |
- * |                                       |                  |                                                  |
- * | `cfg(not(windows))`                   | `(true, false)`  | There are supported platforms in addition to     |
- * |                                       |                  | those in the `windows` `target_family`           |
- * |                                       |                  |                                                  |
- * | `x86_64-apple-darwin`                 | `(true, false)`  | This is a supported target triple but obviously  |
- * |                                       |                  | won't match with other triples.                  |
- * |                                       |                  |                                                  |
- * | `unknown-unknown-unknown`             | `(false, false)` | This will not match any triple.                  |
- * |                                       |                  |                                                  |
- * | `cfg(foo)`                            | `(false, false)` | `foo` is not a strongly defined cfg value.       |
- * | `cfg(target_os = "redox")`            | `(false, false)` | `redox` is not a supported platform.             |
- */
-pub fn is_bazel_supported_platform(target: &str) -> (bool, bool) {
-  // Ensure the target is represented as an expression
-  let target_exp = match target.starts_with("cfg(") {
-    true => target.to_owned(),
-    false => format!("cfg(target = \"{}\")", target),
-  };
-
-  let expression = match Expression::parse(&target_exp) {
-    Ok(exp) => exp,
-    // If the target expression cannot be parsed it is not considered a Bazel platform
-    Err(_) => {
-      return (false, false);
-    },
-  };
-
-  let mut is_supported = false;
-  let mut matches_all = true;
-
-  // Attempt to match the expression
-  for target_info in SUPPORTED_PLATFORM_TRIPLES
-    .iter()
-    .map(|x| get_builtin_target_by_triple(x).unwrap())
-  {
-    if expression.eval(|pred| {
-      match pred {
-        Predicate::Target(tp) => tp.matches(target_info),
-        Predicate::KeyValue {
-          key,
-          val,
-        } => (*key == "target") && (*val == target_info.triple),
-        // For now there is no other kind of matching
-        _ => false,
-      }
-    }) {
-      is_supported = true;
-    } else {
-      matches_all = false;
-    }
-  }
-
-  (is_supported, matches_all)
-}
-
-/** Maps a Rust cfg or triple target to Bazel supported triples.
- *
- * Note, the Bazel triples must be defined in:
- * https://github.com/bazelbuild/rules_rust/blob/master/rust/platform/platform.bzl
- */
-pub fn get_matching_bazel_triples(target: &str) -> Result<Vec<String>> {
-  let target_exp = match target.starts_with("cfg(") {
-    true => target.to_owned(),
-    false => format!("cfg(target = \"{}\")", target),
-  };
-
-  let expression = Expression::parse(&target_exp)?;
-  let triples: Vec<String> = SUPPORTED_PLATFORM_TRIPLES
-    .iter()
-    .filter_map(|triple| {
-      let target_info = get_builtin_target_by_triple(triple).unwrap();
-      match expression.eval(|pred| {
-        match pred {
-          Predicate::Target(tp) => tp.matches(target_info),
-          Predicate::KeyValue {
-            key,
-            val,
-          } => (*key == "target") && (*val == target_info.triple),
-          // For now there is no other kind of matching
-          _ => false,
-        }
-      }) {
-        true => Some(String::from((*target_info).triple)),
-        false => None,
-      }
-    })
-    .collect();
-
-  Ok(triples)
-}
-
-/** Produces a list of triples based on a provided whitelist */
-pub fn filter_bazel_triples(triples: &mut Vec<String>, triples_whitelist: &Vec<String>) {
-  // Early-out if the filter list is empty
-  if triples_whitelist.len() == 0 {
-    return;
-  }
-
-  // Prune everything that's not found in the whitelist
-  triples.retain(|triple| triples_whitelist.iter().any(|i| i == triple));
-
-  triples.sort();
-}
-
-/** Returns a list of Bazel targets for use in `select` statements based on a
- * given list of triples.
- */
-pub fn generate_bazel_conditions(triples: &Vec<String>) -> Result<Vec<String>> {
-  // Sanity check ensuring all strings represent real triples
-  for triple in triples.iter() {
-    match get_builtin_target_by_triple(triple) {
-      None => {
-        return Err(anyhow!("Not a triple: '{}'", triple));
-      },
-      _ => {},
-    }
-  }
-
-  let mut bazel_triples: Vec<String> = triples
-    .iter()
-    .map(|triple| format!("@io_bazel_rules_rust//rust/platform:{}", triple))
-    .collect();
-
-  bazel_triples.sort();
-
-  Ok(bazel_triples)
-}
-
-/** Returns whether or not the given path is a Bazel workspace root */
-pub fn is_workspace_root(dir: &PathBuf) -> bool {
-  let workspace_files = [dir.join("WORKSPACE.bazel"), dir.join("WORKSPACE")];
-
-  for workspace in workspace_files.iter() {
-    if workspace.exists() {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/** Returns a path to a Bazel workspace root based on the current working
- * directory, otherwise None if not workspace is detected.
- */
-pub fn find_workspace_root() -> Option<PathBuf> {
-  let mut dir = match env::current_dir() {
-    Ok(result) => Some(result),
-    Err(_) => None,
-  };
-
-  while let Some(current_dir) = dir {
-    if is_workspace_root(&current_dir) {
-      return Some(current_dir);
-    }
-
-    dir = match current_dir.parent() {
-      Some(parent) => Some(parent.to_path_buf()),
-      None => None,
-    };
-  }
-
-  return None;
-}
+use std::error::Error;
 
 #[derive(Default)]
 pub struct BazelRenderer {
@@ -412,9 +211,7 @@ impl BuildRenderer for BazelRenderer {
         include_additional_build_file(package, rendered_crate_build_file)?;
 
       file_outputs.push(FileOutputs {
-        path: path_prefix
-          .as_path()
-          .join(&package.expected_build_path),
+        path: path_prefix.as_path().join(&package.expected_build_path),
         contents: final_crate_build_file,
       })
     }
@@ -453,10 +250,7 @@ impl BuildRenderer for BazelRenderer {
 
     // N.B. File needs to exist so that contained xyz-1.2.3.BUILD can be referenced
     file_outputs.push(FileOutputs {
-      path: path_prefix
-        .as_path()
-        .join("remote")
-        .join(buildfile_suffix),
+      path: path_prefix.as_path().join("remote").join(buildfile_suffix),
       contents: String::new(),
     });
 
@@ -472,9 +266,7 @@ impl BuildRenderer for BazelRenderer {
         include_additional_build_file(package, rendered_crate_build_file)?;
 
       file_outputs.push(FileOutputs {
-        path: path_prefix
-          .as_path()
-          .join(&package.expected_build_path),
+        path: path_prefix.as_path().join(&package.expected_build_path),
         contents: final_crate_build_file,
       })
     }
@@ -537,9 +329,7 @@ mod tests {
 
   use super::*;
 
-  use std::{collections::HashMap, fs::File};
-
-  use tempfile::TempDir;
+  use std::{collections::HashMap, path::PathBuf};
 
   fn dummy_render_details(buildfile_suffix: &str) -> RenderDetails {
     RenderDetails {
@@ -861,112 +651,5 @@ mod tests {
       file_output.path == PathBuf::from("./some_render_prefix/lockfiles/Cargo.mock-binary.lock")
         && file_output.contents == "World".to_string()
     }))
-  }
-
-  #[test]
-  fn detecting_workspace_root() {
-    // Cache the cwd
-    let cwd = env::current_dir().unwrap();
-
-    // Run test
-    let result = std::panic::catch_unwind(|| {
-      // Generate a temporary directory to do testing in
-      let bazel_root = TempDir::new().unwrap();
-      assert!(env::set_current_dir(&bazel_root).is_ok());
-
-      // Starting within the temp directory, we'll find that there are no WORKSPACE.bazel files
-      // and thus return None to indicate a Bazel workspace root could not be found.
-      assert_eq!(find_workspace_root(), None);
-
-      // After creating a WORKSPACE.bazel file in that directory, we expect to find to be
-      // returned a path to the temporary directory
-      File::create(bazel_root.path().join("WORKSPACE.bazel")).unwrap();
-      assert_eq!(
-        find_workspace_root().unwrap().canonicalize().unwrap(),
-        bazel_root.into_path().canonicalize().unwrap()
-      );
-    });
-
-    // Restore cwd
-    assert!(env::set_current_dir(&cwd).is_ok());
-
-    // Ensure test results were successful
-    assert!(result.is_ok());
-  }
-
-  #[test]
-  fn detect_bazel_platforms() {
-    assert_eq!(
-      is_bazel_supported_platform("cfg(not(fuchsia))"),
-      (true, true)
-    );
-    assert_eq!(
-      is_bazel_supported_platform("cfg(not(target_os = \"redox\"))"),
-      (true, true)
-    );
-    assert_eq!(is_bazel_supported_platform("cfg(unix)"), (true, false));
-    assert_eq!(
-      is_bazel_supported_platform("cfg(not(windows))"),
-      (true, false)
-    );
-    assert_eq!(
-      is_bazel_supported_platform("cfg(target = \"x86_64-apple-darwin\")"),
-      (true, false)
-    );
-    assert_eq!(
-      is_bazel_supported_platform("x86_64-apple-darwin"),
-      (true, false)
-    );
-    assert_eq!(
-      is_bazel_supported_platform("unknown-unknown-unknown"),
-      (false, false)
-    );
-    assert_eq!(is_bazel_supported_platform("cfg(foo)"), (false, false));
-    assert_eq!(
-      is_bazel_supported_platform("cfg(target_os = \"redox\")"),
-      (false, false)
-    );
-  }
-
-  #[test]
-  fn all_supported_platform_triples_unwrap() {
-    for triple in SUPPORTED_PLATFORM_TRIPLES.iter() {
-      get_builtin_target_by_triple(triple).unwrap();
-    }
-  }
-
-  #[test]
-  fn generate_condition_strings() {
-    assert_eq!(
-      generate_bazel_conditions(&vec![
-        "aarch64-unknown-linux-gnu".to_string(),
-        "aarch64-apple-ios".to_string(),
-      ])
-      .unwrap(),
-      vec![
-        "@io_bazel_rules_rust//rust/platform:aarch64-apple-ios",
-        "@io_bazel_rules_rust//rust/platform:aarch64-unknown-linux-gnu",
-      ]
-    );
-
-    assert_eq!(
-      generate_bazel_conditions(&vec!["aarch64-unknown-linux-gnu".to_string()]).unwrap(),
-      vec!["@io_bazel_rules_rust//rust/platform:aarch64-unknown-linux-gnu"]
-    );
-
-    assert!(generate_bazel_conditions(&vec![
-      "aarch64-unknown-linux-gnu".to_string(),
-      "unknown-unknown-unknown".to_string(),
-    ])
-    .is_err());
-
-    assert!(generate_bazel_conditions(&vec!["unknown-unknown-unknown".to_string()]).is_err());
-
-    assert!(generate_bazel_conditions(&vec![
-      "foo".to_string(),
-      "bar".to_string(),
-      "baz".to_string()
-    ])
-    .is_err());
   }
 }
