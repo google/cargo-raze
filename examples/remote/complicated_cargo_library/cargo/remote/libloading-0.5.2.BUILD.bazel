@@ -61,6 +61,8 @@ rust_library(
     ],
     crate_features = [
     ],
+    aliases = {
+    },
 )
 # Unsupported target "markers" with type "test" omitted
 # Unsupported target "windows" with type "test" omitted

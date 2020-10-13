@@ -34,10 +34,15 @@
         "{{feature}}",
         {%- endfor %}
     ],
-    {%- if crate.default_deps.aliased_dependencies | length != 0 %}
+    {%- if crate.default_deps.aliased_dependencies | length != 0 or crate.targeted_deps | length != 0 %}
     aliases = {
         {%- for alias in crate.default_deps.aliased_dependencies %}
         "{{alias.target}}": "{{alias.alias}}",
         {%- endfor %}
+        {%- for dep in crate.targeted_deps %}
+        {%- for alias in dep.deps.aliased_dependencies %}
+        "{{alias.target}}": "{{alias.alias}}",
+        {%- endfor %}
+        {%- endfor %}
     },
-    {%- endif %}
+    {%- endif -%}
