@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod bazel;
 pub mod context;
 pub mod error;
 pub mod license;
 pub mod metadata;
 pub mod planning;
-pub mod rendering;
+pub mod rendering {
+    pub mod bazel;
+    mod rendering;
+    pub use rendering::*;
+}
 pub mod settings;
 pub mod util;
 

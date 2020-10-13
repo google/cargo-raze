@@ -23,10 +23,9 @@ use anyhow::Result;
 use docopt::Docopt;
 
 use cargo_raze::{
-  bazel::BazelRenderer,
   metadata::{CargoMetadataFetcher, CargoWorkspaceFiles, MetadataFetcher},
   planning::{BuildPlanner, BuildPlannerImpl},
-  rendering::{BuildRenderer, FileOutputs, RenderDetails},
+  rendering::{BuildRenderer, FileOutputs, RenderDetails, bazel::BazelRenderer},
   settings::{load_settings, GenMode},
   util::{find_bazel_workspace_root, PlatformDetails},
 };
