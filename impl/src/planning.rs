@@ -33,6 +33,7 @@ use crate::{
     CrateTargetedDepContext, DependencyAlias, GitRepo, LicenseData, SourceDetails,
     WorkspaceContext,
   },
+  error::{RazeError, PLEASE_FILE_A_BUG},
   license,
   metadata::{
     fetch_crate_checksum, gather_binary_dep_info, BinaryDependencyInfo, CargoWorkspaceFiles,
@@ -41,8 +42,7 @@ use crate::{
   settings::{format_registry_url, CrateSettings, GenMode, RazeSettings},
   util::{
     self, filter_bazel_triples, find_bazel_workspace_root, generate_bazel_conditions,
-    get_matching_bazel_triples, is_bazel_supported_platform, PlatformDetails, RazeError,
-    PLEASE_FILE_A_BUG,
+    get_matching_bazel_triples, is_bazel_supported_platform, PlatformDetails,
   },
 };
 
@@ -1062,10 +1062,11 @@ mod checks {
   use anyhow::Result;
 
   use crate::{
+    error::RazeError,
     metadata::{Metadata, Package, PackageId},
     planning::{CrateCatalogEntry, VENDOR_DIR},
     settings::CrateSettingsPerVersion,
-    util::{collect_up_to, RazeError},
+    util::collect_up_to,
   };
 
   // TODO(acmcarther): Consider including a switch to disable limiting
@@ -1144,7 +1145,7 @@ mod checks {
         message: format!(
           "Failed to find metadata.packages which were expected from metadata.resolve {:?}. {}",
           limited_missing_node_ids,
-          crate::util::PLEASE_FILE_A_BUG
+          crate::error::PLEASE_FILE_A_BUG
         ),
       }
       .into(),
