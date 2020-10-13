@@ -18,7 +18,24 @@ cargo_build_script(
       {%- for dependency in crate.default_deps.build_dependencies %}
         "{{dependency.buildable_target}}",
       {%- endfor %}
-    ],
+    ]
+    {%- if crate.targeted_deps -%} 
+    {% for targeted_dep in crate.targeted_deps %} + selects.with_or({
+        # {{ targeted_dep.target }}
+        (
+    {%- for condition in targeted_dep.conditions %}
+            "{{ condition }}",
+    {%- endfor %}
+        ): [
+    {%- for dependency in targeted_dep.deps.build_dependencies %}
+            "{{ dependency.buildable_target }}",
+    {%- endfor %}
+        ],
+        "//conditions:default": [],
+    })
+    {%- endfor -%}
+    {%- else -%}
+    {%- endif %},
     {%- if crate.default_deps.build_proc_macro_dependencies %}
     proc_macro_deps = [
     {%- for dependency in crate.default_deps.build_proc_macro_dependencies %}
