@@ -25,7 +25,7 @@ use docopt::Docopt;
 use cargo_raze::{
   metadata::{CargoMetadataFetcher, CargoWorkspaceFiles, MetadataFetcher},
   planning::{BuildPlanner, BuildPlannerImpl},
-  rendering::{BuildRenderer, FileOutputs, RenderDetails, bazel::BazelRenderer},
+  rendering::{bazel::BazelRenderer, BuildRenderer, FileOutputs, RenderDetails},
   settings::{load_settings, GenMode},
   util::{find_bazel_workspace_root, PlatformDetails},
 };

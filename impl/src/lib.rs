@@ -16,14 +16,17 @@ pub mod context;
 pub mod error;
 pub mod metadata;
 pub mod planning {
-    mod license;
-    mod planning;
-    pub use planning::*;
+  mod checks;
+  mod crate_catalog;
+  mod license;
+  mod planning;
+  mod subplanners;
+  pub use planning::*;
 }
 pub mod rendering {
-    pub mod bazel;
-    mod rendering;
-    pub use rendering::*;
+  pub mod bazel;
+  mod rendering;
+  pub use rendering::*;
 }
 pub mod settings;
 pub mod util;
