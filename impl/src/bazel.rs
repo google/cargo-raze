@@ -505,6 +505,20 @@ impl BuildRenderer for BazelRenderer {
       contents: rendered_bzl_fetch_file,
     });
 
+    // In order to support pinned dependencies for binary dependencies, lockfiles are also
+    // added to ensure the reproducability of subsequent runs.
+    for (name, files) in planned_build.binary_crate_files.iter() {
+      let lockfile = files.lock_path_opt.as_ref().unwrap().clone();
+      file_outputs.push(FileOutputs {
+        path: path_prefix
+          .clone()
+          .as_path()
+          .join("lockfiles")
+          .join(format!("Cargo.{}.lock", name)),
+        contents: std::fs::read_to_string(lockfile)?,
+      });
+    }
+
     Ok(file_outputs)
   }
 }
@@ -515,6 +529,7 @@ mod tests {
 
   use crate::{
     context::*,
+    metadata::CargoWorkspaceFiles,
     planning::PlannedBuild,
     rendering::{FileOutputs, RenderDetails},
     settings::CrateSettings,
@@ -522,7 +537,7 @@ mod tests {
 
   use super::*;
 
-  use std::fs::File;
+  use std::{collections::HashMap, fs::File};
 
   use tempfile::TempDir;
 
@@ -541,6 +556,7 @@ mod tests {
         output_buildfile_suffix: "BUILD".to_owned(),
       },
       crate_contexts,
+      binary_crate_files: HashMap::new(),
     }
   }
 
@@ -817,6 +833,34 @@ mod tests {
       ),
     )
     .unwrap();
+  }
+
+  #[test]
+  fn binary_dependency_lockfiles() {
+    let render_details = dummy_render_details("BUILD.bazel");
+    let mut planned_build = dummy_planned_build(Vec::new());
+
+    let tempdir = tempfile::TempDir::new().unwrap();
+    std::fs::write(tempdir.as_ref().join("Cargo.toml"), "Hello").unwrap();
+    std::fs::write(tempdir.as_ref().join("Cargo.lock"), "World").unwrap();
+
+    planned_build.binary_crate_files.insert(
+      "mock-binary".to_owned(),
+      CargoWorkspaceFiles {
+        toml_path: tempdir.as_ref().join("Cargo.toml"),
+        lock_path_opt: Some(tempdir.as_ref().join("Cargo.lock")),
+      },
+    );
+
+    let render_result = BazelRenderer::new()
+      .render_remote_planned_build(&render_details, &planned_build)
+      .unwrap();
+
+    // Ensure that the lockfiles for binary dependencies get written out propperly
+    assert!(render_result.iter().any(|file_output| {
+      file_output.path == PathBuf::from("./some_render_prefix/lockfiles/Cargo.mock-binary.lock")
+        && file_output.contents == "World".to_string()
+    }))
   }
 
   #[test]
