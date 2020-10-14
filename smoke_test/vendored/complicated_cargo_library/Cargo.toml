@@ -14,7 +14,6 @@ path = "src/main.rs"
 
 [raze]
 workspace_path = "//vendored/complicated_cargo_library/cargo"
-incompatible_relative_workspace_path = true
 gen_workspace_prefix = "vendored_complicated_cargo_library"
 
 [raze.crates.proc-macro2.'0.4.30']
