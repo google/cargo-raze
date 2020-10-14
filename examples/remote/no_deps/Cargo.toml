@@ -10,5 +10,4 @@ path = "src/main.rs"
 [raze]
 workspace_path = "//remote/no_deps/cargo"
 genmode = "Remote"
-incompatible_relative_workspace_path = true
 gen_workspace_prefix = "remote_no_deps"
