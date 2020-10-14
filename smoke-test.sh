@@ -71,22 +71,13 @@ done
 # Run Cargo Vendor over the appropriate projects
 for ex in $(find $EXAMPLES_DIR/vendored -maxdepth 1 -type d | tail -n+2); do
     echo "Running Cargo Vendor for $(basename "$ex")"
-    if [ "$(basename $ex)" = "regression_test" ]; then
-        cd "$ex/cargo"
-        cargo vendor -q --versioned-dirs
-    else
-        cd "$ex"
-        cargo vendor -q --versioned-dirs "$ex/cargo/vendor"
-    fi
+    cd "$ex"
+    cargo vendor -q --versioned-dirs "$ex/cargo/vendor"
 done
 
 for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
     echo "Running Cargo Raze for $(basename $ex)"
-    if [ "$(basename $ex)" = "regression_test" ]; then
-        cd "$ex/cargo"
-    else
-        cd "$ex"
-    fi
+    cd "$ex"
     eval "$RAZE"
 done
 
