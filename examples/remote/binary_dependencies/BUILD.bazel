@@ -1,0 +1,14 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_binary(
+    name = "binary_dependencies_bin",
+    srcs = ["src/main.rs"],
+    data = [
+        "//remote/binary_dependencies/cargo:cargo_bin_texture_synthesis",
+    ],
+    deps = [
+        "//remote/binary_dependencies/cargo:ferris_says",
+    ],
+)

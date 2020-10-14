@@ -5,6 +5,8 @@ successfully as well
 
 load("//tests:launch_test.bzl", "launch_test")
 
+launch_test(target = "//remote/binary_dependencies:binary_dependencies_bin")
+
 launch_test(target = "//remote/complicated_cargo_library")
 
 launch_test(target = "//remote/no_deps")
