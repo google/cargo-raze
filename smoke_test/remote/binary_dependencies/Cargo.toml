@@ -14,7 +14,6 @@ ferris-says = "0.2.0"
 workspace_path = "//remote/binary_dependencies/cargo"
 gen_workspace_prefix = "remote_binary_dependencies"
 genmode = "Remote"
-incompatible_relative_workspace_path = true
 default_gen_buildrs = true
 
 [raze.binary_deps]

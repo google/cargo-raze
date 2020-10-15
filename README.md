@@ -104,7 +104,9 @@ path = "fake_lib.rs"
 log = "=0.3.6"
 
 [raze]
-# The WORKSPACE relative path to the Cargo.toml working directory.
+# The path relative path to the Bazel workspace root (location of
+# WORKSPACE.bazel/WORKSPACE file). If no workspace file is found,
+# the current working directory is used.
 workspace_path = "//cargo"
 
 # The target to generate BUILD rules for.
@@ -127,7 +129,7 @@ will also update your `Cargo.lock` file.
 $ cargo vendor --versioned-dirs
 ```
 
-Finally, generate your BUILD files, again from within the cargo/ directory
+Finally, generate your BUILD files, again from within the `cargo/` directory
 
 ```bash
 $ cargo raze
@@ -150,7 +152,9 @@ Generate a Cargo.toml, similar to Vendoring mode but add a new `genmode` directi
 
 ```toml
 [raze]
-# The WORKSPACE relative path to the Cargo.toml working directory.
+# The path relative path to the Bazel workspace root (location of
+# WORKSPACE.bazel/WORKSPACE file). If no workspace file is found,
+# the current working directory is used.
 workspace_path = "//cargo"
 
 # The target to generate BUILD rules for.
@@ -329,7 +333,7 @@ specified by `workspace_path`.
 
 ## FAQ
 
-## Why choose Bazel to build a Rust project?
+### Why choose Bazel to build a Rust project?
 
 Bazel ("fast", "correct", choose two) is a battle-tested build system used by
 Google to compile incredibly large, multilingual projects without duplicating
@@ -349,7 +353,7 @@ applications built with Bazel's strengths in mind: highly granular build units,
 will compile significantly faster as they are able to cache more aggressively
 and avoid recompilation of as much code while iterating.
 
-## Why try to integrate Cargo's dependencies into this build tool?
+### Why try to integrate Cargo's dependencies into this build tool?
 
 For better or worse, the Rust ecosystem heavily depends on Cargo crates in order
 to provide functionality that is often present in standard libraries. This is
@@ -362,7 +366,7 @@ Putting that aside there are also fantastic crates that help Rust developers
 interact with industry standard systems and libraries which can greatly
 accelerate development in the language.
 
-## Why not build directly with Cargo / Why generate rustc invocations?
+### Why not build directly with Cargo / Why generate rustc invocations?
 
 Though the burden of emulating Cargo's functionality (where possible at all!) is
 high, it appears to be the only way to maintain the guarantees (correctness,
@@ -373,7 +377,7 @@ appears that maintaining a semblance of feature parity is actually easier than
 avoiding all of the sharp edges introduced by treating Cargo like the Rust
 compiler.
 
-## What is buildable right now with Bazel, and what is not?
+### What is buildable right now with Bazel, and what is not?
 
 With a little bit of elbow grease it is possible to build nearly everything,
 including projects that depend on openssl-sys. Many sys crates will require
@@ -403,4 +407,4 @@ See these examples of providing crate configuration:
 
 - [openssl](https://github.com/acmcarther/compile_openssl)
 
-The [raze] section is derived from a struct declared in [impl/src/settings.rs](./impl/src/settings.rs).
+The `[raze]` section is derived from a struct declared in [impl/src/settings.rs](./impl/src/settings.rs).

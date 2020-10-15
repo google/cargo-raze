@@ -19,7 +19,6 @@ path = "src/main.rs"
 workspace_path = "//remote/non_cratesio/cargo"
 target = "x86_64-unknown-linux-gnu"
 genmode = "Remote"
-incompatible_relative_workspace_path = true
 gen_workspace_prefix = "remote_non_cratesio"
 
 [raze.crates.log.'0.4.11']

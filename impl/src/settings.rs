@@ -316,7 +316,7 @@ fn default_crate_settings_field_data_attr() -> Option<String> {
 }
 
 fn incompatible_relative_workspace_path() -> bool {
-  false
+  true
 }
 
 /** Formats a registry url to include the name and version fo the target package */
