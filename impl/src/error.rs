@@ -47,38 +47,41 @@ impl fmt::Display for RazeError {
         s, PLEASE_FILE_A_BUG
       ),
       Self::Config {
-        field_path_opt,
+        field_path_opt: Some(field_path_opt),
         message,
-      } => match field_path_opt {
-        Some(path) => write!(
-          f,
-          "Raze config problem in field \"{}\" with cause: \"{}\"",
-          path, message
-        ),
-        None => write!(f, "Raze config problem with cause: \"{}\"", message),
-      },
+      } => write!(
+        f,
+        "Raze config problem in field \"{}\" with cause: \"{}\"",
+        field_path_opt, message
+      ),
+      Self::Config {
+        field_path_opt: None,
+        message,
+      } => write!(f, "Raze config problem with cause: \"{}\"", message),
       Self::Rendering {
-        crate_name_opt,
+        crate_name_opt: Some(crate_name_op),
         message,
-      } => match crate_name_opt {
-        Some(name) => write!(
-          f,
-          "Raze failed to render crate \"{}\" with cause: \"{}\"",
-          name, message
-        ),
-        None => write!(f, "Raze failed to render with cause: \"{}\"", message),
-      },
+      } => write!(
+        f,
+        "Raze failed to render crate \"{}\" with cause: \"{}\"",
+        crate_name_op, message
+      ),
+      Self::Rendering {
+        crate_name_opt: None,
+        message,
+      } => write!(f, "Raze failed to render with cause: \"{}\"", message),
       Self::Planning {
-        dependency_name_opt,
+        dependency_name_opt: Some(dependency_name_opt),
         message,
-      } => match dependency_name_opt {
-        Some(dep_name) => write!(
-          f,
-          "Raze failed to plan crate \"{}\" with cause: \"{}\"",
-          dep_name, message
-        ),
-        None => write!(f, "Raze failed to render with cause: \"{}\"", message),
-      },
+      } => write!(
+        f,
+        "Raze failed to plan crate \"{}\" with cause: \"{}\"",
+        dependency_name_opt, message
+      ),
+      Self::Planning {
+        dependency_name_opt: None,
+        message,
+      } => write!(f, "Raze failed to render with cause: \"{}\"", message),
     }
   }
 }
