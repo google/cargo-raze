@@ -21,8 +21,9 @@ use std::{
 
 use anyhow::{anyhow, Result};
 
-use cargo_lock::{lockfile::Lockfile, SourceId, Version};
+use cargo_lock::{lockfile::Lockfile, SourceId};
 use cargo_platform::Platform;
+use semver::Version;
 
 use itertools::Itertools;
 use tempfile::TempDir;
@@ -1204,7 +1205,6 @@ mod tests {
   };
 
   use super::*;
-  use semver::Version;
 
   #[test]
   #[allow(non_snake_case)]
