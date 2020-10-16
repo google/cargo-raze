@@ -20,7 +20,7 @@ use crate::{
   context::{CrateContext, WorkspaceContext},
   planning::PlannedBuild,
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
-  util::RazeError,
+  error::RazeError,
 };
 
 use std::error::Error;
