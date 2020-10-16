@@ -6,7 +6,7 @@ An experimental support Cargo plugin for distilling a workspace-level
 Cargo.toml into BUILD targets that code using [rules_rust](https://github.com/bazelbuild/rules_rust)
 can depend on directly.
 
-### Disclaimer
+## Disclaimer
 
 This is not an official Google product (experimental or otherwise), it is just code that happens to be owned by Google.
 
@@ -45,25 +45,12 @@ WORKSPACE. Here is an example:
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
-    name = "bazel_skylib",
-    sha256 = "97e70364e9249702246c0e9444bccdc4b847bed1eb03c5a3ece4f83dfe6abc44",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
-        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
-    ],
-)
-
-load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
-
-bazel_skylib_workspace()
-
-http_archive(
     name = "io_bazel_rules_rust",
-    sha256 = "5ed804fcd10a506a5b8e9e59bc6b3b7f43bc30c87ce4670e6f78df43604894fd",
-    strip_prefix = "rules_rust-fdf9655ba95616e0314b4e0ebab40bb0c5fe005c",
+    sha256 = "50a772198877e21a61823fa292d28539f8bc99d72463e55b5b09942394ec370e",
+    strip_prefix = "rules_rust-9a8ef691b8e8f682d767189c38339cbee16d0a16",
     urls = [
-        # Master branch as of 2020-07-27
-        "https://github.com/bazelbuild/rules_rust/archive/fdf9655ba95616e0314b4e0ebab40bb0c5fe005c.tar.gz",
+        # Master branch as of 2020-10-16
+        "https://github.com/bazelbuild/rules_rust/archive/9a8ef691b8e8f682d767189c38339cbee16d0a16.tar.gz",
     ],
 )
 
@@ -71,9 +58,9 @@ load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
 
 rust_repositories()
 
-load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
+load("@io_bazel_rules_rust//:workspace.bzl", "rust_workspace")
 
-bazel_version(name = "bazel_version")
+rust_workspace()
 ```
 
 ### Vendoring Mode
