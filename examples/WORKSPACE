@@ -7,7 +7,7 @@ http_archive(
     sha256 = "50a772198877e21a61823fa292d28539f8bc99d72463e55b5b09942394ec370e",
     strip_prefix = "rules_rust-9a8ef691b8e8f682d767189c38339cbee16d0a16",
     urls = [
-        # Master branch as of 2020-09-24
+        # Master branch as of 2020-10-16
         "https://github.com/bazelbuild/rules_rust/archive/9a8ef691b8e8f682d767189c38339cbee16d0a16.tar.gz",
     ],
 )
