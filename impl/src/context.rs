@@ -31,8 +31,8 @@ pub struct DependencyAlias {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableTarget {
-  pub name: String,
   pub kind: String,
+  pub name: String,
 
   /**
    * The path in Bazel's format (i.e. with forward slashes) to the target's entry point.

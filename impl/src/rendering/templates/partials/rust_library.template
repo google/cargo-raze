@@ -1,4 +1,3 @@
-
 {% if target_name_sanitized != crate_name_sanitized -%}
 alias(
     name = "{{ crate_name_sanitized }}",
@@ -10,10 +9,9 @@ alias(
 )
 
 {% endif -%}
-# buildifier: leave-alone
 rust_library(
     name = "{{ target_name_sanitized }}",
-    crate_type = "{{ target.kind }}",
+{% include "templates/partials/common_attrs.template" %}
     deps = [
         {%- if crate.build_script_target %}
         ":{{ crate_name_sanitized }}_build_script",
@@ -29,5 +27,4 @@ rust_library(
     {%- include "templates/partials/targeted_dependencies.template" -%},
     {%- else -%},
     {%- endif %}
-{% include "templates/partials/common_attrs.template" %}
 )
