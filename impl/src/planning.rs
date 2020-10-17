@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod license;
+
 use std::{
   collections::{HashMap, HashSet},
   io,
@@ -35,7 +37,6 @@ use crate::{
     WorkspaceContext,
   },
   error::{RazeError, PLEASE_FILE_A_BUG},
-  license,
   metadata::{
     fetch_crate_checksum, gather_binary_dep_info, BinaryDependencyInfo, CargoWorkspaceFiles,
     DependencyKind, Metadata, MetadataFetcher, Node, Package, PackageId,
@@ -1200,7 +1201,6 @@ mod checks {
 mod tests {
   use crate::{
     metadata::{CargoMetadataFetcher, Metadata, MetadataFetcher},
-    planning::checks,
     settings::testing as settings_testing,
     testing::*,
   };
