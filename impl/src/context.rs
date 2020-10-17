@@ -34,9 +34,7 @@ pub struct BuildableTarget {
   pub name: String,
   pub kind: String,
 
-  /**
-   * The path in Bazel's format (i.e. with forward slashes) to the target's entry point.
-   */
+  /** The path in Bazel's format (i.e. with forward slashes) to the target's entry point. */
   pub path: String,
   pub edition: String,
 }
@@ -69,7 +67,7 @@ pub struct GitRepo {
 
   // Directory containing the crate's Cargo.toml file, relative to the git repo root.
   // Will be None iff the crate lives at the root of the git repo.
-  pub path_to_crate_root: Option<String>
+  pub path_to_crate_root: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
