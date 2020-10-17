@@ -1,9 +1,9 @@
 
-# buildifier: leave-alone
 rust_binary(
     # Prefix bin name to disambiguate from (probable) collision with lib name
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_{{ target_name_sanitized }}",
+{% include "templates/partials/common_attrs.template" %}
     deps = [
         {%- if crate.lib_target_name %}
         # Binaries get an implicit dependency on their crate's lib
@@ -23,5 +23,4 @@ rust_binary(
     {%- include "templates/partials/targeted_dependencies.template" -%},
     {%- else -%},
     {%- endif %}
-{% include "templates/partials/common_attrs.template" %}
 )
