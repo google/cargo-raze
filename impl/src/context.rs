@@ -17,9 +17,9 @@ use serde::Serialize;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableDependency {
+  pub buildable_target: String,
   pub name: String,
   pub version: String,
-  pub buildable_target: String,
   pub is_proc_macro: bool,
 }
 
