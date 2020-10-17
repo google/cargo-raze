@@ -31,10 +31,26 @@ licenses([
 # Generated targets
 # Unsupported target "colors" with type "example" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "console",
+    srcs = glob(["**/*.rs"]),
+    aliases = {
+    },
+    crate_features = [
+        "default",
+        "unicode-width",
+    ],
+    crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2018",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.9.2",
     deps = [
         "@remote_binary_dependencies__clicolors_control__1_0_1//:clicolors_control",
         "@remote_binary_dependencies__lazy_static__1_4_0//:lazy_static",
@@ -74,23 +90,6 @@ rust_library(
         ],
         "//conditions:default": [],
     }),
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2018",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.9.2",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-        "default",
-        "unicode-width",
-    ],
-    aliases = {
-    },
 )
 # Unsupported target "cursor_at" with type "example" omitted
 # Unsupported target "term" with type "example" omitted

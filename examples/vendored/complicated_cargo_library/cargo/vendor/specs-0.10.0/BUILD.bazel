@@ -38,21 +38,13 @@ licenses([
 # Unsupported target "parallel" with type "bench" omitted
 # Unsupported target "serialize" with type "example" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "specs",
-    crate_type = "lib",
-    deps = [
-        "//vendored/complicated_cargo_library/cargo/vendor/crossbeam-0.3.2:crossbeam",
-        "//vendored/complicated_cargo_library/cargo/vendor/fnv-1.0.7:fnv",
-        "//vendored/complicated_cargo_library/cargo/vendor/hibitset-0.3.2:hibitset",
-        "//vendored/complicated_cargo_library/cargo/vendor/mopa-0.2.2:mopa",
-        "//vendored/complicated_cargo_library/cargo/vendor/rayon-0.8.2:rayon",
-        "//vendored/complicated_cargo_library/cargo/vendor/shred-0.5.2:shred",
-        "//vendored/complicated_cargo_library/cargo/vendor/tuple_utils-0.2.0:tuple_utils",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     proc_macro_deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/derivative-1.0.4:derivative",
@@ -61,12 +53,19 @@ rust_library(
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.10.0",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "0.10.0",
+    deps = [
+        "//vendored/complicated_cargo_library/cargo/vendor/crossbeam-0.3.2:crossbeam",
+        "//vendored/complicated_cargo_library/cargo/vendor/fnv-1.0.7:fnv",
+        "//vendored/complicated_cargo_library/cargo/vendor/hibitset-0.3.2:hibitset",
+        "//vendored/complicated_cargo_library/cargo/vendor/mopa-0.2.2:mopa",
+        "//vendored/complicated_cargo_library/cargo/vendor/rayon-0.8.2:rayon",
+        "//vendored/complicated_cargo_library/cargo/vendor/shred-0.5.2:shred",
+        "//vendored/complicated_cargo_library/cargo/vendor/tuple_utils-0.2.0:tuple_utils",
     ],
 )
 # Unsupported target "storage" with type "bench" omitted

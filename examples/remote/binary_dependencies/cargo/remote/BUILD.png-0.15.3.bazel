@@ -31,31 +31,30 @@ licenses([
 # Generated targets
 # Unsupported target "decoder" with type "bench" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "png",
+    srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "deflate",
+        "png-encoding",
+    ],
+    crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2018",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.15.3",
     deps = [
         "@remote_binary_dependencies__bitflags__1_2_1//:bitflags",
         "@remote_binary_dependencies__crc32fast__1_2_0//:crc32fast",
         "@remote_binary_dependencies__deflate__0_7_20//:deflate",
         "@remote_binary_dependencies__inflate__0_4_5//:inflate",
-    ],
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2018",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.15.3",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-        "default",
-        "deflate",
-        "png-encoding",
     ],
 )
 # Unsupported target "pngcheck" with type "example" omitted

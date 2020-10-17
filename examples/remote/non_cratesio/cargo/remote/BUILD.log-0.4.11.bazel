@@ -32,27 +32,26 @@ licenses([
 # Unsupported target "build-script-build" with type "custom-build" omitted
 # Unsupported target "filters" with type "test" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "log",
-    crate_type = "lib",
-    deps = [
-        "@remote_non_cratesio__cfg_if__0_1_10//:cfg_if",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "std",
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
         "--cfg=atomic_cas",
     ],
-    version = "0.4.11",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "std",
+    version = "0.4.11",
+    deps = [
+        "@remote_non_cratesio__cfg_if__0_1_10//:cfg_if",
     ],
 )
 # Unsupported target "macros" with type "test" omitted

@@ -30,25 +30,24 @@ licenses([
 
 # Generated targets
 
-# buildifier: leave-alone
 rust_library(
     name = "fnv",
-    crate_type = "lib",
-    deps = [
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "std",
+    ],
     crate_root = "lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "1.0.7",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "default",
-        "std",
+    version = "1.0.7",
+    deps = [
     ],
 )

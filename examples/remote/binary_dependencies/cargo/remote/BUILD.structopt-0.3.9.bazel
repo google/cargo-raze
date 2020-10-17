@@ -69,16 +69,14 @@ licenses([
 # Unsupported target "skip" with type "test" omitted
 # Unsupported target "special_types" with type "test" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "structopt",
-    crate_type = "lib",
-    deps = [
-        "@remote_binary_dependencies__clap__2_33_0//:clap",
-        "@remote_binary_dependencies__lazy_static__1_4_0//:lazy_static",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2018",
     proc_macro_deps = [
         "@remote_binary_dependencies__structopt_derive__0_4_2//:structopt_derive",
@@ -86,13 +84,14 @@ rust_library(
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.3.9",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "default",
+    version = "0.3.9",
+    deps = [
+        "@remote_binary_dependencies__clap__2_33_0//:clap",
+        "@remote_binary_dependencies__lazy_static__1_4_0//:lazy_static",
     ],
 )
 # Unsupported target "subcommand_aliases" with type "example" omitted

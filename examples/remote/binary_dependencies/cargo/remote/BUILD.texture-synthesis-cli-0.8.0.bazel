@@ -30,11 +30,26 @@ licenses([
 
 # Generated targets
 
-# buildifier: leave-alone
 rust_binary(
     # Prefix bin name to disambiguate from (probable) collision with lib name
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_texture_synthesis",
+    srcs = glob(["**/*.rs"]),
+    aliases = {
+    },
+    crate_features = [
+        "default",
+    ],
+    crate_root = "src/main.rs",
+    edition = "2018",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.8.0",
     deps = [
         "@remote_binary_dependencies__structopt__0_3_9//:structopt",
         "@remote_binary_dependencies__texture_synthesis__0_8_0//:texture_synthesis",
@@ -64,20 +79,4 @@ rust_binary(
         ],
         "//conditions:default": [],
     }),
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/main.rs",
-    edition = "2018",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.8.0",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-        "default",
-    ],
-    aliases = {
-    },
 )

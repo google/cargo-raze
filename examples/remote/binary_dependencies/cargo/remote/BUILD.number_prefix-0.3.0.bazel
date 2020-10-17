@@ -31,25 +31,24 @@ licenses([
 # Generated targets
 # Unsupported target "conversions" with type "example" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "number_prefix",
-    crate_type = "lib",
-    deps = [
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "std",
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.3.0",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "default",
-        "std",
+    version = "0.3.0",
+    deps = [
     ],
 )

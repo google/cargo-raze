@@ -30,18 +30,13 @@ licenses([
 
 # Generated targets
 
-# buildifier: leave-alone
 rust_library(
     name = "proc_macro_error_attr",
-    crate_type = "proc-macro",
-    deps = [
-        "@remote_binary_dependencies__proc_macro2__1_0_9//:proc_macro2",
-        "@remote_binary_dependencies__quote__1_0_2//:quote",
-        "@remote_binary_dependencies__syn__1_0_16//:syn",
-        "@remote_binary_dependencies__syn_mid__0_5_0//:syn_mid",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "proc-macro",
     edition = "2018",
     proc_macro_deps = [
         "@remote_binary_dependencies__rustversion__1_0_2//:rustversion",
@@ -49,11 +44,15 @@ rust_library(
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.4.9",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "0.4.9",
+    deps = [
+        "@remote_binary_dependencies__proc_macro2__1_0_9//:proc_macro2",
+        "@remote_binary_dependencies__quote__1_0_2//:quote",
+        "@remote_binary_dependencies__syn__1_0_16//:syn",
+        "@remote_binary_dependencies__syn_mid__0_5_0//:syn_mid",
     ],
 )

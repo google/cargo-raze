@@ -36,29 +36,28 @@ licenses([
 # Unsupported target "fastbar" with type "example" omitted
 # Unsupported target "finebars" with type "example" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "indicatif",
+    srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+    ],
+    crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2018",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.14.0",
     deps = [
         "@remote_binary_dependencies__console__0_9_2//:console",
         "@remote_binary_dependencies__lazy_static__1_4_0//:lazy_static",
         "@remote_binary_dependencies__number_prefix__0_3_0//:number_prefix",
         "@remote_binary_dependencies__regex__1_3_4//:regex",
-    ],
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2018",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.14.0",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-        "default",
     ],
 )
 # Unsupported target "iterator" with type "example" omitted

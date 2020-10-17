@@ -32,24 +32,23 @@ licenses([
 # Unsupported target "decode" with type "example" omitted
 # Unsupported target "decoding_benchmark" with type "bench" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "jpeg_decoder",
-    crate_type = "lib",
-    deps = [
-        "@remote_binary_dependencies__byteorder__1_3_4//:byteorder",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.1.18",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "0.1.18",
+    deps = [
+        "@remote_binary_dependencies__byteorder__1_3_4//:byteorder",
     ],
 )

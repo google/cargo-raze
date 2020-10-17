@@ -31,10 +31,25 @@ licenses([
 # Generated targets
 # Unsupported target "build-script-build" with type "custom-build" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "crossbeam_epoch",
+    srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "lazy_static",
+        "std",
+    ],
+    crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.8.2",
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/cfg-if-0.1.10:cfg_if",
         "//vendored/complicated_cargo_library/cargo/vendor/crossbeam-utils-0.7.2:crossbeam_utils",
@@ -42,22 +57,6 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/maybe-uninit-2.0.0:maybe_uninit",
         "//vendored/complicated_cargo_library/cargo/vendor/memoffset-0.5.5:memoffset",
         "//vendored/complicated_cargo_library/cargo/vendor/scopeguard-1.1.0:scopeguard",
-    ],
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2015",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.8.2",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-        "default",
-        "lazy_static",
-        "std",
     ],
 )
 # Unsupported target "defer" with type "bench" omitted

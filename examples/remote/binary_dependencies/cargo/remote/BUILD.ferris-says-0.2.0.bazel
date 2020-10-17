@@ -30,10 +30,22 @@ licenses([
 
 # Generated targets
 
-# buildifier: leave-alone
 rust_library(
     name = "ferris_says",
+    srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
+    crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.2.0",
     deps = [
         "@remote_binary_dependencies__clap__2_33_3//:clap",
         "@remote_binary_dependencies__error_chain__0_10_0//:error_chain",
@@ -41,26 +53,25 @@ rust_library(
         "@remote_binary_dependencies__textwrap__0_11_0//:textwrap",
         "@remote_binary_dependencies__unicode_width__0_1_8//:unicode_width",
     ],
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2015",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.2.0",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-    ],
 )
 
-# buildifier: leave-alone
 rust_binary(
     # Prefix bin name to disambiguate from (probable) collision with lib name
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_fsays",
+    srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
+    crate_root = "src/bin/main.rs",
+    edition = "2015",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.2.0",
     deps = [
         # Binaries get an implicit dependency on their crate's lib
         ":ferris_says",
@@ -69,19 +80,6 @@ rust_binary(
         "@remote_binary_dependencies__smallvec__0_4_5//:smallvec",
         "@remote_binary_dependencies__textwrap__0_11_0//:textwrap",
         "@remote_binary_dependencies__unicode_width__0_1_8//:unicode_width",
-    ],
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/bin/main.rs",
-    edition = "2015",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.2.0",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
     ],
 )
 # Unsupported target "integration_test" with type "test" omitted

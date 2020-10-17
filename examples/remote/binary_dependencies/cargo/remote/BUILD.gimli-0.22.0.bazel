@@ -34,25 +34,24 @@ licenses([
 # Unsupported target "dwarf-validate" with type "example" omitted
 # Unsupported target "dwarfdump" with type "example" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "gimli",
-    crate_type = "lib",
-    deps = [
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "read",
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.22.0",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "read",
+    version = "0.22.0",
+    deps = [
     ],
 )
 # Unsupported target "parse_self" with type "test" omitted

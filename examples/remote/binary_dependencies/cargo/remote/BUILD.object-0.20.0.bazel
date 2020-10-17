@@ -34,23 +34,9 @@ licenses([
 # Unsupported target "objcopy" with type "example" omitted
 # Unsupported target "objdump" with type "example" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "object",
-    crate_type = "lib",
-    deps = [
-    ],
     srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2018",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.20.0",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
     crate_features = [
         "coff",
         "elf",
@@ -58,6 +44,19 @@ rust_library(
         "pe",
         "read_core",
         "unaligned",
+    ],
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    edition = "2018",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.20.0",
+    deps = [
     ],
 )
 # Unsupported target "parse_self" with type "test" omitted

@@ -39,20 +39,13 @@ licenses([
 # Unsupported target "par_seq" with type "example" omitted
 # Unsupported target "seq_dispatch" with type "example" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "shred",
-    crate_type = "lib",
-    deps = [
-        "@remote_complicated_cargo_library__arrayvec__0_3_25//:arrayvec",
-        "@remote_complicated_cargo_library__fnv__1_0_7//:fnv",
-        "@remote_complicated_cargo_library__mopa__0_2_2//:mopa",
-        "@remote_complicated_cargo_library__pulse__0_5_3//:pulse",
-        "@remote_complicated_cargo_library__rayon__0_8_2//:rayon",
-        "@remote_complicated_cargo_library__smallvec__0_4_5//:smallvec",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     proc_macro_deps = [
         "@remote_complicated_cargo_library__shred_derive__0_3_0//:shred_derive",
@@ -60,12 +53,18 @@ rust_library(
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.5.2",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "0.5.2",
+    deps = [
+        "@remote_complicated_cargo_library__arrayvec__0_3_25//:arrayvec",
+        "@remote_complicated_cargo_library__fnv__1_0_7//:fnv",
+        "@remote_complicated_cargo_library__mopa__0_2_2//:mopa",
+        "@remote_complicated_cargo_library__pulse__0_5_3//:pulse",
+        "@remote_complicated_cargo_library__rayon__0_8_2//:rayon",
+        "@remote_complicated_cargo_library__smallvec__0_4_5//:smallvec",
     ],
 )
 # Unsupported target "thread_local" with type "example" omitted

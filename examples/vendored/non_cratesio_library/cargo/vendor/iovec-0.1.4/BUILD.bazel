@@ -30,10 +30,24 @@ licenses([
 
 # Generated targets
 
-# buildifier: leave-alone
 rust_library(
     name = "iovec",
+    srcs = glob(["**/*.rs"]),
+    aliases = {
+    },
+    crate_features = [
+    ],
+    crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.1.4",
     deps = [
     ] + selects.with_or({
         # cfg(unix)
@@ -58,19 +72,4 @@ rust_library(
         ],
         "//conditions:default": [],
     }),
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2015",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.1.4",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-    ],
-    aliases = {
-    },
 )

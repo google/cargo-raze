@@ -33,10 +33,24 @@ licenses([
 # Unsupported target "double_init_fail" with type "test" omitted
 # Unsupported target "init_zero_threads" with type "test" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "rayon_core",
+    srcs = glob(["**/*.rs"]),
+    aliases = {
+    },
+    crate_features = [
+    ],
+    crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2018",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "1.8.1",
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/crossbeam-channel-0.4.4:crossbeam_channel",
         "//vendored/complicated_cargo_library/cargo/vendor/crossbeam-deque-0.7.3:crossbeam_deque",
@@ -65,21 +79,6 @@ rust_library(
         ],
         "//conditions:default": [],
     }),
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2018",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "1.8.1",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-    ],
-    aliases = {
-    },
 )
 # Unsupported target "scope_join" with type "test" omitted
 # Unsupported target "scoped_threadpool" with type "test" omitted

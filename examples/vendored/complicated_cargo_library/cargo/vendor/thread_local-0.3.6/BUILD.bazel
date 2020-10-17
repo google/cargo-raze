@@ -31,24 +31,23 @@ licenses([
 # Generated targets
 # Unsupported target "thread_local" with type "bench" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "thread_local",
-    crate_type = "lib",
-    deps = [
-        "//vendored/complicated_cargo_library/cargo/vendor/lazy_static-1.4.0:lazy_static",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.3.6",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "0.3.6",
+    deps = [
+        "//vendored/complicated_cargo_library/cargo/vendor/lazy_static-1.4.0:lazy_static",
     ],
 )

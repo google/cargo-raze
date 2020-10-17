@@ -30,24 +30,23 @@ licenses([
 
 # Generated targets
 
-# buildifier: leave-alone
 rust_library(
     name = "bytemuck",
-    crate_type = "lib",
-    deps = [
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "1.2.0",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "1.2.0",
+    deps = [
     ],
 )
 # Unsupported target "cast_slice_tests" with type "test" omitted

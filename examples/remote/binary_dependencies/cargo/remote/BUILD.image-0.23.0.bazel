@@ -31,10 +31,29 @@ licenses([
 # Generated targets
 # Unsupported target "encode_jpeg" with type "bench" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "image",
+    srcs = glob(["**/*.rs"]),
+    aliases = {
+        "@remote_binary_dependencies__jpeg_decoder__0_1_18//:jpeg_decoder": "jpeg",
+    },
+    crate_features = [
+        "bmp",
+        "jpeg",
+        "png",
+    ],
+    crate_root = "src/lib.rs",
     crate_type = "lib",
+    data = ["README.md"],
+    edition = "2018",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.23.0",
     deps = [
         "@remote_binary_dependencies__bytemuck__1_2_0//:bytemuck",
         "@remote_binary_dependencies__byteorder__1_3_4//:byteorder",
@@ -44,25 +63,5 @@ rust_library(
         "@remote_binary_dependencies__num_traits__0_2_11//:num_traits",
         "@remote_binary_dependencies__png__0_15_3//:png",
     ],
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2018",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    data = ["README.md"],
-    version = "0.23.0",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-        "bmp",
-        "jpeg",
-        "png",
-    ],
-    aliases = {
-        "@remote_binary_dependencies__jpeg_decoder__0_1_18//:jpeg_decoder": "jpeg",
-    },
 )
 # Unsupported target "load" with type "bench" omitted

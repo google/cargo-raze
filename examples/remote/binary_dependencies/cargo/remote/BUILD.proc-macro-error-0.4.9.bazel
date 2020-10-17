@@ -35,48 +35,41 @@ load(
     "cargo_build_script",
 )
 
-# buildifier: leave-alone
 cargo_build_script(
     name = "proc_macro_error_build_script",
     srcs = glob(["**/*.rs"]),
-    crate_root = "build.rs",
-    edition = "2018",
-    deps = [
+    build_script_env = {
+    },
+    crate_features = [
     ],
+    crate_root = "build.rs",
+    data = glob(["**"]),
+    edition = "2018",
     proc_macro_deps = [
         "@remote_binary_dependencies__rustversion__1_0_2//:rustversion",
     ],
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    crate_features = [
-    ],
-    build_script_env = {
-    },
-    data = glob(["**"]),
     tags = [
         "cargo-raze",
         "manual",
     ],
     version = "0.4.9",
     visibility = ["//visibility:private"],
+    deps = [
+    ],
 )
-
 # Unsupported target "macro-errors" with type "test" omitted
 # Unsupported target "ok" with type "test" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "proc_macro_error",
-    crate_type = "lib",
-    deps = [
-        ":proc_macro_error_build_script",
-        "@remote_binary_dependencies__proc_macro2__1_0_9//:proc_macro2",
-        "@remote_binary_dependencies__quote__1_0_2//:quote",
-        "@remote_binary_dependencies__syn__1_0_16//:syn",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2018",
     proc_macro_deps = [
         "@remote_binary_dependencies__proc_macro_error_attr__0_4_9//:proc_macro_error_attr",
@@ -84,11 +77,15 @@ rust_library(
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.4.9",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "0.4.9",
+    deps = [
+        ":proc_macro_error_build_script",
+        "@remote_binary_dependencies__proc_macro2__1_0_9//:proc_macro2",
+        "@remote_binary_dependencies__quote__1_0_2//:quote",
+        "@remote_binary_dependencies__syn__1_0_16//:syn",
     ],
 )

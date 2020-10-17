@@ -31,25 +31,24 @@ licenses([
 # Generated targets
 # Unsupported target "addr2line" with type "example" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "addr2line",
-    crate_type = "lib",
-    deps = [
-        "@remote_binary_dependencies__gimli__0_22_0//:gimli",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.13.0",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "0.13.0",
+    deps = [
+        "@remote_binary_dependencies__gimli__0_22_0//:gimli",
     ],
 )
 # Unsupported target "correctness" with type "test" omitted

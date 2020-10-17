@@ -30,27 +30,26 @@ licenses([
 
 # Generated targets
 
-# buildifier: leave-alone
 rust_library(
     name = "crossbeam_deque",
-    crate_type = "lib",
-    deps = [
-        "@remote_complicated_cargo_library__crossbeam_epoch__0_8_2//:crossbeam_epoch",
-        "@remote_complicated_cargo_library__crossbeam_utils__0_7_2//:crossbeam_utils",
-        "@remote_complicated_cargo_library__maybe_uninit__2_0_0//:maybe_uninit",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.7.3",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "0.7.3",
+    deps = [
+        "@remote_complicated_cargo_library__crossbeam_epoch__0_8_2//:crossbeam_epoch",
+        "@remote_complicated_cargo_library__crossbeam_utils__0_7_2//:crossbeam_utils",
+        "@remote_complicated_cargo_library__maybe_uninit__2_0_0//:maybe_uninit",
     ],
 )
 # Unsupported target "fifo" with type "test" omitted

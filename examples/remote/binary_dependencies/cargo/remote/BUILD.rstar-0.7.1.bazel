@@ -30,26 +30,25 @@ licenses([
 
 # Generated targets
 
-# buildifier: leave-alone
 rust_library(
     name = "rstar",
-    crate_type = "lib",
-    deps = [
-        "@remote_binary_dependencies__num_traits__0_2_11//:num_traits",
-        "@remote_binary_dependencies__pdqselect__0_1_0//:pdqselect",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.7.1",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "default",
+    version = "0.7.1",
+    deps = [
+        "@remote_binary_dependencies__num_traits__0_2_11//:num_traits",
+        "@remote_binary_dependencies__pdqselect__0_1_0//:pdqselect",
     ],
 )

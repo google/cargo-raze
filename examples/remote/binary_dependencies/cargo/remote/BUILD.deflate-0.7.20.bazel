@@ -31,26 +31,25 @@ licenses([
 # Generated targets
 # Unsupported target "bench" with type "bench" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "deflate",
-    crate_type = "lib",
-    deps = [
-        "@remote_binary_dependencies__adler32__1_0_4//:adler32",
-        "@remote_binary_dependencies__byteorder__1_3_4//:byteorder",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.7.20",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "0.7.20",
+    deps = [
+        "@remote_binary_dependencies__adler32__1_0_4//:adler32",
+        "@remote_binary_dependencies__byteorder__1_3_4//:byteorder",
     ],
 )
 # Unsupported target "test" with type "test" omitted

@@ -30,29 +30,28 @@ licenses([
 
 # Generated targets
 
-# buildifier: leave-alone
 rust_library(
     name = "c2_chacha",
-    crate_type = "lib",
-    deps = [
-        "@remote_binary_dependencies__ppv_lite86__0_2_6//:ppv_lite86",
-    ],
     srcs = glob(["**/*.rs"]),
+    aliases = {
+        "@remote_binary_dependencies__ppv_lite86__0_2_6//:ppv_lite86": "ppv_lite86",
+    },
+    crate_features = [
+        "simd",
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.2.3",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "simd",
+    version = "0.2.3",
+    deps = [
+        "@remote_binary_dependencies__ppv_lite86__0_2_6//:ppv_lite86",
     ],
-    aliases = {
-        "@remote_binary_dependencies__ppv_lite86__0_2_6//:ppv_lite86": "ppv_lite86",
-    },
 )
 # Unsupported target "chacha20" with type "bench" omitted

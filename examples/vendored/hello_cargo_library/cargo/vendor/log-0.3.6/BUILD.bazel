@@ -31,25 +31,24 @@ licenses([
 # Generated targets
 # Unsupported target "filters" with type "test" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "log",
-    crate_type = "lib",
-    deps = [
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "use_std",
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.3.6",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "default",
-        "use_std",
+    version = "0.3.6",
+    deps = [
     ],
 )

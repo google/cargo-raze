@@ -30,24 +30,23 @@ licenses([
 
 # Generated targets
 
-# buildifier: leave-alone
 rust_library(
     name = "nodrop",
-    crate_type = "lib",
-    deps = [
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "std",
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.1.14",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "std",
+    version = "0.1.14",
+    deps = [
     ],
 )

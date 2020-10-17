@@ -31,27 +31,26 @@ licenses([
 # Generated targets
 # Unsupported target "compiletest" with type "test" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "quote",
-    crate_type = "lib",
-    deps = [
-        "@remote_binary_dependencies__proc_macro2__1_0_9//:proc_macro2",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "proc-macro",
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "1.0.2",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "default",
-        "proc-macro",
+    version = "1.0.2",
+    deps = [
+        "@remote_binary_dependencies__proc_macro2__1_0_9//:proc_macro2",
     ],
 )
 # Unsupported target "test" with type "test" omitted

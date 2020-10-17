@@ -39,20 +39,13 @@ licenses([
 # Unsupported target "par_seq" with type "example" omitted
 # Unsupported target "seq_dispatch" with type "example" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "shred",
-    crate_type = "lib",
-    deps = [
-        "//vendored/complicated_cargo_library/cargo/vendor/arrayvec-0.3.25:arrayvec",
-        "//vendored/complicated_cargo_library/cargo/vendor/fnv-1.0.7:fnv",
-        "//vendored/complicated_cargo_library/cargo/vendor/mopa-0.2.2:mopa",
-        "//vendored/complicated_cargo_library/cargo/vendor/pulse-0.5.3:pulse",
-        "//vendored/complicated_cargo_library/cargo/vendor/rayon-0.8.2:rayon",
-        "//vendored/complicated_cargo_library/cargo/vendor/smallvec-0.4.5:smallvec",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     proc_macro_deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/shred-derive-0.3.0:shred_derive",
@@ -60,12 +53,18 @@ rust_library(
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.5.2",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "0.5.2",
+    deps = [
+        "//vendored/complicated_cargo_library/cargo/vendor/arrayvec-0.3.25:arrayvec",
+        "//vendored/complicated_cargo_library/cargo/vendor/fnv-1.0.7:fnv",
+        "//vendored/complicated_cargo_library/cargo/vendor/mopa-0.2.2:mopa",
+        "//vendored/complicated_cargo_library/cargo/vendor/pulse-0.5.3:pulse",
+        "//vendored/complicated_cargo_library/cargo/vendor/rayon-0.8.2:rayon",
+        "//vendored/complicated_cargo_library/cargo/vendor/smallvec-0.4.5:smallvec",
     ],
 )
 # Unsupported target "thread_local" with type "example" omitted

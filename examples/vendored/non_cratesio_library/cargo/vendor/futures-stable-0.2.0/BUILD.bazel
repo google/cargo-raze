@@ -30,26 +30,25 @@ licenses([
 
 # Generated targets
 
-# buildifier: leave-alone
 rust_library(
     name = "futures_stable",
-    crate_type = "lib",
-    deps = [
-        "//vendored/non_cratesio_library/cargo/vendor/futures-core-0.2.0:futures_core",
-        "//vendored/non_cratesio_library/cargo/vendor/futures-executor-0.2.0:futures_executor",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "std",
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.2.0",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "std",
+    version = "0.2.0",
+    deps = [
+        "//vendored/non_cratesio_library/cargo/vendor/futures-core-0.2.0:futures_core",
+        "//vendored/non_cratesio_library/cargo/vendor/futures-executor-0.2.0:futures_executor",
     ],
 )

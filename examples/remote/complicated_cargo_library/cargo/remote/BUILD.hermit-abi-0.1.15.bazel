@@ -30,25 +30,24 @@ licenses([
 
 # Generated targets
 
-# buildifier: leave-alone
 rust_library(
     name = "hermit_abi",
-    crate_type = "lib",
-    deps = [
-        "@remote_complicated_cargo_library__libc__0_2_77//:libc",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.1.15",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "default",
+    version = "0.1.15",
+    deps = [
+        "@remote_complicated_cargo_library__libc__0_2_77//:libc",
     ],
 )

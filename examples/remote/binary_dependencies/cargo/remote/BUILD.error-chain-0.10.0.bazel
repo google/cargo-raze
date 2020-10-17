@@ -32,28 +32,27 @@ licenses([
 # Unsupported target "all" with type "example" omitted
 # Unsupported target "doc" with type "example" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "error_chain",
-    crate_type = "lib",
-    deps = [
-        "@remote_binary_dependencies__backtrace__0_3_50//:backtrace",
-    ],
     srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2015",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.10.0",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
     crate_features = [
         "backtrace",
         "default",
         "example_generated",
+    ],
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    edition = "2015",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.10.0",
+    deps = [
+        "@remote_binary_dependencies__backtrace__0_3_50//:backtrace",
     ],
 )
 # Unsupported target "quick_main" with type "test" omitted

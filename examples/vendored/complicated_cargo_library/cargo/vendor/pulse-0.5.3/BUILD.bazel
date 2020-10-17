@@ -32,27 +32,26 @@ licenses([
 # Unsupported target "barrier" with type "test" omitted
 # Unsupported target "benches" with type "bench" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "pulse",
-    crate_type = "lib",
-    deps = [
-        "//vendored/complicated_cargo_library/cargo/vendor/atom-0.3.5:atom",
-        "//vendored/complicated_cargo_library/cargo/vendor/time-0.1.44:time",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.5.3",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "default",
+    version = "0.5.3",
+    deps = [
+        "//vendored/complicated_cargo_library/cargo/vendor/atom-0.3.5:atom",
+        "//vendored/complicated_cargo_library/cargo/vendor/time-0.1.44:time",
     ],
 )
 # Unsupported target "select" with type "test" omitted

@@ -41,10 +41,24 @@ licenses([
 # Unsupported target "all-the-things" with type "bench" omitted
 # Unsupported target "diff" with type "test" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "texture_synthesis",
+    srcs = glob(["**/*.rs"]),
+    aliases = {
+    },
+    crate_features = [
+    ],
+    crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2018",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.8.0",
     deps = [
         "@remote_binary_dependencies__image__0_23_0//:image",
         "@remote_binary_dependencies__num_cpus__1_12_0//:num_cpus",
@@ -76,19 +90,4 @@ rust_library(
         ],
         "//conditions:default": [],
     }),
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2018",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.8.0",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-    ],
-    aliases = {
-    },
 )

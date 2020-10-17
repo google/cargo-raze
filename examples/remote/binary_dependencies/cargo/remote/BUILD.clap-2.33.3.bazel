@@ -30,10 +30,31 @@ licenses([
 
 # Generated targets
 
-# buildifier: leave-alone
 rust_library(
     name = "clap",
+    srcs = glob(["**/*.rs"]),
+    aliases = {
+    },
+    crate_features = [
+        "ansi_term",
+        "atty",
+        "color",
+        "default",
+        "strsim",
+        "suggestions",
+        "vec_map",
+    ],
+    crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "2.33.3",
     deps = [
         "@remote_binary_dependencies__atty__0_2_14//:atty",
         "@remote_binary_dependencies__bitflags__1_2_1//:bitflags",
@@ -65,26 +86,4 @@ rust_library(
         ],
         "//conditions:default": [],
     }),
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2015",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "2.33.3",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-        "ansi_term",
-        "atty",
-        "color",
-        "default",
-        "strsim",
-        "suggestions",
-        "vec_map",
-    ],
-    aliases = {
-    },
 )

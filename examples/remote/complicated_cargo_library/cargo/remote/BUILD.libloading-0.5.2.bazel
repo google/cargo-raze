@@ -32,10 +32,24 @@ licenses([
 # Unsupported target "build-script-build" with type "custom-build" omitted
 # Unsupported target "functions" with type "test" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "libloading",
+    srcs = glob(["**/*.rs"]),
+    aliases = {
+    },
+    crate_features = [
+    ],
+    crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.5.2",
     deps = [
         ":global_static",
     ] + selects.with_or({
@@ -48,21 +62,6 @@ rust_library(
         ],
         "//conditions:default": [],
     }),
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2015",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.5.2",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-    ],
-    aliases = {
-    },
 )
 # Unsupported target "markers" with type "test" omitted
 # Unsupported target "windows" with type "test" omitted

@@ -31,23 +31,22 @@ licenses([
 # Generated targets
 # Unsupported target "context" with type "example" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "quick_error",
-    crate_type = "lib",
-    deps = [
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "1.2.3",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "1.2.3",
+    deps = [
     ],
 )

@@ -31,23 +31,9 @@ licenses([
 # Generated targets
 # Unsupported target "build-script-build" with type "custom-build" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "winapi",
-    crate_type = "lib",
-    deps = [
-    ],
     srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2015",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.3.9",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
     crate_features = [
         "consoleapi",
         "minwinbase",
@@ -55,5 +41,18 @@ rust_library(
         "processenv",
         "winbase",
         "wincon",
+    ],
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    edition = "2015",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.3.9",
+    deps = [
     ],
 )
