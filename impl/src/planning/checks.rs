@@ -131,7 +131,7 @@ pub fn warn_unused_settings(
   for (name, settings_per_version) in all_crate_settings {
     if !known_versions_per_crate.contains_key(name) {
       eprintln!(
-        "Found unused raze settings for all of {}-{:?}",
+        "WARNING: Found unused raze settings for all of {}-{:?}",
         name,
         settings_per_version.keys()
       );
@@ -145,7 +145,7 @@ pub fn warn_unused_settings(
     for version in settings_per_version.keys() {
       if !all_known_versions.contains(version) {
         eprintln!(
-          "Found unused raze settings for {}-{}, but {:?} were known",
+          "WARNING: Found unused raze settings for {}-{}, but {:?} were known",
           name, version, all_known_versions
         )
       }
