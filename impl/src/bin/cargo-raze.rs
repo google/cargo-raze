@@ -70,8 +70,10 @@ fn main() -> Result<()> {
     .unwrap_or_else(|e| e.exit());
 
   let settings = load_settings("Cargo.toml")?;
-  println!("Loaded override settings: {:#?}", settings);
-
+  if options.flag_verbose > 0 {
+    println!("Loaded override settings: {:#?}", settings);
+  }
+  
   let mut metadata_fetcher: Box<dyn MetadataFetcher> = match options.flag_cargo_bin_path {
     Some(ref p) => Box::new(CargoMetadataFetcher::new(p, /*use_tempdir: */ true)),
     None => Box::new(CargoMetadataFetcher::default()),
@@ -144,16 +146,18 @@ fn main() -> Result<()> {
     if dry_run {
       println!("{}:\n{}", path.display(), contents);
     } else {
-      write_to_file_loudly(&path, &contents)?;
+      write_to_file(&path, &contents, options.flag_verbose > 0)?;
     }
   }
 
   Ok(())
 }
 
-fn write_to_file_loudly(path: &Path, contents: &str) -> Result<()> {
+fn write_to_file(path: &Path, contents: &str, verbose: bool) -> Result<()> {
   File::create(&path).and_then(|mut f| f.write_all(contents.as_bytes()))?;
-  println!("Generated {} successfully", path.display());
+  if verbose {
+    println!("Generated {} successfully", path.display());
+  }
   Ok(())
 }
 
