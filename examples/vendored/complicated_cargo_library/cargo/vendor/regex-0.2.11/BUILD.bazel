@@ -49,13 +49,18 @@ rust_library(
         "//vendored/complicated_cargo_library/cargo/vendor/regex-syntax-0.5.6:regex_syntax",
         "//vendored/complicated_cargo_library/cargo/vendor/thread_local-0.3.6:thread_local",
         "//vendored/complicated_cargo_library/cargo/vendor/utf8-ranges-1.0.4:utf8_ranges",
+        "//vendored/complicated_cargo_library/cargo:specs",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
+        "--cfg=not_used",
     ],
+    rustc_env = {
+        "NOT_USED_KEY": "not_used_value",
+    },
     version = "0.2.11",
     tags = [
         "cargo-raze",

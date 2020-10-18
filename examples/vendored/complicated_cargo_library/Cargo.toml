@@ -15,16 +15,17 @@ path = "src/main.rs"
 [raze]
 workspace_path = "//vendored/complicated_cargo_library/cargo"
 gen_workspace_prefix = "vendored_complicated_cargo_library"
+genmode = "Vendored"
 
 [raze.crates.proc-macro2.'0.4.30']
 additional_flags = [
     "--cfg=use_proc_macro",
 ]
 
-[raze.crates.regex.'1.1.6']
+[raze.crates.regex.'0.2.11']
 additional_deps = [
   # Add an unused dep
-  "//vendored_complicated_cargo_library/cargo/vendor:specs"
+  "//vendored/complicated_cargo_library/cargo:specs"
 ]
 additional_flags = [
   # Add an unused flag
