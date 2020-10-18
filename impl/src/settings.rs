@@ -288,6 +288,7 @@ fn default_raze_settings_field_gen_workspace_prefix() -> String {
 }
 
 fn default_raze_settings_field_genmode() -> GenMode {
+  eprintln!("WARNING: The [raze] setting `genmode` should be explicitly set to either `\"Remote\"` or `\"Vendored\"`");
   GenMode::Vendored
 }
 
