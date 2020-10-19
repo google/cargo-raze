@@ -90,8 +90,8 @@ pub struct RazeSettings {
   pub genmode: GenMode,
 
   /**
-   * Suffix for generated build files, uses whole value for Vendored mode
-   * Default: BUILD
+   * The name of the output BUILD files when `genmode == "Vendored"`
+   * Default: BUILD.bazel
    */
   #[serde(default = "default_raze_settings_field_output_buildfile_suffix")]
   pub output_buildfile_suffix: String,
