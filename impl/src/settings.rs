@@ -260,6 +260,7 @@ pub struct CrateSettings {
 pub enum GenMode {
   Vendored,
   Remote,
+  Unspecified,
 }
 
 impl Default for CrateSettings {
@@ -288,8 +289,7 @@ fn default_raze_settings_field_gen_workspace_prefix() -> String {
 }
 
 fn default_raze_settings_field_genmode() -> GenMode {
-  eprintln!("WARNING: The [raze] setting `genmode` should be explicitly set to either `\"Remote\"` or `\"Vendored\"`");
-  GenMode::Vendored
+  GenMode::Unspecified
 }
 
 fn default_raze_settings_field_output_buildfile_suffix() -> String {
@@ -345,6 +345,11 @@ fn validate_settings(settings: &mut RazeSettings) -> Result<(), RazeError> {
 
   if settings.workspace_path != "//" && settings.workspace_path.ends_with('/') {
     settings.workspace_path.pop();
+  }
+
+  if settings.genmode == GenMode::Unspecified {
+    eprintln!("WARNING: The [raze] setting `genmode` is unspecified. Not specifying `genmode` is deperacated. Please explicitly set it to either \"Remote\" or \"Vendored\"");
+    settings.genmode = GenMode::Vendored;
   }
 
   Ok(())

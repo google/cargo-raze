@@ -122,6 +122,8 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       GenMode::Vendored => {
         checks::check_all_vendored(self.crate_catalog.entries(), &self.settings.workspace_path)?;
       },
+      // Settings should always have `genmode` set to one of the above fields
+      GenMode::Unspecified => unreachable!(),
     }
 
     checks::warn_unused_settings(&self.settings.crates, &packages);

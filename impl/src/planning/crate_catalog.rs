@@ -121,6 +121,8 @@ impl CrateCatalogEntry {
         "vendor/{}/{}",
         &self.package_ident, settings.output_buildfile_suffix,
       ),
+      // Settings should always have `genmode` set to one of the above fields
+      GenMode::Unspecified => unreachable!(),
     }
   }
 
@@ -140,6 +142,8 @@ impl CrateCatalogEntry {
           format!("{}/vendor/{}", settings.workspace_path, &self.package_ident)
         }
       },
+      // Settings should always have `genmode` set to one of the above fields
+      GenMode::Unspecified => unreachable!(),
     }
   }
 
@@ -167,6 +171,8 @@ impl CrateCatalogEntry {
           )
         }
       },
+      // Settings should always have `genmode` set to one of the above fields
+      GenMode::Unspecified => unreachable!(),
     }
   }
 }
