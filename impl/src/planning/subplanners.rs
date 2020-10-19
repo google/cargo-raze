@@ -122,8 +122,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       GenMode::Vendored => {
         checks::check_all_vendored(self.crate_catalog.entries(), &self.settings.workspace_path)?;
       },
-      // Settings should always have `genmode` set to one of the above fields
-      GenMode::Unspecified => unreachable!(),
+      _ => { /* No checks to perform */ },
     }
 
     checks::warn_unused_settings(&self.settings.crates, &packages);
@@ -356,11 +355,11 @@ impl<'planner> CrateSubplanner<'planner> {
         aliased_dependencies: aliased_deps,
       },
       targeted_deps: filtered_deps,
-      workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings),
+      workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings)?,
       build_script_target: build_script_target_opt,
       raze_settings: self.crate_settings.clone(),
       source_details: self.produce_source_details(&package, &package_root),
-      expected_build_path: self.crate_catalog_entry.local_build_path(&self.settings),
+      expected_build_path: self.crate_catalog_entry.local_build_path(&self.settings)?,
       sha256: self.sha256.clone(),
       registry_url: format_registry_url(
         &self.settings.registry,
@@ -424,7 +423,7 @@ impl<'planner> CrateSubplanner<'planner> {
         .crate_catalog
         .entry_for_package_id(dep_id)
         .unwrap()
-        .workspace_path_and_default_target(&self.settings);
+        .workspace_path_and_default_target(&self.settings)?;
 
       // Implicitly dependencies are on the [lib] target from Cargo.toml (of which there is
       // guaranteed to be at most one).

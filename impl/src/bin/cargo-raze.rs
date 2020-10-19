@@ -134,8 +134,8 @@ fn main() -> Result<()> {
 
       bazel_renderer.render_remote_planned_build(&render_details, &planned_build)?
     }, /* exhaustive, we control the definition */
-    // Settings should always have `genmode` set to one of the above fields
-    GenMode::Unspecified => unreachable!(),
+    // There are no file outputs to produce if `genmode` is Unspecified
+    GenMode::Unspecified => Vec::new(),
   };
 
   for FileOutputs {

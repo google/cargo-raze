@@ -18,7 +18,7 @@ use std::{
   str::{self},
 };
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 
 use crate::{
   error::RazeError,
@@ -111,68 +111,77 @@ impl CrateCatalogEntry {
   }
 
   /** Yields the expected location of the build file (relative to execution path). */
-  pub fn local_build_path(&self, settings: &RazeSettings) -> String {
+  pub fn local_build_path(&self, settings: &RazeSettings) -> Result<String> {
     match settings.genmode {
-      GenMode::Remote => format!(
+      GenMode::Remote => Ok(format!(
         "remote/{}.{}",
         &self.package_ident, settings.output_buildfile_suffix,
-      ),
-      GenMode::Vendored => format!(
+      )),
+      GenMode::Vendored => Ok(format!(
         "vendor/{}/{}",
         &self.package_ident, settings.output_buildfile_suffix,
-      ),
+      )),
       // Settings should always have `genmode` set to one of the above fields
-      GenMode::Unspecified => unreachable!(),
+      GenMode::Unspecified => Err(anyhow!(
+        "Unable to determine local build path. GenMode should not be Unspecified"
+      )),
     }
   }
 
   /** Yields the precise path to this dependency for the provided settings. */
-  #[allow(dead_code)]
-  pub fn workspace_path(&self, settings: &RazeSettings) -> String {
+  pub fn workspace_path(&self, settings: &RazeSettings) -> Result<String> {
     match settings.genmode {
-      GenMode::Remote => format!(
+      GenMode::Remote => Ok(format!(
         "@{}__{}__{}//",
         &settings.gen_workspace_prefix, &self.sanitized_name, &self.sanitized_version
-      ),
+      )),
       GenMode::Vendored => {
         // Convert "settings.workspace_path" to dir. Workspace roots are special cased, no need to append /
         if settings.workspace_path.ends_with("//") {
-          format!("{}vendor/{}", settings.workspace_path, &self.package_ident)
+          Ok(format!(
+            "{}vendor/{}",
+            settings.workspace_path, &self.package_ident
+          ))
         } else {
-          format!("{}/vendor/{}", settings.workspace_path, &self.package_ident)
+          Ok(format!(
+            "{}/vendor/{}",
+            settings.workspace_path, &self.package_ident
+          ))
         }
       },
-      // Settings should always have `genmode` set to one of the above fields
-      GenMode::Unspecified => unreachable!(),
+      GenMode::Unspecified => Err(anyhow!(
+        "Unable to determine workspace path for GenMode::Unspecified"
+      )),
     }
   }
 
   /** Emits a complete path to this dependency and default target using the given settings. */
-  pub fn workspace_path_and_default_target(&self, settings: &RazeSettings) -> String {
+  pub fn workspace_path_and_default_target(&self, settings: &RazeSettings) -> Result<String> {
     match settings.genmode {
-      GenMode::Remote => format!(
+      GenMode::Remote => Ok(format!(
         "@{}__{}__{}//:{}",
         &settings.gen_workspace_prefix,
         &self.sanitized_name,
         &self.sanitized_version,
         &self.sanitized_name
-      ),
+      )),
       GenMode::Vendored => {
         // Convert "settings.workspace_path" to dir. Workspace roots are special cased, no need to append /
         if settings.workspace_path.ends_with("//") {
-          format!(
+          Ok(format!(
             "{}vendor/{}:{}",
             settings.workspace_path, &self.package_ident, &self.sanitized_name
-          )
+          ))
         } else {
-          format!(
+          Ok(format!(
             "{}/vendor/{}:{}",
             settings.workspace_path, &self.package_ident, &self.sanitized_name
-          )
+          ))
         }
       },
-      // Settings should always have `genmode` set to one of the above fields
-      GenMode::Unspecified => unreachable!(),
+      GenMode::Unspecified => Err(anyhow!(
+        "Unable to determine workspace path for GenMode::Unspecified"
+      )),
     }
   }
 }
