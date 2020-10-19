@@ -143,7 +143,7 @@ pub fn get_license_from_str(cargo_license_str: &str) -> LicenseData {
         ),
         rating: BazelLicenseType::Restricted.to_bazel_rating().into(),
       };
-    }
+    },
   };
 
   let mut license_stack: Vec<BazelSpdxLicense> = Vec::new();
@@ -155,12 +155,12 @@ pub fn get_license_from_str(cargo_license_str: &str) -> LicenseData {
           let node2 = license_stack.pop().unwrap();
           let node1 = license_stack.pop().unwrap();
           license_stack.push(node1.and(node2));
-        }
+        },
         Operator::Or => {
           let node2 = license_stack.pop().unwrap();
           let node1 = license_stack.pop().unwrap();
           license_stack.push(node1.or(node2));
-        }
+        },
       },
       ExprNode::Req(requirement) => {
         // Unwrap is safe because there was no parse error so the license type must exist
@@ -171,13 +171,16 @@ pub fn get_license_from_str(cargo_license_str: &str) -> LicenseData {
           expression: req_name.into(),
           license: get_bazel_license_type(&req_name),
         });
-      }
+      },
     };
   }
 
   let crate_license = license_stack.pop().unwrap();
   LicenseData {
-    name: format!("{} from expression \"{}\"", crate_license.name, crate_license.expression),
+    name: format!(
+      "{} from expression \"{}\"",
+      crate_license.name, crate_license.expression
+    ),
     rating: crate_license.license.to_bazel_rating().into(),
   }
 }
@@ -564,36 +567,54 @@ mod tests {
   #[test]
   fn more_permissive_licenses_come_first_with_or() {
     let license = get_license_from_str("Unlicense/Apache-2.0");
-    assert_eq!(license.name, "Unlicense from expression \"Unlicense OR Apache-2.0\"");
+    assert_eq!(
+      license.name,
+      "Unlicense from expression \"Unlicense OR Apache-2.0\""
+    );
     assert_eq!(license.rating, "unencumbered");
 
     let flipped_license = get_license_from_str("Apache-2.0/Unlicense");
-    assert_eq!(flipped_license.name, "Unlicense from expression \"Apache-2.0 OR Unlicense\"");
+    assert_eq!(
+      flipped_license.name,
+      "Unlicense from expression \"Apache-2.0 OR Unlicense\""
+    );
     assert_eq!(flipped_license.rating, "unencumbered");
   }
 
   #[test]
   fn less_permissive_licenses_come_first_with_and() {
     let license = get_license_from_str("Unlicense AND Apache-2.0");
-    assert_eq!(license.name, "Apache-2.0 from expression \"Unlicense AND Apache-2.0\"");
+    assert_eq!(
+      license.name,
+      "Apache-2.0 from expression \"Unlicense AND Apache-2.0\""
+    );
     assert_eq!(license.rating, "notice");
 
     let flipped_license = get_license_from_str("Apache-2.0 AND Unlicense");
-    assert_eq!(flipped_license.name, "Apache-2.0 from expression \"Apache-2.0 AND Unlicense\"");
+    assert_eq!(
+      flipped_license.name,
+      "Apache-2.0 from expression \"Apache-2.0 AND Unlicense\""
+    );
     assert_eq!(flipped_license.rating, "notice");
   }
 
   #[test]
   fn chained_or_works_properly() {
     let license = get_license_from_str("MIT OR Apache-2.0 OR Unlicense");
-    assert_eq!(license.name, "Unlicense from expression \"MIT OR (Apache-2.0 OR Unlicense)\"");
+    assert_eq!(
+      license.name,
+      "Unlicense from expression \"MIT OR (Apache-2.0 OR Unlicense)\""
+    );
     assert_eq!(license.rating, "unencumbered");
   }
 
   #[test]
   fn unknown_licenses_are_restricted() {
     let license = get_license_from_str("MIT5.0");
-    assert_eq!(license.name, "MIT5.0 (Failed to parse as an SPDX license string)");
+    assert_eq!(
+      license.name,
+      "MIT5.0 (Failed to parse as an SPDX license string)"
+    );
     assert_eq!(license.rating, "restricted");
   }
 
