@@ -28,28 +28,28 @@ licenses([
     "reciprocal",  # MPL-2.0 from expression "MPL-2.0"
 ])
 
-# Generated targets
+# Generated Targets
+
 # Unsupported target "bench" with type "bench" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "smallvec",
-    crate_type = "lib",
-    deps = [
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "std",
+    ],
     crate_root = "lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.4.5",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "default",
-        "std",
+    version = "0.4.5",
+    deps = [
     ],
 )

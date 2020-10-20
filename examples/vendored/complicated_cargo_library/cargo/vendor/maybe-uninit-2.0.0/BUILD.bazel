@@ -28,27 +28,28 @@ licenses([
     "notice",  # Apache-2.0 from expression "Apache-2.0 OR MIT"
 ])
 
-# Generated targets
-# Unsupported target "build-script-build" with type "custom-build" omitted
-# Unsupported target "doesnt_drop" with type "test" omitted
+# Generated Targets
 
-# buildifier: leave-alone
+# Unsupported target "build-script-build" with type "custom-build" omitted
+
 rust_library(
     name = "maybe_uninit",
-    crate_type = "lib",
-    deps = [
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "2.0.0",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "2.0.0",
+    deps = [
     ],
 )
+
+# Unsupported target "doesnt_drop" with type "test" omitted

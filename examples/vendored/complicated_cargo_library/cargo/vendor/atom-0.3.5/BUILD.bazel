@@ -28,28 +28,30 @@ licenses([
     "notice",  # Apache-2.0 from expression "Apache-2.0"
 ])
 
-# Generated targets
+# Generated Targets
 
-# buildifier: leave-alone
+# Unsupported target "fifo" with type "example" omitted
+
+# Unsupported target "simple" with type "example" omitted
+
 rust_library(
     name = "atom",
-    crate_type = "lib",
-    deps = [
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "0.3.5",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "0.3.5",
+    deps = [
     ],
 )
+
 # Unsupported target "atom" with type "test" omitted
-# Unsupported target "fifo" with type "example" omitted
-# Unsupported target "simple" with type "example" omitted
