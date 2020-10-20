@@ -31,12 +31,6 @@
     {%- endfor %}
     ],
     {%- endif %}
-    rustc_flags = [
-        "--cap-lints=allow",
-        {%- for flag in crate.raze_settings.additional_flags %}
-        "{{flag}}",
-        {%- endfor %}
-    ],
     {%- if crate.raze_settings.additional_env %}
     rustc_env = {
         {%- for key, value in crate.raze_settings.additional_env %}
@@ -44,6 +38,12 @@
         {%- endfor %}
     },
     {%- endif %}
+    rustc_flags = [
+        "--cap-lints=allow",
+        {%- for flag in crate.raze_settings.additional_flags %}
+        "{{flag}}",
+        {%- endfor %}
+    ],
     tags = [
         "cargo-raze",
         "manual",
