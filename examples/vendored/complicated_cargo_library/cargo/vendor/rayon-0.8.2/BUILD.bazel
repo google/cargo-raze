@@ -48,6 +48,7 @@ rust_library(
         "manual",
     ],
     version = "0.8.2",
+    # buildifier: leave-alone
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/rayon-core-1.8.1:rayon_core",
     ],

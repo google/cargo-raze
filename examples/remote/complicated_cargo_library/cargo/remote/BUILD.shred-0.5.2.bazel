@@ -67,6 +67,7 @@ rust_library(
         "manual",
     ],
     version = "0.5.2",
+    # buildifier: leave-alone
     deps = [
         "@remote_complicated_cargo_library__arrayvec__0_3_25//:arrayvec",
         "@remote_complicated_cargo_library__fnv__1_0_7//:fnv",

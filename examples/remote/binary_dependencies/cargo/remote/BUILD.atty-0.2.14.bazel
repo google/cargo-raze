@@ -50,6 +50,7 @@ rust_library(
         "manual",
     ],
     version = "0.2.14",
+    # buildifier: leave-alone
     deps = [
     ] + selects.with_or({
         # cfg(unix)

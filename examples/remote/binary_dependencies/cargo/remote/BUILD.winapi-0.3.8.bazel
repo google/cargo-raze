@@ -91,6 +91,7 @@ rust_library(
         "manual",
     ],
     version = "0.3.8",
+    # buildifier: leave-alone
     deps = [
         ":winapi_build_script",
     ],

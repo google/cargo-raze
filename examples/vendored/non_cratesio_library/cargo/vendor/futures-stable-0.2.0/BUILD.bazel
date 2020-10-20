@@ -47,6 +47,7 @@ rust_library(
         "manual",
     ],
     version = "0.2.0",
+    # buildifier: leave-alone
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/futures-core-0.2.0:futures_core",
         "//vendored/non_cratesio_library/cargo/vendor/futures-executor-0.2.0:futures_executor",

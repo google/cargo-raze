@@ -48,6 +48,7 @@ rust_library(
         "manual",
     ],
     version = "0.6.13",
+    # buildifier: leave-alone
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/proc-macro2-0.4.30:proc_macro2",
     ],

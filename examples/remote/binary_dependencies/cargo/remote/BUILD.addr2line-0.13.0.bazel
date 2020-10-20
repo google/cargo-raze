@@ -48,6 +48,7 @@ rust_library(
         "manual",
     ],
     version = "0.13.0",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__gimli__0_22_0//:gimli",
     ],

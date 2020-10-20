@@ -49,6 +49,7 @@ rust_library(
         "manual",
     ],
     version = "0.4.9",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__proc_macro2__1_0_9//:proc_macro2",
         "@remote_binary_dependencies__quote__1_0_2//:quote",

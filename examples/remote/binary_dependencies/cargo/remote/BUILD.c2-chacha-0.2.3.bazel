@@ -52,6 +52,7 @@ rust_library(
         "manual",
     ],
     version = "0.2.3",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__ppv_lite86__0_2_6//:ppv_lite86",
     ],

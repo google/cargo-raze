@@ -59,6 +59,7 @@ rust_library(
         "manual",
     ],
     version = "1.3.4",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__regex_syntax__0_6_14//:regex_syntax",
     ],

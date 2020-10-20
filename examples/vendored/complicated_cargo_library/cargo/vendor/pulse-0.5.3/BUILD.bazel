@@ -49,6 +49,7 @@ rust_library(
         "manual",
     ],
     version = "0.5.3",
+    # buildifier: leave-alone
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/atom-0.3.5:atom",
         "//vendored/complicated_cargo_library/cargo/vendor/time-0.1.44:time",

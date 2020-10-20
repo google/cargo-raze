@@ -46,6 +46,7 @@ rust_library(
         "manual",
     ],
     version = "0.7.3",
+    # buildifier: leave-alone
     deps = [
         "@remote_complicated_cargo_library__crossbeam_epoch__0_8_2//:crossbeam_epoch",
         "@remote_complicated_cargo_library__crossbeam_utils__0_7_2//:crossbeam_utils",

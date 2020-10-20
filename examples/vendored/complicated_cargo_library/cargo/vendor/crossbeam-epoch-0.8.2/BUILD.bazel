@@ -61,6 +61,7 @@ rust_library(
         "manual",
     ],
     version = "0.8.2",
+    # buildifier: leave-alone
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/cfg-if-0.1.10:cfg_if",
         "//vendored/complicated_cargo_library/cargo/vendor/crossbeam-utils-0.7.2:crossbeam_utils",

@@ -47,6 +47,7 @@ rust_library(
         "manual",
     ],
     version = "0.7.1",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__num_traits__0_2_11//:num_traits",
         "@remote_binary_dependencies__pdqselect__0_1_0//:pdqselect",

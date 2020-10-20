@@ -47,6 +47,7 @@ rust_binary(
         "manual",
     ],
     version = "0.2.0",
+    # buildifier: leave-alone
     deps = [
         # Binaries get an implicit dependency on their crate's lib
         ":ferris_says",
@@ -74,6 +75,7 @@ rust_library(
         "manual",
     ],
     version = "0.2.0",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__clap__2_33_3//:clap",
         "@remote_binary_dependencies__error_chain__0_10_0//:error_chain",

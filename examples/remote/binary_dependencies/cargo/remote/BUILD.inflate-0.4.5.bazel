@@ -47,6 +47,7 @@ rust_library(
         "manual",
     ],
     version = "0.4.5",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__adler32__1_0_4//:adler32",
     ],

@@ -78,6 +78,7 @@ rust_library(
         "manual",
     ],
     version = "0.2.11",
+    # buildifier: leave-alone
     deps = [
         ":num_traits_build_script",
     ],

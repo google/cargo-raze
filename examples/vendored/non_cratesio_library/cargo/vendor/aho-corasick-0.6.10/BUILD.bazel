@@ -49,6 +49,7 @@ rust_binary(
         "manual",
     ],
     version = "0.6.10",
+    # buildifier: leave-alone
     deps = [
         # Binaries get an implicit dependency on their crate's lib
         ":aho_corasick",
@@ -74,6 +75,7 @@ rust_library(
         "manual",
     ],
     version = "0.6.10",
+    # buildifier: leave-alone
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/memchr-2.3.3:memchr",
     ],

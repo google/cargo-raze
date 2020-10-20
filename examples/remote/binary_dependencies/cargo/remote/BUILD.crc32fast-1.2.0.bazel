@@ -79,6 +79,7 @@ rust_library(
         "manual",
     ],
     version = "1.2.0",
+    # buildifier: leave-alone
     deps = [
         ":crc32fast_build_script",
         "@remote_binary_dependencies__cfg_if__0_1_10//:cfg_if",

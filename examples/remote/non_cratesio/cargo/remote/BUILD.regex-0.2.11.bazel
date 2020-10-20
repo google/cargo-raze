@@ -61,6 +61,7 @@ rust_library(
         "manual",
     ],
     version = "0.2.11",
+    # buildifier: leave-alone
     deps = [
         "@remote_non_cratesio__aho_corasick__0_6_10//:aho_corasick",
         "@remote_non_cratesio__memchr__2_3_3//:memchr",

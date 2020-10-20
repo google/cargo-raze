@@ -75,6 +75,7 @@ rust_library(
         "manual",
     ],
     version = "1.2.1",
+    # buildifier: leave-alone
     deps = [
         ":bitflags_build_script",
     ],

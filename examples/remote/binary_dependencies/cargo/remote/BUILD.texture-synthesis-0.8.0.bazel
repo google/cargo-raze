@@ -68,6 +68,7 @@ rust_library(
         "manual",
     ],
     version = "0.8.0",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__image__0_23_0//:image",
         "@remote_binary_dependencies__num_cpus__1_12_0//:num_cpus",

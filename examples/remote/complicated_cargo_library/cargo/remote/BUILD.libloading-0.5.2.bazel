@@ -50,6 +50,7 @@ rust_library(
         "manual",
     ],
     version = "0.5.2",
+    # buildifier: leave-alone
     deps = [
         ":global_static",
     ] + selects.with_or({

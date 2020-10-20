@@ -70,6 +70,7 @@ rust_library(
         "manual",
     ],
     version = "0.10.0",
+    # buildifier: leave-alone
     deps = [
         "@remote_complicated_cargo_library__crossbeam__0_3_2//:crossbeam",
         "@remote_complicated_cargo_library__fnv__1_0_7//:fnv",

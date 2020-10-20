@@ -61,6 +61,7 @@ rust_library(
         "manual",
     ],
     version = "0.2.11",
+    # buildifier: leave-alone
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/aho-corasick-0.6.10:aho_corasick",
         "//vendored/non_cratesio_library/cargo/vendor/memchr-2.3.3:memchr",

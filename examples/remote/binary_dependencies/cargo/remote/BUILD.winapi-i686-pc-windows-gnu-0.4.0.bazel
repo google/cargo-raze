@@ -73,6 +73,7 @@ rust_library(
         "manual",
     ],
     version = "0.4.0",
+    # buildifier: leave-alone
     deps = [
         ":winapi_i686_pc_windows_gnu_build_script",
     ],

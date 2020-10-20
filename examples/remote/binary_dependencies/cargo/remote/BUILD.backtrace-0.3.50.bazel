@@ -60,6 +60,7 @@ rust_library(
         "manual",
     ],
     version = "0.3.50",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__addr2line__0_13_0//:addr2line",
         "@remote_binary_dependencies__cfg_if__0_1_10//:cfg_if",

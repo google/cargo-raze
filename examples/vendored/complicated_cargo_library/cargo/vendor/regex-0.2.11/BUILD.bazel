@@ -65,6 +65,7 @@ rust_library(
         "manual",
     ],
     version = "0.2.11",
+    # buildifier: leave-alone
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/aho-corasick-0.6.10:aho_corasick",
         "//vendored/complicated_cargo_library/cargo/vendor/memchr-2.3.3:memchr",

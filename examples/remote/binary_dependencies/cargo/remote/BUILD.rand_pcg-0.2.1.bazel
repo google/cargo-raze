@@ -46,6 +46,7 @@ rust_library(
         "manual",
     ],
     version = "0.2.1",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__rand_core__0_5_1//:rand_core",
     ],

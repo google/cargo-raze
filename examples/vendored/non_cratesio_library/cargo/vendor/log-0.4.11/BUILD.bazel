@@ -50,6 +50,7 @@ rust_library(
         "manual",
     ],
     version = "0.4.11",
+    # buildifier: leave-alone
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/cfg-if-0.1.10:cfg_if",
     ],

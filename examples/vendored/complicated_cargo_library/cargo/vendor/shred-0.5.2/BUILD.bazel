@@ -67,6 +67,7 @@ rust_library(
         "manual",
     ],
     version = "0.5.2",
+    # buildifier: leave-alone
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/arrayvec-0.3.25:arrayvec",
         "//vendored/complicated_cargo_library/cargo/vendor/fnv-1.0.7:fnv",

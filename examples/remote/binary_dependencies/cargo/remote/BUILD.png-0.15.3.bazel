@@ -55,6 +55,7 @@ rust_library(
         "manual",
     ],
     version = "0.15.3",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__bitflags__1_2_1//:bitflags",
         "@remote_binary_dependencies__crc32fast__1_2_0//:crc32fast",

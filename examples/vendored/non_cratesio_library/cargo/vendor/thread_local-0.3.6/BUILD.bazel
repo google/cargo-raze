@@ -48,6 +48,7 @@ rust_library(
         "manual",
     ],
     version = "0.3.6",
+    # buildifier: leave-alone
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/lazy_static-1.4.0:lazy_static",
     ],

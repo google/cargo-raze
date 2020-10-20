@@ -91,6 +91,7 @@ rust_library(
         "manual",
     ],
     version = "0.15.44",
+    # buildifier: leave-alone
     deps = [
         ":syn_build_script",
         "@remote_complicated_cargo_library__proc_macro2__0_4_30//:proc_macro2",

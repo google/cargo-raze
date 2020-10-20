@@ -46,6 +46,7 @@ rust_library(
         "manual",
     ],
     version = "0.11.3",
+    # buildifier: leave-alone
     deps = [
         "@remote_complicated_cargo_library__unicode_xid__0_0_4//:unicode_xid",
     ],

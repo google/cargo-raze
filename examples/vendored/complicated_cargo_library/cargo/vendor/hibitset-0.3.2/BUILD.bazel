@@ -51,6 +51,7 @@ rust_library(
         "manual",
     ],
     version = "0.3.2",
+    # buildifier: leave-alone
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/atom-0.3.5:atom",
         "//vendored/complicated_cargo_library/cargo/vendor/rayon-0.8.2:rayon",

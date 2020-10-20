@@ -78,6 +78,7 @@ rust_library(
         "manual",
     ],
     version = "0.1.40",
+    # buildifier: leave-alone
     deps = [
         ":num_iter_build_script",
         "@remote_binary_dependencies__num_integer__0_1_42//:num_integer",

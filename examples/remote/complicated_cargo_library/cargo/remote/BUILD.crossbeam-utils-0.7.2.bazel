@@ -53,6 +53,7 @@ rust_library(
         "manual",
     ],
     version = "0.7.2",
+    # buildifier: leave-alone
     deps = [
         "@remote_complicated_cargo_library__cfg_if__0_1_10//:cfg_if",
         "@remote_complicated_cargo_library__lazy_static__1_4_0//:lazy_static",

@@ -46,6 +46,7 @@ rust_library(
         "manual",
     ],
     version = "0.3.6",
+    # buildifier: leave-alone
     deps = [
     ],
 )

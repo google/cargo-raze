@@ -48,6 +48,7 @@ rust_library(
         "manual",
     ],
     version = "0.3.25",
+    # buildifier: leave-alone
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/nodrop-0.1.14:nodrop",
         "//vendored/complicated_cargo_library/cargo/vendor/odds-0.2.26:odds",

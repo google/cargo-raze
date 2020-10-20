@@ -47,6 +47,7 @@ rust_library(
         "manual",
     ],
     version = "0.1.8",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__libc__0_2_67//:libc",
     ],

@@ -50,6 +50,7 @@ rust_library(
         "manual",
     ],
     version = "1.8.1",
+    # buildifier: leave-alone
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/crossbeam-channel-0.4.4:crossbeam_channel",
         "//vendored/complicated_cargo_library/cargo/vendor/crossbeam-deque-0.7.3:crossbeam_deque",

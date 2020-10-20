@@ -61,6 +61,7 @@ rust_library(
         "manual",
     ],
     version = "0.8.2",
+    # buildifier: leave-alone
     deps = [
         "@remote_complicated_cargo_library__cfg_if__0_1_10//:cfg_if",
         "@remote_complicated_cargo_library__crossbeam_utils__0_7_2//:crossbeam_utils",

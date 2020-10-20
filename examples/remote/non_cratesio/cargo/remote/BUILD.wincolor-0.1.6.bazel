@@ -46,6 +46,7 @@ rust_library(
         "manual",
     ],
     version = "0.1.6",
+    # buildifier: leave-alone
     deps = [
         "@remote_non_cratesio__winapi__0_3_9//:winapi",
     ],

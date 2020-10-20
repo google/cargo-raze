@@ -48,6 +48,7 @@ rust_library(
         "manual",
     ],
     version = "0.2.3",
+    # buildifier: leave-alone
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/MacTypes-sys-2.1.0:MacTypes_sys",
         "//vendored/complicated_cargo_library/cargo/vendor/core-foundation-sys-0.5.1:core_foundation_sys",

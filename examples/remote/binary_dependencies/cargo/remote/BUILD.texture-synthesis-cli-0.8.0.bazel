@@ -50,6 +50,7 @@ rust_binary(
         "manual",
     ],
     version = "0.8.0",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__structopt__0_3_9//:structopt",
         "@remote_binary_dependencies__texture_synthesis__0_8_0//:texture_synthesis",

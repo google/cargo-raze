@@ -93,6 +93,7 @@ rust_library(
         "manual",
     ],
     version = "1.0.16",
+    # buildifier: leave-alone
     deps = [
         ":syn_build_script",
         "@remote_binary_dependencies__proc_macro2__1_0_9//:proc_macro2",

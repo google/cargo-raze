@@ -90,6 +90,7 @@ rust_library(
         "manual",
     ],
     version = "0.3.9",
+    # buildifier: leave-alone
     deps = [
         "@remote_binary_dependencies__clap__2_33_0//:clap",
         "@remote_binary_dependencies__lazy_static__1_4_0//:lazy_static",
