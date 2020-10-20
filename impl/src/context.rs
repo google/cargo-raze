@@ -15,6 +15,11 @@
 use crate::settings::CrateSettings;
 use serde::Serialize;
 
+/** A struct containing information about a crate's dependency that's buildable in Bazel 
+ * 
+ * Note: BUILDifier-compliant BUILD file generation depends on correct sorting of collections 
+ * of this struct by `buildable_target`. Do not add fields preceeding that field.
+ */
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableDependency {
   pub buildable_target: String,
@@ -69,7 +74,7 @@ pub struct GitRepo {
 
   // Directory containing the crate's Cargo.toml file, relative to the git repo root.
   // Will be None iff the crate lives at the root of the git repo.
-  pub path_to_crate_root: Option<String>
+  pub path_to_crate_root: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -86,6 +91,7 @@ pub struct CrateDependencyContext {
   pub dev_dependencies: Vec<BuildableDependency>,
   pub aliased_dependencies: Vec<DependencyAlias>,
 }
+
 #[derive(Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CrateTargetedDepContext {
   pub target: String,
