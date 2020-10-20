@@ -53,13 +53,13 @@ rust_library(
     crate_root = "src/lib.rs",
     crate_type = "lib",
     edition = "2015",
+    rustc_env = {
+        "NOT_USED_KEY": "not_used_value",
+    },
     rustc_flags = [
         "--cap-lints=allow",
         "--cfg=not_used",
     ],
-    rustc_env = {
-        "NOT_USED_KEY": "not_used_value",
-    },
     tags = [
         "cargo-raze",
         "manual",
