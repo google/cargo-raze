@@ -12,6 +12,7 @@ alias(
 rust_library(
     name = "{{ target_name_sanitized }}",
 {% include "templates/partials/common_attrs.template" %}
+    # buildifier: leave-alone
     deps = [
         {%- if crate.build_script_target %}
         ":{{ crate_name_sanitized }}_build_script",
