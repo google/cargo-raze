@@ -76,6 +76,7 @@ struct DependencySet {
   aliased_deps: Vec<DependencyAlias>,
 }
 
+/** A set of dependencies that a crate has for a specific target/cfg */
 struct TargetedDependencySet {
   target: String,
   dependencies: DependencySet,
@@ -391,12 +392,14 @@ impl<'planner> CrateSubplanner<'planner> {
     let normal_dep_names = &names.normal_dep_names;
     let aliased_dep_names = &names.aliased_dep_names;
 
-    let mut build_deps = Vec::new();
-    let mut build_proc_macro_deps = Vec::new();
-    let mut proc_macro_deps = Vec::new();
-    let mut dev_deps = Vec::new();
-    let mut normal_deps = Vec::new();
-    let mut aliased_deps = Vec::new();
+    let mut dep_set = DependencySet{
+      build_deps: Vec::new(),
+      build_proc_macro_deps: Vec::new(),
+      proc_macro_deps: Vec::new(),
+      dev_deps: Vec::new(),
+      normal_deps: Vec::new(),
+      aliased_deps: Vec::new(),
+    };
 
     let all_skipped_deps = self
       .crate_settings
@@ -448,30 +451,30 @@ impl<'planner> CrateSubplanner<'planner> {
 
       if build_dep_names.contains(&dep_package.name) {
         if buildable_dependency.is_proc_macro {
-          build_proc_macro_deps.push(buildable_dependency.clone());
+          dep_set.build_proc_macro_deps.push(buildable_dependency.clone());
         } else {
-          build_deps.push(buildable_dependency.clone());
+          dep_set.build_deps.push(buildable_dependency.clone());
         }
       }
 
       if dev_dep_names.contains(&dep_package.name) {
-        dev_deps.push(buildable_dependency.clone());
+        dep_set.dev_deps.push(buildable_dependency.clone());
       }
 
       if normal_dep_names.contains(&dep_package.name) {
         // sys crates build files may generate DEP_* environment variables that
         // need to be visible in their direct dependency build files.
         if dep_package.name.ends_with("-sys") {
-          build_deps.push(buildable_dependency.clone());
+          dep_set.build_deps.push(buildable_dependency.clone());
         }
         if buildable_dependency.is_proc_macro {
-          proc_macro_deps.push(buildable_dependency);
+          dep_set.proc_macro_deps.push(buildable_dependency);
         } else {
-          normal_deps.push(buildable_dependency);
+          dep_set.normal_deps.push(buildable_dependency);
         }
         // Only add aliased normal deps to the Vec
         if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
-          aliased_deps.push(DependencyAlias {
+          dep_set.aliased_deps.push(DependencyAlias {
             target: buildable_target.clone(),
             alias: util::sanitize_ident(alias),
           })
@@ -479,20 +482,13 @@ impl<'planner> CrateSubplanner<'planner> {
       }
     }
 
-    build_deps.sort();
-    build_proc_macro_deps.sort();
-    proc_macro_deps.sort();
-    dev_deps.sort();
-    normal_deps.sort();
+    dep_set.build_deps.sort();
+    dep_set.build_proc_macro_deps.sort();
+    dep_set.proc_macro_deps.sort();
+    dep_set.dev_deps.sort();
+    dep_set.normal_deps.sort();
 
-    Ok(DependencySet {
-      build_deps,
-      build_proc_macro_deps,
-      proc_macro_deps,
-      dev_deps,
-      normal_deps,
-      aliased_deps,
-    })
+    Ok(dep_set)
   }
 
   /** Generates the set of dependencies for the contained crate. */
