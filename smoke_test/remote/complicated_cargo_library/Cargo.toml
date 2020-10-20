@@ -31,7 +31,7 @@ gen_buildrs = true
 additional_deps = [":global_static"]
 additional_build_file = "cargo/libloading_global_static.BUILD"
 
-[raze.crates.regex.'0.2.11']
+[raze.crates.regex.'0.2.5']
 skipped_deps = [
   # This will break the regex crate
   #"regex-syntax-0.4.2"
