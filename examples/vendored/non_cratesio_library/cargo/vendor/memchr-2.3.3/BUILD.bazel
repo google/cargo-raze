@@ -28,28 +28,29 @@ licenses([
     "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
 ])
 
-# Generated targets
+# Generated Targets
+
 # Unsupported target "build-script-build" with type "custom-build" omitted
 
-# buildifier: leave-alone
 rust_library(
     name = "memchr",
-    crate_type = "lib",
-    deps = [
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "std",
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    version = "2.3.3",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
-        "default",
-        "std",
+    version = "2.3.3",
+    # buildifier: leave-alone
+    deps = [
     ],
 )

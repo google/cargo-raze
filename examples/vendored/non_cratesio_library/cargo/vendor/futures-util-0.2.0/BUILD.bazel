@@ -28,13 +28,30 @@ licenses([
     "notice",  # MIT from expression "MIT OR Apache-2.0"
 ])
 
-# Generated targets
+# Generated Targets
+
 # Unsupported target "bilock" with type "bench" omitted
 
-# buildifier: leave-alone
+# Unsupported target "futures_unordered" with type "bench" omitted
+
 rust_library(
     name = "futures_util",
+    srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "std",
+    ],
+    crate_root = "src/lib.rs",
     crate_type = "lib",
+    edition = "2015",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.2.0",
+    # buildifier: leave-alone
     deps = [
         "//vendored/non_cratesio_library/cargo/vendor/either-1.6.1:either",
         "//vendored/non_cratesio_library/cargo/vendor/futures-channel-0.2.0:futures_channel",
@@ -42,19 +59,4 @@ rust_library(
         "//vendored/non_cratesio_library/cargo/vendor/futures-io-0.2.0:futures_io",
         "//vendored/non_cratesio_library/cargo/vendor/futures-sink-0.2.0:futures_sink",
     ],
-    srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2015",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.2.0",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-        "std",
-    ],
 )
-# Unsupported target "futures_unordered" with type "bench" omitted

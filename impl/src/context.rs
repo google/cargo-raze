@@ -15,11 +15,16 @@
 use crate::settings::CrateSettings;
 use serde::Serialize;
 
+/** A struct containing information about a crate's dependency that's buildable in Bazel 
+ * 
+ * Note: BUILDifier-compliant BUILD file generation depends on correct sorting of collections 
+ * of this struct by `buildable_target`. Do not add fields preceeding that field.
+ */
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableDependency {
+  pub buildable_target: String,
   pub name: String,
   pub version: String,
-  pub buildable_target: String,
   pub is_proc_macro: bool,
 }
 
@@ -31,8 +36,8 @@ pub struct DependencyAlias {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableTarget {
-  pub name: String,
   pub kind: String,
+  pub name: String,
 
   /** The path in Bazel's format (i.e. with forward slashes) to the target's entry point. */
   pub path: String,
@@ -84,6 +89,7 @@ pub struct CrateDependencyContext {
   pub dev_dependencies: Vec<BuildableDependency>,
   pub aliased_dependencies: Vec<DependencyAlias>,
 }
+
 #[derive(Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CrateTargetedDepContext {
   pub target: String,

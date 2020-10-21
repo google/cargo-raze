@@ -114,8 +114,8 @@ impl CrateCatalogEntry {
   pub fn local_build_path(&self, settings: &RazeSettings) -> Result<String> {
     match settings.genmode {
       GenMode::Remote => Ok(format!(
-        "remote/{}.{}",
-        &self.package_ident, settings.output_buildfile_suffix,
+        "remote/BUILD.{}.bazel",
+        &self.package_ident,
       )),
       GenMode::Vendored => Ok(format!(
         "vendor/{}/{}",

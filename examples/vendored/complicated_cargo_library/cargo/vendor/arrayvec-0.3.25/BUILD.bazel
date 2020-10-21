@@ -28,31 +28,33 @@ licenses([
     "notice",  # MIT from expression "MIT OR Apache-2.0"
 ])
 
-# Generated targets
+# Generated Targets
 
-# buildifier: leave-alone
 rust_library(
     name = "arrayvec",
-    crate_type = "lib",
-    deps = [
-        "//vendored/complicated_cargo_library/cargo/vendor/nodrop-0.1.14:nodrop",
-        "//vendored/complicated_cargo_library/cargo/vendor/odds-0.2.26:odds",
-    ],
     srcs = glob(["**/*.rs"]),
-    crate_root = "src/lib.rs",
-    edition = "2015",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    version = "0.3.25",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
     crate_features = [
         "default",
         "std",
     ],
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    edition = "2015",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.3.25",
+    # buildifier: leave-alone
+    deps = [
+        "//vendored/complicated_cargo_library/cargo/vendor/nodrop-0.1.14:nodrop",
+        "//vendored/complicated_cargo_library/cargo/vendor/odds-0.2.26:odds",
+    ],
 )
+
 # Unsupported target "generic_array" with type "test" omitted
+
 # Unsupported target "tests" with type "test" omitted

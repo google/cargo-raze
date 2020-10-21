@@ -1,39 +1,4 @@
     srcs = glob(["**/*.rs"]),
-    crate_root = "{{ target.path }}",
-    edition = "{{ target.edition }}",
-    {%- if crate.default_deps.proc_macro_dependencies %}
-    proc_macro_deps = [
-    {%- for dependency in crate.default_deps.proc_macro_dependencies %}
-        "{{dependency.buildable_target}}",
-    {%- endfor %}
-    ],
-    {%- endif %}
-    rustc_flags = [
-        "--cap-lints=allow",
-        {%- for flag in crate.raze_settings.additional_flags %}
-        "{{flag}}",
-        {%- endfor %}
-    ],
-    {%- if crate.raze_settings.additional_env %}
-    rustc_env = {
-        {%- for key, value in crate.raze_settings.additional_env %}
-        "{{key}}": "{{value}}",
-        {%- endfor %}
-    },
-    {%- endif %}
-    {%- if crate.raze_settings.data_attr %}
-    data = {{crate.raze_settings.data_attr}},
-    {%- endif %}
-    version = "{{ crate.pkg_version }}",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    crate_features = [
-        {%- for feature in crate.features %}
-        "{{feature}}",
-        {%- endfor %}
-    ],
     {%- if crate.default_deps.aliased_dependencies | length != 0 or crate.targeted_deps | length != 0 %}
     aliases = {
         {%- for alias in crate.default_deps.aliased_dependencies %}
@@ -45,4 +10,42 @@
         {%- endfor %}
         {%- endfor %}
     },
-    {%- endif -%}
+    {%- endif %}
+    crate_features = [
+        {%- for feature in crate.features %}
+        "{{feature}}",
+        {%- endfor %}
+    ],
+    crate_root = "{{ target.path }}",
+    {%- if target.kind != "bin" %}
+    crate_type = "{{ target.kind }}",
+    {%- endif %}
+    {%- if crate.raze_settings.data_attr %}
+    data = {{crate.raze_settings.data_attr}},
+    {%- endif %}
+    edition = "{{ target.edition }}",
+    {%- if crate.default_deps.proc_macro_dependencies %}
+    proc_macro_deps = [
+    {%- for dependency in crate.default_deps.proc_macro_dependencies %}
+        "{{dependency.buildable_target}}",
+    {%- endfor %}
+    ],
+    {%- endif %}
+    {%- if crate.raze_settings.additional_env %}
+    rustc_env = {
+        {%- for key, value in crate.raze_settings.additional_env %}
+        "{{key}}": "{{value}}",
+        {%- endfor %}
+    },
+    {%- endif %}
+    rustc_flags = [
+        "--cap-lints=allow",
+        {%- for flag in crate.raze_settings.additional_flags %}
+        "{{flag}}",
+        {%- endfor %}
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "{{ crate.pkg_version }}",

@@ -28,27 +28,27 @@ licenses([
     "notice",  # MIT from expression "MIT"
 ])
 
-# Generated targets
+# Generated Targets
 
-# buildifier: leave-alone
 rust_library(
     name = "conduit_mime_types",
-    crate_type = "lib",
-    deps = [
-        "//vendored/complicated_cargo_library/cargo/vendor/rustc-serialize-0.3.24:rustc_serialize",
-    ],
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
     crate_root = "src/lib.rs",
+    crate_type = "lib",
+    data = glob(["data/**"]),
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    data = glob(["data/**"]),
-    version = "0.7.3",
     tags = [
         "cargo-raze",
         "manual",
     ],
-    crate_features = [
+    version = "0.7.3",
+    # buildifier: leave-alone
+    deps = [
+        "//vendored/complicated_cargo_library/cargo/vendor/rustc-serialize-0.3.24:rustc_serialize",
     ],
 )
