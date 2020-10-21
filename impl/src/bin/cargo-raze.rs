@@ -120,8 +120,18 @@ fn main() -> Result<()> {
     GenMode::Vendored => bazel_renderer.render_planned_build(&render_details, &planned_build)?,
     GenMode::Remote => {
       if !dry_run {
-        // Create the "remote" directory if it doesn't exist
-        fs::create_dir_all(render_details.path_prefix.as_path().join("remote"))?;
+        let remote_dir = render_details.path_prefix.as_path().join("remote");
+        
+        // Clean out the "remote" directory and guarantee that it exists
+        if remote_dir.exists() {
+          for entry in glob::glob(&format!("{}/BUILD*.bazel", &remote_dir.display().to_string()))? {
+            if let Ok(path) = entry {
+              fs::remove_file(path)?;
+            }
+          }
+        } else {
+          fs::create_dir_all(&remote_dir)?;
+        }
 
         if !settings.binary_deps.is_empty() {
           fs::create_dir_all(
