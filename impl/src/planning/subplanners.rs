@@ -244,13 +244,17 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       }
     }
 
-    // Additionally, the binary dependencies need to have their checksums added as well
-    for (pkg, info) in self.settings.binary_deps.iter() {
-      let version = semver::Version::parse(info.req())?;
-      package_to_checksum.insert(
-        (pkg.clone(), version.clone()),
-        fetch_crate_checksum(&self.settings.index_url, pkg, &version.to_string())?,
-      );
+    // Additionally, the binary dependencies need to have their checksums added as well in 
+    // Remote GenMode configurations. Vendored GenMode relies on the behavior of `cargo vendor`
+    // and doesn't perform any special logic to fetch binary dependency crates.
+    if self.settings.genmode == GenMode::Remote {
+      for (pkg, info) in self.settings.binary_deps.iter() {
+        let version = semver::Version::parse(info.req())?;
+        package_to_checksum.insert(
+          (pkg.clone(), version.clone()),
+          fetch_crate_checksum(&self.settings.index_url, pkg, &version.to_string())?,
+        );
+      }
     }
 
     let contexts = catalogs
