@@ -35,7 +35,7 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 struct Options {
   arg_buildprefix: Option<String>,
-  flag_verbose: u32,
+  flag_verbose: Option<bool>,
   flag_quiet: Option<bool>,
   flag_host: Option<String>,
   flag_color: Option<String>,
@@ -70,7 +70,7 @@ fn main() -> Result<()> {
     .unwrap_or_else(|e| e.exit());
 
   let settings = load_settings("Cargo.toml")?;
-  if options.flag_verbose > 0 {
+  if options.flag_verbose.unwrap_or(false) {
     println!("Loaded override settings: {:#?}", settings);
   }
   
@@ -158,7 +158,7 @@ fn main() -> Result<()> {
     if dry_run {
       println!("{}:\n{}", path.display(), contents);
     } else {
-      write_to_file(&path, &contents, options.flag_verbose > 0)?;
+      write_to_file(&path, &contents, options.flag_verbose.unwrap_or(false))?;
     }
   }
 
