@@ -14,6 +14,7 @@
 
 use std::{
   collections::{HashMap, HashSet},
+  iter::FromIterator,
   env, fs,
 };
 
@@ -128,29 +129,21 @@ pub fn warn_unused_settings(
       .insert(version.clone());
   }
 
-  for (name, settings_per_version) in all_crate_settings {
-    if !known_versions_per_crate.contains_key(name) {
-      eprintln!(
-        "WARNING: Found unused raze settings for all of {}-{:?}",
-        name,
-        settings_per_version.keys()
-      );
-      // No version introspection needed -- no known version of this crate
-      continue;
-    }
-
-    // UNWRAP: Guarded above
-    let all_known_versions = known_versions_per_crate.get(name).unwrap();
-
-    for version in settings_per_version.keys() {
-      if !all_known_versions.contains(version) {
-        eprintln!(
-          "WARNING: Found unused raze settings for {}-{}, but {:?} were known",
-          name, version, all_known_versions
-        )
-      }
-    }
+  // 1st check names
+  let pkg_names = all_packages.iter().map(|pkg| &pkg.name).collect::<HashSet<_>>();
+  let setting_names = HashSet::from_iter(all_crate_settings.keys());
+  for missing in setting_names.difference(&pkg_names) {
+    eprintln!("Found unused raze crate settings for `{}`", missing);
   }
+
+  // Then check versions
+  all_crate_settings.iter()
+    .flat_map(|(name, settings)| settings.iter().map(move |x| (x.0, name)))
+    .filter(|(ver_req, _)| !all_packages.iter().any(|pkg| ver_req.matches(&pkg.version)))
+    .for_each(|(ver_req, name)| {
+      eprintln!("Found unused raze settings for version `{}` against crate `{}`",
+          ver_req, name);
+    });
 }
 
 #[cfg(test)]

@@ -14,7 +14,7 @@
 
 use std::{
   collections::{HashMap, HashSet},
-  io,
+  io, iter,
   path::{Path, PathBuf},
   str::FromStr,
 };
@@ -92,7 +92,7 @@ struct CrateSubplanner<'planner> {
   crate_catalog_entry: &'planner CrateCatalogEntry,
   source_id: &'planner Option<SourceId>,
   node: &'planner Node,
-  crate_settings: &'planner CrateSettings,
+  crate_settings: Option<&'planner CrateSettings>,
   sha256: &'planner Option<String>,
 }
 
@@ -180,19 +180,13 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       return None;
     }
 
-    let crate_settings = self
-      .settings
-      .crates
-      .get(&own_package.name)
-      .and_then(|c| c.get(&own_package.version))
-      .cloned()
-      .unwrap_or_else(CrateSettings::default);
-
     // UNWRAP: Safe given unwrap during serialize step of metadata
     let own_source_id = own_package
       .source
       .as_ref()
       .map(|s| SourceId::from_url(&s.to_string()).unwrap());
+
+    let crate_settings = self.crate_settings(&own_package).ok()?;
 
     let crate_subplanner = CrateSubplanner {
       crate_catalog: &catalog,
@@ -201,11 +195,39 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       crate_catalog_entry: &own_crate_catalog_entry,
       source_id: &own_source_id,
       node: &node,
-      crate_settings: &crate_settings,
+      crate_settings: crate_settings,
       sha256: &checksum_opt.map(|c| c.to_owned()),
     };
 
     Some(crate_subplanner.produce_context())
+  }
+
+  fn crate_settings(&self, package: &Package) -> Result<Option<&CrateSettings>> {
+    self
+      .settings
+      .crates
+      .get(&package.name)
+      .map_or(Ok(None), |settings| {
+        let mut versions = settings
+          .iter()
+          .filter(|(ver_req, _)| ver_req.matches(&package.version))
+          .peekable();
+
+        match versions.next() {
+          // This is possible if the crate does not have any version overrides to match against
+          None => Ok(None),
+          Some((_, settings)) if versions.peek().is_none() => Ok(Some(settings)),
+          Some(current) => Err(RazeError::Config {
+            field_path_opt: None,
+            message: format!(
+              "Multiple potential semver matches `[{}]` found for `{}`",
+              iter::once(current).chain(versions).map(|x| x.0).join(", "),
+              &package.name
+            ),
+          }),
+        }
+      })
+      .map_err(|e| e.into())
   }
 
   /** Produces a crate context for each declared crate and dependency. */
@@ -346,7 +368,7 @@ impl<'planner> CrateSubplanner<'planner> {
 
     let context = CrateContext {
       pkg_name: package.name.clone(),
-      pkg_version: package.version.to_string(),
+      pkg_version: package.version.clone(),
       edition: package.edition.clone(),
       license: self.produce_license(),
       features: self.node.features.clone(),
@@ -362,7 +384,7 @@ impl<'planner> CrateSubplanner<'planner> {
       targeted_deps: filtered_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings)?,
       build_script_target: build_script_target_opt,
-      raze_settings: self.crate_settings.clone(),
+      raze_settings: self.crate_settings.cloned().unwrap_or_default(),
       source_details: self.produce_source_details(&package, &package_root),
       expected_build_path: self.crate_catalog_entry.local_build_path(&self.settings)?,
       sha256: self.sha256.clone(),
@@ -407,9 +429,8 @@ impl<'planner> CrateSubplanner<'planner> {
 
     let all_skipped_deps = self
       .crate_settings
-      .skipped_deps
       .iter()
-      .cloned()
+      .flat_map(|pkg| pkg.skipped_deps.iter())
       .collect::<HashSet<_>>();
 
     for dep_id in &self.node.dependencies {
@@ -448,7 +469,7 @@ impl<'planner> CrateSubplanner<'planner> {
 
       let buildable_dependency = BuildableDependency {
         name: dep_package.name.clone(),
-        version: dep_package.version.to_string(),
+        version: dep_package.version.clone(),
         buildable_target: buildable_target.clone(),
         is_proc_macro,
       };
@@ -635,7 +656,7 @@ impl<'planner> CrateSubplanner<'planner> {
   ) -> Option<BuildableTarget> {
     if !self
       .crate_settings
-      .gen_buildrs
+      .and_then(|x| x.gen_buildrs)
       .unwrap_or(self.settings.default_gen_buildrs)
     {
       return None;
