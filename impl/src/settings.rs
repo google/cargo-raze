@@ -384,6 +384,7 @@ pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings,
 #[cfg(test)]
 pub mod testing {
   use super::*;
+  use indoc::indoc;
   use std::io::Write;
   use tempfile::TempDir;
 
@@ -406,30 +407,31 @@ pub mod testing {
 
   #[test]
   fn test_loading_settings() {
-    let toml_contents = "
+    let toml_contents = indoc! { r#"
     [package]
-    name = \"load_settings_test\"
-    version = \"0.1.0\"
+    name = "load_settings_test"
+    version = "0.1.0"
 
     [lib]
-    path = \"not_a_file.rs\"
+    path = "not_a_file.rs"
 
     [dependencies]
-    actix-web = \"2.0.0\"
-    actix-rt = \"1.0.0\"
+    actix-web = "2.0.0"
+    actix-rt = "1.0.0"
 
     [target.x86_64-apple-ios.dependencies]
     [target.x86_64-linux-android.dependencies]
-    bitflags = \"1.2.1\"
+    bitflags = "1.2.1"
 
     [raze]
-    workspace_path = \"//workspace_path/raze\"
-    genmode = \"Remote\"
+    workspace_path = "//workspace_path/raze"
+    genmode = "Remote"
     incompatible_relative_workspace_path = true
 
     [raze.binary_deps]
-    wasm-bindgen-cli =\"0.2.68\"
-    ";
+    wasm-bindgen-cli = "0.2.68"
+    "# };
+
     let temp_workspace_dir = TempDir::new()
       .ok()
       .expect("Failed to set up temporary directory");
