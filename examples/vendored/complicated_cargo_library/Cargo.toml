@@ -12,17 +12,17 @@ specs = "0.10.0"
 name = "complicated_cargo_library"
 path = "src/main.rs"
 
-[raze]
+[package.metadata.raze]
 workspace_path = "//vendored/complicated_cargo_library/cargo"
 gen_workspace_prefix = "vendored_complicated_cargo_library"
 genmode = "Vendored"
 
-[raze.crates.proc-macro2.'0.4.30']
+[package.metadata.raze.crates.proc-macro2.'0.4.30']
 additional_flags = [
     "--cfg=use_proc_macro",
 ]
 
-[raze.crates.regex.'0.2.11']
+[package.metadata.raze.crates.regex.'0.2.11']
 additional_deps = [
   # Add an unused dep
   "//vendored/complicated_cargo_library/cargo:specs"
@@ -34,5 +34,5 @@ additional_flags = [
 # Add an unused environment variable
 additional_env = { NOT_USED_KEY = "not_used_value" }
 
-[raze.crates.conduit-mime-types.'0.7.3']
+[package.metadata.raze.crates.conduit-mime-types.'0.7.3']
 data_attr = "glob([\"data/**\"])"

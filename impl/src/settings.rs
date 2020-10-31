@@ -26,7 +26,18 @@ pub type CrateSettingsPerVersion = HashMap<Version, CrateSettings>;
  */
 #[derive(Debug, Clone, Deserialize)]
 pub struct CargoToml {
-  pub raze: RazeSettings,
+  pub raze: Option<RazeSettings>,
+  pub package: Option<PackageToml>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct PackageToml {
+  pub metadata: Option<MetadataToml>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct MetadataToml {
+  pub raze: Option<RazeSettings>,
 }
 
 /** The configuration settings for `cargo-raze`, included in Cargo.toml. */
@@ -361,7 +372,7 @@ pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings,
     Ok(handle) => handle,
     Err(err) => {
       return Err(RazeError::Generic(err.to_string()));
-    },
+    }
   };
 
   let mut toml_contents = String::new();
@@ -370,10 +381,38 @@ pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings,
     return Err(RazeError::Generic(err.to_string()));
   }
   let mut settings = match toml::from_str::<CargoToml>(&toml_contents) {
-    Ok(toml) => toml.raze,
+    Ok(CargoToml {
+      package:
+        Some(PackageToml {
+          metadata: Some(MetadataToml { raze: Some(raze) }),
+        }),
+      raze: top_level_raze,
+    }) => {
+      if top_level_raze.is_some() {
+        eprintln!(
+          "WARNING: Both [raze] and [package.metadata.raze] are set. \
+            Using [package.metadata.raze] and ignoring [raze], which is deprecated."
+        );
+      }
+      raze
+    }
+    Ok(CargoToml {
+      raze: Some(raze), ..
+    }) => {
+      eprintln!(
+        "WARNING: The top-level [raze] key is deprecated. \
+          Please set [package.metadata.raze] instead."
+      );
+      raze
+    }
+    Ok(_) => {
+      return Err(RazeError::Generic(
+        "Cargo.toml has no `raze` or `package.metadata.raze` field".into(),
+      ));
+    }
     Err(err) => {
       return Err(RazeError::Generic(err.to_string()));
-    },
+    }
   };
 
   validate_settings(&mut settings)?;
