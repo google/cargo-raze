@@ -372,7 +372,7 @@ pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings,
     Ok(handle) => handle,
     Err(err) => {
       return Err(RazeError::Generic(err.to_string()));
-    }
+    },
   };
 
   let mut toml_contents = String::new();
@@ -395,7 +395,7 @@ pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings,
         );
       }
       raze
-    }
+    },
     Ok(CargoToml {
       raze: Some(raze), ..
     }) => {
@@ -404,15 +404,15 @@ pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings,
           Please set [package.metadata.raze] instead."
       );
       raze
-    }
+    },
     Ok(_) => {
       return Err(RazeError::Generic(
         "Cargo.toml has no `raze` or `package.metadata.raze` field".into(),
       ));
-    }
+    },
     Err(err) => {
       return Err(RazeError::Generic(err.to_string()));
-    }
+    },
   };
 
   validate_settings(&mut settings)?;
