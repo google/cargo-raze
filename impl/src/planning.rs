@@ -136,6 +136,7 @@ mod tests {
   use indoc::indoc;
   use super::*;
   use cargo_metadata::PackageId;
+  use httpmock::MockServer;
   use semver::Version;
 
   // A wrapper around a MetadataFetcher which drops the
@@ -585,13 +586,20 @@ mod tests {
   fn test_binary_dependencies_remote_genmode() {
     let (temp_dir, files) = make_workspace(basic_toml(), None);
     let mut settings = settings_testing::dummy_raze_settings();
-    settings.binary_deps.insert(
-      "wasm-bindgen-cli".to_string(),
-      cargo_toml::Dependency::Simple("0.2.68".to_string()),
-    );
     settings.genmode = GenMode::Remote;
 
-    let mut fetcher = WorkspaceCrateMetadataFetcher::default();
+    let mock_server = MockServer::start();
+    let _content_dir = mock_remote_crate("some-remote-crate", "3.3.3", &mock_server);
+    settings.registry = mock_server.url("/api/v1/crates/{crate}/{version}/download");
+    settings.binary_deps.insert(
+      "some-remote-crate".to_string(),
+      cargo_toml::Dependency::Simple("3.3.3".to_string()),
+    );
+
+    let mock_index = mock_crate_index(&to_index_crates_map(vec![("some-remote-crate", "3.3.3")]));
+    settings.index_url = mock_index.path().display().to_string();
+
+    let mut fetcher = CargoMetadataFetcher::default();
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
     let planned_build = planner
       .plan_build(
@@ -609,7 +617,7 @@ mod tests {
     let context = planned_build
       .crate_contexts
       .iter()
-      .find(|ctx| ctx.pkg_name == "wasm-bindgen-cli" && ctx.pkg_version == "0.2.68")
+      .find(|ctx| ctx.pkg_name == "some-remote-crate" && ctx.pkg_version == "3.3.3")
       .unwrap();
 
     // It's also expected to have a checksum
@@ -627,9 +635,11 @@ mod tests {
     let mut settings = settings_testing::dummy_raze_settings();
     settings.genmode = GenMode::Vendored;
 
+    let mock_server = MockServer::start();
+    let _content_dir = mock_remote_crate("some-remote-binary", "3.3.3", &mock_server);
     settings.binary_deps.insert(
-      "wasm-bindgen-cli".to_string(),
-      cargo_toml::Dependency::Simple("0.2.68".to_string()),
+      "some-remote-binary".to_string(),
+      cargo_toml::Dependency::Simple("3.3.3".to_string()),
     );
 
     let mut fetcher = WorkspaceCrateMetadataFetcher::default();
@@ -650,7 +660,7 @@ mod tests {
     assert!(planned_build
       .crate_contexts
       .iter()
-      .find(|ctx| ctx.pkg_name == "wasm-bindgen-cli" && ctx.pkg_version == "0.2.68")
+      .find(|ctx| ctx.pkg_name == "some-remote-binary" && ctx.pkg_version == "3.3.3")
       .is_none());
   }
   // TODO(acmcarther): Add tests:

@@ -194,14 +194,19 @@ fn cargo_generate_lockfile(
 }
 
 pub fn fetch_crate_checksum(index_url: &str, name: &str, version: &str) -> Result<String> {
-  let index = crates_index::BareIndex::from_url(index_url)?;
+  let index_path_is_url = url::Url::parse(index_url).is_ok();
+  let crate_index_path = if index_path_is_url {
+    crates_index::BareIndex::from_url(index_url)?
+      .open_or_clone()?
+      .crate_(name)
+      .ok_or(anyhow!("Failed to find crate '{}' in index", name))?
+  } else {
+    crates_index::Index::new(index_url)
+      .crate_(name)
+      .ok_or(anyhow!("Failed to find crate '{}' in index", name))?
+  };
 
-  let crate_index = index
-    .open_or_clone()?
-    .crate_(name)
-    .ok_or(anyhow!("Failed to find crate '{}' in index", name))?;
-
-  let (_index, crate_version) = crate_index
+  let (_index, crate_version) = crate_index_path
     .versions()
     .iter()
     .enumerate()
@@ -262,15 +267,13 @@ pub fn gather_binary_dep_info(
 
 #[cfg(test)]
 mod tests {
-  use super::*;
+  use httpmock::MockServer;
   use indoc::indoc;
-  use flate2::Compression;
-  use httpmock::{Method::GET, MockServer};
-  use serde_json::json;
-  use std::fs::File;
-  use std::io::Write;
 
+  use super::*;
   use crate::testing::*;
+
+  use std::{fs::File, io::Write};
 
   #[test]
   fn test_metadata_deserializes_correctly() {
@@ -340,58 +343,8 @@ mod tests {
   #[test]
   fn test_fetching_src() {
     let mock_server = MockServer::start();
-
-    // Crate info mock response
-    mock_server.mock(|when, then| {
-      when.method(GET).path("/api/v1/crates/fake-crate");
-      then.status(200).json_body(json!({
-          "crate": {
-              "id": "fake-crate",
-              "name": "fake-crate",
-              "versions": [
-                  283716
-              ],
-          },
-          "versions": [
-              {
-                  "id": 283716,
-                  "crate": "fake-crate",
-                  "num": "3.3.3",
-                  "dl_path": "/api/v1/crates/fake-crate/3.3.3/download",
-              }
-          ],
-      }));
-    });
-
-    // Create archive contents
-    let dir = tempfile::TempDir::new().unwrap();
-    let tar_path = dir.as_ref().join("fake-crate.tar.gz");
-    {
-      std::fs::create_dir_all(dir.as_ref().join("archive")).unwrap();
-      std::fs::File::create(dir.as_ref().join("archive/Cargo.lock")).unwrap();
-      std::fs::File::create(dir.as_ref().join("archive/Cargo.toml")).unwrap();
-      std::fs::File::create(dir.as_ref().join("archive/test")).unwrap();
-
-      let tar_gz: std::fs::File = std::fs::File::create(&tar_path).unwrap();
-      let enc = flate2::write::GzEncoder::new(tar_gz, Compression::default());
-      let mut tar = tar::Builder::new(enc);
-      tar
-        .append_dir_all("fake-crate-3.3.3", dir.as_ref().join("archive"))
-        .unwrap();
-    }
-
-    // Create download mock response
-    mock_server.mock(|when, then| {
-      when
-        .method(GET)
-        .path("/api/v1/crates/fake-crate/3.3.3/download");
-      then
-        .status(200)
-        .header("content-type", "application/x-tar")
-        .body_from_file(&tar_path.display().to_string());
-    });
-
-    let lockfile_dir = tempfile::TempDir::new().unwrap();
+    let dir = mock_remote_crate("fake-crate", "3.3.3", &mock_server);
+    let lockfile_dir = TempDir::new().unwrap();
     let (path, _files) = CargoMetadataFetcher::default()
       .fetch_crate_src(
         &mock_server.url(""),
