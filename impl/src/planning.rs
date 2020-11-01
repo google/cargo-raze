@@ -129,7 +129,7 @@ impl<'fetcher> BuildPlannerImpl<'fetcher> {
 mod tests {
   use crate::{
     metadata::{CargoMetadataFetcher, Metadata, MetadataFetcher},
-    settings::testing as settings_testing,
+    settings::tests as settings_testing,
     testing::*,
   };
 

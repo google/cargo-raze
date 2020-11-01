@@ -244,7 +244,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       }
     }
 
-    // Additionally, the binary dependencies need to have their checksums added as well in 
+    // Additionally, the binary dependencies need to have their checksums added as well in
     // Remote GenMode configurations. Vendored GenMode relies on the behavior of `cargo vendor`
     // and doesn't perform any special logic to fetch binary dependency crates.
     if self.settings.genmode == GenMode::Remote {
@@ -396,7 +396,7 @@ impl<'planner> CrateSubplanner<'planner> {
     let normal_dep_names = &names.normal_dep_names;
     let aliased_dep_names = &names.aliased_dep_names;
 
-    let mut dep_set = DependencySet{
+    let mut dep_set = DependencySet {
       build_deps: Vec::new(),
       build_proc_macro_deps: Vec::new(),
       proc_macro_deps: Vec::new(),
@@ -455,7 +455,9 @@ impl<'planner> CrateSubplanner<'planner> {
 
       if build_dep_names.contains(&dep_package.name) {
         if buildable_dependency.is_proc_macro {
-          dep_set.build_proc_macro_deps.push(buildable_dependency.clone());
+          dep_set
+            .build_proc_macro_deps
+            .push(buildable_dependency.clone());
         } else {
           dep_set.build_deps.push(buildable_dependency.clone());
         }

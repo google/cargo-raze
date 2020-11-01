@@ -225,7 +225,6 @@ pub fn find_bazel_workspace_root() -> Option<PathBuf> {
   return None;
 }
 
-
 pub struct PlatformDetails {
   target_triple: String,
   attrs: Vec<Cfg>,

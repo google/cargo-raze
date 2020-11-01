@@ -18,9 +18,9 @@ use tera::{self, Context, Tera};
 
 use crate::{
   context::{CrateContext, WorkspaceContext},
+  error::RazeError,
   planning::PlannedBuild,
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
-  error::RazeError,
 };
 
 use std::error::Error;
@@ -176,7 +176,7 @@ macro_rules! unwind_tera_error {
       messages.push(e.to_string());
       cause = e.source();
     }
-    messages.join("\n└─")
+    messages.join("\n|__")
   }};
 }
 

@@ -113,10 +113,7 @@ impl CrateCatalogEntry {
   /** Yields the expected location of the build file (relative to execution path). */
   pub fn local_build_path(&self, settings: &RazeSettings) -> Result<String> {
     match settings.genmode {
-      GenMode::Remote => Ok(format!(
-        "remote/BUILD.{}.bazel",
-        &self.package_ident,
-      )),
+      GenMode::Remote => Ok(format!("remote/BUILD.{}.bazel", &self.package_ident,)),
       GenMode::Vendored => Ok(format!(
         "vendor/{}/{}",
         &self.package_ident, settings.output_buildfile_suffix,
