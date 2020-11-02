@@ -15,9 +15,9 @@
 use crate::settings::CrateSettings;
 use serde::Serialize;
 
-/** A struct containing information about a crate's dependency that's buildable in Bazel 
- * 
- * Note: BUILDifier-compliant BUILD file generation depends on correct sorting of collections 
+/** A struct containing information about a crate's dependency that's buildable in Bazel
+ *
+ * Note: BUILDifier-compliant BUILD file generation depends on correct sorting of collections
  * of this struct by `buildable_target`. Do not add fields preceeding that field.
  */
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]

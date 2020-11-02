@@ -348,7 +348,10 @@ fn validate_settings(settings: &mut RazeSettings) -> Result<(), RazeError> {
   }
 
   if settings.genmode == GenMode::Unspecified {
-    eprintln!("WARNING: The [raze] setting `genmode` is unspecified. Not specifying `genmode` is deperacated. Please explicitly set it to either \"Remote\" or \"Vendored\"");
+    eprintln!(
+      "WARNING: The [raze] setting `genmode` is unspecified. Not specifying `genmode` is \
+       deprecated. Please explicitly set it to either \"Remote\" or \"Vendored\""
+    );
     settings.genmode = GenMode::Vendored;
   }
 
@@ -382,7 +385,7 @@ pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings,
 }
 
 #[cfg(test)]
-pub mod testing {
+pub mod tests {
   use super::*;
   use std::io::Write;
   use tempfile::TempDir;

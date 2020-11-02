@@ -73,7 +73,7 @@ fn main() -> Result<()> {
   if options.flag_verbose.unwrap_or(false) {
     println!("Loaded override settings: {:#?}", settings);
   }
-  
+
   let mut metadata_fetcher: Box<dyn MetadataFetcher> = match options.flag_cargo_bin_path {
     Some(ref p) => Box::new(CargoMetadataFetcher::new(p, /*use_tempdir: */ true)),
     None => Box::new(CargoMetadataFetcher::default()),
@@ -121,10 +121,11 @@ fn main() -> Result<()> {
     GenMode::Remote => {
       if !dry_run {
         let remote_dir = render_details.path_prefix.as_path().join("remote");
-        
+
         // Clean out the "remote" directory and guarantee that it exists
         if remote_dir.exists() {
-          for entry in glob::glob(&format!("{}/BUILD*.bazel", &remote_dir.display().to_string()))? {
+          let build_glob = format!("{}/BUILD*.bazel", remote_dir.display());
+          for entry in glob::glob(&build_glob)? {
             if let Ok(path) = entry {
               fs::remove_file(path)?;
             }

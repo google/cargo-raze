@@ -15,8 +15,8 @@
 pub mod bazel;
 
 use crate::planning::PlannedBuild;
-use std::path::PathBuf;
 use anyhow::Result;
+use std::path::PathBuf;
 
 /**
  * An object that can convert a prepared build plan into a series of files for a Bazel-like build
