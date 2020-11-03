@@ -133,6 +133,7 @@ mod tests {
     testing::*,
   };
 
+  use indoc::indoc;
   use super::*;
   use cargo_metadata::PackageId;
   use semver::Version;
@@ -379,18 +380,18 @@ mod tests {
 
   #[test]
   fn test_plan_build_produces_aliased_dependencies() {
-    let toml_file = "
+    let toml_file = indoc! { r#"
     [package]
-    name = \"advanced_toml\"
-    version = \"0.1.0\"
+    name = "advanced_toml"
+    version = "0.1.0"
 
     [lib]
-    path = \"not_a_file.rs\"
+    path = "not_a_file.rs"
 
     [dependencies]
-    actix-web = \"2.0.0\"
-    actix-rt = \"1.0.0\"
-        ";
+    actix-web = "2.0.0"
+    actix-rt = "1.0.0"
+    "# };
     let (temp_dir, files) = make_workspace(toml_file, None);
     let mut fetcher = WorkspaceCrateMetadataFetcher::default();
     let mut settings = settings_testing::dummy_raze_settings();
@@ -440,17 +441,17 @@ mod tests {
 
   #[test]
   fn test_plan_build_produces_proc_macro_dependencies() {
-    let toml_file = "
+    let toml_file = indoc! { r#"
     [package]
-    name = \"advanced_toml\"
-    version = \"0.1.0\"
+    name = "advanced_toml"
+    version = "0.1.0"
 
     [lib]
-    path = \"not_a_file.rs\"
+    path = "not_a_file.rs"
 
     [dependencies]
-    serde = { version = \"=1.0.112\", features = [\"derive\"] }
-        ";
+    serde = { version = "=1.0.112", features = ["derive"] }
+    "# };
     let (temp_dir, files) = make_workspace(toml_file, None);
     let mut fetcher = WorkspaceCrateMetadataFetcher::default();
     let mut settings = settings_testing::dummy_raze_settings();
@@ -494,17 +495,17 @@ mod tests {
 
   #[test]
   fn test_plan_build_produces_build_proc_macro_dependencies() {
-    let toml_file = "
+    let toml_file = indoc! { r#"
     [package]
-    name = \"advanced_toml\"
-    version = \"0.1.0\"
+    name = "advanced_toml"
+    version = "0.1.0"
 
     [lib]
-    path = \"not_a_file.rs\"
+    path = "not_a_file.rs"
 
     [dependencies]
-    markup5ever = \"=0.10.0\"
-        ";
+    markup5ever = "=0.10.0"
+    "# };
     let (temp_dir, files) = make_workspace(toml_file, None);
     let mut fetcher = WorkspaceCrateMetadataFetcher::default();
     let mut settings = settings_testing::dummy_raze_settings();
@@ -548,17 +549,17 @@ mod tests {
 
   #[test]
   fn test_subplan_produces_crate_root_with_forward_slash() {
-    let toml_file = "
+    let toml_file = indoc! { r#"
     [package]
-    name = \"advanced_toml\"
-    version = \"0.1.0\"
+    name = "advanced_toml"
+    version = "0.1.0"
 
     [lib]
-    path = \"not_a_file.rs\"
+    path = "not_a_file.rs"
 
     [dependencies]
-    markup5ever = \"=0.10.0\"
-        ";
+    markup5ever = "=0.10.0"
+    "# };
     let (temp_dir, files) = make_workspace(toml_file, None);
     let mut fetcher = WorkspaceCrateMetadataFetcher::default();
     let mut planner = BuildPlannerImpl::new(&mut fetcher);
