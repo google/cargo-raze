@@ -22,12 +22,13 @@ use anyhow::Result;
 
 use crate::{
   error::RazeError,
-  metadata::{Metadata, Package, PackageId},
   settings::CrateSettingsPerVersion,
   util::collect_up_to,
 };
 
 use super::crate_catalog::{CrateCatalogEntry, VENDOR_DIR};
+
+use cargo_metadata::{Metadata, Package, PackageId};
 
 // TODO(acmcarther): Consider including a switch to disable limiting
 const MAX_DISPLAYED_MISSING_VENDORED_CRATES: usize = 5;
@@ -40,8 +41,6 @@ pub fn check_all_vendored(
 ) -> Result<()> {
   let missing_package_ident_iter = crate_catalog_entries
     .iter()
-    // Root does not need to be vendored -- usually it is a wrapper package.
-    .filter(|p| !p.is_root())
     .filter(|p| !p.is_workspace_crate())
     .filter(|p| fs::metadata(p.expected_vendored_path(workspace_path)).is_err())
     .map(|p| p.package_ident.clone());
@@ -149,17 +148,11 @@ pub fn warn_unused_settings(
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::{
-    metadata::CargoMetadataFetcher, metadata::MetadataFetcher, testing::make_basic_workspace,
-  };
+  use crate::metadata::tests::dummy_raze_metadata;
 
   #[test]
-  #[allow(non_snake_case)]
-  fn test__checks__check_resolve_matches_packages_fails_correctly() {
-    let (_temp_dir, files) = make_basic_workspace();
-    let mut metadata = CargoMetadataFetcher::default()
-      .fetch_metadata(&files)
-      .unwrap();
+  fn test_check_resolve_matches_packages_fails_correctly() {
+    let mut metadata = dummy_raze_metadata().metadata.clone();
 
     // Invalidate the metadata, expect an error.
     metadata.packages = Vec::new();
@@ -167,12 +160,8 @@ mod tests {
   }
 
   #[test]
-  #[allow(non_snake_case)]
-  fn test__checks__check_resolve_matches_packages_works_correctly() {
-    let (_temp_dir, files) = make_basic_workspace();
-    let metadata = CargoMetadataFetcher::default()
-      .fetch_metadata(&files)
-      .unwrap();
+  fn test_check_resolve_matches_packages_works_correctly() {
+    let metadata = dummy_raze_metadata().metadata.clone();
 
     // Should not panic with valid metadata.
     check_resolve_matches_packages(&metadata).unwrap();

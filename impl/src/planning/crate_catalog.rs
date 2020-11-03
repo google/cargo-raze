@@ -13,16 +13,16 @@
 // limitations under the License.
 
 use std::{
-  collections::{HashMap, HashSet},
+  collections::HashMap,
   path::PathBuf,
   str::{self},
 };
 
 use anyhow::{anyhow, Result};
+use cargo_metadata::{Metadata, Node, Package, PackageId};
 
 use crate::{
   error::RazeError,
-  metadata::{Metadata, Package, PackageId},
   settings::{GenMode, RazeSettings},
   util::{self, find_bazel_workspace_root},
 };
@@ -38,20 +38,17 @@ pub struct CrateCatalogEntry {
   pub sanitized_version: String,
   // A unique identifier for the package derived from Cargo usage of the form {name}-{version}
   pub package_ident: String,
-  // Is this the root crate in the whole catalog?
-  pub is_root: bool,
-  // Is this a dependency of the catalog root crate?
-  pub is_root_dep: bool,
   // Is this a member of the root crate workspace?
   pub is_workspace_crate: bool,
+  // A list of workspace members that depend on this entry
+  pub workspace_member_dependents: Vec<PackageId>,
 }
 
 impl CrateCatalogEntry {
   pub fn new(
     package: &Package,
-    is_root: bool,
-    is_root_dep: bool,
     is_workspace_crate: bool,
+    workspace_member_dependents: Vec<PackageId>,
   ) -> Self {
     let sanitized_name = package.name.replace("-", "_");
     let sanitized_version = util::sanitize_ident(&package.version.clone().to_string());
@@ -61,9 +58,8 @@ impl CrateCatalogEntry {
       package_ident: format!("{}-{}", &package.name, &package.version),
       sanitized_name,
       sanitized_version,
-      is_root,
-      is_root_dep,
       is_workspace_crate,
+      workspace_member_dependents,
     }
   }
 
@@ -78,19 +74,9 @@ impl CrateCatalogEntry {
     &self.package
   }
 
-  /** Returns whether or not this is the root crate in the workspace. */
-  pub fn is_root(&self) -> bool {
-    self.is_root
-  }
-
   /** Returns whether or not this is a member of the root workspace. */
   pub fn is_workspace_crate(&self) -> bool {
     self.is_workspace_crate
-  }
-
-  /** Returns whether or not this is a dependency of the workspace root crate.*/
-  pub fn is_root_dep(&self) -> bool {
-    self.is_root_dep
   }
 
   /**
@@ -198,29 +184,17 @@ impl CrateCatalog {
       .as_ref()
       .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?;
 
-    let root_resolve_node = {
-      let root_id = resolve
-        .root
-        .as_ref()
-        .ok_or_else(|| RazeError::Generic("Missing root in resolve graph".into()))?;
-
-      resolve
-        .nodes
-        .iter()
-        .find(|node| &node.id == root_id)
-        .ok_or_else(|| RazeError::Generic("Missing crate with root ID in resolve graph".into()))?
-    };
-
-    let root_direct_deps = root_resolve_node
-      .dependencies
+    let workspace_crates: Vec<&Node> = resolve
+      .nodes
       .iter()
-      .cloned()
-      .collect::<HashSet<_>>();
-    let workspace_crates = metadata
-      .workspace_members
-      .iter()
-      .cloned()
-      .collect::<HashSet<_>>();
+      .filter_map(|node| {
+        if metadata.workspace_members.contains(&node.id) {
+          Some(node)
+        } else {
+          None
+        }
+      })
+      .collect();
 
     let entries = metadata
       .packages
@@ -228,9 +202,17 @@ impl CrateCatalog {
       .map(|package| {
         CrateCatalogEntry::new(
           package,
-          root_resolve_node.id == package.id,
-          root_direct_deps.contains(&package.id),
-          workspace_crates.contains(&package.id),
+          metadata.workspace_members.contains(&package.id),
+          workspace_crates
+            .iter()
+            .filter_map(|node| {
+              if node.dependencies.contains(&package.id) {
+                Some(node.id.clone())
+              } else {
+                None
+              }
+            })
+            .collect(),
         )
       })
       .collect::<Vec<_>>();

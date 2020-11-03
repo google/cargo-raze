@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::{
+  collections::HashMap,
   fs::{self, File},
   io::Write,
   path::{Path, PathBuf},
@@ -25,12 +26,14 @@ use docopt::Docopt;
 use cargo_raze::{
   metadata::{CargoMetadataFetcher, CargoWorkspaceFiles, MetadataFetcher},
   planning::{BuildPlanner, BuildPlannerImpl},
-  rendering::{bazel::BazelRenderer, BuildRenderer, FileOutputs, RenderDetails},
+  rendering::{bazel::BazelRenderer, BuildRenderer, RenderDetails},
+  settings::RazeSettings,
   settings::{load_settings, GenMode},
   util::{find_bazel_workspace_root, PlatformDetails},
 };
 
 use serde::Deserialize;
+use url::Url;
 
 #[derive(Debug, Deserialize)]
 struct Options {
@@ -42,7 +45,7 @@ struct Options {
   flag_target: Option<String>,
   flag_dryrun: Option<bool>,
   flag_cargo_bin_path: Option<String>,
-  flag_output: String,
+  flag_output: Option<String>,
 }
 
 const USAGE: &str = r#"
@@ -67,6 +70,7 @@ Options:
 "#;
 
 fn main() -> Result<()> {
+  // Parse options
   let options: Options = Docopt::new(USAGE)
     .map(|d| {
       d.version(Some(
@@ -76,16 +80,21 @@ fn main() -> Result<()> {
     .and_then(|d| d.deserialize())
     .unwrap_or_else(|e| e.exit());
 
+  // Load settings
   let settings = load_settings("Cargo.toml")?;
   if options.flag_verbose.unwrap_or(false) {
     println!("Loaded override settings: {:#?}", settings);
   }
 
-  let mut metadata_fetcher: Box<dyn MetadataFetcher> = match options.flag_cargo_bin_path {
-    Some(ref p) => Box::new(CargoMetadataFetcher::new(p, /*use_tempdir: */ true)),
+  // Fetch metadata
+  let metadata_fetcher: Box<dyn MetadataFetcher> = match options.flag_cargo_bin_path {
+    Some(ref p) => Box::new(CargoMetadataFetcher::new(
+      p,
+      Url::parse(&settings.registry)?,
+      &settings.index_url,
+    )),
     None => Box::new(CargoMetadataFetcher::default()),
   };
-  let mut planner = BuildPlannerImpl::new(&mut *metadata_fetcher);
 
   let toml_path = PathBuf::from("./Cargo.toml");
   let lock_path_opt = fs::metadata("./Cargo.lock")
@@ -96,83 +105,85 @@ fn main() -> Result<()> {
     lock_path_opt,
   };
 
+  // Determine the path to the Bazel workspace root or fallback to the current working directory
+  let cargo_raze_working_dir = find_bazel_workspace_root().unwrap_or(std::env::current_dir()?);
+
+  let remote_genmode_inputs = gather_remote_genmode_inputs(&cargo_raze_working_dir, &settings);
+
+  let metadata = metadata_fetcher.fetch_metadata(
+    &files,
+    remote_genmode_inputs.binary_deps,
+    remote_genmode_inputs.override_lockfile,
+  )?;
+
+  // Do Planning
   let platform_details = match &settings.target {
     Some(target) => Some(PlatformDetails::new_using_rustc(target)?),
     None => None,
   };
 
-  let prefix_path = calculate_workspace_root(
-    &settings.workspace_path,
-    match !options.flag_output.is_empty() {
-      true => Some(&options.flag_output),
-      false => None,
-    },
-    settings.incompatible_relative_workspace_path,
-  )?;
+  let planned_build =
+    BuildPlannerImpl::new(metadata.clone(), settings.clone()).plan_build(platform_details)?;
 
-  let planned_build = planner.plan_build(&settings, &prefix_path, files, platform_details)?;
+  // Render BUILD files
   let mut bazel_renderer = BazelRenderer::new();
 
   let render_details = RenderDetails {
-    path_prefix: prefix_path,
-    buildfile_suffix: settings.output_buildfile_suffix,
+    cargo_root: metadata.workspace_root,
+    path_prefix: PathBuf::from(&settings.workspace_path.trim_start_matches("/")),
+    workspace_member_output_dir: settings.workspace_member_dir,
+    vendored_buildfile_name: settings.output_buildfile_suffix,
+    bazel_root: cargo_raze_working_dir,
   };
 
-  let dry_run = options.flag_dryrun.unwrap_or(false);
-  if !dry_run {
-    fs::create_dir_all(&render_details.path_prefix)?;
-  }
-
-  let bazel_file_outputs = match settings.genmode {
+  let bazel_file_outputs = match &settings.genmode {
     GenMode::Vendored => bazel_renderer.render_planned_build(&render_details, &planned_build)?,
     GenMode::Remote => {
-      if !dry_run {
-        let remote_dir = render_details.path_prefix.as_path().join("remote");
-
-        // Clean out the "remote" directory and guarantee that it exists
-        if remote_dir.exists() {
-          let build_glob = format!("{}/BUILD*.bazel", remote_dir.display());
-          for entry in glob::glob(&build_glob)? {
-            if let Ok(path) = entry {
-              fs::remove_file(path)?;
-            }
-          }
-        } else {
-          fs::create_dir_all(&remote_dir)?;
-        }
-
-        if !settings.binary_deps.is_empty() {
-          fs::create_dir_all(
-            render_details
-              .path_prefix
-              .clone()
-              .as_path()
-              .join("lockfiles"),
-          )?;
-        }
-      }
-
       bazel_renderer.render_remote_planned_build(&render_details, &planned_build)?
     }, /* exhaustive, we control the definition */
     // There are no file outputs to produce if `genmode` is Unspecified
     GenMode::Unspecified => Vec::new(),
   };
 
-  for FileOutputs {
-    path,
-    contents,
-  } in bazel_file_outputs
-  {
-    if dry_run {
-      println!("{}:\n{}", path.display(), contents);
-    } else {
-      write_to_file(&path, &contents, options.flag_verbose.unwrap_or(false))?;
+  // Write BUILD files
+  if &settings.genmode == &GenMode::Remote {
+    let remote_dir = render_details
+      .bazel_root
+      .join(render_details.path_prefix)
+      .join("remote");
+
+    // Clean out the "remote" directory so users can easily see what build files are relevant
+    if remote_dir.exists() {
+      let build_glob = format!("{}/BUILD*.bazel", remote_dir.display());
+      for entry in glob::glob(&build_glob)? {
+        if let Ok(path) = entry {
+          fs::remove_file(path)?;
+        }
+      }
     }
+  }
+
+  for output in bazel_file_outputs.iter() {
+    if options.flag_dryrun.unwrap_or(false) {
+      println!("{}:\n{}", output.path.display(), output.contents);
+      continue;
+    }
+
+    // Ensure all parent directories exist
+    if let Some(parent) = &output.path.parent() {
+      fs::create_dir_all(parent)?
+    }
+    write_to_file(
+      &output.path,
+      &output.contents,
+      options.flag_verbose.unwrap_or(false),
+    )?;
   }
 
   Ok(())
 }
 
+/** Helper function for writing rendered files to disk */
 fn write_to_file(path: &Path, contents: &str, verbose: bool) -> Result<()> {
   File::create(&path).and_then(|mut f| f.write_all(contents.as_bytes()))?;
   if verbose {
@@ -181,52 +192,34 @@ fn write_to_file(path: &Path, contents: &str, verbose: bool) -> Result<()> {
   Ok(())
 }
 
-fn calculate_workspace_root(
-  path: &str,
-  output_override: Option<&str>,
-  new_behavior: bool,
-) -> Result<PathBuf> {
-  // Default to the current directory '.'
-  let mut prefix_path: PathBuf = std::env::current_dir()?;
-
-  // Allow the command line option to take precedence
-  match output_override {
-    Some(output) => {
-      prefix_path.clear();
-      prefix_path.push(output);
-    },
-    None => {
-      if new_behavior {
-        if let Some(workspace_root) = find_bazel_workspace_root() {
-          prefix_path.clear();
-          prefix_path.push(workspace_root);
-          prefix_path.push(
-            path
-              // Remove the leading "//" from the path
-              .trim_start_matches('/'),
-          );
-        }
-      }
-    },
-  }
-
-  Ok(prefix_path)
+/* A helper struct representing the inputs specific to the Remote genmode */
+struct RemoteGenModeInputs<'settings> {
+  pub override_lockfile: Option<PathBuf>,
+  pub binary_deps: Option<&'settings HashMap<String, cargo_toml::Dependency>>,
 }
 
-#[test]
-fn test_calculate_workspace_root() {
-  assert_eq!(
-    calculate_workspace_root(&"path_a".to_string(), None, true).unwrap(),
-    std::env::current_dir().unwrap()
-  );
+/** Helper function for gathering inputs for `genmode = "Remote"` builds */
+fn gather_remote_genmode_inputs<'settings>(
+  bazel_root: &Path,
+  settings: &'settings RazeSettings,
+) -> RemoteGenModeInputs<'settings> {
+  if settings.genmode == GenMode::Remote {
+    let lockfile = bazel_root
+      .join(settings.workspace_path.trim_start_matches("/"))
+      .join("Cargo.raze.lock");
 
-  assert_eq!(
-    calculate_workspace_root(
-      &"path_b".to_string(),
-      Some(&"direct/path".to_string()),
-      true
-    )
-    .unwrap(),
-    std::path::Path::new("direct").join("path")
-  );
+    RemoteGenModeInputs {
+      override_lockfile: if lockfile.exists() {
+        Some(lockfile)
+      } else {
+        None
+      },
+      binary_deps: Some(&settings.binary_deps),
+    }
+  } else {
+    RemoteGenModeInputs {
+      override_lockfile: None,
+      binary_deps: None,
+    }
+  }
 }

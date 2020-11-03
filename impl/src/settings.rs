@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::error::RazeError;
+use crate::{
+  error::RazeError,
+  metadata::{DEFAULT_CRATE_INDEX_URL, DEFAULT_CRATE_REGISTRY_URL},
+};
 use semver::VersionReq;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs::File, io::Read, path::Path};
@@ -28,6 +31,7 @@ pub type CrateSettingsPerVersion = HashMap<VersionReq, CrateSettings>;
 pub struct CargoToml {
   pub raze: Option<RazeSettings>,
   pub package: Option<PackageToml>,
+  pub workspace: Option<PackageToml>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -47,6 +51,13 @@ pub struct RazeSettings {
    * The path to the Cargo.toml working directory.
    */
   pub workspace_path: String,
+
+  /**
+   * The path within each workspace member directory where dependencies of that
+   * specifc package will be rendered.
+   */
+  #[serde(default = "default_workspace_member_dir")]
+  pub workspace_member_dir: String,
 
   /**
    * If true, will force the `workspace_path` setting will be treated as a Bazel label.
@@ -312,11 +323,14 @@ fn default_raze_settings_field_gen_buildrs() -> bool {
 }
 
 fn default_raze_settings_registry() -> String {
-  "https://crates.io/api/v1/crates/{crate}/{version}/download".to_string()
+  format!(
+    "{}/{}",
+    DEFAULT_CRATE_REGISTRY_URL, "api/v1/crates/{crate}/{version}/download"
+  )
 }
 
 fn default_raze_settings_index_url() -> String {
-  "https://github.com/rust-lang/crates.io-index".to_string()
+  DEFAULT_CRATE_INDEX_URL.to_string()
 }
 
 fn default_crate_settings_field_gen_buildrs() -> Option<bool> {
@@ -325,6 +339,10 @@ fn default_crate_settings_field_gen_buildrs() -> Option<bool> {
 
 fn default_crate_settings_field_data_attr() -> Option<String> {
   None
+}
+
+fn default_workspace_member_dir() -> String {
+  "cargo".to_string()
 }
 
 fn incompatible_relative_workspace_path() -> bool {
@@ -385,16 +403,37 @@ pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings,
   }
   let mut settings = match toml::from_str::<CargoToml>(&toml_contents) {
     Ok(CargoToml {
-      package:
+      workspace:
         Some(PackageToml {
-          metadata: Some(MetadataToml { raze: Some(raze) }),
+          metadata: Some(MetadataToml {
+            raze: Some(raze),
+          }),
         }),
       raze: top_level_raze,
+      ..
     }) => {
       if top_level_raze.is_some() {
         eprintln!(
-          "WARNING: Both [raze] and [package.metadata.raze] are set. \
-            Using [package.metadata.raze] and ignoring [raze], which is deprecated."
+          "WARNING: Both [raze] and [workspace.metadata.raze] are set. Using \
+           [workspace.metadata.raze] and ignoring [raze], which is deprecated."
+        );
+      }
+      raze
+    },
+    Ok(CargoToml {
+      package:
+        Some(PackageToml {
+          metadata: Some(MetadataToml {
+            raze: Some(raze),
+          }),
+        }),
+      raze: top_level_raze,
+      ..
+    }) => {
+      if top_level_raze.is_some() {
+        eprintln!(
+          "WARNING: Both [raze] and [package.metadata.raze] are set. Using \
+           [package.metadata.raze] and ignoring [raze], which is deprecated."
         );
       }
       raze
@@ -403,8 +442,8 @@ pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings,
       raze: Some(raze), ..
     }) => {
       eprintln!(
-        "WARNING: The top-level [raze] key is deprecated. \
-          Please set [package.metadata.raze] instead."
+        "WARNING: The top-level [raze] key is deprecated. Please set [package.metadata.raze] \
+         instead."
       );
       raze
     },
@@ -425,6 +464,8 @@ pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings,
 
 #[cfg(test)]
 pub mod tests {
+  use crate::testing::{make_workspace, named_toml_contents};
+
   use super::*;
   use indoc::indoc;
   use std::io::Write;
@@ -433,6 +474,7 @@ pub mod tests {
   pub fn dummy_raze_settings() -> RazeSettings {
     RazeSettings {
       workspace_path: "//cargo".to_owned(),
+      workspace_member_dir: "cargo".to_owned(),
       target: Some("x86_64-unknown-linux-gnu".to_owned()),
       targets: None,
       crates: HashMap::new(),
@@ -483,6 +525,29 @@ pub mod tests {
 
     let settings = load_settings(cargo_toml_path).unwrap();
     assert!(settings.binary_deps.len() > 0);
+  }
+
+  #[test]
+  fn test_loading_workspace_settings() {
+    let toml_contents = indoc! { r#"
+      [workspace]
+      members = [
+        "test_crate",
+      ]
+
+      [workspace.metadata.raze]
+      workspace_path = "//workspace_path/raze"
+      genmode = "Remote"
+    "# };
+
+    let (dir, files) = make_workspace(toml_contents, None);
+    let test_crate_toml = dir.as_ref().join("test_crate").join("Cargo.toml");
+    std::fs::create_dir_all(test_crate_toml.parent().unwrap()).unwrap();
+    std::fs::write(test_crate_toml, named_toml_contents("test_crate", "0.0.1")).unwrap();
+
+    let settings = load_settings(files.toml_path).unwrap();
+    assert_eq!(&settings.workspace_path, "//workspace_path/raze");
+    assert_eq!(settings.genmode, GenMode::Remote);
   }
 
   #[test]
