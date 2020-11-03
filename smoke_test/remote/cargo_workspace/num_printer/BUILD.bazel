@@ -1,0 +1,13 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_binary(
+    name = "number_printer",
+    srcs = ["src/main.rs"],
+    edition = "2018",
+    deps = [
+        "//remote/cargo_workspace/num_printer/cargo:clap",
+        "//remote/cargo_workspace/printer",
+    ],
+)
