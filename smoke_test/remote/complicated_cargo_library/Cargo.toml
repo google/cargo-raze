@@ -14,24 +14,24 @@ regex = "=0.2.5"
 specs = "=0.10.0"
 security-framework-sys = "=0.2.2"
 
-[raze]
+[package.metadata.raze]
 workspace_path = "//remote/complicated_cargo_library/cargo"
 gen_workspace_prefix = "remote_complicated_cargo_library"
 genmode = "Remote"
 
-[raze.crates.proc-macro2.'0.4.30']
+[package.metadata.raze.crates.proc-macro2.'0.4.30']
 additional_flags = [
     "--cfg=use_proc_macro",
 ]
 
-[raze.crates.syn.'0.15.44']
+[package.metadata.raze.crates.syn.'0.15.44']
 gen_buildrs = true
 
-[raze.crates.libloading.'0.5.2']
+[package.metadata.raze.crates.libloading.'0.5.2']
 additional_deps = [":global_static"]
 additional_build_file = "cargo/libloading_global_static.BUILD"
 
-[raze.crates.regex.'0.2.5']
+[package.metadata.raze.crates.regex.'0.2.5']
 skipped_deps = [
   # This will break the regex crate
   #"regex-syntax-0.4.2"

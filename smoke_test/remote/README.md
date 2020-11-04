@@ -8,6 +8,6 @@ In order to make sure that this assertion holds, please make sure set up **Cargo
 **Cargo.toml**
 ```toml
 
-[raze]
+[package.metadata.raze]
 gen_workspace_prefix = "<folder>"
 ```

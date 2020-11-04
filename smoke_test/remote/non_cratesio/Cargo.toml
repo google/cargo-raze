@@ -15,13 +15,13 @@ log = { git = "https://github.com/rust-lang-nursery/log.git", rev = "bf40d1f563c
 name = "non_cratesio"
 path = "src/main.rs"
 
-[raze]
+[package.metadata.raze]
 workspace_path = "//remote/non_cratesio/cargo"
 target = "x86_64-unknown-linux-gnu"
 genmode = "Remote"
 gen_workspace_prefix = "remote_non_cratesio"
 
-[raze.crates.log.'0.4.11']
+[package.metadata.raze.crates.log.'0.4.11']
 additional_flags = [
     "--cfg=atomic_cas"
 ]

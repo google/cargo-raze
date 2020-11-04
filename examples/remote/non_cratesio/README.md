@@ -5,7 +5,7 @@
 
 1. Run `cargo install cargo-raze`
 2. Generate a Cargo.toml with desired dependencies into cargo/Cargo.toml
-3. Add a [raze] section with your desired options (see cargo-raze `settings::CargoToml` for
+3. Add a [package.metadata.raze] section with your desired options (see cargo-raze `settings::CargoToml` for
    the exact details)
 4. Run `cargo vendor --versioned-dirs` from `cargo/`
 5. Run `cargo raze` from `cargo/`

@@ -90,7 +90,7 @@ path = "fake_lib.rs"
 [dependencies]
 log = "=0.3.6"
 
-[raze]
+[package.metadata.raze]
 # The path relative path to the Bazel workspace root (location of
 # WORKSPACE.bazel/WORKSPACE file). If no workspace file is found,
 # the current working directory is used.
@@ -135,10 +135,10 @@ is required.
 #### Generate a Cargo.toml
 
 Generate a Cargo.toml, similar to Vendoring mode but add a new `genmode` directive in the
-`[raze]` section
+`[package.metadata.raze]` section
 
 ```toml
-[raze]
+[package.metadata.raze]
 # The path relative path to the Bazel workspace root (location of
 # WORKSPACE.bazel/WORKSPACE file). If no workspace file is found,
 # the current working directory is used.
@@ -198,7 +198,7 @@ source file. These build-scripts rules can actually be executed and used within
 Bazel by including a directive in your Cargo.toml prior to generation:
 
 ```toml
-[raze.crates.clang-sys.'0.21.1']
+[package.metadata.raze.crates.clang-sys.'0.21.1']
 gen_buildrs = true
 ```
 
@@ -214,7 +214,7 @@ compilation target is statically known), they can be provided from within the
 Cargo.toml, in the following manner
 
 ```toml
-[raze.crates.unicase.'2.1.0']
+[package.metadata.raze.crates.unicase.'2.1.0']
 additional_flags = [
   # Rustc is 1.15, enable all optional settings
   "--cfg=__unicase__iter_cmp",
@@ -235,7 +235,7 @@ rule for it, and add the dependency to the corresponding `-sys` crate. For
 openssl, this may in part look like:
 
 ```toml
-[raze.crates.openssl-sys.'0.9.24']
+[package.metadata.raze.crates.openssl-sys.'0.9.24']
 additional_flags = [
   # Vendored openssl is 1.0.2m
   "--cfg=ossl102",
@@ -246,7 +246,7 @@ additional_deps = [
   "@//third_party/openssl:ssl",
 ]
 
-[raze.crates.openssl.'0.10.2']
+[package.metadata.raze.crates.openssl.'0.10.2']
 additional_flags = [
   # Vendored openssl is 1.0.2m
   "--cfg=ossl102",
@@ -273,7 +273,7 @@ facilitated by removing and supplementing dependencies in the Cargo.toml,
 pre-generation:
 
 ```toml
-[raze.crates.sdl2.'0.31.0']
+[package.metadata.raze.crates.sdl2.'0.31.0']
 skipped_deps = [
   "sdl2-sys-0.31.0"
 ]
@@ -290,7 +290,7 @@ files by processing C or C++ files. A directive can be added to the Cargo.toml
 to tell Bazel to expose such binaries for you:
 
 ```toml
-[raze.crates.bindgen.'0.32.2']
+[package.metadata.raze.crates.bindgen.'0.32.2']
 gen_buildrs = true # needed to build bindgen
 extra_aliased_targets = [
   "cargo_bin_bindgen"
@@ -308,14 +308,14 @@ of your `Cargo.toml` file will not result in generated Bazel targets. Cargo-raze
 has a special field to handle these crates when using `genmode = "Remote"`:
 
 ```toml
-[raze.binary_deps]
+[package.metadata.raze.binary_deps]
 wasm-bindgen-cli = "0.2.68"
 ```
 
 In the snippet above, the `wasm-bindgen-cli` crate is defined as binary dependency
 and Cargo-raze will ensure metadata for this and any other crate defined here are
 included in the resulting output directory. Lockfiles for targets specified under
-`[raze.binary_deps]` will be generated into a `lockfiles` directory inside the path
+`[package.metadata.raze.binary_deps]` will be generated into a `lockfiles` directory inside the path
 specified by `workspace_path`.
 
 ## FAQ
@@ -394,4 +394,4 @@ See these examples of providing crate configuration:
 
 - [openssl](https://github.com/acmcarther/compile_openssl)
 
-The `[raze]` section is derived from a struct declared in [impl/src/settings.rs](./impl/src/settings.rs).
+The `[package.metadata.raze]` section is derived from a struct declared in [impl/src/settings.rs](./impl/src/settings.rs).
