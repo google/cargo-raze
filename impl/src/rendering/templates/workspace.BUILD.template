@@ -1,10 +1,4 @@
-"""
-@generated
-cargo-raze workspace build file.
-
-DO NOT EDIT! Replaced on runs of cargo-raze
-"""
-
+{%- include "templates/partials/header.template" %}
 package(default_visibility = ["//visibility:public"])
 
 licenses([

@@ -37,8 +37,24 @@ impl BazelRenderer {
     internal_renderer
       .add_raw_templates(vec![
         (
+          "templates/crate.BUILD.template",
+          include_str!("templates/crate.BUILD.template"),
+        ),
+        (
           "templates/partials/build_script.template",
           include_str!("templates/partials/build_script.template"),
+        ),
+        (
+          "templates/partials/common_attrs.template",
+          include_str!("templates/partials/common_attrs.template"),
+        ),
+        (
+          "templates/partials/header.template",
+          include_str!("templates/partials/header.template"),
+        ),
+        (
+          "templates/partials/remote_crates_patch.template",
+          include_str!("templates/partials/remote_crates_patch.template"),
         ),
         (
           "templates/partials/rust_binary.template",
@@ -49,28 +65,16 @@ impl BazelRenderer {
           include_str!("templates/partials/rust_library.template"),
         ),
         (
-          "templates/partials/common_attrs.template",
-          include_str!("templates/partials/common_attrs.template"),
-        ),
-        (
-          "templates/workspace.BUILD.template",
-          include_str!("templates/workspace.BUILD.template"),
-        ),
-        (
-          "templates/crate.BUILD.template",
-          include_str!("templates/crate.BUILD.template"),
+          "templates/partials/targeted_dependencies.template",
+          include_str!("templates/partials/targeted_dependencies.template"),
         ),
         (
           "templates/remote_crates.bzl.template",
           include_str!("templates/remote_crates.bzl.template"),
         ),
         (
-          "templates/partials/remote_crates_patch.template",
-          include_str!("templates/partials/remote_crates_patch.template"),
-        ),
-        (
-          "templates/partials/targeted_dependencies.template",
-          include_str!("templates/partials/targeted_dependencies.template"),
+          "templates/workspace.BUILD.template",
+          include_str!("templates/workspace.BUILD.template"),
         ),
       ])
       .unwrap();

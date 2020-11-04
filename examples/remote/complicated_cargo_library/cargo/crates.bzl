@@ -1,6 +1,6 @@
 """
 @generated
-cargo-raze crate workspace functions
+cargo-raze generated Bazel file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
