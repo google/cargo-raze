@@ -384,6 +384,7 @@ impl<'planner> CrateSubplanner<'planner> {
       targeted_deps: filtered_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings)?,
       build_script_target: build_script_target_opt,
+      links: package.links.clone(),
       raze_settings: self.crate_settings.cloned().unwrap_or_default(),
       source_details: self.produce_source_details(&package, &package_root),
       expected_build_path: self.crate_catalog_entry.local_build_path(&self.settings)?,
