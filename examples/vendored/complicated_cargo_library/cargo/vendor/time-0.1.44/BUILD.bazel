@@ -52,6 +52,14 @@ rust_library(
     deps = [
         "//vendored/complicated_cargo_library/cargo/vendor/libc-0.2.77:libc",
     ] + selects.with_or({
+        # cfg(target_os = "wasi")
+        (
+            "@io_bazel_rules_rust//rust/platform:wasm32-wasi",
+        ): [
+            "//vendored/complicated_cargo_library/cargo/vendor/wasi-0.10.0+wasi-snapshot-preview1:wasi",
+        ],
+        "//conditions:default": [],
+    }) + selects.with_or({
         # cfg(windows)
         (
             "@io_bazel_rules_rust//rust/platform:i686-pc-windows-msvc",
