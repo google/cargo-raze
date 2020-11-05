@@ -44,6 +44,7 @@ static SUPPORTED_PLATFORM_TRIPLES: &'static [&'static str] = &[
   "powerpc-unknown-linux-gnu",
   "s390x-unknown-linux-gnu",
   "wasm32-unknown-unknown",
+  "wasm32-wasi",
   "x86_64-apple-ios",
   "x86_64-linux-android",
   "x86_64-unknown-freebsd",
