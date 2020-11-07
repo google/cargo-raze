@@ -13,11 +13,11 @@
 // limitations under the License.
 
 use crate::error::RazeError;
-use semver::Version;
+use semver::VersionReq;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs::File, io::Read, path::Path};
 
-pub type CrateSettingsPerVersion = HashMap<Version, CrateSettings>;
+pub type CrateSettingsPerVersion = HashMap<VersionReq, CrateSettings>;
 
 /**
  * A "deserializable struct" for the whole Cargo.toml

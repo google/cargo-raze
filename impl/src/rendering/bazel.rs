@@ -323,6 +323,8 @@ impl BuildRenderer for BazelRenderer {
 mod tests {
   use hamcrest2::{core::expect, prelude::*};
 
+  use semver::Version;
+
   use crate::{
     context::*,
     metadata::CargoWorkspaceFiles,
@@ -357,7 +359,7 @@ mod tests {
   fn dummy_binary_crate_with_name(buildfile_suffix: &str) -> CrateContext {
     CrateContext {
       pkg_name: "test-binary".to_owned(),
-      pkg_version: "1.1.1".to_owned(),
+      pkg_version: Version::parse("1.1.1").unwrap(),
       edition: "2015".to_owned(),
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
       expected_build_path: format!("vendor/test-binary-1.1.1/{}", buildfile_suffix),
@@ -397,7 +399,7 @@ mod tests {
   fn dummy_library_crate_with_name(buildfile_suffix: &str) -> CrateContext {
     CrateContext {
       pkg_name: "test-library".to_owned(),
-      pkg_version: "1.1.1".to_owned(),
+      pkg_version: Version::parse("1.1.1").unwrap(),
       edition: "2015".to_owned(),
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),

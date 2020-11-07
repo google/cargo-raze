@@ -14,6 +14,7 @@
 
 use crate::settings::CrateSettings;
 use serde::Serialize;
+use semver::Version;
 
 /** A struct containing information about a crate's dependency that's buildable in Bazel
  *
@@ -24,7 +25,7 @@ use serde::Serialize;
 pub struct BuildableDependency {
   pub buildable_target: String,
   pub name: String,
-  pub version: String,
+  pub version: Version,
   pub is_proc_macro: bool,
 }
 
@@ -47,7 +48,7 @@ pub struct BuildableTarget {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct Metadep {
   pub name: String,
-  pub min_version: String,
+  pub min_version: Version,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -100,7 +101,7 @@ pub struct CrateTargetedDepContext {
 #[derive(Debug, Clone, Serialize)]
 pub struct CrateContext {
   pub pkg_name: String,
-  pub pkg_version: String,
+  pub pkg_version: Version,
   pub edition: String,
   pub raze_settings: CrateSettings,
   pub default_deps: CrateDependencyContext,
