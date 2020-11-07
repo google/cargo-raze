@@ -276,12 +276,6 @@ mod tests {
   use std::{fs::File, io::Write};
 
   #[test]
-  fn test_metadata_deserializes_correctly() {
-    let metadata_file_contents = include_str!("../test_fixtures/metadata.txt");
-    serde_json::from_str::<Metadata>(metadata_file_contents).unwrap();
-  }
-
-  #[test]
   fn test_cargo_subcommand_metadata_fetcher_works_without_lock() {
     let dir = TempDir::new().unwrap();
     let toml_path = dir.path().join("Cargo.toml");
