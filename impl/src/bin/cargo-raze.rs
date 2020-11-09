@@ -53,9 +53,11 @@ Usage:
     cargo raze [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>] [--output=<PATH>]
     cargo raze <buildprefix> [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>]
                              [--output=<PATH>]
+    cargo raze (-V | --version)
 
 Options:
     -h, --help                         Print this message
+    -V, --version                      Print version info and exit
     -v, --verbose                      Use verbose output
     -q, --quiet                        No output printed to stdout
     --color=<WHEN>                     Coloring: auto, always, never
@@ -66,6 +68,11 @@ Options:
 
 fn main() -> Result<()> {
   let options: Options = Docopt::new(USAGE)
+    .map(|d| {
+      d.version(Some(
+        concat!("cargo-raze ", env!("CARGO_PKG_VERSION")).to_string(),
+      ))
+    })
     .and_then(|d| d.deserialize())
     .unwrap_or_else(|e| e.exit());
 
