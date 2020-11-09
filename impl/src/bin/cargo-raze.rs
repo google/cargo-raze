@@ -53,11 +53,11 @@ Usage:
     cargo raze [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>] [--output=<PATH>]
     cargo raze <buildprefix> [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>]
                              [--output=<PATH>]
-    cargo raze --version
+    cargo raze (-V | --version)
 
 Options:
     -h, --help                         Print this message
-    --version                          Print version info and exit
+    -V, --version                      Print version info and exit
     -v, --verbose                      Use verbose output
     -q, --quiet                        No output printed to stdout
     --color=<WHEN>                     Coloring: auto, always, never
