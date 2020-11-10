@@ -318,6 +318,41 @@ included in the resulting output directory. Lockfiles for targets specified unde
 `[package.metadata.raze.binary_deps]` will be generated into a `lockfiles` directory inside the path
 specified by `workspace_path`.
 
+### Build scripts by default
+
+Setting default_gen_buildrs to true will cause cargo-raze to generate build scripts
+for all crates that require them:
+
+```
+[package.metadata.raze]
+workspace_path = "//cargo"
+genmode = "Remote"
+default_gen_buildrs = true
+```
+
+This setting is a trade-off between convenience and correctness. By enabling it,
+you should find many crates work without having to specify any flags explicitly,
+and without having to manually enable individual build scripts. But by turning
+it on, you are allowing all of the crates you are using to run arbitrary code at
+build time, and the actions they perform may not be hermetic.
+
+Even with this setting enabled, you may still need to provide extra settings for
+a few crates. For example, the ring crate needs access to the source tree at build
+time:
+
+```
+[package.metadata.raze.crates.ring.'*']
+data_attr = "glob([\"src/**\"])"
+```
+
+If you wish to disable the build script on an individual crate, you can do so
+as follows:
+
+```
+[package.metadata.raze.crates.some_dependency.'*']
+gen_buildrs = false
+```
+
 ## FAQ
 
 ### Why choose Bazel to build a Rust project?
