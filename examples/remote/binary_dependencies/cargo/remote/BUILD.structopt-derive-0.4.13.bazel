@@ -25,25 +25,19 @@ package(default_visibility = [
 ])
 
 licenses([
-    "notice",  # MIT from expression "MIT"
+    "notice",  # Apache-2.0 from expression "Apache-2.0 OR MIT"
 ])
 
 # Generated Targets
 
-# Unsupported target "linear" with type "bench" omitted
-
-# Unsupported target "layout" with type "example" omitted
-
-# Unsupported target "termwidth" with type "example" omitted
-
 rust_library(
-    name = "textwrap",
+    name = "structopt_derive",
     srcs = glob(["**/*.rs"]),
     crate_features = [
     ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
-    edition = "2015",
+    crate_type = "proc-macro",
+    edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -51,11 +45,13 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.11.0",
+    version = "0.4.13",
     # buildifier: leave-alone
     deps = [
-        "@remote_binary_dependencies__unicode_width__0_1_8//:unicode_width",
+        "@remote_binary_dependencies__heck__0_3_1//:heck",
+        "@remote_binary_dependencies__proc_macro2__1_0_24//:proc_macro2",
+        "@remote_binary_dependencies__proc_macro_error__1_0_4//:proc_macro_error",
+        "@remote_binary_dependencies__quote__1_0_7//:quote",
+        "@remote_binary_dependencies__syn__1_0_48//:syn",
     ],
 )
-
-# Unsupported target "version-numbers" with type "test" omitted

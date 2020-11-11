@@ -25,25 +25,20 @@ package(default_visibility = [
 ])
 
 licenses([
-    "notice",  # MIT from expression "MIT"
+    "notice",  # MIT from expression "MIT OR Apache-2.0"
 ])
 
 # Generated Targets
 
-# Unsupported target "linear" with type "bench" omitted
-
-# Unsupported target "layout" with type "example" omitted
-
-# Unsupported target "termwidth" with type "example" omitted
-
 rust_library(
-    name = "textwrap",
+    name = "ppv_lite86",
     srcs = glob(["**/*.rs"]),
     crate_features = [
+        "simd",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
+    edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -51,11 +46,8 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.11.0",
+    version = "0.2.9",
     # buildifier: leave-alone
     deps = [
-        "@remote_binary_dependencies__unicode_width__0_1_8//:unicode_width",
     ],
 )
-
-# Unsupported target "version-numbers" with type "test" omitted

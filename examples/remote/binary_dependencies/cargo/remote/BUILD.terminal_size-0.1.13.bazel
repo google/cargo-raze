@@ -30,28 +30,8 @@ licenses([
 
 # Generated Targets
 
-# Unsupported target "all-the-things" with type "bench" omitted
-
-# Unsupported target "01_single_example_synthesis" with type "example" omitted
-
-# Unsupported target "02_multi_example_synthesis" with type "example" omitted
-
-# Unsupported target "03_guided_synthesis" with type "example" omitted
-
-# Unsupported target "04_style_transfer" with type "example" omitted
-
-# Unsupported target "05_inpaint" with type "example" omitted
-
-# Unsupported target "06_inpaint_channel" with type "example" omitted
-
-# Unsupported target "07_tiling_texture" with type "example" omitted
-
-# Unsupported target "08_repeat_transform" with type "example" omitted
-
-# Unsupported target "09_sample_masks" with type "example" omitted
-
 rust_library(
-    name = "texture_synthesis",
+    name = "terminal_size",
     srcs = glob(["**/*.rs"]),
     aliases = {
     },
@@ -67,16 +47,11 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.8.0",
+    version = "0.1.13",
     # buildifier: leave-alone
     deps = [
-        "@remote_binary_dependencies__image__0_23_10//:image",
-        "@remote_binary_dependencies__num_cpus__1_13_0//:num_cpus",
-        "@remote_binary_dependencies__rand__0_7_3//:rand",
-        "@remote_binary_dependencies__rand_pcg__0_2_1//:rand_pcg",
-        "@remote_binary_dependencies__rstar__0_7_1//:rstar",
     ] + selects.with_or({
-        # cfg(not(target_arch = "wasm32"))
+        # cfg(not(windows))
         (
             "@io_bazel_rules_rust//rust/platform:aarch64-apple-darwin",
             "@io_bazel_rules_rust//rust/platform:aarch64-apple-ios",
@@ -85,22 +60,29 @@ rust_library(
             "@io_bazel_rules_rust//rust/platform:arm-unknown-linux-gnueabi",
             "@io_bazel_rules_rust//rust/platform:i686-apple-darwin",
             "@io_bazel_rules_rust//rust/platform:i686-linux-android",
-            "@io_bazel_rules_rust//rust/platform:i686-pc-windows-msvc",
             "@io_bazel_rules_rust//rust/platform:i686-unknown-freebsd",
             "@io_bazel_rules_rust//rust/platform:i686-unknown-linux-gnu",
             "@io_bazel_rules_rust//rust/platform:powerpc-unknown-linux-gnu",
             "@io_bazel_rules_rust//rust/platform:s390x-unknown-linux-gnu",
+            "@io_bazel_rules_rust//rust/platform:wasm32-unknown-unknown",
+            "@io_bazel_rules_rust//rust/platform:wasm32-wasi",
             "@io_bazel_rules_rust//rust/platform:x86_64-apple-darwin",
             "@io_bazel_rules_rust//rust/platform:x86_64-apple-ios",
             "@io_bazel_rules_rust//rust/platform:x86_64-linux-android",
-            "@io_bazel_rules_rust//rust/platform:x86_64-pc-windows-msvc",
             "@io_bazel_rules_rust//rust/platform:x86_64-unknown-freebsd",
             "@io_bazel_rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
-            "@remote_binary_dependencies__crossbeam_utils__0_7_2//:crossbeam_utils",
+            "@remote_binary_dependencies__libc__0_2_80//:libc",
+        ],
+        "//conditions:default": [],
+    }) + selects.with_or({
+        # cfg(windows)
+        (
+            "@io_bazel_rules_rust//rust/platform:i686-pc-windows-msvc",
+            "@io_bazel_rules_rust//rust/platform:x86_64-pc-windows-msvc",
+        ): [
+            "@remote_binary_dependencies__winapi__0_3_9//:winapi",
         ],
         "//conditions:default": [],
     }),
 )
-
-# Unsupported target "diff" with type "test" omitted

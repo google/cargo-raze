@@ -77,10 +77,10 @@ rust_library(
     version = "0.14.0",
     # buildifier: leave-alone
     deps = [
-        "@remote_binary_dependencies__console__0_9_2//:console",
+        "@remote_binary_dependencies__console__0_13_0//:console",
         "@remote_binary_dependencies__lazy_static__1_4_0//:lazy_static",
         "@remote_binary_dependencies__number_prefix__0_3_0//:number_prefix",
-        "@remote_binary_dependencies__regex__1_3_4//:regex",
+        "@remote_binary_dependencies__regex__1_4_1//:regex",
     ],
 )
 

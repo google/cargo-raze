@@ -25,25 +25,30 @@ package(default_visibility = [
 ])
 
 licenses([
-    "notice",  # MIT from expression "MIT"
+    "notice",  # Apache-2.0 from expression "Apache-2.0 OR MIT"
 ])
 
 # Generated Targets
 
-# Unsupported target "linear" with type "bench" omitted
+# Unsupported target "bench" with type "bench" omitted
 
-# Unsupported target "layout" with type "example" omitted
+# Unsupported target "dwarf-validate" with type "example" omitted
 
-# Unsupported target "termwidth" with type "example" omitted
+# Unsupported target "dwarfdump" with type "example" omitted
+
+# Unsupported target "simple" with type "example" omitted
+
+# Unsupported target "simple_line" with type "example" omitted
 
 rust_library(
-    name = "textwrap",
+    name = "gimli",
     srcs = glob(["**/*.rs"]),
     crate_features = [
+        "read",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
+    edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -51,11 +56,12 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.11.0",
+    version = "0.23.0",
     # buildifier: leave-alone
     deps = [
-        "@remote_binary_dependencies__unicode_width__0_1_8//:unicode_width",
     ],
 )
 
-# Unsupported target "version-numbers" with type "test" omitted
+# Unsupported target "convert_self" with type "test" omitted
+
+# Unsupported target "parse_self" with type "test" omitted

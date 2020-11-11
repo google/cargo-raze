@@ -13,8 +13,35 @@ licenses([
 
 # Aliased targets
 alias(
-    name = "ferris_says",
-    actual = "@remote_binary_dependencies__ferris_says__0_2_0//:ferris_says",
+    name = "atty",
+    actual = "@remote_binary_dependencies__atty__0_2_14//:atty",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "indicatif",
+    actual = "@remote_binary_dependencies__indicatif__0_14_0//:indicatif",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "structopt",
+    actual = "@remote_binary_dependencies__structopt__0_3_20//:structopt",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
+alias(
+    name = "texture_synthesis",
+    actual = "@remote_binary_dependencies__texture_synthesis__0_8_0//:texture_synthesis",
     tags = [
         "cargo-raze",
         "manual",

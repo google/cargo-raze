@@ -36,24 +36,13 @@ load(
 )
 
 cargo_build_script(
-    name = "winapi_build_script",
+    name = "num_integer_build_script",
     srcs = glob(["**/*.rs"]),
     build_script_env = {
     },
     crate_features = [
-        "consoleapi",
-        "errhandlingapi",
-        "fileapi",
-        "handleapi",
-        "minwinbase",
-        "minwindef",
-        "processenv",
+        "i128",
         "std",
-        "winbase",
-        "wincon",
-        "winerror",
-        "winnt",
-        "winuser",
     ],
     crate_root = "build.rs",
     data = glob(["**"]),
@@ -65,29 +54,25 @@ cargo_build_script(
         "cargo-raze",
         "manual",
     ],
-    version = "0.3.9",
+    version = "0.1.44",
     visibility = ["//visibility:private"],
     deps = [
+        "@remote_binary_dependencies__autocfg__1_0_1//:autocfg",
     ],
 )
 
+# Unsupported target "average" with type "bench" omitted
+
+# Unsupported target "gcd" with type "bench" omitted
+
+# Unsupported target "roots" with type "bench" omitted
+
 rust_library(
-    name = "winapi",
+    name = "num_integer",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "consoleapi",
-        "errhandlingapi",
-        "fileapi",
-        "handleapi",
-        "minwinbase",
-        "minwindef",
-        "processenv",
+        "i128",
         "std",
-        "winbase",
-        "wincon",
-        "winerror",
-        "winnt",
-        "winuser",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -99,9 +84,14 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.3.9",
+    version = "0.1.44",
     # buildifier: leave-alone
     deps = [
-        ":winapi_build_script",
+        ":num_integer_build_script",
+        "@remote_binary_dependencies__num_traits__0_2_14//:num_traits",
     ],
 )
+
+# Unsupported target "average" with type "test" omitted
+
+# Unsupported target "roots" with type "test" omitted
