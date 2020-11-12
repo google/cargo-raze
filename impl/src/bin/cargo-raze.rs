@@ -203,23 +203,23 @@ fn gather_remote_genmode_inputs<'settings>(
   bazel_root: &Path,
   settings: &'settings RazeSettings,
 ) -> RemoteGenModeInputs<'settings> {
-  if settings.genmode == GenMode::Remote {
-    let lockfile = bazel_root
-      .join(settings.workspace_path.trim_start_matches("/"))
-      .join("Cargo.raze.lock");
-
-    RemoteGenModeInputs {
-      override_lockfile: if lockfile.exists() {
-        Some(lockfile)
-      } else {
-        None
-      },
-      binary_deps: Some(&settings.binary_deps),
-    }
-  } else {
-    RemoteGenModeInputs {
+  if settings.genmode != GenMode::Remote {
+    return RemoteGenModeInputs {
       override_lockfile: None,
       binary_deps: None,
-    }
+    };
+  }
+
+  let lockfile = bazel_root
+    .join(settings.workspace_path.trim_start_matches("/"))
+    .join("Cargo.raze.lock");
+
+  RemoteGenModeInputs {
+    override_lockfile: if lockfile.exists() {
+      Some(lockfile)
+    } else {
+      None
+    },
+    binary_deps: Some(&settings.binary_deps),
   }
 }
