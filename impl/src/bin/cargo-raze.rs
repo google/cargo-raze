@@ -88,8 +88,8 @@ fn main() -> Result<()> {
 
   // Fetch metadata
   let metadata_fetcher: Box<dyn MetadataFetcher> = match options.flag_cargo_bin_path {
-    Some(ref p) => Box::new(CargoMetadataFetcher::new(
-      p,
+    Some(ref cargo_bin_path) => Box::new(CargoMetadataFetcher::new(
+      cargo_bin_path,
       Url::parse(&settings.registry)?,
       &settings.index_url,
     )),
