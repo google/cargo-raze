@@ -145,7 +145,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
             .metadata
             .packages
             .iter()
-            .find(|pkg| pkg.id.eq(&pkg_id))
+            .find(|pkg| pkg.id == *pkg_id)
           {
             get_workspace_member_path(&pkg.manifest_path, &self.metadata.metadata.workspace_root)
           } else {
@@ -324,7 +324,7 @@ impl<'planner> CrateSubplanner<'planner> {
           .metadata
           .packages
           .iter()
-          .find(|pkg| pkg.id.eq(pkg_id))
+          .find(|pkg| pkg.id == *pkg_id)
         {
           get_workspace_member_path(
             &workspace_member.manifest_path,

@@ -187,13 +187,7 @@ impl CrateCatalog {
     let workspace_crates: Vec<&Node> = resolve
       .nodes
       .iter()
-      .filter_map(|node| {
-        if metadata.workspace_members.contains(&node.id) {
-          Some(node)
-        } else {
-          None
-        }
-      })
+      .filter(|node| metadata.workspace_members.contains(&node.id))
       .collect();
 
     let entries = metadata

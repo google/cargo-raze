@@ -338,7 +338,7 @@ impl BuildRenderer for BazelRenderer {
     let crates_bzl_pkg_file = path_prefix.as_path().join("BUILD.bazel");
     let outputs_contain_crates_bzl_build_file = file_outputs
       .iter()
-      .any(|output| output.path.eq(&crates_bzl_pkg_file));
+      .any(|output| output.path == crates_bzl_pkg_file);
     if !outputs_contain_crates_bzl_build_file {
       file_outputs.push(FileOutputs {
         path: crates_bzl_pkg_file,
