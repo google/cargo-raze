@@ -387,6 +387,51 @@ fn validate_settings(settings: &mut RazeSettings) -> Result<(), RazeError> {
   Ok(())
 }
 
+/** A helper function for parsing raze settings from the contents of a `Cargo.toml` file */
+fn parse_raze_settings(toml_contents: CargoToml) -> Result<RazeSettings, RazeError> {
+  // Workspace takes precidence
+  if let Some(raze) = toml_contents
+    .workspace
+    .and_then(|pkg| pkg.metadata.and_then(|data| data.raze))
+  {
+    if toml_contents.raze.is_some() {
+      eprintln!(
+        "WARNING: Both [raze] and [workspace.metadata.raze] are set. Using \
+         [workspace.metadata.raze] and ignoring [raze], which is deprecated."
+      );
+    }
+    return Ok(raze);
+  }
+
+  // Next is package
+  if let Some(raze) = toml_contents
+    .package
+    .and_then(|pkg| pkg.metadata.and_then(|data| data.raze))
+  {
+    if toml_contents.raze.is_some() {
+      eprintln!(
+        "WARNING: Both [raze] and [pakcage.metadata.raze] are set. Using [package.metadata.raze] \
+         and ignoring [raze], which is deprecated."
+      );
+    }
+    return Ok(raze);
+  }
+
+  // Finally the direct raze settings
+  if let Some(raze) = toml_contents.raze {
+    eprintln!(
+      "WARNING: The top-level [raze] key is deprecated. Please set [package.metadata.raze] \
+       instead."
+    );
+
+    return Ok(raze);
+  }
+
+  return Err(RazeError::Generic(
+    "Cargo.toml has no `raze`, `workspace.metadata.raze` or `package.metadata.raze` field".into(),
+  ));
+}
+
 pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings, RazeError> {
   let path = cargo_toml_path.as_ref();
   let mut toml = match File::open(path) {
@@ -396,67 +441,20 @@ pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings,
     },
   };
 
-  let mut toml_contents = String::new();
-  let result = toml.read_to_string(&mut toml_contents);
-  if let Some(err) = result.err() {
-    return Err(RazeError::Generic(err.to_string()));
-  }
-  let mut settings = match toml::from_str::<CargoToml>(&toml_contents) {
-    Ok(CargoToml {
-      workspace:
-        Some(PackageToml {
-          metadata: Some(MetadataToml {
-            raze: Some(raze),
-          }),
-        }),
-      raze: top_level_raze,
-      ..
-    }) => {
-      if top_level_raze.is_some() {
-        eprintln!(
-          "WARNING: Both [raze] and [workspace.metadata.raze] are set. Using \
-           [workspace.metadata.raze] and ignoring [raze], which is deprecated."
-        );
-      }
-      raze
-    },
-    Ok(CargoToml {
-      package:
-        Some(PackageToml {
-          metadata: Some(MetadataToml {
-            raze: Some(raze),
-          }),
-        }),
-      raze: top_level_raze,
-      ..
-    }) => {
-      if top_level_raze.is_some() {
-        eprintln!(
-          "WARNING: Both [raze] and [package.metadata.raze] are set. Using \
-           [package.metadata.raze] and ignoring [raze], which is deprecated."
-        );
-      }
-      raze
-    },
-    Ok(CargoToml {
-      raze: Some(raze), ..
-    }) => {
-      eprintln!(
-        "WARNING: The top-level [raze] key is deprecated. Please set [package.metadata.raze] \
-         instead."
-      );
-      raze
-    },
-    Ok(_) => {
-      return Err(RazeError::Generic(
-        "Cargo.toml has no `raze` or `package.metadata.raze` field".into(),
-      ));
-    },
-    Err(err) => {
+  let toml_contents = {
+    let mut contents = String::new();
+    let result = toml.read_to_string(&mut contents);
+    if let Some(err) = result.err() {
       return Err(RazeError::Generic(err.to_string()));
-    },
+    }
+
+    match toml::from_str::<CargoToml>(&contents) {
+      Ok(toml_contents) => toml_contents,
+      Err(err) => return Err(RazeError::Generic(err.to_string())),
+    }
   };
 
+  let mut settings = parse_raze_settings(toml_contents)?;
   validate_settings(&mut settings)?;
 
   Ok(settings)
