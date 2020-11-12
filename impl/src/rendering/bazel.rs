@@ -383,6 +383,7 @@ mod tests {
         edition: "2015".to_owned(),
       }],
       build_script_target: None,
+      links: None,
       source_details: SourceDetails {
         git_data: None,
       },
@@ -423,6 +424,7 @@ mod tests {
         edition: "2015".to_owned(),
       }],
       build_script_target: None,
+      links: Some("ssh2".to_owned()),
       source_details: SourceDetails {
         git_data: None,
       },

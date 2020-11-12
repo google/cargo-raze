@@ -112,6 +112,7 @@ pub struct CrateContext {
   pub is_root_dependency: bool,
   pub targets: Vec<BuildableTarget>,
   pub build_script_target: Option<BuildableTarget>,
+  pub links: Option<String>,
   pub source_details: SourceDetails,
   pub sha256: Option<String>,
   pub registry_url: String,
