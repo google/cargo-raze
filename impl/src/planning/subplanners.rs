@@ -231,19 +231,17 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
   /** Produces a crate context for each declared crate and dependency. */
   fn produce_crate_contexts(&self) -> Result<Vec<CrateContext>> {
-    Ok(
-      self
-        .crate_catalog
-        .metadata
-        .resolve
-        .as_ref()
-        .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?
-        .nodes
-        .iter()
-        .sorted_by_key(|n| &n.id)
-        .filter_map(|node| self.create_crate_context(node, &self.crate_catalog))
-        .collect::<Result<Vec<CrateContext>>>()?,
-    )
+    self
+      .crate_catalog
+      .metadata
+      .resolve
+      .as_ref()
+      .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?
+      .nodes
+      .iter()
+      .sorted_by_key(|n| &n.id)
+      .filter_map(|node| self.create_crate_context(node, &self.crate_catalog))
+      .collect::<Result<Vec<CrateContext>>>()
   }
 }
 
