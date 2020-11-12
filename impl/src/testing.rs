@@ -147,6 +147,14 @@ pub fn make_workspace_with_dependency() -> (TempDir, CargoWorkspaceFiles) {
   make_workspace(advanced_toml(), Some(advanced_lock()))
 }
 
+/** A helper stuct for mocking a crates.io remote crate endpoint */
+pub struct MockRemoteCrateInfo<'http_mock_server> {
+  // A directory of mock data to pull via a mocked endpoint
+  pub data_dir: TempDir,
+  // mocked endpoints
+  pub endpoints: Vec<MockRef<'http_mock_server>>,
+}
+
 /**
  * Configures the given mock_server (representing a crates.io remote) to return
  * mock responses for the given crate and version .
@@ -155,7 +163,7 @@ pub fn mock_remote_crate<'server>(
   name: &str,
   version: &str,
   mock_server: &'server MockServer,
-) -> (TempDir, Vec<MockRef<'server>>) {
+) -> MockRemoteCrateInfo<'server> {
   // Crate info mock response
   let mock_metadata = mock_server.mock(|when, then| {
     when.method(GET).path(format!("/api/v1/crates/{}", name));
@@ -218,7 +226,10 @@ pub fn mock_remote_crate<'server>(
       .body_from_file(&tar_path.display().to_string());
   });
 
-  (dir, vec![mock_metadata, mock_download])
+  MockRemoteCrateInfo {
+    data_dir: dir,
+    endpoints: vec![mock_metadata, mock_download],
+  }
 }
 
 /** A helper macro for passing a `crates` to  `mock_crate_index` */

@@ -450,7 +450,7 @@ mod tests {
 
   fn dummy_binary_dependency_metadata() -> (RazeMetadata, RazeSettings) {
     let (fetcher, server, index_dir) = dummy_raze_metadata_fetcher();
-    let (_dir, mocks) = mock_remote_crate("some-binary-crate", "3.3.3", &server);
+    let mock = mock_remote_crate("some-binary-crate", "3.3.3", &server);
     let dir = mock_crate_index(
       &to_index_crates_map(vec![("some-binary-crate", "3.3.3")]),
       Some(index_dir.as_ref()),
@@ -468,7 +468,7 @@ mod tests {
       .fetch_metadata(&files, Some(&settings.binary_deps), None)
       .unwrap();
 
-    for mock in mocks.iter() {
+    for mock in mock.endpoints.iter() {
       mock.assert();
     }
 

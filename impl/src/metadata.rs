@@ -520,13 +520,13 @@ pub mod tests {
   #[test]
   fn test_fetching_src() {
     let (fetcher, mock_server, _index_url) = dummy_raze_metadata_fetcher();
-    let (dir, mocks) = mock_remote_crate("fake-crate", "3.3.3", &mock_server);
+    let mock = mock_remote_crate("fake-crate", "3.3.3", &mock_server);
 
     let path = fetcher
-      .fetch_crate_src(dir.as_ref(), "fake-crate", "3.3.3")
+      .fetch_crate_src(mock.data_dir.as_ref(), "fake-crate", "3.3.3")
       .unwrap();
 
-    for mock in mocks.iter() {
+    for mock in mock.endpoints.iter() {
       mock.assert();
     }
 
@@ -534,7 +534,7 @@ pub mod tests {
 
     // Ensure the name follows a consistent pattern: `{name}-{version}`
     assert_eq!(
-      dir.into_path().join("fake-crate-3.3.3").as_path(),
+      mock.data_dir.into_path().join("fake-crate-3.3.3").as_path(),
       path.as_path()
     );
     assert!(path.join("Cargo.toml").exists());
