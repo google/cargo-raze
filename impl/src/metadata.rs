@@ -133,34 +133,8 @@ impl CargoMetadataFetcher {
       .with_context(|| "Failed to create symlink for generating metadata")
   }
 
-  /** Creates a copy workspace in a temporary directory for fetching the metadata of the current workspace */
-  fn make_temp_workspace(&self, files: &CargoWorkspaceFiles) -> Result<(TempDir, PathBuf)> {
-    let temp_dir = TempDir::new()?;
-    assert!(files.toml_path.is_file());
-    assert!(files.lock_path_opt.as_ref().map_or(true, |p| p.is_file()));
-
-    // First gather metadata without downloading any dependencies so we can identify any path dependencies.
-    let no_deps_metadata = MetadataCommand::new()
-      .cargo_path(&self.cargo_bin_path)
-      .current_dir(files.toml_path.parent().unwrap()) // UNWRAP: Guarded by function assertion
-      .no_deps()
-      .exec()?;
-
-    // There should be a `Cargo.toml` file in the workspace root
-    fs::copy(
-      no_deps_metadata.workspace_root.join("Cargo.toml"),
-      temp_dir.as_ref().join("Cargo.toml"),
-    )?;
-
-    // Optionally copy over the lock file
-    if no_deps_metadata.workspace_root.join("Cargo.lock").exists() {
-      fs::copy(
-        no_deps_metadata.workspace_root.join("Cargo.lock"),
-        temp_dir.as_ref().join("Cargo.lock"),
-      )?;
-    }
-
-    // Copy over the Cargo.toml files of each workspace member
+  /** Symlinks the source code of all workspace members into the temp workspace */
+  fn link_src_to_workspace(&self, no_deps_metadata: &Metadata, temp_dir: &Path) -> Result<()> {
     let re = Regex::new(r".+\(path\+file://(.+)\)")?;
     for member in no_deps_metadata.workspace_members.iter() {
       // Get a path to the workspace member directory
@@ -189,7 +163,7 @@ impl CargoMetadataFetcher {
       let diff = diff_paths(&path, &no_deps_metadata.workspace_root).ok_or(anyhow!(
         "All workspace memebers are expected to be under the workspace root"
       ))?;
-      let new_path = temp_dir.as_ref().join(diff);
+      let new_path = temp_dir.join(diff);
       fs::create_dir_all(&new_path)?;
       fs::copy(path.join("Cargo.toml"), new_path.join("Cargo.toml"))?;
 
@@ -206,7 +180,7 @@ impl CargoMetadataFetcher {
           ))?;
 
           // Create a matching directory tree for the current file within the temp workspace
-          let new_path = temp_dir.as_ref().join(diff);
+          let new_path = temp_dir.join(diff);
           if let Some(parent) = new_path.parent() {
             fs::create_dir_all(parent)?;
           }
@@ -215,6 +189,39 @@ impl CargoMetadataFetcher {
         }
       }
     }
+
+    Ok(())
+  } 
+
+  /** Creates a copy workspace in a temporary directory for fetching the metadata of the current workspace */
+  fn make_temp_workspace(&self, files: &CargoWorkspaceFiles) -> Result<(TempDir, PathBuf)> {
+    let temp_dir = TempDir::new()?;
+    assert!(files.toml_path.is_file());
+    assert!(files.lock_path_opt.as_ref().map_or(true, |p| p.is_file()));
+
+    // First gather metadata without downloading any dependencies so we can identify any path dependencies.
+    let no_deps_metadata = MetadataCommand::new()
+      .cargo_path(&self.cargo_bin_path)
+      .current_dir(files.toml_path.parent().unwrap()) // UNWRAP: Guarded by function assertion
+      .no_deps()
+      .exec()?;
+
+    // There should be a `Cargo.toml` file in the workspace root
+    fs::copy(
+      no_deps_metadata.workspace_root.join("Cargo.toml"),
+      temp_dir.as_ref().join("Cargo.toml"),
+    )?;
+
+    // Optionally copy over the lock file
+    if no_deps_metadata.workspace_root.join("Cargo.lock").exists() {
+      fs::copy(
+        no_deps_metadata.workspace_root.join("Cargo.lock"),
+        temp_dir.as_ref().join("Cargo.lock"),
+      )?;
+    }
+
+    // Copy over the Cargo.toml files of each workspace member
+    self.link_src_to_workspace(&no_deps_metadata, temp_dir.as_ref())?;
 
     Ok((temp_dir, no_deps_metadata.workspace_root))
   }
@@ -228,6 +235,8 @@ impl CargoMetadataFetcher {
       r_url.to_string()
     };
 
+    // Generate a URL with no path. This allows the path to keep any port information
+    // associated with it.
     let mut url = url::Url::parse(&registry_url)?;
     url.set_path("");
 
