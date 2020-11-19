@@ -50,8 +50,8 @@ pub trait BuildPlanner {
 
 /** The default implementation of a `BuildPlanner`. */
 pub struct BuildPlannerImpl {
-  pub metadata: RazeMetadata,
-  pub settings: RazeSettings,
+  metadata: RazeMetadata,
+  settings: RazeSettings,
 }
 
 impl BuildPlanner for BuildPlannerImpl {
