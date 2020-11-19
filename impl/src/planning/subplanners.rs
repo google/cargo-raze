@@ -185,7 +185,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
     let checksum_opt = self
       .metadata
-      .get_checksum(&own_package.name, &own_package.version.to_string());
+      .checksum_for(&own_package.name, &own_package.version.to_string());
 
     let crate_subplanner = CrateSubplanner {
       crate_catalog: &catalog,

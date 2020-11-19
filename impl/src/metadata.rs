@@ -45,36 +45,15 @@ pub struct RazeMetadata {
   // The metadata of a lockfile that was generated as a result of fetching metadata
   pub lockfile: Option<Lockfile>,
 
-  // A map of all known crates with checksums
-  checksums: HashMap<String, String>,
+  // A map of all known crates with checksums. Use `checksums_for` to access data from this map.
+  pub checksums: HashMap<String, String>,
 }
 
 impl RazeMetadata {
-  pub fn new(
-    metadata: Metadata,
-    checksums: HashMap<String, String>,
-    workspace_root: PathBuf,
-    lockfile: Option<Lockfile>,
-  ) -> RazeMetadata {
-    RazeMetadata {
-      metadata,
-      checksums,
-      workspace_root,
-      lockfile,
-    }
-  }
-
   /** Get the checksum of a crate using a unique formatter. */
-  pub fn get_checksum(&self, name: &str, version: &str) -> Option<&String> {
+  pub fn checksum_for(&self, name: &str, version: &str) -> Option<&String> {
     self.checksums.get(&format!("{}-{}", name, version))
   }
-}
-
-/** A struct containing information about a binary dependency */
-pub struct BinaryDependencyInfo {
-  pub name: String,
-  pub info: cargo_toml::Dependency,
-  pub lockfile: Option<PathBuf>,
 }
 
 /**
@@ -99,78 +78,90 @@ pub struct CargoWorkspaceFiles {
   pub lock_path_opt: Option<PathBuf>,
 }
 
+// Create a symlink file on unix systems
+#[cfg(target_family = "unix")]
+fn make_symlink(src: &Path, dest: &Path) -> Result<()> {
+  std::os::unix::fs::symlink(src, dest)
+    .with_context(|| "Failed to create symlink for generating metadata")
+}
+
+// Create a symlink file on windows systems
+#[cfg(target_family = "windows")]
+fn make_symlink(src: &Path, dest: &Path) -> Result<()> {
+  std::os::windows::fs::symlink_file(dest, src)
+    .with_context(|| "Failed to create symlink for generating metadata")
+}
+
 /** A workspace metadata fetcher that uses the Cargo Metadata subcommand. */
 pub struct CargoMetadataFetcher {
   cargo_bin_path: PathBuf,
   registry_url: Url,
-  index_url: String,
+  index_url: Url,
 }
 
 impl CargoMetadataFetcher {
   pub fn new<P: Into<PathBuf>>(
     cargo_bin_path: P,
     registry_url: Url,
-    index_url: &str,
+    index_url: Url,
   ) -> CargoMetadataFetcher {
     CargoMetadataFetcher {
       cargo_bin_path: cargo_bin_path.into(),
-      registry_url: registry_url.clone(),
-      index_url: String::from(index_url),
+      registry_url,
+      index_url,
     }
-  }
-
-  // Create a symlink file on unix systems
-  #[cfg(target_family = "unix")]
-  fn make_symlink(&self, src: &Path, dest: &Path) -> Result<()> {
-    std::os::unix::fs::symlink(src, dest)
-      .with_context(|| "Failed to create symlink for generating metadata")
-  }
-
-  // Create a symlink file on windows systems
-  #[cfg(target_family = "windows")]
-  fn make_symlink(&self, src: &Path, dest: &Path) -> Result<()> {
-    std::os::windows::fs::symlink_file(dest, src)
-      .with_context(|| "Failed to create symlink for generating metadata")
   }
 
   /** Symlinks the source code of all workspace members into the temp workspace */
   fn link_src_to_workspace(&self, no_deps_metadata: &Metadata, temp_dir: &Path) -> Result<()> {
-    let re = Regex::new(r".+\(path\+file://(.+)\)")?;
+    let crate_member_id_re = Regex::new(r".+\(path\+file://(.+)\)")?;
     for member in no_deps_metadata.workspace_members.iter() {
       // Get a path to the workspace member directory
-      let path = {
-        let capture = match re.captures(&member.repr) {
-          Some(capture) => capture,
-          None => continue,
-        };
+      let workspace_member_directory = {
+        let crate_member_id_match = crate_member_id_re
+          .captures(&member.repr)
+          .and_then(|cap| cap.get(1));
 
-        let re_match = match capture.get(1) {
-          Some(re_match) => re_match,
-          None => continue,
-        };
+        if crate_member_id_match.is_none() {
+          continue;
+        }
 
-        PathBuf::from(re_match.as_str())
+        // UNWRAP: guarded above
+        PathBuf::from(crate_member_id_match.unwrap().as_str())
       };
 
-      let toml_path = path.join("Cargo.toml");
-
-      // If no Cargo.toml file is found, skip this
+      // Sanity check: The assumption is that any crate with an `id` that matches
+      // the regex pattern above should contain a Cargo.toml file with which we
+      // can use to infer the existence of libraries from relative paths such as
+      // `src/lib.rs` and `src/main.rs`.
+      let toml_path = workspace_member_directory.join("Cargo.toml");
       if !toml_path.exists() {
-        continue;
+        return Err(anyhow!(format!(
+          "The regex patter `{}` found a path that did not contain a Cargo.toml file: `{}`",
+          crate_member_id_re.as_str(),
+          workspace_member_directory.display()
+        )));
       }
 
       // Copy the Cargo.toml files into the temp directory to match the directory structure on disk
-      let diff = diff_paths(&path, &no_deps_metadata.workspace_root).ok_or(anyhow!(
+      let diff = diff_paths(
+        &workspace_member_directory,
+        &no_deps_metadata.workspace_root,
+      )
+      .ok_or(anyhow!(
         "All workspace memebers are expected to be under the workspace root"
       ))?;
       let new_path = temp_dir.join(diff);
       fs::create_dir_all(&new_path)?;
-      fs::copy(path.join("Cargo.toml"), new_path.join("Cargo.toml"))?;
+      fs::copy(
+        workspace_member_directory.join("Cargo.toml"),
+        new_path.join("Cargo.toml"),
+      )?;
 
       // Additionally, symlink everything in some common source directories to ensure specified
       // library targets can be relied on and won't prevent fetching metadata
       for dir in vec!["bin", "src"].iter() {
-        let glob_pattern = format!("{}/**/*.rs", path.join(dir).display());
+        let glob_pattern = format!("{}/**/*.rs", workspace_member_directory.join(dir).display());
         for entry in glob(glob_pattern.as_str()).expect("Failed to read glob pattern") {
           let path = entry?;
 
@@ -185,13 +176,13 @@ impl CargoMetadataFetcher {
             fs::create_dir_all(parent)?;
           }
 
-          self.make_symlink(&path, &new_path)?;
+          make_symlink(&path, &new_path)?;
         }
       }
     }
 
     Ok(())
-  } 
+  }
 
   /** Creates a copy workspace in a temporary directory for fetching the metadata of the current workspace */
   fn make_temp_workspace(&self, files: &CargoWorkspaceFiles) -> Result<(TempDir, PathBuf)> {
@@ -301,14 +292,14 @@ impl CargoMetadataFetcher {
 
   /** Look up a crate in a specified crate index to determine it's checksum */
   fn fetch_crate_checksum(&self, name: &str, version: &str) -> Result<String> {
-    let index_path_is_url = url::Url::parse(&self.index_url).is_ok();
-    let crate_index_path = if index_path_is_url {
-      crates_index::BareIndex::from_url(&self.index_url)?
+    let index_url_is_file = self.index_url.scheme().to_lowercase() == "file";
+    let crate_index_path = if !index_url_is_file {
+      crates_index::BareIndex::from_url(&self.index_url.to_string())?
         .open_or_clone()?
         .crate_(name)
         .ok_or(anyhow!("Failed to find crate '{}' in index", name))?
     } else {
-      crates_index::Index::new(&self.index_url)
+      crates_index::Index::new(&self.index_url.path())
         .crate_(name)
         .ok_or(anyhow!("Failed to find crate '{}' in index", name))?
     };
@@ -361,7 +352,7 @@ impl Default for CargoMetadataFetcher {
       SYSTEM_CARGO_BIN_PATH,
       // UNWRAP: The default is covered by testing and should never return err
       Url::parse(DEFAULT_CRATE_REGISTRY_URL).unwrap(),
-      DEFAULT_CRATE_INDEX_URL,
+      Url::parse(DEFAULT_CRATE_REGISTRY_URL).unwrap(),
     )
   }
 }
@@ -438,6 +429,13 @@ impl MetadataFetcher for CargoMetadataFetcher {
   }
 }
 
+/** A struct containing information about a binary dependency */
+pub struct BinaryDependencyInfo {
+  pub name: String,
+  pub info: cargo_toml::Dependency,
+  pub lockfile: Option<PathBuf>,
+}
+
 #[cfg(test)]
 pub mod tests {
   use httpmock::MockServer;
@@ -454,7 +452,7 @@ pub mod tests {
       CargoMetadataFetcher::new(
         SYSTEM_CARGO_BIN_PATH,
         Url::parse(&mock_server.base_url()).unwrap(),
-        tempdir.as_ref().display().to_string().as_str(),
+        Url::parse(&format!("file://{}", tempdir.as_ref().display())).unwrap(),
       ),
       mock_server,
       tempdir,

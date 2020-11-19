@@ -387,7 +387,7 @@ fn validate_settings(settings: &mut RazeSettings) -> Result<(), RazeError> {
   Ok(())
 }
 
-/** A helper function for parsing raze settings from the contents of a `Cargo.toml` file */
+/** Parses raze settings from the contents of a `Cargo.toml` file */
 fn parse_raze_settings(toml_contents: CargoToml) -> Result<RazeSettings, RazeError> {
   // Workspace takes precidence
   if let Some(raze) = toml_contents

@@ -104,7 +104,12 @@ mod tests {
     let mut metadata = raze_metadata.metadata.clone();
     assert!(metadata.resolve.is_some());
     metadata.resolve = None;
-    RazeMetadata::new(metadata, HashMap::new(), PathBuf::from("/some/crate"), None)
+    RazeMetadata {
+      metadata,
+      workspace_root: PathBuf::from("/some/crate"),
+      lockfile: None,
+      checksums: HashMap::new(),
+    }
   }
 
   #[test]
@@ -121,7 +126,12 @@ mod tests {
     let raze_metadata = dummy_raze_metadata();
     let mut metadata = raze_metadata.metadata.clone();
     metadata.packages.clear();
-    RazeMetadata::new(metadata, HashMap::new(), PathBuf::from("/some/crate"), None)
+    RazeMetadata {
+      metadata,
+      workspace_root: PathBuf::from("/some/crate"),
+      lockfile: None,
+      checksums: HashMap::new(),
+    }
   }
 
   #[test]
@@ -181,7 +191,12 @@ mod tests {
     new_package.version = Version::new(0, 0, 1);
     metadata.packages.push(new_package);
 
-    RazeMetadata::new(metadata, HashMap::new(), PathBuf::from("/some/crate"), None)
+    RazeMetadata {
+      metadata,
+      workspace_root: PathBuf::from("/some/crate"),
+      lockfile: None,
+      checksums: HashMap::new(),
+    }
   }
 
   #[test]
@@ -252,7 +267,12 @@ mod tests {
 
     metadata.workspace_members.push(id);
 
-    RazeMetadata::new(metadata, HashMap::new(), PathBuf::from("/some/crate"), None)
+    RazeMetadata {
+      metadata,
+      workspace_root: PathBuf::from("/some/crate"),
+      lockfile: None,
+      checksums: HashMap::new(),
+    }
   }
 
   #[test]

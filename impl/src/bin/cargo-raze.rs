@@ -91,7 +91,7 @@ fn main() -> Result<()> {
     Some(ref cargo_bin_path) => Box::new(CargoMetadataFetcher::new(
       cargo_bin_path,
       Url::parse(&settings.registry)?,
-      &settings.index_url,
+      Url::parse(&settings.index_url)?,
     )),
     None => Box::new(CargoMetadataFetcher::default()),
   };
@@ -105,7 +105,6 @@ fn main() -> Result<()> {
     lock_path_opt,
   };
 
-  // Determine the path to the Bazel workspace root or fallback to the current working directory
   let cargo_raze_working_dir = find_bazel_workspace_root().unwrap_or(std::env::current_dir()?);
 
   let remote_genmode_inputs = gather_remote_genmode_inputs(&cargo_raze_working_dir, &settings);
@@ -183,7 +182,7 @@ fn main() -> Result<()> {
   Ok(())
 }
 
-/** Helper function for writing rendered files to disk */
+/** Writes rendered files to filesystem. */
 fn write_to_file(path: &Path, contents: &str, verbose: bool) -> Result<()> {
   File::create(&path).and_then(|mut f| f.write_all(contents.as_bytes()))?;
   if verbose {
@@ -192,13 +191,13 @@ fn write_to_file(path: &Path, contents: &str, verbose: bool) -> Result<()> {
   Ok(())
 }
 
-/* A helper struct representing the inputs specific to the Remote genmode */
+/* Represents the inputs specific to the Remote genmode. */
 struct RemoteGenModeInputs<'settings> {
   pub override_lockfile: Option<PathBuf>,
   pub binary_deps: Option<&'settings HashMap<String, cargo_toml::Dependency>>,
 }
 
-/** Helper function for gathering inputs for `genmode = "Remote"` builds */
+/** Gathers inputs for the `genmode = "Remote"` builds. */
 fn gather_remote_genmode_inputs<'settings>(
   bazel_root: &Path,
   settings: &'settings RazeSettings,
