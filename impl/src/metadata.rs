@@ -137,7 +137,7 @@ impl CargoMetadataFetcher {
       let toml_path = workspace_member_directory.join("Cargo.toml");
       if !toml_path.exists() {
         return Err(anyhow!(format!(
-          "The regex patter `{}` found a path that did not contain a Cargo.toml file: `{}`",
+          "The regex pattern `{}` found a path that did not contain a Cargo.toml file: `{}`",
           crate_member_id_re.as_str(),
           workspace_member_directory.display()
         )));
@@ -352,7 +352,7 @@ impl Default for CargoMetadataFetcher {
       SYSTEM_CARGO_BIN_PATH,
       // UNWRAP: The default is covered by testing and should never return err
       Url::parse(DEFAULT_CRATE_REGISTRY_URL).unwrap(),
-      Url::parse(DEFAULT_CRATE_REGISTRY_URL).unwrap(),
+      Url::parse(DEFAULT_CRATE_INDEX_URL).unwrap(),
     )
   }
 }
