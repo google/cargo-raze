@@ -389,7 +389,7 @@ fn validate_settings(settings: &mut RazeSettings) -> Result<(), RazeError> {
 
 /** Parses raze settings from the contents of a `Cargo.toml` file */
 fn parse_raze_settings(toml_contents: CargoToml) -> Result<RazeSettings, RazeError> {
-  // Workspace takes precidence
+  // Workspace takes precedence
   if let Some(raze) = toml_contents
     .workspace
     .and_then(|pkg| pkg.metadata.and_then(|data| data.raze))
@@ -410,7 +410,7 @@ fn parse_raze_settings(toml_contents: CargoToml) -> Result<RazeSettings, RazeErr
   {
     if toml_contents.raze.is_some() {
       eprintln!(
-        "WARNING: Both [raze] and [pakcage.metadata.raze] are set. Using [package.metadata.raze] \
+        "WARNING: Both [raze] and [package.metadata.raze] are set. Using [package.metadata.raze] \
          and ignoring [raze], which is deprecated."
       );
     }

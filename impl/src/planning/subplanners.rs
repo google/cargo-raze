@@ -107,20 +107,18 @@ pub struct WorkspaceSubplanner<'planner> {
 impl<'planner> WorkspaceSubplanner<'planner> {
   /** Produces a planned build using internal state. */
   pub fn produce_planned_build(&self) -> Result<PlannedBuild> {
-    // Check for errors ---
+    // Check for errors
     checks::check_resolve_matches_packages(&self.crate_catalog.metadata)?;
-
     if self.settings.genmode == GenMode::Vendored {
       checks::check_all_vendored(self.crate_catalog.entries(), &self.settings.workspace_path)?;
     }
 
-    // Check for warnings ---
+    // Check for warnings
     let packages: Vec<&Package> = self.crate_catalog.metadata.packages.iter().collect();
     checks::warn_unused_settings(&self.settings.crates, &packages);
 
-    // Produce planned build ---
+    // Produce planned build
     let crate_contexts = self.produce_crate_contexts()?;
-
     Ok(PlannedBuild {
       workspace_context: self.produce_workspace_context(),
       crate_contexts,
@@ -130,29 +128,32 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
   /** Constructs a workspace context from settings. */
   fn produce_workspace_context(&self) -> WorkspaceContext {
+    // Gather the workspace member paths for all workspace members
+    let workspace_members = self
+      .metadata
+      .metadata
+      .workspace_members
+      .iter()
+      .filter_map(|pkg_id| {
+        let workspace_memeber = self
+          .metadata
+          .metadata
+          .packages
+          .iter()
+          .find(|pkg| pkg.id == *pkg_id);
+        if let Some(pkg) = workspace_memeber {
+          get_workspace_member_path(&pkg.manifest_path, &self.metadata.metadata.workspace_root)
+        } else {
+          None
+        }
+      })
+      .collect();
+
     WorkspaceContext {
       workspace_path: self.settings.workspace_path.clone(),
       gen_workspace_prefix: self.settings.gen_workspace_prefix.clone(),
       output_buildfile_suffix: self.settings.output_buildfile_suffix.clone(),
-      workspace_members: self
-        .metadata
-        .metadata
-        .workspace_members
-        .iter()
-        .filter_map(|pkg_id| {
-          if let Some(pkg) = self
-            .metadata
-            .metadata
-            .packages
-            .iter()
-            .find(|pkg| pkg.id == *pkg_id)
-          {
-            get_workspace_member_path(&pkg.manifest_path, &self.metadata.metadata.workspace_root)
-          } else {
-            None
-          }
-        })
-        .collect(),
+      workspace_members,
     }
   }
 
@@ -317,15 +318,15 @@ impl<'planner> CrateSubplanner<'planner> {
       .workspace_member_dependents
       .iter()
       .filter_map(|pkg_id| {
-        if let Some(workspace_member) = self
+        let workspace_member = self
           .crate_catalog
           .metadata
           .packages
           .iter()
-          .find(|pkg| pkg.id == *pkg_id)
-        {
+          .find(|pkg| pkg.id == *pkg_id);
+        if let Some(package) = workspace_member {
           get_workspace_member_path(
-            &workspace_member.manifest_path,
+            &package.manifest_path,
             &self.crate_catalog.metadata.workspace_root,
           )
         } else {
