@@ -95,7 +95,6 @@ fn main() -> Result<()> {
     )),
     None => Box::new(CargoMetadataFetcher::default()),
   };
-
   let toml_path = PathBuf::from("./Cargo.toml");
   let lock_path_opt = fs::metadata("./Cargo.lock")
     .ok()
@@ -104,11 +103,8 @@ fn main() -> Result<()> {
     toml_path,
     lock_path_opt,
   };
-
   let cargo_raze_working_dir = find_bazel_workspace_root().unwrap_or(std::env::current_dir()?);
-
   let remote_genmode_inputs = gather_remote_genmode_inputs(&cargo_raze_working_dir, &settings);
-
   let metadata = metadata_fetcher.fetch_metadata(
     &files,
     remote_genmode_inputs.binary_deps,
@@ -120,13 +116,11 @@ fn main() -> Result<()> {
     Some(target) => Some(PlatformDetails::new_using_rustc(target)?),
     None => None,
   };
-
   let planned_build =
     BuildPlannerImpl::new(metadata.clone(), settings.clone()).plan_build(platform_details)?;
 
   // Render BUILD files
   let mut bazel_renderer = BazelRenderer::new();
-
   let render_details = RenderDetails {
     cargo_root: metadata.workspace_root,
     path_prefix: PathBuf::from(&settings.workspace_path.trim_start_matches("/")),
@@ -134,7 +128,6 @@ fn main() -> Result<()> {
     vendored_buildfile_name: settings.output_buildfile_suffix,
     bazel_root: cargo_raze_working_dir,
   };
-
   let bazel_file_outputs = match &settings.genmode {
     GenMode::Vendored => bazel_renderer.render_planned_build(&render_details, &planned_build)?,
     GenMode::Remote => {
@@ -150,7 +143,6 @@ fn main() -> Result<()> {
       .bazel_root
       .join(render_details.path_prefix)
       .join("remote");
-
     // Clean out the "remote" directory so users can easily see what build files are relevant
     if remote_dir.exists() {
       let build_glob = format!("{}/BUILD*.bazel", remote_dir.display());
@@ -161,13 +153,11 @@ fn main() -> Result<()> {
       }
     }
   }
-
   for output in bazel_file_outputs.iter() {
     if options.flag_dryrun.unwrap_or(false) {
       println!("{}:\n{}", output.path.display(), output.contents);
       continue;
     }
-
     // Ensure all parent directories exist
     if let Some(parent) = &output.path.parent() {
       fs::create_dir_all(parent)?
