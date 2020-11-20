@@ -12,14 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-  env, fmt,
-  iter::Iterator,
-  path::Path,
-  path::PathBuf,
-  process::Command,
-  str::{self, FromStr},
-};
+use std::{env, fmt, iter::Iterator, path::Path, path::PathBuf, process::Command, str::FromStr};
 
 use anyhow::{anyhow, Result};
 

@@ -470,7 +470,7 @@ pub mod tests {
     let dir = TempDir::new().unwrap();
     let toml_path = dir.path().join("Cargo.toml");
     let mut toml = File::create(&toml_path).unwrap();
-    toml.write_all(basic_toml().as_bytes()).unwrap();
+    toml.write_all(basic_toml_contents().as_bytes()).unwrap();
     let files = CargoWorkspaceFiles {
       lock_path_opt: None,
       toml_path,
@@ -487,13 +487,13 @@ pub mod tests {
     let toml_path = {
       let path = dir.path().join("Cargo.toml");
       let mut toml = File::create(&path).unwrap();
-      toml.write_all(basic_toml().as_bytes()).unwrap();
+      toml.write_all(basic_toml_contents().as_bytes()).unwrap();
       path
     };
     let lock_path = {
       let path = dir.path().join("Cargo.lock");
       let mut lock = File::create(&path).unwrap();
-      lock.write_all(basic_lock().as_bytes()).unwrap();
+      lock.write_all(basic_lock_contents().as_bytes()).unwrap();
       path
     };
     let files = CargoWorkspaceFiles {
@@ -612,11 +612,11 @@ pub mod tests {
   fn test_cargo_generate_lockfile_new_file() {
     let (fetcher, _mock_server, _index_url) = dummy_raze_metadata_fetcher();
 
-    let (crate_dir, _files) = make_workspace(advanced_toml(), None);
+    let (crate_dir, _files) = make_workspace(advanced_toml_contents(), None);
     let expected_lockfile = crate_dir.as_ref().join("expected/Cargo.expected.lock");
 
     fs::create_dir_all(expected_lockfile.parent().unwrap()).unwrap();
-    fs::write(&expected_lockfile, advanced_lock()).unwrap();
+    fs::write(&expected_lockfile, advanced_lock_contents()).unwrap();
 
     // Returns a newly generated lockfile
     assert_eq!(
