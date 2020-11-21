@@ -59,7 +59,7 @@ rust_library(
     version = "0.10.0",
     # buildifier: leave-alone
     deps = [
-        "@remote_binary_dependencies__backtrace__0_3_50//:backtrace",
+        "@remote_binary_dependencies__backtrace__0_3_54//:backtrace",
     ],
 )
 

@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::path::PathBuf;
+
 use crate::settings::CrateSettings;
-use serde::Serialize;
 use semver::Version;
+use serde::Serialize;
 
 /** A struct containing information about a crate's dependency that's buildable in Bazel
  *
@@ -91,6 +93,17 @@ pub struct CrateDependencyContext {
   pub aliased_dependencies: Vec<DependencyAlias>,
 }
 
+impl CrateDependencyContext {
+  pub fn contains(&self, name: &str, version: Version) -> bool {
+    let condition = |dep: &BuildableDependency| dep.name.eq(&name) && dep.version.eq(&version);
+    self.dependencies.iter().any(condition)
+      || self.proc_macro_dependencies.iter().any(condition)
+      || self.build_dependencies.iter().any(condition)
+      || self.build_proc_macro_dependencies.iter().any(condition)
+      || self.dev_dependencies.iter().any(condition)
+  }
+}
+
 #[derive(Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CrateTargetedDepContext {
   pub target: String,
@@ -109,7 +122,9 @@ pub struct CrateContext {
   pub license: LicenseData,
   pub features: Vec<String>,
   pub workspace_path_to_crate: String,
-  pub is_root_dependency: bool,
+  pub workspace_member_dependents: Vec<PathBuf>,
+  pub is_workspace_member_dependency: bool,
+  pub is_binary_dependency: bool,
   pub targets: Vec<BuildableTarget>,
   pub build_script_target: Option<BuildableTarget>,
   pub links: Option<String>,
@@ -144,4 +159,7 @@ pub struct WorkspaceContext {
   // Bare files will just be named after this setting. Named files, such as those passed to
   // repository rules, will take the form of $prefix.$this_value.
   pub output_buildfile_suffix: String,
+
+  // A list of relative paths from a Cargo workspace root to a Cargo package.
+  pub workspace_members: Vec<PathBuf>,
 }

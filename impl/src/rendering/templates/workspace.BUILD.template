@@ -8,7 +8,7 @@ licenses([
 
 # Aliased targets
 {%- for crate in crates %}
-{%- if crate.is_root_dependency and crate.lib_target_name %}
+{%- if crate.is_workspace_member_dependency and crate.lib_target_name %}
 {%- set crate_name_sanitized = crate.pkg_name | replace(from="-", to="_") %}
 alias(
     name = "{{crate_name_sanitized}}",

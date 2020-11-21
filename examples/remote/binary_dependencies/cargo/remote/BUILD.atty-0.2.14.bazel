@@ -72,7 +72,7 @@ rust_library(
             "@io_bazel_rules_rust//rust/platform:x86_64-unknown-freebsd",
             "@io_bazel_rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
-            "@remote_binary_dependencies__libc__0_2_67//:libc",
+            "@remote_binary_dependencies__libc__0_2_80//:libc",
         ],
         "//conditions:default": [],
     }) + selects.with_or({
@@ -81,7 +81,7 @@ rust_library(
             "@io_bazel_rules_rust//rust/platform:i686-pc-windows-msvc",
             "@io_bazel_rules_rust//rust/platform:x86_64-pc-windows-msvc",
         ): [
-            "@remote_binary_dependencies__winapi__0_3_8//:winapi",
+            "@remote_binary_dependencies__winapi__0_3_9//:winapi",
         ],
         "//conditions:default": [],
     }),

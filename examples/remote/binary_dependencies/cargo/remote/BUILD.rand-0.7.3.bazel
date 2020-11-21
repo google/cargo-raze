@@ -62,7 +62,7 @@ rust_library(
     version = "0.7.3",
     # buildifier: leave-alone
     deps = [
-        "@remote_binary_dependencies__rand_chacha__0_2_1//:rand_chacha",
+        "@remote_binary_dependencies__rand_chacha__0_2_2//:rand_chacha",
         "@remote_binary_dependencies__rand_core__0_5_1//:rand_core",
     ] + selects.with_or({
         # cfg(unix)

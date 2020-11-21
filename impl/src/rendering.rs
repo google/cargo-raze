@@ -43,6 +43,9 @@ pub struct FileOutputs {
 
 #[derive(Debug, Clone)]
 pub struct RenderDetails {
+  pub cargo_root: PathBuf,
   pub path_prefix: PathBuf,
-  pub buildfile_suffix: String,
+  pub workspace_member_output_dir: String,
+  pub vendored_buildfile_name: String,
+  pub bazel_root: PathBuf,
 }

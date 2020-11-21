@@ -22,42 +22,6 @@ alias(
 )
 
 alias(
-    name = "atty",
-    actual = "@remote_binary_dependencies__atty__0_2_14//:atty",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "indicatif",
-    actual = "@remote_binary_dependencies__indicatif__0_14_0//:indicatif",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "structopt",
-    actual = "@remote_binary_dependencies__structopt__0_3_9//:structopt",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
-    name = "texture_synthesis",
-    actual = "@remote_binary_dependencies__texture_synthesis__0_8_0//:texture_synthesis",
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-)
-
-alias(
     # Extra aliased target, from raze configuration
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_texture_synthesis",

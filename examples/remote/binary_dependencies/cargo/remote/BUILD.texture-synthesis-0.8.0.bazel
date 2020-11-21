@@ -70,8 +70,8 @@ rust_library(
     version = "0.8.0",
     # buildifier: leave-alone
     deps = [
-        "@remote_binary_dependencies__image__0_23_0//:image",
-        "@remote_binary_dependencies__num_cpus__1_12_0//:num_cpus",
+        "@remote_binary_dependencies__image__0_23_10//:image",
+        "@remote_binary_dependencies__num_cpus__1_13_0//:num_cpus",
         "@remote_binary_dependencies__rand__0_7_3//:rand",
         "@remote_binary_dependencies__rand_pcg__0_2_1//:rand_pcg",
         "@remote_binary_dependencies__rstar__0_7_1//:rstar",

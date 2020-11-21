@@ -15,6 +15,7 @@
 use std::{
   env, fmt,
   iter::Iterator,
+  path::Path,
   path::PathBuf,
   process::Command,
   str::{self, FromStr},
@@ -25,6 +26,7 @@ use anyhow::{anyhow, Result};
 use cargo_platform::Cfg;
 
 use cfg_expr::{targets::get_builtin_target_by_triple, Expression, Predicate};
+use pathdiff::diff_paths;
 
 static SUPPORTED_PLATFORM_TRIPLES: &'static [&'static str] = &[
   // SUPPORTED_T1_PLATFORM_TRIPLES
@@ -324,6 +326,12 @@ fn fetch_attrs(target: &str) -> Result<Vec<Cfg>> {
       .map(|cfg| cfg.expect("attrs from rustc should be parsable into Cargo Cfg"))
       .collect(),
   )
+}
+
+pub fn get_workspace_member_path(manifest_path: &Path, workspace_root: &Path) -> Option<PathBuf> {
+  assert!(manifest_path.ends_with("Cargo.toml"));
+  // UNWRAP: A manifest path should always be a path to a 'Cargo.toml' file which should always have a parent directory
+  diff_paths(manifest_path.parent().unwrap(), workspace_root)
 }
 
 #[cfg(test)]

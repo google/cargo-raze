@@ -20,10 +20,9 @@ use std::{
 };
 
 use anyhow::Result;
-
-use cargo_lock::{lockfile::Lockfile, SourceId, Version};
+use cargo_lock::SourceId;
+use cargo_metadata::{DependencyKind, Node, Package};
 use cargo_platform::Platform;
-
 use itertools::Itertools;
 
 use crate::{
@@ -33,9 +32,10 @@ use crate::{
     WorkspaceContext,
   },
   error::{RazeError, PLEASE_FILE_A_BUG},
-  metadata::{fetch_crate_checksum, CargoWorkspaceFiles, DependencyKind, Node, Package},
+  metadata::RazeMetadata,
   planning::license,
   settings::{format_registry_url, CrateSettings, GenMode, RazeSettings},
+  util::get_workspace_member_path,
   util::{
     self, filter_bazel_triples, generate_bazel_conditions, get_matching_bazel_triples,
     is_bazel_supported_platform, PlatformDetails,
@@ -101,62 +101,69 @@ pub struct WorkspaceSubplanner<'planner> {
   pub(super) settings: &'planner RazeSettings,
   pub(super) platform_details: &'planner Option<PlatformDetails>,
   pub(super) crate_catalog: &'planner CrateCatalog,
-  pub(super) files: &'planner CargoWorkspaceFiles,
-  pub(super) binary_dependencies: &'planner Vec<CrateCatalog>,
-  pub(super) binary_deps_files: &'planner HashMap<String, CargoWorkspaceFiles>,
+  pub(super) metadata: &'planner RazeMetadata,
 }
 
 impl<'planner> WorkspaceSubplanner<'planner> {
   /** Produces a planned build using internal state. */
   pub fn produce_planned_build(&self) -> Result<PlannedBuild> {
+    // Check for errors
     checks::check_resolve_matches_packages(&self.crate_catalog.metadata)?;
-
-    let mut packages: Vec<&Package> = self.crate_catalog.metadata.packages.iter().collect();
-
-    match self.settings.genmode {
-      GenMode::Remote => {
-        for bin_dep in self.binary_dependencies {
-          checks::check_resolve_matches_packages(&bin_dep.metadata)?;
-          packages.extend(bin_dep.metadata.packages.iter());
-        }
-      },
-      GenMode::Vendored => {
-        checks::check_all_vendored(self.crate_catalog.entries(), &self.settings.workspace_path)?;
-      },
-      _ => { /* No checks to perform */ },
+    if self.settings.genmode == GenMode::Vendored {
+      checks::check_all_vendored(self.crate_catalog.entries(), &self.settings.workspace_path)?;
     }
 
+    // Check for warnings
+    let packages: Vec<&Package> = self.crate_catalog.metadata.packages.iter().collect();
     checks::warn_unused_settings(&self.settings.crates, &packages);
 
+    // Produce planned build
     let crate_contexts = self.produce_crate_contexts()?;
-
     Ok(PlannedBuild {
       workspace_context: self.produce_workspace_context(),
       crate_contexts,
-      binary_crate_files: self.binary_deps_files.clone(),
+      lockfile: self.metadata.lockfile.clone(),
     })
   }
 
   /** Constructs a workspace context from settings. */
   fn produce_workspace_context(&self) -> WorkspaceContext {
+    // Gather the workspace member paths for all workspace members
+    let workspace_members = self
+      .metadata
+      .metadata
+      .workspace_members
+      .iter()
+      .filter_map(|pkg_id| {
+        let workspace_memeber = self
+          .metadata
+          .metadata
+          .packages
+          .iter()
+          .find(|pkg| pkg.id == *pkg_id);
+        if let Some(pkg) = workspace_memeber {
+          get_workspace_member_path(&pkg.manifest_path, &self.metadata.metadata.workspace_root)
+        } else {
+          None
+        }
+      })
+      .collect();
+
     WorkspaceContext {
       workspace_path: self.settings.workspace_path.clone(),
       gen_workspace_prefix: self.settings.gen_workspace_prefix.clone(),
       output_buildfile_suffix: self.settings.output_buildfile_suffix.clone(),
+      workspace_members,
     }
   }
 
   fn create_crate_context(
     &self,
     node: &Node,
-    package_to_checksum: &HashMap<(String, Version), String>,
     catalog: &CrateCatalog,
   ) -> Option<Result<CrateContext>> {
     let own_crate_catalog_entry = catalog.entry_for_package_id(&node.id)?;
     let own_package = own_crate_catalog_entry.package();
-
-    let checksum_opt =
-      package_to_checksum.get(&(own_package.name.clone(), own_package.version.clone()));
 
     let is_binary_dep = self
       .settings
@@ -164,19 +171,8 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       .keys()
       .any(|key| key == &own_package.name);
 
-    // Skip the root package (which is probably a junk package, by convention) unless it's a binary dir
-    if !is_binary_dep && own_crate_catalog_entry.is_root() {
-      return None;
-    }
-
-    // Skip workspace crates, since we haven't yet decided how they should be handled.
-    //
-    // Except in the case of binary dependencies. They can handle these no problem
-    //
-    // Hey you, reader! If you have opinions about this please comment on the below bug, or file
-    // another bug.
-    // See Also: https://github.com/google/cargo-raze/issues/111
-    if !is_binary_dep && own_crate_catalog_entry.is_workspace_crate() {
+    // Skip workspace members unless they are binary dependencies
+    if own_crate_catalog_entry.is_workspace_crate() && !is_binary_dep {
       return None;
     }
 
@@ -187,6 +183,10 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       .map(|s| SourceId::from_url(&s.to_string()).unwrap());
 
     let crate_settings = self.crate_settings(&own_package).ok()?;
+
+    let checksum_opt = self
+      .metadata
+      .checksum_for(&own_package.name, &own_package.version.to_string());
 
     let crate_subplanner = CrateSubplanner {
       crate_catalog: &catalog,
@@ -232,70 +232,17 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
   /** Produces a crate context for each declared crate and dependency. */
   fn produce_crate_contexts(&self) -> Result<Vec<CrateContext>> {
-    // Build a list of all catalogs we want the context for
-    let mut catalogs = vec![self.crate_catalog];
-    for catalog in self.binary_dependencies.iter() {
-      catalogs.push(catalog);
-    }
-
-    // Build a list of all workspace files
-    let mut files: Vec<&CargoWorkspaceFiles> = self
-      .binary_deps_files
+    self
+      .crate_catalog
+      .metadata
+      .resolve
+      .as_ref()
+      .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?
+      .nodes
       .iter()
-      .map(|(_key, val)| val)
-      .collect();
-    files.push(self.files);
-
-    // Gather the checksums for all packages in the lockfile
-    // which have them.
-    //
-    // Store the representation of the package as a tuple
-    // of (name, version) -> checksum.
-    let mut package_to_checksum = HashMap::new();
-    for workspace_files in files.iter() {
-      if let Some(lock_path) = workspace_files.lock_path_opt.as_ref() {
-        let lockfile = Lockfile::load(lock_path.as_path())?;
-        for package in lockfile.packages {
-          if let Some(checksum) = package.checksum {
-            package_to_checksum.insert(
-              (package.name.to_string(), package.version),
-              checksum.to_string(),
-            );
-          }
-        }
-      }
-    }
-
-    // Additionally, the binary dependencies need to have their checksums added as well in
-    // Remote GenMode configurations. Vendored GenMode relies on the behavior of `cargo vendor`
-    // and doesn't perform any special logic to fetch binary dependency crates.
-    if self.settings.genmode == GenMode::Remote {
-      for (pkg, info) in self.settings.binary_deps.iter() {
-        let version = semver::Version::parse(info.req())?;
-        package_to_checksum.insert(
-          (pkg.clone(), version.clone()),
-          fetch_crate_checksum(&self.settings.index_url, pkg, &version.to_string())?,
-        );
-      }
-    }
-
-    let contexts = catalogs
-      .iter()
-      .map(|catalog| {
-        (*catalog)
-          .metadata
-          .resolve
-          .as_ref()
-          .ok_or_else(|| RazeError::Generic("Missing resolve graph".into()))?
-          .nodes
-          .iter()
-          .sorted_by_key(|n| &n.id)
-          .filter_map(|node| self.create_crate_context(node, &package_to_checksum, catalog))
-          .collect::<Result<Vec<CrateContext>>>()
-      })
-      .collect::<Result<Vec<Vec<CrateContext>>>>()?;
-
-    Ok(contexts.iter().flat_map(|i| i.clone()).collect())
+      .sorted_by_key(|n| &n.id)
+      .filter_map(|node| self.create_crate_context(node, &self.crate_catalog))
+      .collect::<Result<Vec<CrateContext>>>()
   }
 }
 
@@ -366,13 +313,40 @@ impl<'planner> CrateSubplanner<'planner> {
 
     filtered_deps.sort();
 
+    let workspace_member_dependents: Vec<PathBuf> = self
+      .crate_catalog_entry
+      .workspace_member_dependents
+      .iter()
+      .filter_map(|pkg_id| {
+        let workspace_member = self
+          .crate_catalog
+          .metadata
+          .packages
+          .iter()
+          .find(|pkg| pkg.id == *pkg_id);
+        if let Some(package) = workspace_member {
+          get_workspace_member_path(
+            &package.manifest_path,
+            &self.crate_catalog.metadata.workspace_root,
+          )
+        } else {
+          None
+        }
+      })
+      .collect();
+
+    let is_workspace_member_dependency = !&workspace_member_dependents.is_empty();
+    let is_binary_dependency = self.settings.binary_deps.contains_key(&package.name);
+
     let context = CrateContext {
       pkg_name: package.name.clone(),
       pkg_version: package.version.clone(),
       edition: package.edition.clone(),
       license: self.produce_license(),
       features: self.node.features.clone(),
-      is_root_dependency: self.crate_catalog_entry.is_root_dep(),
+      workspace_member_dependents: workspace_member_dependents,
+      is_workspace_member_dependency: is_workspace_member_dependency,
+      is_binary_dependency: is_binary_dependency,
       default_deps: CrateDependencyContext {
         dependencies: normal_deps,
         proc_macro_dependencies: proc_macro_deps,
@@ -510,11 +484,12 @@ impl<'planner> CrateSubplanner<'planner> {
       }
     }
 
+    dep_set.aliased_deps.sort();
     dep_set.build_deps.sort();
     dep_set.build_proc_macro_deps.sort();
-    dep_set.proc_macro_deps.sort();
     dep_set.dev_deps.sort();
     dep_set.normal_deps.sort();
+    dep_set.proc_macro_deps.sort();
 
     Ok(dep_set)
   }

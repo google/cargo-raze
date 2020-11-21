@@ -25,6 +25,18 @@ use crate::{
 
 use std::error::Error;
 
+macro_rules! unwind_tera_error {
+  ($err:ident) => {{
+    let mut messages = vec![$err.to_string()];
+    let mut cause = $err.source();
+    while let Some(e) = cause {
+      messages.push(e.to_string());
+      cause = e.source();
+    }
+    messages.join("\n|__")
+  }};
+}
+
 #[derive(Default)]
 pub struct BazelRenderer {
   internal_renderer: Tera,
@@ -97,7 +109,7 @@ impl BazelRenderer {
       .render("templates/crate.BUILD.template", &context)
   }
 
-  pub fn render_aliases(
+  pub fn render_vendored_aliases(
     &self,
     workspace_context: &WorkspaceContext,
     all_packages: &[CrateContext],
@@ -148,6 +160,51 @@ impl BazelRenderer {
       .internal_renderer
       .render("templates/remote_crates.bzl.template", &context)
   }
+
+  pub fn render_aliases(
+    &self,
+    planned_build: &PlannedBuild,
+    render_details: &RenderDetails,
+    is_remote_mode: bool,
+  ) -> Result<Vec<FileOutputs>> {
+    let mut file_outputs = Vec::new();
+    for member_path in planned_build.workspace_context.workspace_members.iter() {
+      let all_packages: Vec<CrateContext> = planned_build
+        .crate_contexts
+        .iter()
+        .filter(|ctx| {
+          ctx.is_binary_dependency || ctx.workspace_member_dependents.contains(member_path)
+        })
+        .cloned()
+        .collect();
+
+      let rendered_alias_build_file = if is_remote_mode {
+        self
+          .render_remote_aliases(&planned_build.workspace_context, &all_packages)
+          .map_err(|e| RazeError::Rendering {
+            crate_name_opt: None,
+            message: unwind_tera_error!(e),
+          })?
+      } else {
+        self
+          .render_vendored_aliases(&planned_build.workspace_context, &all_packages)
+          .map_err(|e| RazeError::Rendering {
+            crate_name_opt: None,
+            message: unwind_tera_error!(e),
+          })?
+      };
+
+      file_outputs.push(FileOutputs {
+        path: render_details
+          .cargo_root
+          .join(member_path)
+          .join(&render_details.workspace_member_output_dir)
+          .join("BUILD.bazel"),
+        contents: rendered_alias_build_file,
+      });
+    }
+    Ok(file_outputs)
+  }
 }
 
 fn include_additional_build_file(
@@ -172,35 +229,22 @@ fn include_additional_build_file(
   }
 }
 
-macro_rules! unwind_tera_error {
-  ($err:ident) => {{
-    let mut messages = vec![$err.to_string()];
-    let mut cause = $err.source();
-    while let Some(e) = cause {
-      messages.push(e.to_string());
-      cause = e.source();
-    }
-    messages.join("\n|__")
-  }};
-}
-
 impl BuildRenderer for BazelRenderer {
   fn render_planned_build(
     &mut self,
     render_details: &RenderDetails,
     planned_build: &PlannedBuild,
   ) -> Result<Vec<FileOutputs>> {
-    let &RenderDetails {
-      ref path_prefix,
-      ref buildfile_suffix,
-      ..
-    } = render_details;
     let &PlannedBuild {
       ref workspace_context,
       ref crate_contexts,
       ..
     } = planned_build;
     let mut file_outputs = Vec::new();
+    let path_prefix = render_details
+      .bazel_root
+      .as_path()
+      .join(&render_details.path_prefix);
 
     for package in crate_contexts {
       let rendered_crate_build_file =
@@ -220,18 +264,8 @@ impl BuildRenderer for BazelRenderer {
       })
     }
 
-    let build_file_path = path_prefix.as_path().join(buildfile_suffix);
-    let rendered_alias_build_file = self
-      .render_aliases(&workspace_context, &crate_contexts)
-      .map_err(|e| RazeError::Rendering {
-        crate_name_opt: None,
-        message: unwind_tera_error!(e),
-      })?;
+    file_outputs.extend(self.render_aliases(planned_build, render_details, false)?);
 
-    file_outputs.push(FileOutputs {
-      path: build_file_path,
-      contents: rendered_alias_build_file,
-    });
     Ok(file_outputs)
   }
 
@@ -240,17 +274,18 @@ impl BuildRenderer for BazelRenderer {
     render_details: &RenderDetails,
     planned_build: &PlannedBuild,
   ) -> Result<Vec<FileOutputs>> {
-    let &RenderDetails {
-      ref path_prefix,
-      ref buildfile_suffix,
-      ..
-    } = render_details;
     let &PlannedBuild {
       ref workspace_context,
       ref crate_contexts,
       ..
     } = planned_build;
     let mut file_outputs: Vec<FileOutputs> = Vec::new();
+
+    let path_prefix = render_details
+      .bazel_root
+      .as_path()
+      .join(&render_details.path_prefix);
+    let buildfile_suffix = &render_details.vendored_buildfile_name;
 
     // N.B. File needs to exist so that contained xyz-1.2.3.BUILD can be referenced
     file_outputs.push(FileOutputs {
@@ -275,18 +310,7 @@ impl BuildRenderer for BazelRenderer {
       })
     }
 
-    let alias_file_path = path_prefix.as_path().join(buildfile_suffix);
-    let rendered_alias_build_file = self
-      .render_remote_aliases(&workspace_context, &crate_contexts)
-      .map_err(|e| RazeError::Rendering {
-        crate_name_opt: None,
-        message: unwind_tera_error!(e),
-      })?;
-
-    file_outputs.push(FileOutputs {
-      path: alias_file_path,
-      contents: rendered_alias_build_file,
-    });
+    file_outputs.extend(self.render_aliases(planned_build, render_details, true)?);
 
     let bzl_fetch_file_path = path_prefix.as_path().join("crates.bzl");
     let rendered_bzl_fetch_file = self
@@ -301,17 +325,26 @@ impl BuildRenderer for BazelRenderer {
       contents: rendered_bzl_fetch_file,
     });
 
-    // In order to support pinned dependencies for binary dependencies, lockfiles are also
-    // added to ensure the reproducability of subsequent runs.
-    for (name, files) in planned_build.binary_crate_files.iter() {
-      let lockfile = files.lock_path_opt.as_ref().unwrap().clone();
+    // Optionally write out a unique lockfile for Cargo Raze. This happens in the case
+    // where a project has specified binary dependencies.
+    if let Some(lockfile) = &planned_build.lockfile {
       file_outputs.push(FileOutputs {
-        path: path_prefix
-          .clone()
-          .as_path()
-          .join("lockfiles")
-          .join(format!("Cargo.{}.lock", name)),
-        contents: std::fs::read_to_string(lockfile)?,
+        path: path_prefix.as_path().join("Cargo.raze.lock"),
+        contents: lockfile.to_string(),
+      });
+    }
+
+    // Ensure there is always a `BUILD.bazel` file to accompany `crates.bzl`
+    let crates_bzl_pkg_file = path_prefix.as_path().join("BUILD.bazel");
+    let outputs_contain_crates_bzl_build_file = file_outputs
+      .iter()
+      .any(|output| output.path == crates_bzl_pkg_file);
+    if !outputs_contain_crates_bzl_build_file {
+      file_outputs.push(FileOutputs {
+        path: crates_bzl_pkg_file,
+        contents: self
+          .internal_renderer
+          .render("templates/partials/header.template", &Context::new())?,
       });
     }
 
@@ -327,20 +360,23 @@ mod tests {
 
   use crate::{
     context::*,
-    metadata::CargoWorkspaceFiles,
     planning::PlannedBuild,
     rendering::{FileOutputs, RenderDetails},
     settings::CrateSettings,
+    testing::basic_lock,
   };
 
   use super::*;
 
-  use std::{collections::HashMap, path::PathBuf};
+  use std::{path::PathBuf, str::FromStr};
 
   fn dummy_render_details(buildfile_suffix: &str) -> RenderDetails {
     RenderDetails {
+      cargo_root: PathBuf::from("/some/cargo/root"),
       path_prefix: PathBuf::from("./some_render_prefix"),
-      buildfile_suffix: buildfile_suffix.to_owned(),
+      workspace_member_output_dir: "cargo".to_string(),
+      vendored_buildfile_name: buildfile_suffix.to_owned(),
+      bazel_root: PathBuf::from("/some/bazel/root"),
     }
   }
 
@@ -350,9 +386,12 @@ mod tests {
         workspace_path: "//workspace/prefix".to_owned(),
         gen_workspace_prefix: "".to_owned(),
         output_buildfile_suffix: "BUILD".to_owned(),
+        // This will typically resolve to:
+        // `/some/cargo/root/some/crate`
+        workspace_members: vec![PathBuf::from("some/crate")],
       },
       crate_contexts,
-      binary_crate_files: HashMap::new(),
+      lockfile: None,
     }
   }
 
@@ -374,7 +413,9 @@ mod tests {
         aliased_dependencies: Vec::new(),
       },
       targeted_deps: Vec::new(),
-      is_root_dependency: true,
+      workspace_member_dependents: Vec::new(),
+      is_workspace_member_dependency: false,
+      is_binary_dependency: false,
       workspace_path_to_crate: "@raze__test_binary__1_1_1//".to_owned(),
       targets: vec![BuildableTarget {
         name: "some_binary".to_owned(),
@@ -415,7 +456,9 @@ mod tests {
         aliased_dependencies: Vec::new(),
       },
       targeted_deps: Vec::new(),
-      is_root_dependency: true,
+      workspace_member_dependents: Vec::new(),
+      is_workspace_member_dependency: false,
+      is_binary_dependency: false,
       workspace_path_to_crate: "@raze__test_library__1_1_1//".to_owned(),
       targets: vec![BuildableTarget {
         name: "some_library".to_owned(),
@@ -476,7 +519,10 @@ mod tests {
 
     assert_that!(
       &file_names,
-      contains(vec!["./some_render_prefix/BUILD".to_string()]).exactly()
+      contains(vec![
+        "/some/cargo/root/some/crate/cargo/BUILD.bazel".to_string()
+      ])
+      .exactly()
     );
   }
 
@@ -491,8 +537,8 @@ mod tests {
     assert_that!(
       &file_names,
       contains(vec![
-        "./some_render_prefix/vendor/test-library-1.1.1/BUILD".to_string(),
-        "./some_render_prefix/BUILD".to_string(),
+        "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD".to_string(),
+        "/some/cargo/root/some/crate/cargo/BUILD.bazel".to_string(),
       ])
       .exactly()
     );
@@ -512,38 +558,49 @@ mod tests {
     assert_that!(
       &file_names,
       contains(vec![
-        "./some_render_prefix/vendor/test-library-1.1.1/BUILD.bazel".to_string(),
-        "./some_render_prefix/BUILD.bazel".to_string(),
+        "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD.bazel".to_string(),
+        "/some/cargo/root/some/crate/cargo/BUILD.bazel".to_string(),
       ])
       .exactly()
     );
   }
 
   #[test]
-  fn root_crates_get_build_aliases() {
-    let file_outputs = render_crates_for_test(vec![dummy_library_crate()]);
-    let root_build_contents =
-      extract_contents_matching_path(&file_outputs, "./some_render_prefix/BUILD");
+  fn workspace_member_dependencies_get_build_aliases() {
+    let mut context = dummy_library_crate();
+    context.is_workspace_member_dependency = true;
+    context
+      .workspace_member_dependents
+      .push(PathBuf::from("some/crate"));
+
+    let file_outputs = render_crates_for_test(vec![context]);
+    let workspace_crate_build_contents = extract_contents_matching_path(
+      &file_outputs,
+      "/some/cargo/root/some/crate/cargo/BUILD.bazel",
+    );
 
     expect(
-      root_build_contents.contains("alias"),
+      workspace_crate_build_contents.contains("alias"),
       format!(
         "expected root build contents to contain an alias for test-library crate, but it just \
          contained [{}]",
-        root_build_contents
+        workspace_crate_build_contents
       ),
     )
     .unwrap();
   }
 
   #[test]
-  fn non_root_crates_dont_get_build_aliases() {
-    let mut non_root_crate = dummy_library_crate();
-    non_root_crate.is_root_dependency = false;
+  fn non_workspace_crates_dont_get_build_aliases() {
+    let mut non_workspace_crate = dummy_library_crate();
+    non_workspace_crate.workspace_member_dependents = Vec::new();
+    non_workspace_crate.is_workspace_member_dependency = false;
 
-    let file_outputs = render_crates_for_test(vec![non_root_crate]);
-    let root_build_contents =
-      extract_contents_matching_path(&file_outputs, "./some_render_prefix/BUILD");
+    let file_outputs = render_crates_for_test(vec![non_workspace_crate]);
+    let root_build_contents = extract_contents_matching_path(
+      &file_outputs,
+      "/some/cargo/root/some/crate/cargo/BUILD.bazel",
+    );
 
     expect(
       !root_build_contents.contains("alias"),
@@ -561,7 +618,7 @@ mod tests {
     let file_outputs = render_crates_for_test(vec![dummy_binary_crate()]);
     let crate_build_contents = extract_contents_matching_path(
       &file_outputs,
-      "./some_render_prefix/vendor/test-binary-1.1.1/BUILD",
+      "/some/bazel/root/./some_render_prefix/vendor/test-binary-1.1.1/BUILD",
     );
 
     expect(
@@ -579,7 +636,7 @@ mod tests {
     let file_outputs = render_crates_for_test(vec![dummy_library_crate()]);
     let crate_build_contents = extract_contents_matching_path(
       &file_outputs,
-      "./some_render_prefix/vendor/test-library-1.1.1/BUILD",
+      "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD",
     );
 
     expect(
@@ -619,7 +676,7 @@ mod tests {
     }]);
     let crate_build_contents = extract_contents_matching_path(
       &file_outputs,
-      "./some_render_prefix/vendor/test-library-1.1.1/BUILD",
+      "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD",
     );
 
     expect(
@@ -634,21 +691,10 @@ mod tests {
   }
 
   #[test]
-  fn binary_dependency_lockfiles() {
+  fn test_generate_lockfile() {
     let render_details = dummy_render_details("BUILD.bazel");
     let mut planned_build = dummy_planned_build(Vec::new());
-
-    let tempdir = tempfile::TempDir::new().unwrap();
-    std::fs::write(tempdir.as_ref().join("Cargo.toml"), "Hello").unwrap();
-    std::fs::write(tempdir.as_ref().join("Cargo.lock"), "World").unwrap();
-
-    planned_build.binary_crate_files.insert(
-      "mock-binary".to_owned(),
-      CargoWorkspaceFiles {
-        toml_path: tempdir.as_ref().join("Cargo.toml"),
-        lock_path_opt: Some(tempdir.as_ref().join("Cargo.lock")),
-      },
-    );
+    planned_build.lockfile = Some(cargo_lock::Lockfile::from_str(basic_lock()).unwrap());
 
     let render_result = BazelRenderer::new()
       .render_remote_planned_build(&render_details, &planned_build)
@@ -656,8 +702,15 @@ mod tests {
 
     // Ensure that the lockfiles for binary dependencies get written out propperly
     assert!(render_result.iter().any(|file_output| {
-      file_output.path == PathBuf::from("./some_render_prefix/lockfiles/Cargo.mock-binary.lock")
-        && file_output.contents == "World".to_string()
+      file_output.path == PathBuf::from("/some/bazel/root/./some_render_prefix/Cargo.raze.lock")
+        && file_output.contents
+          == indoc::formatdoc! { r#"
+              # This file is automatically @generated by Cargo.
+              # It is not intended for manual editing.
+              [[package]]
+              name = "test"
+              version = "0.0.1"
+            "# }
     }))
   }
 }
