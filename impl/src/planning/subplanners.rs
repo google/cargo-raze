@@ -307,7 +307,10 @@ impl<'planner> CrateSubplanner<'planner> {
           dev_dependencies: dep_set.dependencies.dev_deps.clone(),
           aliased_dependencies: dep_set.dependencies.aliased_deps.clone(),
         },
-        conditions: generate_bazel_conditions(&target_triples)?,
+        conditions: generate_bazel_conditions(
+          &self.settings.rust_rules_workspace_name,
+          &target_triples,
+        )?,
       });
     }
 
