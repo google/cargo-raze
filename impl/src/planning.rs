@@ -86,16 +86,15 @@ mod tests {
   use std::{collections::HashMap, path::PathBuf};
 
   use crate::{
-    metadata::{
-      tests::{dummy_raze_metadata, dummy_raze_metadata_fetcher},
-      MetadataFetcher,
+    metadata::tests::{
+      dummy_raze_metadata, dummy_raze_metadata_fetcher, DummyCargoMetadataFetcher,
     },
     settings::{tests::*, GenMode},
     testing::*,
   };
 
   use super::*;
-  use cargo_metadata::{MetadataCommand, PackageId};
+  use cargo_metadata::PackageId;
   use indoc::indoc;
   use semver::{Version, VersionReq};
 
@@ -236,18 +235,17 @@ mod tests {
     assert!(planned_build_res.is_err());
   }
 
-  fn dummy_workspace_crate_metadata(toml: Option<&str>) -> RazeMetadata {
-    let mut metadata = match toml {
-      Some(toml) => {
-        let dir = tempfile::TempDir::new().unwrap();
-        std::fs::write(dir.as_ref().join("Cargo.toml"), toml).unwrap();
-        MetadataCommand::new()
-          .current_dir(dir.as_ref())
-          .exec()
-          .unwrap()
-      },
-      None => dummy_raze_metadata().metadata.clone(),
-    };
+  fn dummy_workspace_crate_metadata(metadata_template: &str) -> RazeMetadata {
+    let (_dir, files) = make_basic_workspace();
+    let (mut fetcher, _server, _index_dir) = dummy_raze_metadata_fetcher();
+
+    // Ensure we render the given template
+    fetcher.set_metadata_fetcher(Box::new(DummyCargoMetadataFetcher {
+      metadata_template: Some(metadata_template.to_string()),
+    }));
+
+    let raze_metadata = fetcher.fetch_metadata(&files, None, None).unwrap();
+    let mut metadata = raze_metadata.metadata;
 
     // Phase 1: Create a workspace package, add it to the packages list.
 
@@ -280,7 +278,10 @@ mod tests {
     let mut settings = dummy_raze_settings();
     settings.genmode = GenMode::Vendored;
 
-    let planner = BuildPlannerImpl::new(dummy_workspace_crate_metadata(None), settings);
+    let planner = BuildPlannerImpl::new(
+      dummy_workspace_crate_metadata("basic_metadata.json.template"),
+      settings,
+    );
     // N.B. This will fail if we don't correctly ignore workspace crates.
     let planned_build_res = planner.plan_build(Some(PlatformDetails::new(
       "some_target_triple".to_owned(),
@@ -291,23 +292,13 @@ mod tests {
 
   #[test]
   fn test_plan_build_produces_aliased_dependencies() {
-    let toml_file = indoc! { r#"
-    [package]
-    name = "build_produces_aliased_dependencies"
-    version = "0.1.0"
-
-    [lib]
-    path = "not_a_file.rs"
-
-    [dependencies]
-    actix-web = "2.0.0"
-    actix-rt = "1.0.0"
-    "# };
-
     let mut settings = dummy_raze_settings();
     settings.genmode = GenMode::Remote;
 
-    let planner = BuildPlannerImpl::new(dummy_workspace_crate_metadata(Some(toml_file)), settings);
+    let planner = BuildPlannerImpl::new(
+      dummy_workspace_crate_metadata("plan_build_produces_aliased_dependencies.json.template"),
+      settings,
+    );
     // N.B. This will fail if we don't correctly ignore workspace crates.
     let planned_build_res = planner.plan_build(Some(PlatformDetails::new(
       "some_target_triple".to_owned(),
@@ -346,21 +337,13 @@ mod tests {
 
   #[test]
   fn test_plan_build_produces_proc_macro_dependencies() {
-    let toml_file = indoc! { r#"
-    [package]
-    name = "build_produces_proc_macro_dependencies"
-    version = "0.1.0"
-
-    [lib]
-    path = "not_a_file.rs"
-
-    [dependencies]
-    serde = { version = "=1.0.112", features = ["derive"] }
-    "# };
     let mut settings = dummy_raze_settings();
     settings.genmode = GenMode::Remote;
 
-    let planner = BuildPlannerImpl::new(dummy_workspace_crate_metadata(Some(toml_file)), settings);
+    let planner = BuildPlannerImpl::new(
+      dummy_workspace_crate_metadata("plan_build_produces_proc_macro_dependencies.json.template"),
+      settings,
+    );
     let planned_build = planner
       .plan_build(Some(PlatformDetails::new(
         "some_target_triple".to_owned(),
@@ -393,21 +376,15 @@ mod tests {
 
   #[test]
   fn test_plan_build_produces_build_proc_macro_dependencies() {
-    let toml_file = indoc! { r#"
-    [package]
-    name = "build_produces_build_proc_macro_dependencies"
-    version = "0.1.0"
-
-    [lib]
-    path = "not_a_file.rs"
-
-    [dependencies]
-    markup5ever = "=0.10.0"
-    "# };
     let mut settings = dummy_raze_settings();
     settings.genmode = GenMode::Remote;
 
-    let planner = BuildPlannerImpl::new(dummy_workspace_crate_metadata(Some(toml_file)), settings);
+    let planner = BuildPlannerImpl::new(
+      dummy_workspace_crate_metadata(
+        "plan_build_produces_build_proc_macro_dependencies.json.template",
+      ),
+      settings,
+    );
     let planned_build = planner
       .plan_build(Some(PlatformDetails::new(
         "some_target_triple".to_owned(),
@@ -440,19 +417,10 @@ mod tests {
 
   #[test]
   fn test_subplan_produces_crate_root_with_forward_slash() {
-    let toml_file = indoc! { r#"
-    [package]
-    name = "subplan_produces_crate_root_with_forward_slash"
-    version = "0.1.0"
-
-    [lib]
-    path = "not_a_file.rs"
-
-    [dependencies]
-    markup5ever = "=0.10.0"
-    "# };
     let planner = BuildPlannerImpl::new(
-      dummy_workspace_crate_metadata(Some(toml_file)),
+      dummy_workspace_crate_metadata(
+        "subplan_produces_crate_root_with_forward_slash.json.template",
+      ),
       dummy_raze_settings(),
     );
     let planned_build = planner
@@ -468,8 +436,20 @@ mod tests {
     );
   }
 
-  fn dummy_binary_dependency_metadata() -> (RazeMetadata, RazeSettings) {
-    let (fetcher, server, index_dir) = dummy_raze_metadata_fetcher();
+  fn dummy_binary_dependency_metadata(is_remote_genmode: bool) -> (RazeMetadata, RazeSettings) {
+    let (mut fetcher, server, index_dir) = dummy_raze_metadata_fetcher();
+
+    // Only in cases where `RazeSettings::genmode == "Remote"` do we exepct the metadata to be anything different
+    // than the standard metadata. So we use a generated template to represent that state.
+    let dummy_metadata_fetcher = DummyCargoMetadataFetcher {
+      metadata_template: if is_remote_genmode {
+        Some("dummy_binary_dependency_remote.json.template".to_string())
+      } else {
+        Some("basic_metadata.json.template".to_string())
+      },
+    };
+    fetcher.set_metadata_fetcher(Box::new(dummy_metadata_fetcher));
+
     let mock = mock_remote_crate("some-binary-crate", "3.3.3", &server);
     let dir = mock_crate_index(
       &to_index_crates_map(vec![("some-binary-crate", "3.3.3")]),
@@ -497,7 +477,7 @@ mod tests {
 
   #[test]
   fn test_binary_dependencies_remote_genmode() {
-    let (raze_metadata, mut settings) = dummy_binary_dependency_metadata();
+    let (raze_metadata, mut settings) = dummy_binary_dependency_metadata(true);
     settings.genmode = GenMode::Remote;
 
     let planner = BuildPlannerImpl::new(raze_metadata, settings);
@@ -524,7 +504,7 @@ mod tests {
 
   #[test]
   fn test_binary_dependencies_vendored_genmode() {
-    let (raze_metadata, mut settings) = dummy_binary_dependency_metadata();
+    let (raze_metadata, mut settings) = dummy_binary_dependency_metadata(false);
     settings.genmode = GenMode::Vendored;
 
     let planner = BuildPlannerImpl::new(raze_metadata, settings);
@@ -643,7 +623,10 @@ mod tests {
       crate::settings::load_settings(&files.toml_path).unwrap()
     };
 
-    let planner = BuildPlannerImpl::new(dummy_workspace_crate_metadata(Some(toml_file)), settings);
+    let planner = BuildPlannerImpl::new(
+      dummy_workspace_crate_metadata("semver_matching.json.template"),
+      settings,
+    );
 
     // N.B. This will fail if we don't correctly ignore workspace crates.
     let planned_build_res = planner.plan_build(Some(PlatformDetails::new(
@@ -720,6 +703,11 @@ mod tests {
   }
 
   fn dummy_workspace_member_toml_contents(name: &str, dep_version: &str) -> String {
+    assert!(
+      dep_version == "0.2.1" || dep_version == "0.1.0",
+      "The `dummy_workspace_members_metadata` template was generated with these versions, if \
+       something else is passed, that file will need to be regenerated"
+    );
     indoc::formatdoc! { r#"
       [package]
       name = "{name}"
@@ -734,7 +722,10 @@ mod tests {
   }
 
   fn dummy_workspace_members_metadata() -> RazeMetadata {
-    let (fetcher, _server, _index_dir) = dummy_raze_metadata_fetcher();
+    let (mut fetcher, _server, _index_dir) = dummy_raze_metadata_fetcher();
+    fetcher.set_metadata_fetcher(Box::new(DummyCargoMetadataFetcher {
+      metadata_template: Some("dummy_workspace_members_metadata.json.template".to_string()),
+    }));
 
     let workspace_toml = indoc! { r#"
       [workspace]

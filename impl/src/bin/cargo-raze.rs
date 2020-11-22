@@ -24,7 +24,7 @@ use anyhow::Result;
 use docopt::Docopt;
 
 use cargo_raze::{
-  metadata::{CargoMetadataFetcher, CargoWorkspaceFiles, MetadataFetcher},
+  metadata::{CargoWorkspaceFiles, RazeMetadataFetcher},
   planning::{BuildPlanner, BuildPlannerImpl},
   rendering::{bazel::BazelRenderer, BuildRenderer, RenderDetails},
   settings::RazeSettings,
@@ -87,13 +87,13 @@ fn main() -> Result<()> {
   }
 
   // Fetch metadata
-  let metadata_fetcher: Box<dyn MetadataFetcher> = match options.flag_cargo_bin_path {
-    Some(ref cargo_bin_path) => Box::new(CargoMetadataFetcher::new(
+  let metadata_fetcher: RazeMetadataFetcher = match options.flag_cargo_bin_path {
+    Some(ref cargo_bin_path) => RazeMetadataFetcher::new(
       cargo_bin_path,
       Url::parse(&settings.registry)?,
       Url::parse(&settings.index_url)?,
-    )),
-    None => Box::new(CargoMetadataFetcher::default()),
+    ),
+    None => RazeMetadataFetcher::default(),
   };
   let toml_path = PathBuf::from("./Cargo.toml");
   let lock_path_opt = fs::metadata("./Cargo.lock")
