@@ -35,6 +35,7 @@ use crate::{
   metadata::RazeMetadata,
   planning::license,
   settings::{format_registry_url, CrateSettings, GenMode, RazeSettings},
+  util::get_package_ident,
   util::get_workspace_member_path,
   util::{
     self, filter_bazel_triples, generate_bazel_conditions, get_matching_bazel_triples,
@@ -43,7 +44,6 @@ use crate::{
 };
 
 use super::{
-  checks,
   crate_catalog::{CrateCatalog, CrateCatalogEntry},
   PlannedBuild,
 };
@@ -107,18 +107,9 @@ pub struct WorkspaceSubplanner<'planner> {
 impl<'planner> WorkspaceSubplanner<'planner> {
   /** Produces a planned build using internal state. */
   pub fn produce_planned_build(&self) -> Result<PlannedBuild> {
-    // Check for errors
-    checks::check_resolve_matches_packages(&self.crate_catalog.metadata)?;
-    if self.settings.genmode == GenMode::Vendored {
-      checks::check_all_vendored(self.crate_catalog.entries(), &self.settings.workspace_path)?;
-    }
-
-    // Check for warnings
-    let packages: Vec<&Package> = self.crate_catalog.metadata.packages.iter().collect();
-    checks::warn_unused_settings(&self.settings.crates, &packages);
-
     // Produce planned build
     let crate_contexts = self.produce_crate_contexts()?;
+
     Ok(PlannedBuild {
       workspace_context: self.produce_workspace_context(),
       crate_contexts,
@@ -425,7 +416,10 @@ impl<'planner> CrateSubplanner<'planner> {
         .package();
 
       // Skip settings-indicated deps to skip
-      if all_skipped_deps.contains(&format!("{}-{}", dep_package.name, dep_package.version)) {
+      if all_skipped_deps.contains(&get_package_ident(
+        &dep_package.name,
+        &dep_package.version.to_string(),
+      )) {
         continue;
       }
 

@@ -23,7 +23,7 @@ use crate::{
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
 };
 
-use std::error::Error;
+use std::{convert::TryInto, error::Error, path::PathBuf};
 
 macro_rules! unwind_tera_error {
   ($err:ident) => {{
@@ -213,18 +213,23 @@ fn include_additional_build_file(
 ) -> Result<String> {
   match &package.raze_settings.additional_build_file {
     Some(file_path) => {
+      let validated_path: &PathBuf = file_path.try_into()?;
+      let valdated_name: &String = file_path.into();
       let additional_content =
-        std::fs::read_to_string(file_path).map_err(|e| RazeError::Rendering {
+        std::fs::read_to_string(validated_path).map_err(|e| RazeError::Rendering {
           crate_name_opt: Some(package.pkg_name.to_owned()),
-          message: format!("failed to read additional_build_file: {}", e),
+          message: format!(
+            "failed to read additional_build_file '{}': {}",
+            validated_path.display(),
+            e
+          ),
         })?;
 
       Ok(format!(
         "{}\n# Additional content from {}\n{}",
-        existing_contents, file_path, additional_content
+        existing_contents, valdated_name, additional_content
       ))
     },
-
     None => Ok(existing_contents),
   }
 }
@@ -344,7 +349,7 @@ impl BuildRenderer for BazelRenderer {
         path: crates_bzl_pkg_file,
         contents: self
           .internal_renderer
-          .render("templates/partials/header.template", &Context::new())?,
+          .render("templates/partials/header.template", &tera::Context::new())?,
       });
     }
 
@@ -357,18 +362,20 @@ mod tests {
   use hamcrest2::{core::expect, prelude::*};
 
   use semver::Version;
+  use tempfile::TempDir;
 
   use crate::{
     context::*,
     planning::PlannedBuild,
     rendering::{FileOutputs, RenderDetails},
+    settings::AdditionalBuildFile,
     settings::CrateSettings,
     testing::basic_lock_contents,
   };
 
   use super::*;
 
-  use std::{path::PathBuf, str::FromStr};
+  use std::{fs, path::PathBuf, str::FromStr};
 
   fn dummy_render_details(buildfile_suffix: &str) -> RenderDetails {
     RenderDetails {
@@ -667,9 +674,19 @@ mod tests {
 
   #[test]
   fn additional_build_file_included() {
+    let tmp_dir = TempDir::new().unwrap();
+    fs::write(
+      tmp_dir.as_ref().join("some_additional_build_file"),
+      "This is some additional BUILD file.",
+    )
+    .unwrap();
+
     let file_outputs = render_crates_for_test(vec![CrateContext {
       raze_settings: CrateSettings {
-        additional_build_file: Some("README.md".into()),
+        additional_build_file: Some(AdditionalBuildFile::Validated {
+          name: "some_additional_build_file".to_owned(),
+          path: tmp_dir.as_ref().join("some_additional_build_file"),
+        }),
         ..Default::default()
       },
       ..dummy_library_crate()
@@ -680,7 +697,7 @@ mod tests {
     );
 
     expect(
-      crate_build_contents.contains("# Additional content from README.md"),
+      crate_build_contents.contains("# Additional content from some_additional_build_file"),
       format!(
         "expected crate build contents to include additional_build_file, but it just contained \
          [{}]",

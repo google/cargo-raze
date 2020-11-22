@@ -16,9 +16,10 @@ use crate::{
   error::RazeError,
   metadata::{DEFAULT_CRATE_INDEX_URL, DEFAULT_CRATE_REGISTRY_URL},
 };
+use anyhow::anyhow;
 use semver::VersionReq;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fs::File, io::Read, path::Path};
+use std::{collections::HashMap, convert::TryFrom, fs::File, io::Read, path::Path, path::PathBuf};
 
 pub type CrateSettingsPerVersion = HashMap<VersionReq, CrateSettings>;
 
@@ -148,6 +149,55 @@ pub struct RazeSettings {
    */
   #[serde(default = "default_raze_settings_rust_rules_workspace_name")]
   pub rust_rules_workspace_name: String,
+
+  /**
+   * The expected path relative to the `Cargo.toml` file where vendored sources can
+   * be found. This should match the path passed to the `cargo vendor` command. eg:
+   * `cargo vendor -q --versioned-dirs "cargo/vendor"
+   */
+  #[serde(default = "default_raze_settings_vendor_dir")]
+  pub vendor_dir: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum AdditionalBuildFile {
+  Raw(String),
+  Validated { name: String, path: PathBuf },
+}
+
+impl From<&str> for AdditionalBuildFile {
+  fn from(value: &str) -> Self {
+    AdditionalBuildFile::Raw(value.to_owned())
+  }
+}
+
+impl<'build_file> From<&'build_file AdditionalBuildFile> for &'build_file String {
+  fn from(value: &'build_file AdditionalBuildFile) -> Self {
+    match value {
+      AdditionalBuildFile::Raw(name) => name,
+      AdditionalBuildFile::Validated {
+        name,
+        path: _,
+      } => name,
+    }
+  }
+}
+
+impl<'build_file> TryFrom<&'build_file AdditionalBuildFile> for &'build_file PathBuf {
+  type Error = anyhow::Error;
+
+  fn try_from(value: &'build_file AdditionalBuildFile) -> Result<Self, Self::Error> {
+    match value {
+      AdditionalBuildFile::Raw(_) => Err(anyhow!(
+        "`AdditionalBuildFile::Raw` cannot be converted to PathBuf"
+      )),
+      AdditionalBuildFile::Validated {
+        name: _,
+        path,
+      } => Ok(path),
+    }
+  }
 }
 
 /** Override settings for individual crates (as part of `RazeSettings`). */
@@ -271,7 +321,7 @@ pub struct CrateSettings {
    * the crate through a combination of additional_build_file and additional_deps.
    */
   #[serde(default)]
-  pub additional_build_file: Option<String>,
+  pub additional_build_file: Option<AdditionalBuildFile>,
 }
 
 /**
@@ -344,6 +394,10 @@ fn default_raze_settings_rust_rules_workspace_name() -> String {
   "io_bazel_rules_rust".to_owned()
 }
 
+fn default_raze_settings_vendor_dir() -> String {
+  "vendor".to_owned()
+}
+
 fn default_crate_settings_field_gen_buildrs() -> Option<bool> {
   None
 }
@@ -367,8 +421,90 @@ pub fn format_registry_url(registry_url: &str, name: &str, version: &str) -> Str
     .replace("{version}", version)
 }
 
+fn validate_create_setting_additional_build_file_is_relative(
+  file_path: &Path,
+  crate_name: &str,
+  version: &VersionReq,
+) -> Result<(), RazeError> {
+  if file_path.is_absolute() {
+    return Err(RazeError::Config {
+      field_path_opt: Some(format!(
+        "raze.crates.{}.{}.additional_build_file",
+        crate_name,
+        version.to_string()
+      )),
+      message: "additional_build_file flags should be reletive paths from the manifest containing \
+                the definition"
+        .to_owned(),
+    });
+  }
+
+  Ok(())
+}
+
+fn validate_create_setting_additional_build_file(
+  additional_build_file: &mut &mut AdditionalBuildFile,
+  toml_path: &Path,
+  crate_name: &str,
+  version: &VersionReq,
+) -> Result<(), RazeError> {
+  match additional_build_file {
+    AdditionalBuildFile::Raw(name) => {
+      **additional_build_file = {
+        let file_path = PathBuf::from(&name);
+        validate_create_setting_additional_build_file_is_relative(&file_path, crate_name, version)?;
+
+        // Canonicalize the path of the additional build file
+        match toml_path.join(&file_path).canonicalize() {
+          Ok(path) => AdditionalBuildFile::Validated {
+            name: name.clone(),
+            path,
+          },
+          Err(err) => {
+            return Err(RazeError::Config {
+              field_path_opt: Some(format!(
+                "raze.crates.{}.{}.additional_build_file",
+                crate_name,
+                version.to_string()
+              )),
+              message: format!(
+                "Failed to canonicalize string with error: {}",
+                err.to_string()
+              ),
+            });
+          },
+        }
+      }
+    },
+    _ => { /* Do nothing for any other context */ },
+  }
+
+  Ok(())
+}
+
+/** Ensures crate settings which specify additional build files have canonicalized paths */
+fn validate_crate_settings(settings: &mut RazeSettings, toml_path: &Path) -> Result<(), RazeError> {
+  for (crate_name, crate_settings) in settings.crates.iter_mut() {
+    for (version, crate_settings) in crate_settings.iter_mut() {
+      if crate_settings.additional_build_file.is_none() {
+        continue;
+      }
+
+      let additional_build_file: &mut &mut AdditionalBuildFile =
+        &mut crate_settings.additional_build_file.as_mut().unwrap();
+      validate_create_setting_additional_build_file(
+        additional_build_file,
+        toml_path,
+        crate_name,
+        version,
+      )?;
+    }
+  }
+  Ok(())
+}
+
 /** Verifies that the provided settings make sense. */
-fn validate_settings(settings: &mut RazeSettings) -> Result<(), RazeError> {
+fn validate_settings(settings: &mut RazeSettings, toml_path: &Path) -> Result<(), RazeError> {
   if !settings.workspace_path.starts_with("//") {
     return Err(
       RazeError::Config {
@@ -394,6 +530,8 @@ fn validate_settings(settings: &mut RazeSettings) -> Result<(), RazeError> {
     );
     settings.genmode = GenMode::Vendored;
   }
+
+  validate_crate_settings(settings, toml_path)?;
 
   Ok(())
 }
@@ -466,7 +604,9 @@ pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings,
   };
 
   let mut settings = parse_raze_settings(toml_contents)?;
-  validate_settings(&mut settings)?;
+
+  // UNWRAP: Safe due to the fact that `path` was read as a file earlier
+  validate_settings(&mut settings, path.parent().unwrap())?;
 
   Ok(settings)
 }
@@ -496,6 +636,7 @@ pub mod tests {
       registry: default_raze_settings_registry(),
       index_url: default_raze_settings_index_url(),
       rust_rules_workspace_name: default_raze_settings_rust_rules_workspace_name(),
+      vendor_dir: default_raze_settings_vendor_dir(),
     }
   }
 

@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod checks;
 mod crate_catalog;
 mod license;
 mod subplanners;
 
 use anyhow::Result;
-
 use cargo_lock::Lockfile;
 
 use crate::{
@@ -86,6 +84,7 @@ mod tests {
   use std::{collections::HashMap, path::PathBuf};
 
   use crate::{
+    checks::tests::dummy_modified_metadata,
     metadata::tests::{
       dummy_raze_metadata, dummy_raze_metadata_fetcher, DummyCargoMetadataFetcher,
     },
@@ -105,7 +104,7 @@ mod tests {
     metadata.resolve = None;
     RazeMetadata {
       metadata,
-      workspace_root: PathBuf::from("/some/crate"),
+      cargo_workspace_root: PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
     }
@@ -121,29 +120,6 @@ mod tests {
     assert!(res.is_err());
   }
 
-  fn dummy_package_dropping_metadata() -> RazeMetadata {
-    let raze_metadata = dummy_raze_metadata();
-    let mut metadata = raze_metadata.metadata.clone();
-    metadata.packages.clear();
-    RazeMetadata {
-      metadata,
-      workspace_root: PathBuf::from("/some/crate"),
-      lockfile: None,
-      checksums: HashMap::new(),
-    }
-  }
-
-  #[test]
-  fn test_plan_build_missing_package_in_metadata() {
-    let planner = BuildPlannerImpl::new(dummy_package_dropping_metadata(), dummy_raze_settings());
-    let planned_build_res = planner.plan_build(Some(PlatformDetails::new(
-      "some_target_triple".to_owned(),
-      Vec::new(), /* attrs */
-    )));
-
-    assert!(planned_build_res.is_err());
-  }
-
   #[test]
   fn test_plan_build_minimum_workspace() {
     let planner = BuildPlannerImpl::new(dummy_raze_metadata(), dummy_raze_settings());
@@ -156,43 +132,9 @@ mod tests {
   }
 
   fn dummy_injecting_metadata() -> RazeMetadata {
-    let raze_metadata = dummy_raze_metadata();
-    let mut metadata = raze_metadata.metadata.clone();
-
-    // Phase 1: Add a dummy dependency to the dependency graph.
-
-    let mut resolve = metadata.resolve.take().unwrap();
-    let mut new_node = resolve.nodes[0].clone();
-    let name = "test_dep";
-    let name_id = "test_dep_id";
-
-    // Add the new dependency.
-    let id = PackageId {
-      repr: name_id.to_string(),
-    };
-    resolve.nodes[0].dependencies.push(id.clone());
-
-    // Add the new node representing the dependency.
-    new_node.id = id;
-    new_node.deps = Vec::new();
-    new_node.dependencies = Vec::new();
-    new_node.features = Vec::new();
-    resolve.nodes.push(new_node);
-    metadata.resolve = Some(resolve);
-
-    // Phase 2: Add the dummy dependency to the package list.
-
-    let mut new_package = metadata.packages[0].clone();
-    new_package.name = name.to_string();
-    new_package.id = PackageId {
-      repr: name_id.to_string(),
-    };
-    new_package.version = Version::new(0, 0, 1);
-    metadata.packages.push(new_package);
-
     RazeMetadata {
-      metadata,
-      workspace_root: PathBuf::from("/some/crate"),
+      metadata: dummy_modified_metadata(),
+      cargo_workspace_root: PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
     }
@@ -220,19 +162,6 @@ mod tests {
       "{} should be sanitized",
       dep.workspace_path_to_crate
     );
-  }
-
-  #[test]
-  fn test_plan_build_verifies_vendored_state() {
-    let mut settings = dummy_raze_settings();
-    settings.genmode = GenMode::Vendored;
-    let planner = BuildPlannerImpl::new(dummy_injecting_metadata(), settings);
-    let planned_build_res = planner.plan_build(Some(PlatformDetails::new(
-      "some_target_triple".to_owned(),
-      Vec::new(), /* attrs */
-    )));
-
-    assert!(planned_build_res.is_err());
   }
 
   fn dummy_workspace_crate_metadata(metadata_template: &str) -> RazeMetadata {
@@ -267,7 +196,7 @@ mod tests {
 
     RazeMetadata {
       metadata,
-      workspace_root: PathBuf::from("/some/crate"),
+      cargo_workspace_root: PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
     }

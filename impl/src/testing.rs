@@ -24,7 +24,7 @@ use std::{
 };
 use tempfile::TempDir;
 
-use crate::metadata::CargoWorkspaceFiles;
+use crate::{metadata::CargoWorkspaceFiles, util::get_package_ident};
 
 pub const fn basic_toml_contents() -> &'static str {
   indoc! { r#"
@@ -209,7 +209,7 @@ pub fn mock_remote_crate<'server>(
     let mut tar = tar::Builder::new(enc);
     tar
       .append_dir_all(
-        format!("{}-{}", name, version),
+        get_package_ident(name, version),
         dir.as_ref().join("archive"),
       )
       .unwrap();
