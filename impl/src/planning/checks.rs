@@ -14,17 +14,13 @@
 
 use std::{
   collections::{HashMap, HashSet},
-  iter::FromIterator,
   env, fs,
+  iter::FromIterator,
 };
 
 use anyhow::Result;
 
-use crate::{
-  error::RazeError,
-  settings::CrateSettingsPerVersion,
-  util::collect_up_to,
-};
+use crate::{error::RazeError, settings::CrateSettingsPerVersion, util::collect_up_to};
 
 use super::crate_catalog::{CrateCatalogEntry, VENDOR_DIR};
 
@@ -55,9 +51,7 @@ pub fn check_all_vendored(
   }
 
   // Oops, missing some crates. Yield a nice message
-  let expected_full_path = env::current_dir()
-    .unwrap()
-    .join(format!("./{}", VENDOR_DIR));
+  let expected_full_path = env::current_dir().unwrap().join(VENDOR_DIR);
 
   Err(
     RazeError::Planning {
@@ -129,19 +123,25 @@ pub fn warn_unused_settings(
   }
 
   // 1st check names
-  let pkg_names = all_packages.iter().map(|pkg| &pkg.name).collect::<HashSet<_>>();
+  let pkg_names = all_packages
+    .iter()
+    .map(|pkg| &pkg.name)
+    .collect::<HashSet<_>>();
   let setting_names = HashSet::from_iter(all_crate_settings.keys());
   for missing in setting_names.difference(&pkg_names) {
     eprintln!("Found unused raze crate settings for `{}`", missing);
   }
 
   // Then check versions
-  all_crate_settings.iter()
+  all_crate_settings
+    .iter()
     .flat_map(|(name, settings)| settings.iter().map(move |x| (x.0, name)))
     .filter(|(ver_req, _)| !all_packages.iter().any(|pkg| ver_req.matches(&pkg.version)))
     .for_each(|(ver_req, name)| {
-      eprintln!("Found unused raze settings for version `{}` against crate `{}`",
-          ver_req, name);
+      eprintln!(
+        "Found unused raze settings for version `{}` against crate `{}`",
+        ver_req, name
+      );
     });
 }
 

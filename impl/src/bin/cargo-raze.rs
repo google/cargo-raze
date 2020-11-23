@@ -59,14 +59,14 @@ Usage:
     cargo raze (-V | --version)
 
 Options:
-    -h, --help                         Print this message
-    -V, --version                      Print version info and exit
-    -v, --verbose                      Use verbose output
-    -q, --quiet                        No output printed to stdout
-    --color=<WHEN>                     Coloring: auto, always, never
-    -d, --dryrun                       Do not emit any files
-    --cargo-bin-path=<PATH>            Path to the cargo binary to be used for loading workspace metadata
-    --output=<PATH>                    Path to output the generated into.
+    -h, --help                          Print this message
+    -V, --version                       Print version info and exit
+    -v, --verbose                       Use verbose output
+    -q, --quiet                         No output printed to stdout
+    --color=<WHEN>                      Coloring: auto, always, never
+    -d, --dryrun                        Do not emit any files
+    --cargo-bin-path=<PATH>             Path to the cargo binary to be used for loading workspace metadata
+    --output=<PATH>                     Path to output the generated into.
 "#;
 
 fn main() -> Result<()> {

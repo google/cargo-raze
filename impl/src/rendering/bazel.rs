@@ -363,7 +363,7 @@ mod tests {
     planning::PlannedBuild,
     rendering::{FileOutputs, RenderDetails},
     settings::CrateSettings,
-    testing::basic_lock,
+    testing::basic_lock_contents,
   };
 
   use super::*;
@@ -694,7 +694,7 @@ mod tests {
   fn test_generate_lockfile() {
     let render_details = dummy_render_details("BUILD.bazel");
     let mut planned_build = dummy_planned_build(Vec::new());
-    planned_build.lockfile = Some(cargo_lock::Lockfile::from_str(basic_lock()).unwrap());
+    planned_build.lockfile = Some(cargo_lock::Lockfile::from_str(basic_lock_contents()).unwrap());
 
     let render_result = BazelRenderer::new()
       .render_remote_planned_build(&render_details, &planned_build)

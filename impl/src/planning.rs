@@ -293,7 +293,7 @@ mod tests {
   fn test_plan_build_produces_aliased_dependencies() {
     let toml_file = indoc! { r#"
     [package]
-    name = "advanced_toml"
+    name = "build_produces_aliased_dependencies"
     version = "0.1.0"
 
     [lib]
@@ -348,7 +348,7 @@ mod tests {
   fn test_plan_build_produces_proc_macro_dependencies() {
     let toml_file = indoc! { r#"
     [package]
-    name = "advanced_toml"
+    name = "build_produces_proc_macro_dependencies"
     version = "0.1.0"
 
     [lib]
@@ -395,7 +395,7 @@ mod tests {
   fn test_plan_build_produces_build_proc_macro_dependencies() {
     let toml_file = indoc! { r#"
     [package]
-    name = "advanced_toml"
+    name = "build_produces_build_proc_macro_dependencies"
     version = "0.1.0"
 
     [lib]
@@ -442,7 +442,7 @@ mod tests {
   fn test_subplan_produces_crate_root_with_forward_slash() {
     let toml_file = indoc! { r#"
     [package]
-    name = "advanced_toml"
+    name = "subplan_produces_crate_root_with_forward_slash"
     version = "0.1.0"
 
     [lib]
@@ -568,7 +568,7 @@ mod tests {
     # The following are negative tests aka test they dont match
     lexical-core = "0.7.4"
 
-    [raze]
+    [package.metadata.raze]
     workspace_path = "//cargo"
     genmode = "Remote"
 
@@ -578,7 +578,7 @@ mod tests {
 
     # Test bare versions
     # AKA: `==0.9.24`
-    [raze.crates.openssl-sys.'0.9.24']
+    [package.metadata.raze.crates.openssl-sys.'0.9.24']
     additional_flags = [
       # Vendored openssl is 1.0.2m
       "--cfg=ossl102",
@@ -591,7 +591,7 @@ mod tests {
 
     # Test `^` range
     # AKA: `>=0.10.0 < 0.11.0-0`
-    [raze.crates.openssl.'^0.10']
+    [package.metadata.raze.crates.openssl.'^0.10']
     additional_flags = [
       # Vendored openssl is 1.0.2m
       "--cfg=ossl102",
@@ -601,12 +601,12 @@ mod tests {
 
     # Test `*` or globs
     # AKA: `>=0.21.0 < 0.22.0-0`
-    [raze.crates.clang-sys.'0.21.*']
+    [package.metadata.raze.crates.clang-sys.'0.21.*']
     gen_buildrs = true
 
     # Test `~` range
     # AKA: `>=2.0.0 < 3.0.0-0`
-    [raze.crates.unicase.'~2']
+    [package.metadata.raze.crates.unicase.'~2']
     additional_flags = [
       # Rustc is 1.15, enable all optional settings
       "--cfg=__unicase__iter_cmp",
@@ -615,24 +615,24 @@ mod tests {
 
     # Test `*` full glob
     # AKA: Get out of my way raze and just give me this for everything
-    [raze.crates.bindgen.'*']
+    [package.metadata.raze.crates.bindgen.'*']
     gen_buildrs = true # needed to build bindgen
     extra_aliased_targets = [
         "cargo_bin_bindgen"
     ]
 
     # This should not match unicase, and should not error
-    [raze.crates.unicase.'2.6.0']
+    [package.metadata.raze.crates.unicase.'2.6.0']
     additional_flags = [
         "--cfg=SHOULD_NOT_MATCH"
     ]
 
-    [raze.crates.lexical-core.'~0.6']
+    [package.metadata.raze.crates.lexical-core.'~0.6']
     additional_flags = [
         "--cfg=SHOULD_NOT_MATCH"
     ]
 
-    [raze.crates.lexical-core.'^0.6']
+    [package.metadata.raze.crates.lexical-core.'^0.6']
     additional_flags = [
         "--cfg=SHOULD_NOT_MATCH"
     ]
