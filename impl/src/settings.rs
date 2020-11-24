@@ -54,8 +54,12 @@ pub struct RazeSettings {
   pub workspace_path: String,
 
   /**
-   * The path within each workspace member directory where dependencies of that
-   * specifc package will be rendered.
+   * The relative path within each workspace member directory where aliases the member's dependencies should be rendered. 
+   * 
+   * By default, a new directory will be created next to the `Cargo.toml` file named `cargo` for users to refer to them
+   * as. For example, the toml file `//my/package:Cargo.toml`  will have aliases rendered as something like 
+   * `//my/package/cargo:dependency`. Note that setting this value to `"."` will cause the BUILD file in the same package 
+   * as the Cargo.toml file to be overwritten.
    */
   #[serde(default = "default_package_aliases_dir")]
   pub package_aliases_dir: String,

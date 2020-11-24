@@ -96,6 +96,10 @@ log = "=0.3.6"
 # the current working directory is used.
 workspace_path = "//cargo"
 
+# This causes aliases for dependencies to be rendered in the BUILD
+# file located next to this `Cargo.toml` file.
+package_aliases_dir = "."
+
 # The target to generate BUILD rules for.
 target = "x86_64-unknown-linux-gnu"
 ```
@@ -143,6 +147,10 @@ Generate a Cargo.toml, similar to Vendoring mode but add a new `genmode` directi
 # WORKSPACE.bazel/WORKSPACE file). If no workspace file is found,
 # the current working directory is used.
 workspace_path = "//cargo"
+
+# This causes aliases for dependencies to be rendered in the BUILD
+# file located next to this `Cargo.toml` file.
+package_aliases_dir = "."
 
 # The target to generate BUILD rules for.
 target = "x86_64-unknown-linux-gnu"
