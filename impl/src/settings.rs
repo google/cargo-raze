@@ -57,8 +57,8 @@ pub struct RazeSettings {
    * The path within each workspace member directory where dependencies of that
    * specifc package will be rendered.
    */
-  #[serde(default = "default_workspace_member_dir")]
-  pub workspace_member_dir: String,
+  #[serde(default = "default_package_aliases_dir")]
+  pub package_aliases_dir: String,
 
   /**
    * If true, will force the `workspace_path` setting will be treated as a Bazel label.
@@ -368,7 +368,7 @@ fn default_crate_settings_field_data_attr() -> Option<String> {
   None
 }
 
-fn default_workspace_member_dir() -> String {
+fn default_package_aliases_dir() -> String {
   "cargo".to_string()
 }
 
@@ -566,7 +566,7 @@ pub mod tests {
   pub fn dummy_raze_settings() -> RazeSettings {
     RazeSettings {
       workspace_path: "//cargo".to_owned(),
-      workspace_member_dir: "cargo".to_owned(),
+      package_aliases_dir: "cargo".to_owned(),
       target: Some("x86_64-unknown-linux-gnu".to_owned()),
       targets: None,
       crates: HashMap::new(),

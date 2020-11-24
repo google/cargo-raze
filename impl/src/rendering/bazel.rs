@@ -197,7 +197,7 @@ impl BazelRenderer {
         path: render_details
           .cargo_root
           .join(member_path)
-          .join(&render_details.workspace_member_output_dir)
+          .join(&render_details.package_aliases_dir)
           .join("BUILD.bazel"),
         contents: rendered_alias_build_file,
       });
@@ -390,7 +390,7 @@ mod tests {
     RenderDetails {
       cargo_root: PathBuf::from("/some/cargo/root"),
       path_prefix: PathBuf::from("./some_render_prefix"),
-      workspace_member_output_dir: "cargo".to_string(),
+      package_aliases_dir: "cargo".to_string(),
       vendored_buildfile_name: buildfile_suffix.to_owned(),
       bazel_root: PathBuf::from("/some/bazel/root"),
     }

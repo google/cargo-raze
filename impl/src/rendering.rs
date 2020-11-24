@@ -45,7 +45,7 @@ pub struct FileOutputs {
 pub struct RenderDetails {
   pub cargo_root: PathBuf,
   pub path_prefix: PathBuf,
-  pub workspace_member_output_dir: String,
+  pub package_aliases_dir: String,
   pub vendored_buildfile_name: String,
   pub bazel_root: PathBuf,
 }
