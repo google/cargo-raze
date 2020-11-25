@@ -477,7 +477,7 @@ mod tests {
 
   #[test]
   fn test_binary_dependencies_remote_genmode() {
-    let (raze_metadata, mut settings) = dummy_binary_dependency_metadata(true);
+    let (raze_metadata, mut settings) = dummy_binary_dependency_metadata(/*is_remote_genmode=*/true);
     settings.genmode = GenMode::Remote;
 
     let planner = BuildPlannerImpl::new(raze_metadata, settings);
@@ -504,7 +504,7 @@ mod tests {
 
   #[test]
   fn test_binary_dependencies_vendored_genmode() {
-    let (raze_metadata, mut settings) = dummy_binary_dependency_metadata(false);
+    let (raze_metadata, mut settings) = dummy_binary_dependency_metadata(/*is_remote_genmode=*/false);
     settings.genmode = GenMode::Vendored;
 
     let planner = BuildPlannerImpl::new(raze_metadata, settings);

@@ -257,7 +257,7 @@ impl RazeMetadataFetcher {
     // First gather metadata without downloading any dependencies so we can identify any path dependencies.
     let no_deps_metadata = self
       .metadata_fetcher
-      .fetch_metadata(files.toml_path.parent().unwrap(), false)?;
+      .fetch_metadata(files.toml_path.parent().unwrap(), /*include_deps=*/false)?;
 
     // There should be a `Cargo.toml` file in the workspace root
     fs::copy(
@@ -464,7 +464,7 @@ impl RazeMetadataFetcher {
 
     let metadata = self
       .metadata_fetcher
-      .fetch_metadata(cargo_dir.as_ref(), true)?;
+      .fetch_metadata(cargo_dir.as_ref(), /*include_deps=*/true)?;
 
     Ok(RazeMetadata {
       metadata,
