@@ -373,7 +373,7 @@ fn default_crate_settings_field_data_attr() -> Option<String> {
 }
 
 fn default_package_aliases_dir() -> String {
-  "cargo".to_string()
+  ".".to_owned()
 }
 
 fn incompatible_relative_workspace_path() -> bool {
