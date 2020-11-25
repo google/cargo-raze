@@ -1,0 +1,13 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "printer",
+    srcs = ["src/lib.rs"],
+    edition = "2018",
+    deps = [
+        "//remote/cargo_workspace/printer/cargo:ferris_says",
+        "//remote/cargo_workspace/rng",
+    ],
+)

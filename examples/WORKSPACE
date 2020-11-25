@@ -24,6 +24,10 @@ load("//remote/binary_dependencies/cargo:crates.bzl", "remote_binary_dependencie
 
 remote_binary_dependencies_fetch_remote_crates()
 
+load("//remote/cargo_workspace/cargo:crates.bzl", "remote_cargo_workspace_fetch_remote_crates")
+
+remote_cargo_workspace_fetch_remote_crates()
+
 load("//remote/complicated_cargo_library/cargo:crates.bzl", "remote_complicated_cargo_library_fetch_remote_crates")
 
 remote_complicated_cargo_library_fetch_remote_crates()
