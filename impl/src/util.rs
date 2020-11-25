@@ -165,7 +165,10 @@ pub fn filter_bazel_triples(triples: &mut Vec<String>, triples_whitelist: &Vec<S
 /** Returns a list of Bazel targets for use in `select` statements based on a
  * given list of triples.
  */
-pub fn generate_bazel_conditions(triples: &Vec<String>) -> Result<Vec<String>> {
+pub fn generate_bazel_conditions(
+  rust_rules_workspace_name: &str,
+  triples: &Vec<String>,
+) -> Result<Vec<String>> {
   // Sanity check ensuring all strings represent real triples
   for triple in triples.iter() {
     match get_builtin_target_by_triple(triple) {
@@ -178,7 +181,7 @@ pub fn generate_bazel_conditions(triples: &Vec<String>) -> Result<Vec<String>> {
 
   let mut bazel_triples: Vec<String> = triples
     .iter()
-    .map(|triple| format!("@io_bazel_rules_rust//rust/platform:{}", triple))
+    .map(|triple| format!("@{}//rust/platform:{}", rust_rules_workspace_name, triple))
     .collect();
 
   bazel_triples.sort();
@@ -434,35 +437,44 @@ mod tests {
   #[test]
   fn generate_condition_strings() {
     assert_eq!(
-      generate_bazel_conditions(&vec![
-        "aarch64-unknown-linux-gnu".to_string(),
-        "aarch64-apple-ios".to_string(),
-      ])
+      generate_bazel_conditions(
+        "rules_rust",
+        &vec![
+          "aarch64-unknown-linux-gnu".to_string(),
+          "aarch64-apple-ios".to_string(),
+        ]
+      )
       .unwrap(),
       vec![
-        "@io_bazel_rules_rust//rust/platform:aarch64-apple-ios",
-        "@io_bazel_rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+        "@rules_rust//rust/platform:aarch64-apple-ios",
+        "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
       ]
     );
 
     assert_eq!(
-      generate_bazel_conditions(&vec!["aarch64-unknown-linux-gnu".to_string()]).unwrap(),
-      vec!["@io_bazel_rules_rust//rust/platform:aarch64-unknown-linux-gnu"]
+      generate_bazel_conditions("rules_rust", &vec!["aarch64-unknown-linux-gnu".to_string()])
+        .unwrap(),
+      vec!["@rules_rust//rust/platform:aarch64-unknown-linux-gnu"]
     );
 
-    assert!(generate_bazel_conditions(&vec![
-      "aarch64-unknown-linux-gnu".to_string(),
-      "unknown-unknown-unknown".to_string(),
-    ])
+    assert!(generate_bazel_conditions(
+      "rules_rust",
+      &vec![
+        "aarch64-unknown-linux-gnu".to_string(),
+        "unknown-unknown-unknown".to_string(),
+      ]
+    )
     .is_err());
 
-    assert!(generate_bazel_conditions(&vec!["unknown-unknown-unknown".to_string()]).is_err());
+    assert!(
+      generate_bazel_conditions("rules_rust", &vec!["unknown-unknown-unknown".to_string()])
+        .is_err()
+    );
 
-    assert!(generate_bazel_conditions(&vec![
-      "foo".to_string(),
-      "bar".to_string(),
-      "baz".to_string()
-    ])
+    assert!(generate_bazel_conditions(
+      "rules_rust",
+      &vec!["foo".to_string(), "bar".to_string(), "baz".to_string()]
+    )
     .is_err());
   }
 }

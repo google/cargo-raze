@@ -141,6 +141,13 @@ pub struct RazeSettings {
    */
   #[serde(default = "default_raze_settings_index_url")]
   pub index_url: String,
+
+  /**
+   * The name of the [rules_rust](https://github.com/bazelbuild/rules_rust) repository
+   * used in the generated workspace.
+   */
+  #[serde(default = "default_raze_settings_rust_rules_workspace_name")]
+  pub rust_rules_workspace_name: String,
 }
 
 /** Override settings for individual crates (as part of `RazeSettings`). */
@@ -333,6 +340,10 @@ fn default_raze_settings_index_url() -> String {
   DEFAULT_CRATE_INDEX_URL.to_string()
 }
 
+fn default_raze_settings_rust_rules_workspace_name() -> String {
+  "io_bazel_rules_rust".to_owned()
+}
+
 fn default_crate_settings_field_gen_buildrs() -> Option<bool> {
   None
 }
@@ -484,6 +495,7 @@ pub mod tests {
       binary_deps: HashMap::new(),
       registry: default_raze_settings_registry(),
       index_url: default_raze_settings_index_url(),
+      rust_rules_workspace_name: default_raze_settings_rust_rules_workspace_name(),
     }
   }
 
