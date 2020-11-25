@@ -394,7 +394,7 @@ impl RazeMetadataFetcher {
   ) -> Result<Lockfile> {
     let lockfile_path = cargo_dir.join("Cargo.lock");
 
-    // Use the reusable lockfile if one si provided
+    // Use the reusable lockfile if one is provided
     if let Some(override_lockfile) = override_lockfile {
       fs::copy(&override_lockfile, &lockfile_path)?;
       return Lockfile::load(&lockfile_path)
