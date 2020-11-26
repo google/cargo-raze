@@ -128,6 +128,7 @@ pub struct CrateContext {
   pub features: Vec<String>,
   pub workspace_path_to_crate: String,
   pub workspace_member_dependents: Vec<PathBuf>,
+  pub workspace_member_dev_dependents: Vec<PathBuf>,
   pub is_workspace_member_dependency: bool,
   pub is_binary_dependency: bool,
   pub targets: Vec<BuildableTarget>,
@@ -136,6 +137,7 @@ pub struct CrateContext {
   pub source_details: SourceDetails,
   pub sha256: Option<String>,
   pub registry_url: String,
+  pub is_proc_macro: bool,
 
   // TODO(acmcarther): This is used internally by renderer to know where to put the build file. It
   // probably should live somewhere else. Renderer params (separate from context) should live
