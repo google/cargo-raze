@@ -35,7 +35,7 @@ pub trait BuildRenderer {
   ) -> Result<Vec<FileOutputs>>;
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FileOutputs {
   pub path: PathBuf,
   pub contents: String,
@@ -50,4 +50,5 @@ pub struct RenderDetails {
   pub bazel_root: PathBuf,
   pub rust_rules_workspace_name: String,
   pub experimental_api: bool,
+  pub render_package_aliases: bool,
 }

@@ -227,6 +227,7 @@ fn render_files(
     bazel_root: cargo_raze_working_dir,
     rust_rules_workspace_name: settings.rust_rules_workspace_name.clone(),
     experimental_api: settings.experimental_api,
+    render_package_aliases: settings.render_package_aliases,
   };
   let bazel_file_outputs = match &settings.genmode {
     GenMode::Vendored => bazel_renderer.render_planned_build(&render_details, &planned_build)?,
