@@ -142,7 +142,12 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           .iter()
           .find(|pkg| pkg.id == *pkg_id);
         if let Some(pkg) = workspace_memeber {
-          get_workspace_member_path(&pkg.manifest_path, &self.metadata.metadata.workspace_root)
+          // Don't include binary dependencies
+          if self.settings.binary_deps.contains_key(&pkg.name) {
+            None
+          } else {
+            get_workspace_member_path(&pkg.manifest_path, &self.metadata.metadata.workspace_root)
+          }
         } else {
           None
         }
