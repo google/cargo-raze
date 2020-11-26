@@ -467,6 +467,7 @@ fn validate_settings(
  * [`RazeSettings`](crate::settings::RazeSettings)
  */
 #[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct RawRazeSettings {
   #[serde(default)]
   pub workspace_path: Option<String>,
