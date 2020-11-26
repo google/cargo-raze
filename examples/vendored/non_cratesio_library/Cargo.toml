@@ -18,10 +18,17 @@ path = "src/main.rs"
 
 [package.metadata.raze]
 workspace_path = "//vendored/non_cratesio_library/cargo"
-target = "x86_64-unknown-linux-gnu"
+targets = [
+    "aarch64-apple-darwin",
+    "aarch64-unknown-linux-gnu",
+    "x86_64-apple-darwin",
+    "x86_64-pc-windows-msvc",
+    "x86_64-unknown-linux-gnu",
+]
 gen_workspace_prefix = "vendored_non_cratesio_library"
 genmode = "Vendored"
 package_aliases_dir = "cargo"
+default_gen_buildrs = false
 
 [package.metadata.raze.crates.log.'0.4.11']
 additional_flags = [
