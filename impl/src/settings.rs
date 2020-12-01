@@ -703,7 +703,7 @@ fn parse_raze_settings_legacy(metadata: &Metadata) -> Result<RazeSettings> {
 }
 
 /** Parses raze settings from the contents of a `Cargo.toml` file */
-fn parse_raze_settings(metadata: Metadata) -> Result<RazeSettings> {
+fn parse_raze_settings(metadata: &Metadata) -> Result<RazeSettings> {
   // Workspace takes precedence
   let workspace_level_settigns = metadata.workspace_metadata.get("raze");
   if let Some(value) = workspace_level_settigns {
@@ -718,7 +718,7 @@ fn parse_raze_settings(metadata: Metadata) -> Result<RazeSettings> {
   }
 
   // Attempt to load legacy settings but do not allow failures to propogate
-  if let Ok(settings) = parse_raze_settings_legacy(&metadata) {
+  if let Ok(settings) = parse_raze_settings_legacy(metadata) {
     eprintln!(
       "WARNING: The top-level `[raze]` key is deprecated. Please set `[workspace.metadata.raze]` \
        or `[package.metadata.raze]` instead."
@@ -731,8 +731,16 @@ fn parse_raze_settings(metadata: Metadata) -> Result<RazeSettings> {
 }
 
 /** A cargo command wrapper for gathering cargo metadata used to parse [RazeSettings](crate::settings::RazeSettings) */
-struct SettingsMetadataFetcher {
+pub struct SettingsMetadataFetcher {
   pub cargo_bin_path: PathBuf,
+}
+
+impl Default for SettingsMetadataFetcher {
+  fn default() -> SettingsMetadataFetcher {
+    SettingsMetadataFetcher {
+      cargo_bin_path: SYSTEM_CARGO_BIN_PATH.into(),
+    }
+  }
 }
 
 impl MetadataFetcher for SettingsMetadataFetcher {
@@ -754,8 +762,8 @@ impl MetadataFetcher for SettingsMetadataFetcher {
   }
 }
 
-/** Load settings used to configure the functionality of Cargo Raze */
-pub fn load_settings<T: AsRef<Path>>(
+/** Load settings from a given Cargo manifest */
+pub fn load_settings_from_manifest<T: AsRef<Path>>(
   cargo_toml_path: T,
   cargo_bin_path: Option<String>,
 ) -> Result<RazeSettings, RazeError> {
@@ -783,6 +791,11 @@ pub fn load_settings<T: AsRef<Path>>(
     result.unwrap()
   };
 
+  load_settings(&metadata)
+}
+
+/** Load settings used to configure the functionality of Cargo Raze */
+pub fn load_settings(metadata: &Metadata) -> Result<RazeSettings, RazeError> {
   let mut settings = {
     let result = parse_raze_settings(metadata);
     if result.is_err() {
@@ -792,7 +805,7 @@ pub fn load_settings<T: AsRef<Path>>(
     result.unwrap()
   };
 
-  validate_settings(&mut settings, cargo_toml_dir)?;
+  validate_settings(&mut settings, &metadata.workspace_root)?;
 
   Ok(settings)
 }
@@ -856,7 +869,7 @@ pub mod tests {
     let cargo_toml_path = temp_workspace_dir.path().join("Cargo.toml");
     std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
 
-    let settings = load_settings(cargo_toml_path, None).unwrap();
+    let settings = load_settings_from_manifest(cargo_toml_path, None).unwrap();
     assert!(settings.binary_deps.len() > 0);
   }
 
@@ -892,7 +905,7 @@ pub mod tests {
     let cargo_toml_path = temp_workspace_dir.path().join("Cargo.toml");
     std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
 
-    let settings = load_settings(cargo_toml_path, /*cargo_bin_path=*/ None).unwrap();
+    let settings = load_settings_from_manifest(cargo_toml_path, /*cargo_bin_path=*/ None).unwrap();
     assert!(settings.binary_deps.len() > 0);
   }
 
@@ -925,7 +938,7 @@ pub mod tests {
       std::fs::write(crate_toml, toml_contents).unwrap();
     }
 
-    let settings = load_settings(files.toml_path, None).unwrap();
+    let settings = load_settings_from_manifest(files.toml_path, None).unwrap();
     assert_eq!(&settings.workspace_path, "//workspace_path/raze");
     assert_eq!(settings.genmode, GenMode::Remote);
     assert_eq!(settings.crates.len(), 2);

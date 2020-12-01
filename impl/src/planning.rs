@@ -590,7 +590,7 @@ mod tests {
 
     let settings = {
       let (_temp_dir, files) = make_workspace(toml_file, None);
-      crate::settings::load_settings(&files.toml_path, None).unwrap()
+      crate::settings::load_settings_from_manifest(&files.toml_path, None).unwrap()
     };
 
     let planner = BuildPlannerImpl::new(
