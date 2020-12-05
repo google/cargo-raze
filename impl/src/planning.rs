@@ -477,8 +477,17 @@ mod tests {
 
   #[test]
   fn test_binary_dependencies_remote_genmode() {
-    let (raze_metadata, mut settings) = dummy_binary_dependency_metadata(/*is_remote_genmode=*/true);
+    let (raze_metadata, mut settings) =
+      dummy_binary_dependency_metadata(/*is_remote_genmode=*/ true);
     settings.genmode = GenMode::Remote;
+
+    // Make sure the dummy settings contain the information we expect
+    let version = Version::parse("3.3.3").unwrap();
+    assert!(settings.binary_deps.contains_key("some-binary-crate"));
+    assert_eq!(
+      settings.binary_deps.get("some-binary-crate").unwrap().req(),
+      version.to_string()
+    );
 
     let planner = BuildPlannerImpl::new(raze_metadata, settings);
     let planned_build = planner
@@ -487,8 +496,6 @@ mod tests {
         Vec::new(), /* attrs */
       )))
       .unwrap();
-
-    let version = Version::parse("3.3.3").unwrap();
 
     // We expect to have a crate context for the binary dependency
     let context = planned_build
@@ -504,8 +511,17 @@ mod tests {
 
   #[test]
   fn test_binary_dependencies_vendored_genmode() {
-    let (raze_metadata, mut settings) = dummy_binary_dependency_metadata(/*is_remote_genmode=*/false);
+    let (raze_metadata, mut settings) =
+      dummy_binary_dependency_metadata(/*is_remote_genmode=*/ false);
     settings.genmode = GenMode::Vendored;
+
+    // Make sure the dummy settings contain the information we expect
+    let version = Version::parse("3.3.3").unwrap();
+    assert!(settings.binary_deps.contains_key("some-binary-crate"));
+    assert_eq!(
+      settings.binary_deps.get("some-binary-crate").unwrap().req(),
+      version.to_string()
+    );
 
     let planner = BuildPlannerImpl::new(raze_metadata, settings);
     let planned_build = planner
@@ -515,14 +531,49 @@ mod tests {
       )))
       .unwrap();
 
-    let wasm_version = Version::parse("0.2.68").unwrap();
-
     // Vendored builds do not use binary dependencies and should not alter the outputs
     assert!(planned_build
       .crate_contexts
       .iter()
-      .find(|ctx| ctx.pkg_name == "wasm-bindgen-cli" && ctx.pkg_version == wasm_version)
+      .find(|ctx| ctx.pkg_name == "some-binary-crate")
       .is_none());
+  }
+
+  #[test]
+  fn test_workspace_context_contains_no_binary_dependencies() {
+    let (raze_metadata, mut settings) =
+      dummy_binary_dependency_metadata(/*is_remote_genmode=*/ true);
+    settings.genmode = GenMode::Remote;
+
+    // Make sure the dummy settings contain the information we expect
+    let version = Version::parse("3.3.3").unwrap();
+    assert!(settings.binary_deps.contains_key("some-binary-crate"));
+    assert_eq!(
+      settings.binary_deps.get("some-binary-crate").unwrap().req(),
+      version.to_string()
+    );
+
+    let planner = BuildPlannerImpl::new(raze_metadata, settings);
+    let planned_build = planner
+      .plan_build(Some(PlatformDetails::new(
+        "some_target_triple".to_owned(),
+        Vec::new(), /* attrs */
+      )))
+      .unwrap();
+
+    // Ensure binary dependencies are not considered workspace members after planning
+    let binary_dep_name = format!("some-binary-crate-{}", version.to_string());
+    assert_eq!(
+      planned_build
+        .workspace_context
+        .workspace_members
+        .iter()
+        .any(|member| match member.file_name() {
+          Some(file_name) => file_name == binary_dep_name.as_str(),
+          None => false,
+        }),
+      false
+    )
   }
 
   #[test]
