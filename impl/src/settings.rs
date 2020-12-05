@@ -159,6 +159,14 @@ pub struct RazeSettings {
   pub vendor_dir: String,
 }
 
+/** 
+ * Additional build files (see [crate::settings::CrateSettings::additional_build_file])
+ * are both representable by a path to a file and a name. This enum allows for this attribute
+ * to be representable by the path provided in the metadata (which is a relative path to a
+ * file from a `Cargo.toml` file) but resolvable to a canonicalized path so that the additional
+ * BUILD file may be accessed at any point. Build files that have relitive paths associated with
+ * them are considered `Validated`.
+ */
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum AdditionalBuildFile {
