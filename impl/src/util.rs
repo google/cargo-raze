@@ -46,30 +46,19 @@ static SUPPORTED_PLATFORM_TRIPLES: &'static [&'static str] = &[
   "x86_64-unknown-freebsd",
 ];
 
-/** Determines if the target matches those supported by and defined in rules_rust
- *
- * Examples can be seen below:
- *
- * | target                                | returns          | reason                                           |
- * | ------------------------------------- | ---------------- | ------------------------------------------------ |
- * | `cfg(not(fuchsia))`                   | `(true, true)`   | `fuchsia` would be considered a 'default'        |
- * |                                       |                  | dependency since no supported target maps to it. |
- * |                                       |                  |                                                  |
- * | `cfg(unix)`                           | `(true, false)`  | There are supported platforms from the `unix`    |
- * |                                       |                  | `target_family` but not all platforms are of     |
- * |                                       |                  | the `unix` family.                               |
- * |                                       |                  |                                                  |
- * | `cfg(not(windows))`                   | `(true, false)`  | There are supported platforms in addition to     |
- * |                                       |                  | those in the `windows` `target_family`           |
- * |                                       |                  |                                                  |
- * | `x86_64-apple-darwin`                 | `(true, false)`  | This is a supported target triple but obviously  |
- * |                                       |                  | won't match with other triples.                  |
- * |                                       |                  |                                                  |
- * | `unknown-unknown-unknown`             | `(false, false)` | This will not match any triple.                  |
- * |                                       |                  |                                                  |
- * | `cfg(foo)`                            | `(false, false)` | `foo` is not a strongly defined cfg value.       |
- * | `cfg(target_os = "redox")`            | `(false, false)` | `redox` is not a supported platform.             |
- */
+/// Determines if the target matches those supported by and defined in rules_rust
+///
+/// Examples can be seen below:
+///
+/// | target                                | returns          | reason                                           |
+/// | ------------------------------------- | ---------------- | ------------------------------------------------ |
+/// | `cfg(not(fuchsia))`                   | `(true, true)`   | `fuchsia` would be considered a 'default' dependency since no supported target maps to it. |
+/// | `cfg(unix)`                           | `(true, false)`  | There are supported platforms from the `unix` `target_family` but not all platforms are of the `unix` family. |
+/// | `cfg(not(windows))`                   | `(true, false)`  | There are supported platforms in addition to those in the `windows` `target_family` |
+/// | `x86_64-apple-darwin`                 | `(true, false)`  | This is a supported target triple but obviously won't match with other triples. |
+/// | `unknown-unknown-unknown`             | `(false, false)` | This will not match any triple.                  |
+/// | `cfg(foo)`                            | `(false, false)` | `foo` is not a strongly defined cfg value.       |
+/// | `cfg(target_os = "redox")`            | `(false, false)` | `redox` is not a supported platform.             |
 pub fn is_bazel_supported_platform(target: &str) -> (bool, bool) {
   // Ensure the target is represented as an expression
   let target_exp = match target.starts_with("cfg(") {
@@ -113,11 +102,10 @@ pub fn is_bazel_supported_platform(target: &str) -> (bool, bool) {
   (is_supported, matches_all)
 }
 
-/** Maps a Rust cfg or triple target to Bazel supported triples.
- *
- * Note, the Bazel triples must be defined in:
- * https://github.com/bazelbuild/rules_rust/blob/master/rust/platform/platform.bzl
- */
+/// Maps a Rust cfg or triple target to Bazel supported triples.
+///
+/// Note, the Bazel triples must be defined in:
+/// https://github.com/bazelbuild/rules_rust/blob/master/rust/platform/platform.bzl
 pub fn get_matching_bazel_triples(target: &str) -> Result<Vec<String>> {
   let target_exp = match target.starts_with("cfg(") {
     true => target.to_owned(),
@@ -149,7 +137,7 @@ pub fn get_matching_bazel_triples(target: &str) -> Result<Vec<String>> {
   Ok(triples)
 }
 
-/** Produces a list of triples based on a provided whitelist */
+/// Produces a list of triples based on a provided whitelist
 pub fn filter_bazel_triples(triples: &mut Vec<String>, triples_whitelist: &Vec<String>) {
   // Early-out if the filter list is empty
   if triples_whitelist.len() == 0 {
@@ -162,9 +150,8 @@ pub fn filter_bazel_triples(triples: &mut Vec<String>, triples_whitelist: &Vec<S
   triples.sort();
 }
 
-/** Returns a list of Bazel targets for use in `select` statements based on a
- * given list of triples.
- */
+/// Returns a list of Bazel targets for use in `select` statements based on a
+/// given list of triples.
 pub fn generate_bazel_conditions(
   rust_rules_workspace_name: &str,
   triples: &Vec<String>,
@@ -189,7 +176,7 @@ pub fn generate_bazel_conditions(
   Ok(bazel_triples)
 }
 
-/** Returns whether or not the given path is a Bazel workspace root */
+/// Returns whether or not the given path is a Bazel workspace root
 pub fn is_bazel_workspace_root(dir: &Path) -> bool {
   let workspace_files = [dir.join("WORKSPACE.bazel"), dir.join("WORKSPACE")];
 
@@ -202,9 +189,8 @@ pub fn is_bazel_workspace_root(dir: &Path) -> bool {
   return false;
 }
 
-/** Returns a path to a Bazel workspace root based on the current working
- * directory, otherwise None if not workspace is detected.
- */
+/// Returns a path to a Bazel workspace root based on the current working
+/// directory, otherwise None if not workspace is detected.
 pub fn find_bazel_workspace_root(manifest_path: &Path) -> Option<PathBuf> {
   let mut dir = if manifest_path.is_dir() {
     Some(manifest_path)
@@ -297,7 +283,7 @@ pub fn sanitize_ident(ident: &str) -> String {
   slug::slugify(&ident).replace("-", "_")
 }
 
-/** Gets the proper system attributes for the provided platform triple using rustc. */
+/// Gets the proper system attributes for the provided platform triple using rustc.
 fn fetch_attrs(target: &str) -> Result<Vec<Cfg>> {
   let args = vec![format!("--target={}", target), "--print=cfg".to_owned()];
 

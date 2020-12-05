@@ -196,17 +196,13 @@ fn fetch_raze_metadata(
   Ok(raze_metadata)
 }
 
-fn do_planning(
-  settings: &RazeSettings,
-  metadata: &RazeMetadata,
-) -> Result<PlannedBuild> {
+fn do_planning(settings: &RazeSettings, metadata: &RazeMetadata) -> Result<PlannedBuild> {
   let platform_details = match &settings.target {
     Some(target) => Some(PlatformDetails::new_using_rustc(target)?),
     None => None,
   };
 
-  BuildPlannerImpl::new(metadata.clone(), settings.clone())
-    .plan_build(platform_details)
+  BuildPlannerImpl::new(metadata.clone(), settings.clone()).plan_build(platform_details)
 }
 
 fn render_files(
@@ -282,7 +278,7 @@ fn write_files(
   Ok(())
 }
 
-/** Writes rendered files to filesystem. */
+/// Writes rendered files to filesystem.
 fn write_to_file(path: &Path, contents: &str, verbose: bool) -> Result<()> {
   File::create(&path).and_then(|mut f| f.write_all(contents.as_bytes()))?;
   if verbose {
@@ -297,7 +293,7 @@ struct RemoteGenModeInputs<'settings> {
   pub binary_deps: Option<&'settings HashMap<String, cargo_toml::Dependency>>,
 }
 
-/** Gathers inputs for the `genmode = "Remote"` builds. */
+/// Gathers inputs for the `genmode = "Remote"` builds.
 fn gather_remote_genmode_inputs<'settings>(
   bazel_root: &Path,
   settings: &'settings RazeSettings,

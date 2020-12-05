@@ -35,12 +35,12 @@ pub(crate) const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
 pub(crate) const DEFAULT_CRATE_REGISTRY_URL: &str = "https://crates.io";
 pub(crate) const DEFAULT_CRATE_INDEX_URL: &str = "https://github.com/rust-lang/crates.io-index";
 
-/** An entity that can generate Cargo metadata within a Cargo workspace */
+/// An entity that can generate Cargo metadata within a Cargo workspace
 pub trait MetadataFetcher {
   fn fetch_metadata(&self, working_dir: &Path, include_deps: bool) -> Result<Metadata>;
 }
 
-/** A lockfile generator which simply wraps the `cargo_metadata::MetadataCommand` command */
+/// A lockfile generator which simply wraps the `cargo_metadata::MetadataCommand` command
 struct CargoMetadataFetcher {
   pub cargo_bin_path: PathBuf,
 }
@@ -75,18 +75,18 @@ impl MetadataFetcher for CargoMetadataFetcher {
   }
 }
 
-/** An entity that can generate a lockfile data within a Cargo workspace */
+/// An entity that can generate a lockfile data within a Cargo workspace
 pub trait LockfileGenerator {
   fn generate_lockfile(&self, crate_root_dir: &Path) -> Result<Lockfile>;
 }
 
-/** A lockfile generator which simply wraps the `cargo generate-lockfile` command */
+/// A lockfile generator which simply wraps the `cargo generate-lockfile` command
 struct CargoLockfileGenerator {
   cargo_bin_path: PathBuf,
 }
 
 impl LockfileGenerator for CargoLockfileGenerator {
-  /** Generate lockfile information from a cargo workspace root*/
+  /// Generate lockfile information from a cargo workspace root
   fn generate_lockfile(&self, crate_root_dir: &Path) -> Result<Lockfile> {
     let lockfile_path = crate_root_dir.join("Cargo.lock");
 
@@ -102,7 +102,7 @@ impl LockfileGenerator for CargoLockfileGenerator {
   }
 }
 
-/** A struct containing all metadata about a project with which to plan generated output files for */
+/// A struct containing all metadata about a project with which to plan generated output files for
 #[derive(Debug, Clone)]
 pub struct RazeMetadata {
   // `cargo metadata` output of the current project
@@ -121,37 +121,35 @@ pub struct RazeMetadata {
 }
 
 impl RazeMetadata {
-  /** Get the checksum of a crate using a unique formatter. */
+  /// Get the checksum of a crate using a unique formatter.
   pub fn checksum_for(&self, name: &str, version: &str) -> Option<&String> {
     self.checksums.get(&package_ident(name, version))
   }
 }
 
-/** The local Cargo workspace files to be used for build planning .*/
+/// The local Cargo workspace files to be used for build planning .
 #[derive(Debug, Clone)]
 pub struct CargoWorkspaceFiles {
   pub toml_path: PathBuf,
   pub lock_path_opt: Option<PathBuf>,
 }
 
-// Create a symlink file on unix systems
+/// Create a symlink file on unix systems
 #[cfg(target_family = "unix")]
 fn make_symlink(src: &Path, dest: &Path) -> Result<()> {
   std::os::unix::fs::symlink(src, dest)
     .with_context(|| "Failed to create symlink for generating metadata")
 }
 
-// Create a symlink file on windows systems
+/// Create a symlink file on windows systems
 #[cfg(target_family = "windows")]
 fn make_symlink(src: &Path, dest: &Path) -> Result<()> {
   std::os::windows::fs::symlink_file(dest, src)
     .with_context(|| "Failed to create symlink for generating metadata")
 }
 
-/**
- * A workspace metadata fetcher that uses the Cargo commands to gather information about a Cargo
- * project and it's transitive dependencies for planning and rendering of Bazel BUILD files.
- */
+/// A workspace metadata fetcher that uses the Cargo commands to gather information about a Cargo
+/// project and it's transitive dependencies for planning and rendering of Bazel BUILD files.
 pub struct RazeMetadataFetcher {
   registry_url: Url,
   index_url: Url,
@@ -178,17 +176,17 @@ impl RazeMetadataFetcher {
     }
   }
 
-  /** Reassign the [`crate::metadata::MetadataFetcher`] associated with the Raze Metadata Fetcher */
+  /// Reassign the [`crate::metadata::MetadataFetcher`] associated with the Raze Metadata Fetcher
   pub fn set_metadata_fetcher(&mut self, fetcher: Box<dyn MetadataFetcher>) {
     self.metadata_fetcher = fetcher;
   }
 
-  /** Reassign the [`crate::metadata::LockfileGenerator`] associated with the current Fetcher */
+  /// Reassign the [`crate::metadata::LockfileGenerator`] associated with the current Fetcher
   pub fn set_lockfile_generator(&mut self, generator: Box<dyn LockfileGenerator>) {
     self.lockfile_generator = generator;
   }
 
-  /** Symlinks the source code of all workspace members into the temp workspace */
+  /// Symlinks the source code of all workspace members into the temp workspace
   fn link_src_to_workspace(&self, no_deps_metadata: &Metadata, temp_dir: &Path) -> Result<()> {
     let crate_member_id_re = Regex::new(r".+\(path\+file://(.+)\)")?;
     for member in no_deps_metadata.workspace_members.iter() {
@@ -260,7 +258,7 @@ impl RazeMetadataFetcher {
     Ok(())
   }
 
-  /** Creates a copy workspace in a temporary directory for fetching the metadata of the current workspace */
+  /// Creates a copy workspace in a temporary directory for fetching the metadata of the current workspace
   fn make_temp_workspace(&self, files: &CargoWorkspaceFiles) -> Result<(TempDir, PathBuf)> {
     let temp_dir = TempDir::new()?;
     assert!(files.toml_path.is_file());
@@ -292,7 +290,7 @@ impl RazeMetadataFetcher {
     Ok((temp_dir, no_deps_metadata.workspace_root))
   }
 
-  /** Download a crate's source code from the current registry url */
+  /// Download a crate's source code from the current registry url
   fn fetch_crate_src(&self, dir: &Path, name: &str, version: &str) -> Result<PathBuf> {
     // The registry url should only be the host URL with ports. No path
     let registry_url = {
@@ -327,7 +325,7 @@ impl RazeMetadataFetcher {
     Ok(crate_dir)
   }
 
-  /** Add binary dependencies as workspace members to the given workspace root Cargo.toml file */
+  /// Add binary dependencies as workspace members to the given workspace root Cargo.toml file
   fn inject_binaries_into_workspace(
     &self,
     binary_deps: Vec<String>,
@@ -365,7 +363,7 @@ impl RazeMetadataFetcher {
     })
   }
 
-  /** Look up a crate in a specified crate index to determine it's checksum */
+  /// Look up a crate in a specified crate index to determine it's checksum
   fn fetch_crate_checksum(&self, name: &str, version: &str) -> Result<String> {
     let index_url_is_file = self.index_url.scheme().to_lowercase() == "file";
     let crate_index_path = if !index_url_is_file {
@@ -393,13 +391,11 @@ impl RazeMetadataFetcher {
     Ok(crate_version.checksum()[..].to_hex())
   }
 
-  /**
-   * Ensures a lockfile is generated for a crate on disk
-   *
-   * If a lockfile for the current crate exists in the `raze` lockfiles output directory, that
-   * lockfile will instead be installed into the crate's directory. If no lockfile exists, one
-   * will be generated.
-   */
+  /// Ensures a lockfile is generated for a crate on disk
+  ///
+  /// If a lockfile for the current crate exists in the `raze` lockfiles output directory, that
+  /// lockfile will instead be installed into the crate's directory. If no lockfile exists, one
+  /// will be generated.
   fn cargo_generate_lockfile(
     &self,
     override_lockfile: &Option<PathBuf>,
@@ -417,7 +413,7 @@ impl RazeMetadataFetcher {
     self.lockfile_generator.generate_lockfile(&cargo_dir)
   }
 
-  /** Gather all information about a Cargo project to use for planning and rendering steps */
+  /// Gather all information about a Cargo project to use for planning and rendering steps
   pub fn fetch_metadata(
     &self,
     files: &CargoWorkspaceFiles,
@@ -495,7 +491,7 @@ impl Default for RazeMetadataFetcher {
   }
 }
 
-/** A struct containing information about a binary dependency */
+/// A struct containing information about a binary dependency
 pub struct BinaryDependencyInfo {
   pub name: String,
   pub info: cargo_toml::Dependency,

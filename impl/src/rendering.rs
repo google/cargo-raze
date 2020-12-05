@@ -18,10 +18,6 @@ use crate::planning::PlannedBuild;
 use anyhow::Result;
 use std::path::PathBuf;
 
-/**
- * An object that can convert a prepared build plan into a series of files for a Bazel-like build
- * system.
- */
 pub trait BuildRenderer {
   fn render_planned_build(
     &mut self,

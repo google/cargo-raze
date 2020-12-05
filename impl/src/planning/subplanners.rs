@@ -43,7 +43,7 @@ use super::{
   PlannedBuild,
 };
 
-/** A set of named dependencies (without version) derived from a package manifest. */
+/// A set of named dependencies (without version) derived from a package manifest.
 struct DependencyNames {
   // Dependencies that are required for all buildable targets of this crate
   normal_dep_names: Vec<String>,
@@ -56,7 +56,7 @@ struct DependencyNames {
 }
 
 // TODO(acmcarther): Remove this struct -- move it into CrateContext.
-/** A set of dependencies that a crate has broken down by type. */
+/// A set of dependencies that a crate has broken down by type.
 struct DependencySet {
   // Dependencies that are required for all buildable targets of this crate
   normal_deps: Vec<BuildableDependency>,
@@ -71,13 +71,13 @@ struct DependencySet {
   aliased_deps: Vec<DependencyAlias>,
 }
 
-/** A set of dependencies that a crate has for a specific target/cfg */
+/// A set of dependencies that a crate has for a specific target/cfg
 struct TargetedDependencySet {
   target: String,
   dependencies: DependencySet,
 }
 
-/** An internal working planner for generating context for an individual crate. */
+/// An internal working planner for generating context for an individual crate.
 struct CrateSubplanner<'planner> {
   // Workspace-Wide details
   settings: &'planner RazeSettings,
@@ -91,7 +91,7 @@ struct CrateSubplanner<'planner> {
   sha256: &'planner Option<String>,
 }
 
-/** An internal working planner for generating context for a whole workspace. */
+/// An internal working planner for generating context for a whole workspace.
 pub struct WorkspaceSubplanner<'planner> {
   pub(super) settings: &'planner RazeSettings,
   pub(super) platform_details: &'planner Option<util::PlatformDetails>,
@@ -100,7 +100,7 @@ pub struct WorkspaceSubplanner<'planner> {
 }
 
 impl<'planner> WorkspaceSubplanner<'planner> {
-  /** Produces a planned build using internal state. */
+  /// Produces a planned build using internal state.
   pub fn produce_planned_build(&self) -> Result<PlannedBuild> {
     // Produce planned build
     let crate_contexts = self.produce_crate_contexts()?;
@@ -112,7 +112,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
     })
   }
 
-  /** Constructs a workspace context from settings. */
+  /// Constructs a workspace context from settings.
   fn produce_workspace_context(&self) -> WorkspaceContext {
     // Gather the workspace member paths for all workspace members
     let workspace_members = self
@@ -224,7 +224,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       .map_err(|e| e.into())
   }
 
-  /** Produces a crate context for each declared crate and dependency. */
+  /// Produces a crate context for each declared crate and dependency.
   fn produce_crate_contexts(&self) -> Result<Vec<CrateContext>> {
     self
       .crate_catalog
@@ -241,7 +241,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 }
 
 impl<'planner> CrateSubplanner<'planner> {
-  /** Builds a crate context from internal state. */
+  /// Builds a crate context from internal state.
   fn produce_context(&self, cargo_workspace_root: &Path) -> Result<CrateContext> {
     let (
       DependencySet {
@@ -422,7 +422,7 @@ impl<'planner> CrateSubplanner<'planner> {
     Ok(context)
   }
 
-  /** Generates license data from internal crate details. */
+  /// Generates license data from internal crate details.
   fn produce_license(&self) -> LicenseData {
     let licenses_str = self
       .crate_catalog_entry
@@ -544,7 +544,7 @@ impl<'planner> CrateSubplanner<'planner> {
     Ok(dep_set)
   }
 
-  /** Generates the set of dependencies for the contained crate. */
+  /// Generates the set of dependencies for the contained crate.
   fn produce_deps(&self) -> Result<(DependencySet, Vec<TargetedDependencySet>)> {
     let (default_deps, targeted_deps) = self.identify_named_deps()?;
 
@@ -559,7 +559,7 @@ impl<'planner> CrateSubplanner<'planner> {
     Ok((self._produce_deps(&default_deps)?, targeted_set))
   }
 
-  /** Yields the list of dependencies as described by the manifest (without version). */
+  /// Yields the list of dependencies as described by the manifest (without version).
   fn identify_named_deps(&self) -> Result<(DependencyNames, HashMap<String, DependencyNames>)> {
     // Resolve dependencies into types
     let mut default_dep_names = DependencyNames {
@@ -651,7 +651,7 @@ impl<'planner> CrateSubplanner<'planner> {
     Ok((default_dep_names, targeted_dep_names))
   }
 
-  /** Generates source details for internal crate. */
+  /// Generates source details for internal crate.
   fn produce_source_details(&self, package: &Package, package_root: &Path) -> SourceDetails {
     SourceDetails {
       git_data: self.source_id.as_ref().filter(|id| id.is_git()).map(|id| {
@@ -671,12 +671,10 @@ impl<'planner> CrateSubplanner<'planner> {
     }
   }
 
-  /**
-   * Extracts the (one and only) build script target from the provided set of build targets.
-   *
-   * This function mutates the provided list of build arguments. It removes the first (and usually,
-   * only) found build script target.
-   */
+  /// Extracts the (one and only) build script target from the provided set of build targets.
+  ///
+  /// This function mutates the provided list of build arguments. It removes the first (and usually,
+  /// only) found build script target.
   fn take_build_script_target(
     &self,
     all_targets: &mut Vec<BuildableTarget>,
@@ -695,12 +693,9 @@ impl<'planner> CrateSubplanner<'planner> {
       .map(|idx| all_targets.remove(idx))
   }
 
-  /**
-   * Produces the complete set of build targets specified by this crate.
-   *
-   * This function may access the file system. See #find_package_root_for_manifest for more
-   * details.
-   */
+  /// Produces the complete set of build targets specified by this crate.
+  /// This function may access the file system. See #find_package_root_for_manifest for more
+  /// details.
   fn produce_targets(&self, package_root_path: &Path) -> Result<Vec<BuildableTarget>> {
     let mut targets = Vec::new();
     let package = self.crate_catalog_entry.package();
@@ -740,14 +735,11 @@ impl<'planner> CrateSubplanner<'planner> {
     Ok(targets)
   }
 
-  /**
-   * Finds the root of a contained git package.
-   *
-   * This function needs to access the file system if the dependency is a git dependency in order
-   * to find the true filesystem root of the dependency. The root cause is that git dependencies
-   * often aren't solely the crate of interest, but rather a repository that contains the crate of
-   * interest among others.
-   */
+  /// Finds the root of a contained git package.
+  /// This function needs to access the file system if the dependency is a git dependency in order
+  /// to find the true filesystem root of the dependency. The root cause is that git dependencies
+  /// often aren't solely the crate of interest, but rather a repository that contains the crate of
+  /// interest among others.
   fn find_package_root_for_manifest(&self, manifest_path: &PathBuf) -> Result<PathBuf> {
     let has_git_repo_root = {
       let is_git = self.source_id.as_ref().map_or(false, SourceId::is_git);

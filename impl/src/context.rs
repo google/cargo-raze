@@ -18,13 +18,11 @@ use crate::settings::CrateSettings;
 use semver::Version;
 use serde::Serialize;
 
-/** A struct containing information about a crate's dependency that's buildable in Bazel
- *
- * Note: BUILDifier-compliant BUILD file generation depends on correct sorting of collections
- * of this struct by `buildable_target`. Do not add fields preceeding that field.
- */
+/// A struct containing information about a crate's dependency that's buildable in Bazel
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableDependency {
+  // Note: Buildifier-compliant BUILD file generation depends on correct sorting of collections
+  // of this struct by `buildable_target`. Do not add fields preceeding this field.
   pub buildable_target: String,
   pub name: String,
   pub version: Version,
@@ -42,7 +40,7 @@ pub struct BuildableTarget {
   pub kind: String,
   pub name: String,
 
-  /** The path in Bazel's format (i.e. with forward slashes) to the target's entry point. */
+  /// The path in Bazel's format (i.e. with forward slashes) to the target's entry point.
   pub path: String,
   pub edition: String,
 }
