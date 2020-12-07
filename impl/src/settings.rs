@@ -14,38 +14,23 @@
 
 use crate::{
   error::RazeError,
-  metadata::{DEFAULT_CRATE_INDEX_URL, DEFAULT_CRATE_REGISTRY_URL},
+  metadata::{
+    MetadataFetcher, DEFAULT_CRATE_INDEX_URL, DEFAULT_CRATE_REGISTRY_URL, SYSTEM_CARGO_BIN_PATH,
+  },
 };
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
+use cargo_metadata::{Metadata, MetadataCommand, Package};
 use semver::VersionReq;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fs::File, io::Read, path::Path, path::PathBuf};
+use std::{
+  collections::HashMap,
+  hash::Hash,
+  path::{Path, PathBuf},
+};
 
 pub type CrateSettingsPerVersion = HashMap<VersionReq, CrateSettings>;
 
-/**
- * A "deserializable struct" for the whole Cargo.toml
- *
- * Contains only `raze` settings, (we drop everything else in the toml on the floor).
- */
-#[derive(Debug, Clone, Deserialize)]
-pub struct CargoToml {
-  pub raze: Option<RazeSettings>,
-  pub package: Option<PackageToml>,
-  pub workspace: Option<PackageToml>,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct PackageToml {
-  pub metadata: Option<MetadataToml>,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct MetadataToml {
-  pub raze: Option<RazeSettings>,
-}
-
-/** The configuration settings for `cargo-raze`, included in Cargo.toml. */
+/** The configuration settings for `cargo-raze`, included in a projects Cargo metadata */
 #[derive(Debug, Clone, Deserialize)]
 pub struct RazeSettings {
   /**
@@ -483,77 +468,299 @@ fn validate_settings(
   Ok(())
 }
 
-/** Parses raze settings from the contents of a `Cargo.toml` file */
-fn parse_raze_settings(toml_contents: CargoToml) -> Result<RazeSettings, RazeError> {
-  // Workspace takes precedence
-  if let Some(raze) = toml_contents
-    .workspace
-    .and_then(|pkg| pkg.metadata.and_then(|data| data.raze))
-  {
-    if toml_contents.raze.is_some() {
-      eprintln!(
-        "WARNING: Both [raze] and [workspace.metadata.raze] are set. Using \
-         [workspace.metadata.raze] and ignoring [raze], which is deprecated."
-      );
-    }
-    return Ok(raze);
-  }
-
-  // Next is package
-  if let Some(raze) = toml_contents
-    .package
-    .and_then(|pkg| pkg.metadata.and_then(|data| data.raze))
-  {
-    if toml_contents.raze.is_some() {
-      eprintln!(
-        "WARNING: Both [raze] and [package.metadata.raze] are set. Using [package.metadata.raze] \
-         and ignoring [raze], which is deprecated."
-      );
-    }
-    return Ok(raze);
-  }
-
-  // Finally the direct raze settings
-  if let Some(raze) = toml_contents.raze {
-    eprintln!(
-      "WARNING: The top-level [raze] key is deprecated. Please set [package.metadata.raze] \
-       instead."
-    );
-
-    return Ok(raze);
-  }
-
-  return Err(RazeError::Generic(
-    "Cargo.toml has no `raze`, `workspace.metadata.raze` or `package.metadata.raze` field".into(),
-  ));
+/** The intermediate configuration settings for `cargo-raze`, included in a project's Cargo metadata
+ *
+ * Note that this struct should contain only `Option` and match all public fields of
+ * [`RazeSettings`](crate::settings::RazeSettings)
+ */
+#[derive(Debug, Clone, Deserialize)]
+struct RawRazeSettings {
+  #[serde(default)]
+  pub workspace_path: Option<String>,
+  #[serde(default)]
+  pub package_aliases_dir: Option<String>,
+  #[serde(default)]
+  pub target: Option<String>,
+  #[serde(default)]
+  pub targets: Option<Vec<String>>,
+  #[serde(default)]
+  pub binary_deps: HashMap<String, cargo_toml::Dependency>,
+  #[serde(default)]
+  pub crates: HashMap<String, CrateSettingsPerVersion>,
+  #[serde(default)]
+  pub gen_workspace_prefix: Option<String>,
+  #[serde(default)]
+  pub genmode: Option<GenMode>,
+  #[serde(default)]
+  pub output_buildfile_suffix: Option<String>,
+  #[serde(default)]
+  pub default_gen_buildrs: Option<bool>,
+  #[serde(default)]
+  pub registry: Option<String>,
+  #[serde(default)]
+  pub index_url: Option<String>,
+  #[serde(default)]
+  pub incompatible_relative_workspace_path: Option<bool>,
+  #[serde(default)]
+  pub rust_rules_workspace_name: Option<String>,
+  #[serde(default)]
+  pub vendor_dir: Option<String>,
 }
 
-pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings, RazeError> {
-  let path = cargo_toml_path.as_ref();
-  let mut toml = match File::open(path) {
-    Ok(handle) => handle,
-    Err(err) => {
-      return Err(RazeError::Generic(err.to_string()));
-    },
+impl RawRazeSettings {
+  /** Checks whether or not the settings have non-package specific settings specified */
+  fn contains_primary_options(&self) -> bool {
+    self.workspace_path.is_some()
+      || self.package_aliases_dir.is_some()
+      || self.target.is_some()
+      || self.targets.is_some()
+      || self.gen_workspace_prefix.is_some()
+      || self.genmode.is_some()
+      || self.output_buildfile_suffix.is_some()
+      || self.default_gen_buildrs.is_some()
+      || self.registry.is_some()
+      || self.index_url.is_some()
+      || self.incompatible_relative_workspace_path.is_some()
+      || self.rust_rules_workspace_name.is_some()
+      || self.vendor_dir.is_some()
+  }
+}
+
+/** Grows a list with duplicate keys between two maps */
+fn extend_duplicates<K: Hash + Eq + Clone, V>(
+  extended_list: &mut Vec<K>,
+  main_map: &HashMap<K, V>,
+  input_map: &HashMap<K, V>,
+) {
+  extended_list.extend(
+    input_map
+      .iter()
+      .filter_map(|(key, _value)| {
+        // Log the key if it exists in both the main and input maps
+        if main_map.contains_key(key) {
+          Some(key)
+        } else {
+          None
+        }
+      })
+      .cloned()
+      .collect::<Vec<K>>(),
+  );
+}
+
+/** Parse [`RazeSettings`](crate::settings::RazeSettings) from workspace metadata */
+fn parse_raze_settings_workspace(
+  metadata_value: &serde_json::value::Value,
+  metadata: &Metadata,
+) -> Result<RazeSettings> {
+  let mut settings = RazeSettings::deserialize(metadata_value)?;
+
+  let workspace_packages: Vec<&Package> = metadata
+    .packages
+    .iter()
+    .filter(|pkg| metadata.workspace_members.contains(&pkg.id))
+    .collect();
+
+  let mut duplicate_binary_deps = Vec::new();
+  let mut duplicate_crate_settings = Vec::new();
+
+  for package in workspace_packages.iter() {
+    if let Some(pkg_value) = package.metadata.get("raze") {
+      let pkg_settings = RawRazeSettings::deserialize(pkg_value)?;
+      if pkg_settings.contains_primary_options() {
+        return Err(anyhow!(
+          "The package '{}' contains Primary raze settings, please move these to the \
+           `[workspace.metadata.raze]`",
+          package.name
+        ));
+      }
+
+      // Log duplicate binary dependencies
+      extend_duplicates(
+        &mut duplicate_binary_deps,
+        &settings.binary_deps,
+        &pkg_settings.binary_deps,
+      );
+
+      settings
+        .binary_deps
+        .extend(pkg_settings.binary_deps.into_iter());
+
+      // Log duplicate crate settings
+      extend_duplicates(
+        &mut duplicate_crate_settings,
+        &settings.crates,
+        &pkg_settings.crates,
+      );
+
+      settings.crates.extend(pkg_settings.crates.into_iter());
+    }
+  }
+
+  // Check for duplication errors
+  if duplicate_binary_deps.len() > 0 {
+    return Err(anyhow!(
+      "Duplicate `raze.binary_deps` values detected accross various crates: {:?}",
+      duplicate_binary_deps
+    ));
+  }
+  if duplicate_crate_settings.len() > 0 {
+    return Err(anyhow!(
+      "Duplicate `raze.crates.*` values detected accross various crates: {:?}",
+      duplicate_crate_settings
+    ));
+  }
+
+  Ok(settings)
+}
+
+/** Parse [`RazeSettings`](crate::settings::RazeSettings) from a project's root package's metadata */
+fn parse_raze_settings_root_package(
+  metadata_value: &serde_json::value::Value,
+  root_package: &Package,
+) -> Result<RazeSettings> {
+  return RazeSettings::deserialize(metadata_value).with_context(|| {
+    format!(
+      "Failed to load raze settings from root package: {}",
+      root_package.name,
+    )
+  });
+}
+
+/** Parse [`RazeSettings`](crate::settings::RazeSettings) from any workspace member's metadata */
+fn parse_raze_settings_any_package(metadata: &Metadata) -> Result<RazeSettings> {
+  let mut settings_packages = Vec::new();
+
+  for package in metadata.packages.iter() {
+    if let Some(pkg_value) = package.metadata.get("raze") {
+      let pkg_settings = RawRazeSettings::deserialize(pkg_value)?;
+      if pkg_settings.contains_primary_options() {
+        settings_packages.push(package);
+      }
+    }
+  }
+
+  // There should only be one package with raze
+  if settings_packages.len() > 1 {
+    return Err(anyhow!(
+      "Multiple packages contain primary raze settings: {:?}",
+      settings_packages
+        .iter()
+        .map(|pkg| &pkg.name)
+        .collect::<Vec<&String>>()
+    ));
+  }
+
+  // UNWRAP: Safe due to checks above
+  let settings_value = settings_packages[0].metadata.get("raze").unwrap();
+  RazeSettings::deserialize(settings_value)
+    .with_context(|| format!("Failed to deserialize raze settings: {:?}", settings_value))
+}
+
+/** A struct only to deserialize a Cargo.toml to in search of the legacy syntax for [`RazeSettings`](crate::settings::RazeSettings) */
+#[derive(Debug, Clone, Deserialize)]
+pub struct LegacyCargoToml {
+  pub raze: RazeSettings,
+}
+
+/** Parse [`RazeSettings`](crate::settings::RazeSettings) from a Cargo.toml file using the legacy syntax `[raze]` */
+fn parse_raze_settings_legacy(metadata: &Metadata) -> Result<RazeSettings> {
+  let root_toml = metadata.workspace_root.join("Cargo.toml");
+  let toml_contents = std::fs::read_to_string(&root_toml)?;
+  let data = toml::from_str::<LegacyCargoToml>(&toml_contents).with_context(|| {
+    format!(
+      "Failed to read `[raze]` settings from {}",
+      root_toml.display()
+    )
+  })?;
+  Ok(data.raze)
+}
+
+/** Parses raze settings from the contents of a `Cargo.toml` file */
+fn parse_raze_settings(metadata: Metadata) -> Result<RazeSettings> {
+  // Workspace takes precedence
+  let workspace_level_settigns = metadata.workspace_metadata.get("raze");
+  if let Some(value) = workspace_level_settigns {
+    return parse_raze_settings_workspace(value, &metadata);
+  }
+
+  // Root packages are the next priority
+  if let Some(root_package) = metadata.root_package() {
+    if let Some(value) = root_package.metadata.get("raze") {
+      return parse_raze_settings_root_package(value, root_package);
+    }
+  }
+
+  // Attempt to load legacy settings but do not allow failures to propogate
+  if let Ok(settings) = parse_raze_settings_legacy(&metadata) {
+    eprintln!(
+      "WARNING: The top-level `[raze]` key is deprecated. Please set `[workspace.metadata.raze]` or \
+       `[package.metadata.raze]` instead."
+    );
+    return Ok(settings);
+  }
+
+  // Finally check any package for settings
+  parse_raze_settings_any_package(&metadata)
+}
+
+struct SettingsMetadataFetcher {
+  pub cargo_bin_path: PathBuf,
+}
+
+impl MetadataFetcher for SettingsMetadataFetcher {
+  fn fetch_metadata(&self, working_dir: &Path, _include_deps: bool) -> Result<Metadata> {
+    // This fetch should not require network access.
+    MetadataCommand::new()
+      .cargo_path(&self.cargo_bin_path)
+      .no_deps()
+      .current_dir(working_dir)
+      .other_options(vec!["--offline".to_owned()])
+      .exec()
+      .with_context(|| {
+        format!(
+          "Failed to fetch Metadata with `{}` from `{}`",
+          &self.cargo_bin_path.display(),
+          working_dir.display()
+        )
+      })
+  }
+}
+
+/** Load settings used to configure the functionality of Cargo Raze */
+pub fn load_settings<T: AsRef<Path>>(
+  cargo_toml_path: T,
+  cargo_bin_path: Option<String>,
+) -> Result<RazeSettings, RazeError> {
+  // Create a MetadataFetcher from either an optional Cargo binary path
+  // or a fallback expected to be found on the system.
+  let fetcher = SettingsMetadataFetcher {
+    cargo_bin_path: cargo_bin_path
+      .unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string())
+      .into(),
   };
 
-  let toml_contents = {
-    let mut contents = String::new();
-    let result = toml.read_to_string(&mut contents);
-    if let Some(err) = result.err() {
-      return Err(RazeError::Generic(err.to_string()));
+  // UNWRAP: safe due to earlier assert
+  let cargo_toml_dir = cargo_toml_path.as_ref().parent().unwrap();
+  let metadata = {
+    let result = fetcher.fetch_metadata(cargo_toml_dir, false);
+    if result.is_err() {
+      return Err(RazeError::Generic(result.err().unwrap().to_string()));
     }
-
-    match toml::from_str::<CargoToml>(&contents) {
-      Ok(toml_contents) => toml_contents,
-      Err(err) => return Err(RazeError::Generic(err.to_string())),
-    }
+    // UNWRAP: safe due to check above
+    result.unwrap()
   };
 
-  let mut settings = parse_raze_settings(toml_contents)?;
+  let mut settings = {
+    let result = parse_raze_settings(metadata);
+    if result.is_err() {
+      return Err(RazeError::Generic(result.err().unwrap().to_string()));
+    }
+    // UNWRAP: safe due to check above
+    result.unwrap()
+  };
 
-  // UNWRAP: Safe due to the fact that `path` was read as a file earlier
-  validate_settings(&mut settings, path.parent().unwrap())?;
+  validate_settings(&mut settings, cargo_toml_dir)?;
 
   Ok(settings)
 }
@@ -563,8 +770,7 @@ pub mod tests {
   use crate::testing::{make_workspace, named_toml_contents};
 
   use super::*;
-  use indoc::indoc;
-  use std::io::Write;
+  use indoc::{formatdoc, indoc};
   use tempfile::TempDir;
 
   pub fn dummy_raze_settings() -> RazeSettings {
@@ -588,7 +794,43 @@ pub mod tests {
   }
 
   #[test]
-  fn test_loading_settings() {
+  fn test_loading_package_settings() {
+    let toml_contents = indoc! { r#"
+    [package]
+    name = "load_settings_test"
+    version = "0.1.0"
+
+    [lib]
+    path = "not_a_file.rs"
+
+    [dependencies]
+    actix-web = "2.0.0"
+    actix-rt = "1.0.0"
+
+    [target.x86_64-apple-ios.dependencies]
+    [target.x86_64-linux-android.dependencies]
+    bitflags = "1.2.1"
+
+    [package.metadata.raze]
+    workspace_path = "//workspace_path/raze"
+    genmode = "Remote"
+
+    [package.metadata.raze.binary_deps]
+    wasm-bindgen-cli = "0.2.68"
+    "# };
+
+    let temp_workspace_dir = TempDir::new()
+      .ok()
+      .expect("Failed to set up temporary directory");
+    let cargo_toml_path = temp_workspace_dir.path().join("Cargo.toml");
+    std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
+
+    let settings = load_settings(cargo_toml_path, None).unwrap();
+    assert!(settings.binary_deps.len() > 0);
+  }
+
+  #[test]
+  fn test_loading_settings_legacy() {
     let toml_contents = indoc! { r#"
     [package]
     name = "load_settings_test"
@@ -608,7 +850,6 @@ pub mod tests {
     [raze]
     workspace_path = "//workspace_path/raze"
     genmode = "Remote"
-    incompatible_relative_workspace_path = true
 
     [raze.binary_deps]
     wasm-bindgen-cli = "0.2.68"
@@ -618,10 +859,9 @@ pub mod tests {
       .ok()
       .expect("Failed to set up temporary directory");
     let cargo_toml_path = temp_workspace_dir.path().join("Cargo.toml");
-    let mut toml = File::create(&cargo_toml_path).unwrap();
-    toml.write_all(toml_contents.as_bytes()).unwrap();
+    std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
 
-    let settings = load_settings(cargo_toml_path).unwrap();
+    let settings = load_settings(cargo_toml_path, None).unwrap();
     assert!(settings.binary_deps.len() > 0);
   }
 
@@ -630,7 +870,8 @@ pub mod tests {
     let toml_contents = indoc! { r#"
       [workspace]
       members = [
-        "test_crate",
+        "crate_a",
+        "crate_b",
       ]
 
       [workspace.metadata.raze]
@@ -639,13 +880,24 @@ pub mod tests {
     "# };
 
     let (dir, files) = make_workspace(toml_contents, None);
-    let test_crate_toml = dir.as_ref().join("test_crate").join("Cargo.toml");
-    std::fs::create_dir_all(test_crate_toml.parent().unwrap()).unwrap();
-    std::fs::write(test_crate_toml, named_toml_contents("test_crate", "0.0.1")).unwrap();
+    for member in vec!["crate_a", "crate_b"].iter() {
+      let crate_toml = dir.as_ref().join(member).join("Cargo.toml");
+      std::fs::create_dir_all(crate_toml.parent().unwrap()).unwrap();
+      let toml_contents = formatdoc! { r#"
+        {named_contents}
 
-    let settings = load_settings(files.toml_path).unwrap();
+        [package.metadata.raze.crates.settings-test-{name}.'*']
+        additional_flags = [
+        "--cfg={name}"
+        ]    
+      "#, named_contents = named_toml_contents(member, "0.0.1"), name = member };
+      std::fs::write(crate_toml, toml_contents).unwrap();
+    }
+
+    let settings = load_settings(files.toml_path, None).unwrap();
     assert_eq!(&settings.workspace_path, "//workspace_path/raze");
     assert_eq!(settings.genmode, GenMode::Remote);
+    assert_eq!(settings.crates.len(), 2);
   }
 
   #[test]
