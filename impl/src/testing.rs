@@ -294,7 +294,7 @@ pub fn mock_crate_index(
   }
 }
 
-/** Generate some basic metadata with */
+/** Generate some basic metadata with an injected mock dependency */
 pub fn dummy_modified_metadata() -> Metadata {
   let mut metadata = dummy_raze_metadata().metadata.clone();
 
