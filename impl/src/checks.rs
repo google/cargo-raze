@@ -214,47 +214,12 @@ fn warn_unused_settings(
 }
 
 #[cfg(test)]
-pub(crate) mod tests {
+pub mod tests {
   use super::*;
-  use crate::{metadata::tests::dummy_raze_metadata, settings::tests::dummy_raze_settings};
-  use semver::Version;
-
-  pub fn dummy_modified_metadata() -> Metadata {
-    let mut metadata = dummy_raze_metadata().metadata.clone();
-
-    // Phase 1: Add a dummy dependency to the dependency graph.
-
-    let mut resolve = metadata.resolve.take().unwrap();
-    let mut new_node = resolve.nodes[0].clone();
-    let name = "test_dep";
-    let name_id = "test_dep_id";
-
-    // Add the new dependency.
-    let id = PackageId {
-      repr: name_id.to_string(),
-    };
-    resolve.nodes[0].dependencies.push(id.clone());
-
-    // Add the new node representing the dependency.
-    new_node.id = id;
-    new_node.deps = Vec::new();
-    new_node.dependencies = Vec::new();
-    new_node.features = Vec::new();
-    resolve.nodes.push(new_node);
-    metadata.resolve = Some(resolve);
-
-    // Phase 2: Add the dummy dependency to the package list.
-
-    let mut new_package = metadata.packages[0].clone();
-    new_package.name = name.to_string();
-    new_package.id = PackageId {
-      repr: name_id.to_string(),
-    };
-    new_package.version = Version::new(0, 0, 1);
-    metadata.packages.push(new_package);
-
-    metadata
-  }
+  use crate::{
+    metadata::tests::dummy_raze_metadata, settings::tests::dummy_raze_settings,
+    testing::dummy_modified_metadata,
+  };
 
   #[test]
   fn test_check_resolve_matches_packages_fails_correctly() {

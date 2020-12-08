@@ -159,7 +159,7 @@ pub struct RazeSettings {
   pub vendor_dir: String,
 }
 
-/** 
+/**
  * Additional build files (see [crate::settings::CrateSettings::additional_build_file])
  * are both representable by a path to a file and a name. This enum allows for this attribute
  * to be representable by the path provided in the metadata (which is a relative path to a
@@ -429,7 +429,7 @@ pub fn format_registry_url(registry_url: &str, name: &str, version: &str) -> Str
     .replace("{version}", version)
 }
 
-fn validate_create_setting_additional_build_file_is_relative(
+fn validate_crate_setting_additional_build_file_is_relative(
   file_path: &Path,
   crate_name: &str,
   version: &VersionReq,
@@ -450,7 +450,7 @@ fn validate_create_setting_additional_build_file_is_relative(
   Ok(())
 }
 
-fn validate_create_setting_additional_build_file(
+fn validate_crate_setting_additional_build_file(
   additional_build_file: &mut &mut AdditionalBuildFile,
   toml_path: &Path,
   crate_name: &str,
@@ -460,7 +460,7 @@ fn validate_create_setting_additional_build_file(
     AdditionalBuildFile::Raw(name) => {
       **additional_build_file = {
         let file_path = PathBuf::from(&name);
-        validate_create_setting_additional_build_file_is_relative(&file_path, crate_name, version)?;
+        validate_crate_setting_additional_build_file_is_relative(&file_path, crate_name, version)?;
 
         // Canonicalize the path of the additional build file
         match toml_path.join(&file_path).canonicalize() {
@@ -500,7 +500,7 @@ fn validate_crate_settings(settings: &mut RazeSettings, toml_path: &Path) -> Res
 
       let additional_build_file: &mut &mut AdditionalBuildFile =
         &mut crate_settings.additional_build_file.as_mut().unwrap();
-      validate_create_setting_additional_build_file(
+      validate_crate_setting_additional_build_file(
         additional_build_file,
         toml_path,
         crate_name,

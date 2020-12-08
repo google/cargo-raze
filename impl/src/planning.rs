@@ -84,7 +84,6 @@ mod tests {
   use std::{collections::HashMap, path::PathBuf};
 
   use crate::{
-    checks::tests::dummy_modified_metadata,
     metadata::tests::{
       dummy_raze_metadata, dummy_raze_metadata_fetcher, DummyCargoMetadataFetcher,
     },
