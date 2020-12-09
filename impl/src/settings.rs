@@ -16,10 +16,10 @@ use crate::{
   error::RazeError,
   metadata::{DEFAULT_CRATE_INDEX_URL, DEFAULT_CRATE_REGISTRY_URL},
 };
-use anyhow::anyhow;
+use anyhow::Result;
 use semver::VersionReq;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, convert::TryFrom, fs::File, io::Read, path::Path, path::PathBuf};
+use std::{collections::HashMap, fs::File, io::Read, path::Path, path::PathBuf};
 
 pub type CrateSettingsPerVersion = HashMap<VersionReq, CrateSettings>;
 
@@ -159,55 +159,6 @@ pub struct RazeSettings {
   pub vendor_dir: String,
 }
 
-/**
- * Additional build files (see [crate::settings::CrateSettings::additional_build_file])
- * are both representable by a path to a file and a name. This enum allows for this attribute
- * to be representable by the path provided in the metadata (which is a relative path to a
- * file from a `Cargo.toml` file) but resolvable to a canonicalized path so that the additional
- * BUILD file may be accessed at any point. Build files that have relitive paths associated with
- * them are considered `Validated`.
- */
-#[derive(Debug, Clone, Deserialize, Serialize)]
-#[serde(untagged)]
-pub enum AdditionalBuildFile {
-  Raw(String),
-  Validated { name: String, path: PathBuf },
-}
-
-impl From<&str> for AdditionalBuildFile {
-  fn from(value: &str) -> Self {
-    AdditionalBuildFile::Raw(value.to_owned())
-  }
-}
-
-impl<'build_file> From<&'build_file AdditionalBuildFile> for &'build_file String {
-  fn from(value: &'build_file AdditionalBuildFile) -> Self {
-    match value {
-      AdditionalBuildFile::Raw(name) => name,
-      AdditionalBuildFile::Validated {
-        name,
-        path: _,
-      } => name,
-    }
-  }
-}
-
-impl<'build_file> TryFrom<&'build_file AdditionalBuildFile> for &'build_file PathBuf {
-  type Error = anyhow::Error;
-
-  fn try_from(value: &'build_file AdditionalBuildFile) -> Result<Self, Self::Error> {
-    match value {
-      AdditionalBuildFile::Raw(_) => Err(anyhow!(
-        "`AdditionalBuildFile::Raw` cannot be converted to PathBuf"
-      )),
-      AdditionalBuildFile::Validated {
-        name: _,
-        path,
-      } => Ok(path),
-    }
-  }
-}
-
 /** Override settings for individual crates (as part of `RazeSettings`). */
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CrateSettings {
@@ -329,7 +280,7 @@ pub struct CrateSettings {
    * the crate through a combination of additional_build_file and additional_deps.
    */
   #[serde(default)]
-  pub additional_build_file: Option<AdditionalBuildFile>,
+  pub additional_build_file: Option<PathBuf>,
 }
 
 /**
@@ -450,47 +401,25 @@ fn validate_crate_setting_additional_build_file_is_relative(
   Ok(())
 }
 
+/** Ensures crate settings which specify additional build files have canonicalized paths */
 fn validate_crate_setting_additional_build_file(
-  additional_build_file: &mut &mut AdditionalBuildFile,
+  additional_build_file: &mut &mut PathBuf,
   toml_path: &Path,
   crate_name: &str,
   version: &VersionReq,
-) -> Result<(), RazeError> {
-  match additional_build_file {
-    AdditionalBuildFile::Raw(name) => {
-      **additional_build_file = {
-        let file_path = PathBuf::from(&name);
-        validate_crate_setting_additional_build_file_is_relative(&file_path, crate_name, version)?;
+) -> Result<()> {
+  validate_crate_setting_additional_build_file_is_relative(
+    additional_build_file,
+    crate_name,
+    version,
+  )?;
 
-        // Canonicalize the path of the additional build file
-        match toml_path.join(&file_path).canonicalize() {
-          Ok(path) => AdditionalBuildFile::Validated {
-            name: name.clone(),
-            path,
-          },
-          Err(err) => {
-            return Err(RazeError::Config {
-              field_path_opt: Some(format!(
-                "raze.crates.{}.{}.additional_build_file",
-                crate_name,
-                version.to_string()
-              )),
-              message: format!(
-                "Failed to canonicalize string with error: {}",
-                err.to_string()
-              ),
-            });
-          },
-        }
-      }
-    },
-    _ => { /* Do nothing for any other context */ },
-  }
+  **additional_build_file = toml_path.join(&additional_build_file).canonicalize()?;
 
   Ok(())
 }
 
-/** Ensures crate settings which specify additional build files have canonicalized paths */
+/** Ensures crate settings associatd with the parsed [RazeSettings](crate::settings::RazeSettings) have valid crate settings */
 fn validate_crate_settings(settings: &mut RazeSettings, toml_path: &Path) -> Result<(), RazeError> {
   for (crate_name, crate_settings) in settings.crates.iter_mut() {
     for (version, crate_settings) in crate_settings.iter_mut() {
@@ -498,14 +427,30 @@ fn validate_crate_settings(settings: &mut RazeSettings, toml_path: &Path) -> Res
         continue;
       }
 
-      let additional_build_file: &mut &mut AdditionalBuildFile =
+      let additional_build_file: &mut &mut PathBuf =
         &mut crate_settings.additional_build_file.as_mut().unwrap();
-      validate_crate_setting_additional_build_file(
+
+      let result = validate_crate_setting_additional_build_file(
         additional_build_file,
         toml_path,
         crate_name,
         version,
-      )?;
+      );
+
+      if result.is_err() {
+        return Err(RazeError::Config {
+          field_path_opt: Some(format!(
+            "raze.crates.{}.{}.additional_build_file",
+            crate_name,
+            version.to_string()
+          )),
+          message: format!(
+            "Failed to canonicalize string with error: {}",
+            // UNWRAP: safe inside this block
+            result.err().unwrap().to_string()
+          ),
+        });
+      }
     }
   }
   Ok(())

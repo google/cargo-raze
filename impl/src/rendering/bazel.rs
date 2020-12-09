@@ -14,6 +14,7 @@
 
 use anyhow::Result;
 
+use pathdiff::diff_paths;
 use tera::{self, Context, Tera};
 
 use crate::{
@@ -23,7 +24,7 @@ use crate::{
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
 };
 
-use std::{convert::TryInto, error::Error, path::PathBuf};
+use std::{error::Error, path::Path};
 
 macro_rules! unwind_tera_error {
   ($err:ident) => {{
@@ -210,24 +211,30 @@ impl BazelRenderer {
 fn include_additional_build_file(
   package: &CrateContext,
   existing_contents: String,
+  output_file_path: &Path,
 ) -> Result<String> {
   match &package.raze_settings.additional_build_file {
     Some(file_path) => {
-      let validated_path: &PathBuf = file_path.try_into()?;
-      let valdated_name: &String = file_path.into();
+      // Generate a relative path if possible so the output files are more consistent by not
+      // including full paths to the file on the current machine. This should cause the file
+      // `/home/user/code/bazel_project/crates/BUILD.additional.bazel` to be renderd as
+      // `./BUILD.additional.bazel`.
+      let display_path = &diff_paths(file_path, output_file_path).unwrap_or(file_path.clone());
       let additional_content =
-        std::fs::read_to_string(validated_path).map_err(|e| RazeError::Rendering {
+        std::fs::read_to_string(file_path).map_err(|e| RazeError::Rendering {
           crate_name_opt: Some(package.pkg_name.to_owned()),
           message: format!(
             "failed to read additional_build_file '{}': {}",
-            validated_path.display(),
+            file_path.display(),
             e
           ),
         })?;
 
       Ok(format!(
         "{}\n# Additional content from {}\n{}",
-        existing_contents, valdated_name, additional_content
+        existing_contents,
+        display_path.display(),
+        additional_content
       ))
     },
     None => Ok(existing_contents),
@@ -260,11 +267,13 @@ impl BuildRenderer for BazelRenderer {
             message: unwind_tera_error!(e),
           })?;
 
+      let output_file_path = path_prefix.as_path().join(&package.expected_build_path);
+
       let final_crate_build_file =
-        include_additional_build_file(package, rendered_crate_build_file)?;
+        include_additional_build_file(package, rendered_crate_build_file, &output_file_path)?;
 
       file_outputs.push(FileOutputs {
-        path: path_prefix.as_path().join(&package.expected_build_path),
+        path: output_file_path,
         contents: final_crate_build_file,
       })
     }
@@ -306,11 +315,13 @@ impl BuildRenderer for BazelRenderer {
           message: unwind_tera_error!(e),
         })?;
 
+      let output_file_path = path_prefix.as_path().join(&package.expected_build_path);
+
       let final_crate_build_file =
-        include_additional_build_file(package, rendered_crate_build_file)?;
+        include_additional_build_file(package, rendered_crate_build_file, &output_file_path)?;
 
       file_outputs.push(FileOutputs {
-        path: path_prefix.as_path().join(&package.expected_build_path),
+        path: output_file_path,
         contents: final_crate_build_file,
       })
     }
@@ -368,7 +379,6 @@ mod tests {
     context::*,
     planning::PlannedBuild,
     rendering::{FileOutputs, RenderDetails},
-    settings::AdditionalBuildFile,
     settings::CrateSettings,
     testing::basic_lock_contents,
   };
@@ -683,21 +693,26 @@ mod tests {
 
     let file_outputs = render_crates_for_test(vec![CrateContext {
       raze_settings: CrateSettings {
-        additional_build_file: Some(AdditionalBuildFile::Validated {
-          name: "some_additional_build_file".to_owned(),
-          path: tmp_dir.as_ref().join("some_additional_build_file"),
-        }),
+        additional_build_file: Some(tmp_dir.as_ref().join("some_additional_build_file")),
         ..Default::default()
       },
       ..dummy_library_crate()
     }]);
-    let crate_build_contents = extract_contents_matching_path(
-      &file_outputs,
-      "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD",
-    );
+
+    let file_name =
+      "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD".to_owned();
+    let display_path = diff_paths(
+      tmp_dir.as_ref().join("some_additional_build_file"),
+      &file_name,
+    )
+    .unwrap();
+    let crate_build_contents = extract_contents_matching_path(&file_outputs, &file_name);
 
     expect(
-      crate_build_contents.contains("# Additional content from some_additional_build_file"),
+      crate_build_contents.contains(&format!(
+        "# Additional content from {}",
+        display_path.display()
+      )),
       format!(
         "expected crate build contents to include additional_build_file, but it just contained \
          [{}]",
