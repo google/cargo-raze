@@ -29,7 +29,7 @@ use std::{
 
 use crate::{
   metadata::{tests::dummy_raze_metadata, CargoWorkspaceFiles},
-  util::get_package_ident,
+  util::package_ident,
 };
 
 pub const fn basic_toml_contents() -> &'static str {
@@ -215,7 +215,7 @@ pub fn mock_remote_crate<'server>(
     let mut tar = tar::Builder::new(enc);
     tar
       .append_dir_all(
-        get_package_ident(name, version),
+        package_ident(name, version),
         dir.as_ref().join("archive"),
       )
       .unwrap();
@@ -298,8 +298,6 @@ pub fn mock_crate_index(
 pub fn dummy_modified_metadata() -> Metadata {
   let mut metadata = dummy_raze_metadata().metadata.clone();
 
-  // Phase 1: Add a dummy dependency to the dependency graph.
-
   let mut resolve = metadata.resolve.take().unwrap();
   let mut new_node = resolve.nodes[0].clone();
   let name = "test_dep";
@@ -318,8 +316,6 @@ pub fn dummy_modified_metadata() -> Metadata {
   new_node.features = Vec::new();
   resolve.nodes.push(new_node);
   metadata.resolve = Some(resolve);
-
-  // Phase 2: Add the dummy dependency to the package list.
 
   let mut new_package = metadata.packages[0].clone();
   new_package.name = name.to_string();

@@ -421,6 +421,8 @@ fn validate_crate_setting_additional_build_file(
 
 /** Ensures crate settings associatd with the parsed [RazeSettings](crate::settings::RazeSettings) have valid crate settings */
 fn validate_crate_settings(settings: &mut RazeSettings, toml_path: &Path) -> Result<(), RazeError> {
+  let mut errors = Vec::new();
+
   for (crate_name, crate_settings) in settings.crates.iter_mut() {
     for (version, crate_settings) in crate_settings.iter_mut() {
       if crate_settings.additional_build_file.is_none() {
@@ -438,7 +440,7 @@ fn validate_crate_settings(settings: &mut RazeSettings, toml_path: &Path) -> Res
       );
 
       if result.is_err() {
-        return Err(RazeError::Config {
+        errors.push(RazeError::Config {
           field_path_opt: Some(format!(
             "raze.crates.{}.{}.additional_build_file",
             crate_name,
@@ -453,6 +455,15 @@ fn validate_crate_settings(settings: &mut RazeSettings, toml_path: &Path) -> Res
       }
     }
   }
+
+  // Surface all errors
+  if !errors.is_empty() {
+    return Err(RazeError::Config {
+      field_path_opt: None,
+      message: format!("{:?}", errors),
+    });
+  }
+
   Ok(())
 }
 

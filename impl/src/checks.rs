@@ -26,7 +26,7 @@ use crate::{
   error::RazeError,
   settings::{CrateSettingsPerVersion, GenMode, RazeSettings},
   util::collect_up_to,
-  util::get_package_ident,
+  util::package_ident,
 };
 
 use cargo_metadata::{Metadata, Package, PackageId};
@@ -35,6 +35,7 @@ use cargo_metadata::{Metadata, Package, PackageId};
 const MAX_DISPLAYED_MISSING_VENDORED_CRATES: usize = 5;
 const MAX_DISPLAYED_MISSING_RESOLVE_PACKAGES: usize = 5;
 
+/** Ensure that the given Metadata is valid and ready to use for planning. */
 pub fn check_metadata(
   metadata: &Metadata,
   settings: &RazeSettings,
@@ -53,7 +54,7 @@ pub fn check_metadata(
   Ok(())
 }
 
-// Verifies that all provided packages are vendored (in VENDOR_DIR relative to CWD)
+/** Verifies that all provided packages are vendored (in settings.vendor_dir relative to CWD) */
 fn check_all_vendored(
   metadata: &Metadata,
   settings: &RazeSettings,
@@ -76,7 +77,7 @@ fn check_all_vendored(
       ))
       .is_err()
     })
-    .map(|p| get_package_ident(&p.name, &p.version.to_string()));
+    .map(|p| package_ident(&p.name, &p.version.to_string()));
 
   let limited_missing_crates = collect_up_to(
     MAX_DISPLAYED_MISSING_VENDORED_CRATES,
@@ -115,11 +116,7 @@ fn vendor_path(bazel_workspace_root: &Path, workspace_path: &str, vendor_dir: &s
     .join(vendor_dir)
 }
 
-/**
- * Returns the packages expected path during current execution.
- *
- * Not for use except during planning as path is local to run location.
- */
+/** Returns the packages expected path during current execution. */
 fn expected_vendored_path(
   package: &Package,
   bazel_workspace_root: &Path,
@@ -127,7 +124,7 @@ fn expected_vendored_path(
   vendor_dir: &str,
 ) -> String {
   vendor_path(bazel_workspace_root, workspace_path, vendor_dir)
-    .join(get_package_ident(
+    .join(package_ident(
       &package.name,
       &package.version.to_string(),
     ))
@@ -214,7 +211,7 @@ fn warn_unused_settings(
 }
 
 #[cfg(test)]
-pub mod tests {
+mod tests {
   use super::*;
   use crate::{
     metadata::tests::dummy_raze_metadata, settings::tests::dummy_raze_settings,
@@ -239,7 +236,7 @@ pub mod tests {
   }
 
   #[test]
-  fn test_verifies_vendored_state() {
+  fn test_check_all_vendored_verifies_vendored_state() {
     let mut settings = dummy_raze_settings();
     settings.genmode = GenMode::Vendored;
 

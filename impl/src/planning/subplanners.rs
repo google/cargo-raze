@@ -414,7 +414,7 @@ impl<'planner> CrateSubplanner<'planner> {
         .package();
 
       // Skip settings-indicated deps to skip
-      if all_skipped_deps.contains(&util::get_package_ident(
+      if all_skipped_deps.contains(&util::package_ident(
         &dep_package.name,
         &dep_package.version.to_string(),
       )) {

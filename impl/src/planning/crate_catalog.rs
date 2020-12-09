@@ -24,7 +24,7 @@ use crate::{
   error::RazeError,
   settings::{GenMode, RazeSettings},
   util,
-  util::get_package_ident,
+  util::package_ident,
 };
 
 /** An entry in the Crate catalog for a single crate. */
@@ -54,7 +54,7 @@ impl CrateCatalogEntry {
 
     Self {
       package: package.clone(),
-      package_ident: get_package_ident(&package.name, &package.version.to_string()),
+      package_ident: package_ident(&package.name, &package.version.to_string()),
       sanitized_name,
       sanitized_version,
       is_workspace_crate,

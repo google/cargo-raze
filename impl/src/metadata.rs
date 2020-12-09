@@ -29,7 +29,7 @@ use rustc_serialize::hex::ToHex;
 use tempfile::TempDir;
 use url::Url;
 
-use crate::util::get_package_ident;
+use crate::util::package_ident;
 
 const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
 pub(crate) const DEFAULT_CRATE_REGISTRY_URL: &str = "https://crates.io";
@@ -101,7 +101,8 @@ pub struct RazeMetadata {
   pub metadata: Metadata,
 
   // The absolute path to the current project's cargo workspace root. Note that the workspace
-  // root in `metadata` will be inside of a temporary directory.
+  // root in `metadata` will be inside of a temporary directory. For details see:
+  // https://doc.rust-lang.org/cargo/reference/workspaces.html#root-package
   pub cargo_workspace_root: PathBuf,
 
   // The metadata of a lockfile that was generated as a result of fetching metadata
@@ -114,7 +115,7 @@ pub struct RazeMetadata {
 impl RazeMetadata {
   /** Get the checksum of a crate using a unique formatter. */
   pub fn checksum_for(&self, name: &str, version: &str) -> Option<&String> {
-    self.checksums.get(&get_package_ident(name, version))
+    self.checksums.get(&package_ident(name, version))
   }
 }
 
@@ -310,7 +311,7 @@ impl RazeMetadataFetcher {
       &Vec::new(),
     )?;
 
-    let crate_dir = dir.join(get_package_ident(name, version));
+    let crate_dir = dir.join(package_ident(name, version));
     if !crate_dir.exists() {
       return Err(anyhow!("Directory does not exist"));
     }
@@ -430,7 +431,7 @@ impl RazeMetadataFetcher {
           let version = info.req().to_string();
           let src_dir = self.fetch_crate_src(cargo_dir.as_ref(), &name, &version)?;
           checksums.insert(
-            get_package_ident(&name, &version),
+            package_ident(&name, &version),
             self.fetch_crate_checksum(&name, &version)?,
           );
           if let Some(dirname) = src_dir.file_name() {
@@ -455,7 +456,7 @@ impl RazeMetadataFetcher {
       for package in &lockfile.packages {
         if let Some(checksum) = &package.checksum {
           checksums.insert(
-            get_package_ident(&package.name.to_string(), &package.version.to_string()),
+            package_ident(&package.name.to_string(), &package.version.to_string()),
             checksum.to_string(),
           );
         }

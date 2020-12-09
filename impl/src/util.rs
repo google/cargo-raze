@@ -331,7 +331,7 @@ pub fn get_workspace_member_path(manifest_path: &Path, workspace_root: &Path) ->
   diff_paths(manifest_path.parent().unwrap(), workspace_root)
 }
 
-pub fn get_package_ident(package_name: &str, package_version: &str) -> String {
+pub fn package_ident(package_name: &str, package_version: &str) -> String {
   format!("{}-{}", package_name, package_version)
 }
 
