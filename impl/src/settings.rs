@@ -278,6 +278,9 @@ pub struct CrateSettings {
    * For example, some crates include non-Rust code typically built through a build.rs script. They
    * can be made compatible by manually writing appropriate Bazel targets, and including them into
    * the crate through a combination of additional_build_file and additional_deps.
+   *
+   * Note: This field should be a path to a file relative to the Cargo workspace root. For more
+   * context, see https://doc.rust-lang.org/cargo/reference/workspaces.html#root-package
    */
   #[serde(default)]
   pub additional_build_file: Option<PathBuf>,
