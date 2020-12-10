@@ -392,7 +392,7 @@ fn validate_crate_setting_additional_build_file_is_relative(
         crate_name,
         version.to_string()
       )),
-      message: "additional_build_file flags should be reletive paths from the manifest containing \
+      message: "additional_build_file flags should be relative paths from the manifest containing \
                 the definition"
         .to_owned(),
     });
@@ -402,7 +402,7 @@ fn validate_crate_setting_additional_build_file_is_relative(
 }
 
 /** Ensures crate settings which specify additional build files have canonicalized paths */
-fn validate_crate_setting_additional_build_file(
+fn canonicalize_crate_setting_additional_build_file(
   additional_build_file: &mut &mut PathBuf,
   toml_path: &Path,
   crate_name: &str,
@@ -432,7 +432,7 @@ fn validate_crate_settings(settings: &mut RazeSettings, toml_path: &Path) -> Res
       let additional_build_file: &mut &mut PathBuf =
         &mut crate_settings.additional_build_file.as_mut().unwrap();
 
-      let result = validate_crate_setting_additional_build_file(
+      let result = canonicalize_crate_setting_additional_build_file(
         additional_build_file,
         toml_path,
         crate_name,
