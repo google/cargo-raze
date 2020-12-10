@@ -326,7 +326,10 @@ mod tests {
 
     // Ensure all packages are workspace members for this test
     for package in raze_metadata.metadata.packages.iter() {
-      assert!(raze_metadata.metadata.workspace_members.contains(&package.id))
+      assert!(raze_metadata
+        .metadata
+        .workspace_members
+        .contains(&package.id))
     }
 
     // Ensure no checks fail

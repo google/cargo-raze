@@ -34,6 +34,7 @@ use crate::util::package_ident;
 pub(crate) const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
 pub(crate) const DEFAULT_CRATE_REGISTRY_URL: &str = "https://crates.io";
 pub(crate) const DEFAULT_CRATE_INDEX_URL: &str = "https://github.com/rust-lang/crates.io-index";
+pub(crate) const RAZE_LOCKFILE_NAME: &str = "Cargo.raze.lock";
 
 /// An entity that can generate Cargo metadata within a Cargo workspace
 pub trait MetadataFetcher {
@@ -125,13 +126,6 @@ impl RazeMetadata {
   pub fn checksum_for(&self, name: &str, version: &str) -> Option<&String> {
     self.checksums.get(&package_ident(name, version))
   }
-}
-
-/// The local Cargo workspace files to be used for build planning .
-#[derive(Debug, Clone)]
-pub struct CargoWorkspaceFiles {
-  pub toml_path: PathBuf,
-  pub lock_path_opt: Option<PathBuf>,
 }
 
 /// Create a symlink file on unix systems
@@ -259,16 +253,13 @@ impl RazeMetadataFetcher {
   }
 
   /// Creates a copy workspace in a temporary directory for fetching the metadata of the current workspace
-  fn make_temp_workspace(&self, files: &CargoWorkspaceFiles) -> Result<(TempDir, PathBuf)> {
+  fn make_temp_workspace(&self, cargo_workspace_root: &Path) -> Result<(TempDir, PathBuf)> {
     let temp_dir = TempDir::new()?;
-    assert!(files.toml_path.is_file());
-    assert!(files.lock_path_opt.as_ref().map_or(true, |p| p.is_file()));
 
     // First gather metadata without downloading any dependencies so we can identify any path dependencies.
-    let no_deps_metadata = self.metadata_fetcher.fetch_metadata(
-      files.toml_path.parent().unwrap(),
-      /*include_deps=*/ false,
-    )?;
+    let no_deps_metadata = self
+      .metadata_fetcher
+      .fetch_metadata(cargo_workspace_root, /*include_deps=*/ false)?;
 
     // There should be a `Cargo.toml` file in the workspace root
     fs::copy(
@@ -393,40 +384,45 @@ impl RazeMetadataFetcher {
 
   /// Ensures a lockfile is generated for a crate on disk
   ///
-  /// If a lockfile for the current crate exists in the `raze` lockfiles output directory, that
-  /// lockfile will instead be installed into the crate's directory. If no lockfile exists, one
-  /// will be generated.
+  /// Args:
+  ///   - reused_lockfile: An optional lockfile to use for fetching metadata to
+  ///       ensure subsequent metadata fetches return consistent results.
+  ///   - cargo_dir: The directory of the cargo workspace to gather metadata for.
+  /// Returns:
+  ///   If a new lockfile was generated via the `lockfile_generator`, that
+  ///   Lockfile object is returned. New lockfiles are generated when
+  ///   `reused_lockfile` is not provided.
   fn cargo_generate_lockfile(
     &self,
-    override_lockfile: &Option<PathBuf>,
+    reused_lockfile: &Option<PathBuf>,
     cargo_dir: &Path,
-  ) -> Result<Lockfile> {
+  ) -> Result<Option<Lockfile>> {
     let lockfile_path = cargo_dir.join("Cargo.lock");
 
     // Use the reusable lockfile if one is provided
-    if let Some(override_lockfile) = override_lockfile {
-      fs::copy(&override_lockfile, &lockfile_path)?;
-      return Lockfile::load(&lockfile_path)
-        .with_context(|| format!("Failed to load lockfile: {}", lockfile_path.display()));
+    if let Some(reused_lockfile) = reused_lockfile {
+      fs::copy(&reused_lockfile, &lockfile_path)?;
+      return Ok(None);
     }
 
-    self.lockfile_generator.generate_lockfile(&cargo_dir)
+    let lockfile = self.lockfile_generator.generate_lockfile(&cargo_dir)?;
+
+    // Returning the lockfile here signifies that a new lockfile has been created.
+    Ok(Some(lockfile))
   }
 
   /// Gather all information about a Cargo project to use for planning and rendering steps
   pub fn fetch_metadata(
     &self,
-    files: &CargoWorkspaceFiles,
+    cargo_workspace_root: &Path,
     binary_dep_info: Option<&HashMap<String, cargo_toml::Dependency>>,
-    override_lockfile: Option<PathBuf>,
+    reused_lockfile: Option<PathBuf>,
   ) -> Result<RazeMetadata> {
-    let (cargo_dir, cargo_workspace_root) = self.make_temp_workspace(files)?;
+    let (cargo_dir, cargo_workspace_root) = self.make_temp_workspace(cargo_workspace_root)?;
     let cargo_root_toml = cargo_dir.as_ref().join("Cargo.toml");
 
-    let mut checksums: HashMap<String, String> = HashMap::new();
-    let mut output_lockfile = None;
-
     // Gather new lockfile data if any binary dependencies were provided
+    let mut checksums: HashMap<String, String> = HashMap::new();
     if let Some(binary_dep_info) = binary_dep_info {
       if !binary_dep_info.is_empty() {
         let mut src_dirnames: Vec<String> = Vec::new();
@@ -446,12 +442,10 @@ impl RazeMetadataFetcher {
         }
 
         self.inject_binaries_into_workspace(src_dirnames, &cargo_root_toml)?;
-
-        // Potentially generate a new lockfile
-        output_lockfile =
-          Some(self.cargo_generate_lockfile(&override_lockfile, cargo_dir.as_ref())?);
       }
     }
+
+    let output_lockfile = self.cargo_generate_lockfile(&reused_lockfile, cargo_dir.as_ref())?;
 
     // Load checksums from the lockfile
     let workspace_toml_lock = cargo_dir.as_ref().join("Cargo.lock");
@@ -489,6 +483,26 @@ impl Default for RazeMetadataFetcher {
       Url::parse(DEFAULT_CRATE_INDEX_URL).unwrap(),
     )
   }
+}
+
+/// Locates a lockfile for the associated crate. A `Cargo.raze.lock` file in the
+/// [RazeSettings::workspace_path](crate::settings::RazeSettings::workspace_path)
+/// direcotry will take precidence over a standard `Cargo.lock` file.
+pub fn find_lockfile(cargo_workspace_root: &Path, raze_output_dir: &Path) -> Option<PathBuf> {
+  // The custom raze lockfile will always take precidence
+  let raze_lockfile = raze_output_dir.join(RAZE_LOCKFILE_NAME);
+  if raze_lockfile.exists() {
+    return Some(raze_lockfile);
+  }
+
+  // If there is an existing standard lockfile, use it.
+  let cargo_lockfile = cargo_workspace_root.join("Cargo.lock");
+  if cargo_lockfile.exists() {
+    return Some(cargo_lockfile);
+  }
+
+  // No lockfile is available.
+  None
 }
 
 /// A struct containing information about a binary dependency
@@ -608,7 +622,7 @@ pub mod tests {
   }
 
   pub fn dummy_raze_metadata() -> RazeMetadata {
-    let (_dir, files) = make_basic_workspace();
+    let dir = make_basic_workspace();
     let (mut fetcher, _server, _index_dir) = dummy_raze_metadata_fetcher();
 
     // Always render basic metadata
@@ -616,7 +630,7 @@ pub mod tests {
       metadata_template: Some(templates::BASIC_METADATA.to_string()),
     }));
 
-    fetcher.fetch_metadata(&files, None, None).unwrap()
+    fetcher.fetch_metadata(dir.as_ref(), None, None).unwrap()
   }
 
   #[test]
@@ -625,61 +639,50 @@ pub mod tests {
     let toml_path = dir.path().join("Cargo.toml");
     let mut toml = File::create(&toml_path).unwrap();
     toml.write_all(basic_toml_contents().as_bytes()).unwrap();
-    let files = CargoWorkspaceFiles {
-      lock_path_opt: None,
-      toml_path,
-    };
 
     let mut fetcher = RazeMetadataFetcher::default();
     fetcher.set_lockfile_generator(Box::new(DummyLockfileGenerator {
       lockfile_contents: None,
     }));
-    fetcher.fetch_metadata(&files, None, None).unwrap();
+    fetcher.fetch_metadata(dir.as_ref(), None, None).unwrap();
   }
 
   #[test]
   fn test_cargo_subcommand_metadata_fetcher_works_with_lock() {
     let dir = TempDir::new().unwrap();
-    let toml_path = {
+    // Create Cargo.toml
+    {
       let path = dir.path().join("Cargo.toml");
       let mut toml = File::create(&path).unwrap();
       toml.write_all(basic_toml_contents().as_bytes()).unwrap();
-      path
-    };
-    let lock_path = {
+    }
+
+    // Create Cargo.lock
+    {
       let path = dir.path().join("Cargo.lock");
       let mut lock = File::create(&path).unwrap();
       lock.write_all(basic_lock_contents().as_bytes()).unwrap();
-      path
-    };
-    let files = CargoWorkspaceFiles {
-      lock_path_opt: Some(lock_path),
-      toml_path,
-    };
+    }
 
     let mut fetcher = RazeMetadataFetcher::default();
     fetcher.set_lockfile_generator(Box::new(DummyLockfileGenerator {
       lockfile_contents: None,
     }));
-    fetcher.fetch_metadata(&files, None, None).unwrap();
+    fetcher.fetch_metadata(dir.as_ref(), None, None).unwrap();
   }
 
   #[test]
   fn test_cargo_subcommand_metadata_fetcher_handles_bad_files() {
     let dir = TempDir::new().unwrap();
-    let toml_path = {
+    // Create Cargo.toml
+    {
       let path = dir.path().join("Cargo.toml");
       let mut toml = File::create(&path).unwrap();
       toml.write_all(b"hello").unwrap();
-      path
-    };
-    let files = CargoWorkspaceFiles {
-      lock_path_opt: None,
-      toml_path,
-    };
+    }
 
     let fetcher = RazeMetadataFetcher::default();
-    assert!(fetcher.fetch_metadata(&files, None, None).is_err());
+    assert!(fetcher.fetch_metadata(dir.as_ref(), None, None).is_err());
   }
 
   #[test]
@@ -711,9 +714,10 @@ pub mod tests {
   fn test_inject_dependency_to_workspace() {
     let (fetcher, _mock_server, _index_url) = dummy_raze_metadata_fetcher();
 
-    let (crate_dir, files) = make_workspace_with_dependency();
+    let crate_dir = make_workspace_with_dependency();
+    let cargo_toml_path = crate_dir.as_ref().join("Cargo.toml");
     let mut manifest =
-      cargo_toml::Manifest::from_str(fs::read_to_string(&files.toml_path).unwrap().as_str())
+      cargo_toml::Manifest::from_str(fs::read_to_string(&cargo_toml_path).unwrap().as_str())
         .unwrap();
 
     let basic_dep_toml = crate_dir.as_ref().join("basic_dep/Cargo.toml");
@@ -729,19 +733,19 @@ pub mod tests {
 
     // Ensure the manifest only includes the new workspace member after the injection
     assert_ne!(
-      cargo_toml::Manifest::from_str(fs::read_to_string(&files.toml_path).unwrap().as_str())
+      cargo_toml::Manifest::from_str(fs::read_to_string(&cargo_toml_path).unwrap().as_str())
         .unwrap(),
       manifest
     );
 
     // Fetch metadata
     fetcher
-      .inject_binaries_into_workspace(vec!["test".to_string()], &files.toml_path)
+      .inject_binaries_into_workspace(vec!["test".to_string()], &cargo_toml_path)
       .unwrap();
 
     // Ensure workspace now has the new member
     assert_eq!(
-      cargo_toml::Manifest::from_str(fs::read_to_string(&files.toml_path).unwrap().as_str())
+      cargo_toml::Manifest::from_str(fs::read_to_string(&cargo_toml_path).unwrap().as_str())
         .unwrap(),
       manifest
     );
@@ -751,18 +755,22 @@ pub mod tests {
   fn test_generate_lockfile_use_previously_generated() {
     let (fetcher, _mock_server, _index_url) = dummy_raze_metadata_fetcher();
 
-    let (crate_dir, files) = make_workspace_with_dependency();
-    let override_lockfile = crate_dir.as_ref().join("locks_test/Cargo.raze.lock");
+    let crate_dir = make_workspace_with_dependency();
+    let reused_lockfile = crate_dir.as_ref().join("locks_test/Cargo.raze.lock");
 
-    fs::create_dir_all(override_lockfile.parent().unwrap()).unwrap();
-    fs::write(&override_lockfile, "# test_generate_lockfile").unwrap();
+    fs::create_dir_all(reused_lockfile.parent().unwrap()).unwrap();
+    fs::write(&reused_lockfile, "# test_generate_lockfile").unwrap();
+
+    // A reuse lockfile was provided so no new lockfile should be returned
+    assert!(fetcher
+      .cargo_generate_lockfile(&Some(reused_lockfile.clone()), crate_dir.as_ref())
+      .unwrap()
+      .is_none());
 
     // Returns the built in lockfile
     assert_eq!(
-      fetcher
-        .cargo_generate_lockfile(&Some(override_lockfile), crate_dir.as_ref(),)
-        .unwrap(),
-      cargo_lock::Lockfile::load(files.lock_path_opt.unwrap()).unwrap(),
+      cargo_lock::Lockfile::load(crate_dir.as_ref().join("Cargo.lock")).unwrap(),
+      cargo_lock::Lockfile::load(&reused_lockfile).unwrap(),
     );
   }
 
@@ -773,17 +781,41 @@ pub mod tests {
       lockfile_contents: Some(advanced_lock_contents().to_string()),
     }));
 
-    let (crate_dir, _files) = make_workspace(advanced_toml_contents(), None);
+    let crate_dir = make_workspace(advanced_toml_contents(), None);
+
+    // A new lockfile should have been created and it should match the expected contents for the advanced_toml workspace
+    assert_eq!(
+      fetcher
+        .cargo_generate_lockfile(&None, crate_dir.as_ref())
+        .unwrap()
+        .unwrap(),
+      Lockfile::from_str(advanced_lock_contents()).unwrap()
+    );
+  }
+
+  #[test]
+  fn test_cargo_generate_lockfile_no_file() {
+    let (mut fetcher, _mock_server, _index_url) = dummy_raze_metadata_fetcher();
+    fetcher.set_lockfile_generator(Box::new(DummyLockfileGenerator {
+      lockfile_contents: Some(advanced_lock_contents().to_string()),
+    }));
+
+    let crate_dir = make_workspace(advanced_toml_contents(), None);
     let expected_lockfile = crate_dir.as_ref().join("expected/Cargo.expected.lock");
 
     fs::create_dir_all(expected_lockfile.parent().unwrap()).unwrap();
     fs::write(&expected_lockfile, advanced_lock_contents()).unwrap();
 
+    assert!(fetcher
+      .cargo_generate_lockfile(&Some(expected_lockfile.clone()), crate_dir.as_ref())
+      .unwrap()
+      .is_none());
+
+    // Ensure a Cargo.lock file was generated and matches the expected file
     assert_eq!(
-      fetcher
-        .cargo_generate_lockfile(&None, crate_dir.as_ref())
-        .unwrap(),
-      Lockfile::from_str(advanced_lock_contents()).unwrap()
+      Lockfile::from_str(&fs::read_to_string(expected_lockfile).unwrap()).unwrap(),
+      Lockfile::from_str(&fs::read_to_string(crate_dir.as_ref().join("Cargo.lock")).unwrap())
+        .unwrap()
     );
   }
 }

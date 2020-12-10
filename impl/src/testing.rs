@@ -29,7 +29,7 @@ use std::{
 use crate::{
   metadata::{
     tests::{dummy_raze_metadata_fetcher, DummyCargoMetadataFetcher},
-    CargoWorkspaceFiles, RazeMetadata,
+    RazeMetadata,
   },
   util::package_ident,
 };
@@ -134,37 +134,30 @@ pub fn named_lock_contents(name: &str, version: &str) -> String {
   "#, name = name, version = version }
 }
 
-pub fn make_workspace(toml_file: &str, lock_file: Option<&str>) -> (TempDir, CargoWorkspaceFiles) {
+pub fn make_workspace(toml_file: &str, lock_file: Option<&str>) -> TempDir {
   let dir = TempDir::new().unwrap();
-  let toml_path = {
+  // Create Cargo.toml
+  {
     let path = dir.path().join("Cargo.toml");
     let mut toml = File::create(&path).unwrap();
     toml.write_all(toml_file.as_bytes()).unwrap();
-    path
-  };
-  let lock_path = match lock_file {
-    Some(lock_file) => {
-      let path = dir.path().join("Cargo.lock");
-      let mut lock = File::create(&path).unwrap();
-      lock.write_all(lock_file.as_bytes()).unwrap();
-      Some(path)
-    },
-    None => None,
-  };
-  let files = CargoWorkspaceFiles {
-    lock_path_opt: lock_path,
-    toml_path,
-  };
+  }
+
+  if let Some(lock_file) = lock_file {
+    let path = dir.path().join("Cargo.lock");
+    let mut lock = File::create(&path).unwrap();
+    lock.write_all(lock_file.as_bytes()).unwrap();
+  }
 
   File::create(dir.as_ref().join("WORKSPACE.bazel")).unwrap();
-  (dir, files)
+  dir
 }
 
-pub fn make_basic_workspace() -> (TempDir, CargoWorkspaceFiles) {
+pub fn make_basic_workspace() -> TempDir {
   make_workspace(basic_toml_contents(), Some(basic_lock_contents()))
 }
 
-pub fn make_workspace_with_dependency() -> (TempDir, CargoWorkspaceFiles) {
+pub fn make_workspace_with_dependency() -> TempDir {
   make_workspace(advanced_toml_contents(), Some(advanced_lock_contents()))
 }
 

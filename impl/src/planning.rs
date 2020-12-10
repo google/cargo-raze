@@ -153,7 +153,7 @@ mod tests {
   }
 
   fn dummy_workspace_crate_metadata(metadata_template: &str) -> RazeMetadata {
-    let (_dir, files) = make_basic_workspace();
+    let dir = make_basic_workspace();
     let (mut fetcher, _server, _index_dir) = dummy_raze_metadata_fetcher();
 
     // Ensure we render the given template
@@ -161,7 +161,7 @@ mod tests {
       metadata_template: Some(metadata_template.to_string()),
     }));
 
-    let raze_metadata = fetcher.fetch_metadata(&files, None, None).unwrap();
+    let raze_metadata = fetcher.fetch_metadata(dir.as_ref(), None, None).unwrap();
     let mut metadata = raze_metadata.metadata;
 
     // Phase 1: Create a workspace package, add it to the packages list.
@@ -380,9 +380,9 @@ mod tests {
       cargo_toml::Dependency::Simple("3.3.3".to_string()),
     );
 
-    let (_dir, files) = make_basic_workspace();
+    let dir = make_basic_workspace();
     let raze_metadata = fetcher
-      .fetch_metadata(&files, Some(&settings.binary_deps), None)
+      .fetch_metadata(dir.as_ref(), Some(&settings.binary_deps), None)
       .unwrap();
 
     for mock in mock.endpoints.iter() {
@@ -587,8 +587,9 @@ mod tests {
     "#};
 
     let settings = {
-      let (_temp_dir, files) = make_workspace(toml_file, None);
-      crate::settings::load_settings_from_manifest(&files.toml_path, None).unwrap()
+      let temp_dir = make_workspace(toml_file, None);
+      let manifest_path = temp_dir.as_ref().join("Cargo.toml");
+      crate::settings::load_settings_from_manifest(&manifest_path, None).unwrap()
     };
 
     let planner = BuildPlannerImpl::new(
@@ -720,7 +721,7 @@ mod tests {
       ]
     "# };
 
-    let (crate_dir, files) = make_workspace(&workspace_toml, Some(&workspace_lock));
+    let crate_dir = make_workspace(&workspace_toml, Some(&workspace_lock));
 
     for (member, dep_version) in vec![("lib_a", "0.2.1"), ("lib_b", "0.1.0")].iter() {
       let member_dir = crate_dir.as_ref().join(&member);
@@ -732,7 +733,9 @@ mod tests {
       .unwrap();
     }
 
-    fetcher.fetch_metadata(&files, None, None).unwrap()
+    fetcher
+      .fetch_metadata(crate_dir.as_ref(), None, None)
+      .unwrap()
   }
 
   #[test]
