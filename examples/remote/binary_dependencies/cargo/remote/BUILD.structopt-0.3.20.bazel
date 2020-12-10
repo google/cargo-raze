@@ -80,6 +80,7 @@ rust_library(
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    data = [],
     edition = "2018",
     proc_macro_deps = [
         "@remote_binary_dependencies__structopt_derive__0_4_13//:structopt_derive",

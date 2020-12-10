@@ -20,9 +20,16 @@
     {%- if target.kind != "bin" %}
     crate_type = "{{ target.kind }}",
     {%- endif %}
-    {%- if crate.raze_settings.data_attr %}
-    data = {{crate.raze_settings.data_attr}},
-    {%- endif %}
+    data = []
+    {%- if crate.raze_settings.data_attr %} + {{crate.raze_settings.data_attr}}
+    {%- endif -%}
+    {# Note: data_dependencies can only be set when using cargo-raze as a library at the moment #}
+    {%- if crate.default_deps.data_dependencies %} + [
+    {%- for dependency in crate.default_deps.data_dependencies %}
+        "{{dependency.buildable_target}}",
+    {%- endfor %}
+    ]
+    {%- endif %},
     edition = "{{ target.edition }}",
     {%- if crate.default_deps.proc_macro_dependencies %}
     proc_macro_deps = [

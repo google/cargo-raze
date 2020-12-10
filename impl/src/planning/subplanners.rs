@@ -307,8 +307,10 @@ impl<'planner> CrateSubplanner<'planner> {
         deps: CrateDependencyContext {
           dependencies: dep_set.dependencies.normal_deps.clone(),
           proc_macro_dependencies: dep_set.dependencies.proc_macro_deps.clone(),
+          data_dependencies: vec![],
           build_dependencies: dep_set.dependencies.build_deps.clone(),
           build_proc_macro_dependencies: dep_set.dependencies.build_proc_macro_deps.clone(),
+          build_data_dependencies: vec![],
           dev_dependencies: dep_set.dependencies.dev_deps.clone(),
           aliased_dependencies: dep_set.dependencies.aliased_deps.clone(),
         },
@@ -358,8 +360,10 @@ impl<'planner> CrateSubplanner<'planner> {
       default_deps: CrateDependencyContext {
         dependencies: normal_deps,
         proc_macro_dependencies: proc_macro_deps,
+        data_dependencies: vec![],
         build_dependencies: build_deps,
         build_proc_macro_dependencies: build_proc_macro_deps,
+        build_data_dependencies: vec![],
         dev_dependencies: dev_deps,
         aliased_dependencies: aliased_deps,
       },

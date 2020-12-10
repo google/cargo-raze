@@ -41,6 +41,7 @@ rust_binary(
         "default",
     ],
     crate_root = "src/main.rs",
+    data = [],
     edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",

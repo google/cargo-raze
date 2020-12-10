@@ -72,6 +72,7 @@ rust_library(
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    data = [],
     edition = "2018",
     proc_macro_deps = [
         "@remote_binary_dependencies__proc_macro_error_attr__1_0_4//:proc_macro_error_attr",

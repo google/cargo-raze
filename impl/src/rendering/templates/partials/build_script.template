@@ -21,8 +21,15 @@ cargo_build_script(
     crate_root = "{{ crate.build_script_target.path }}",
     {%- else %}
     crate_root = "build.rs",
+    {%- endif -%}
+    {# Note: build_data_dependencies can only be set when using cargo-raze as a library at the moment #}
+    data = {%- if crate.default_deps.build_data_dependencies %} glob(["**"]) + [
+    {%- for dependency in crate.default_deps.build_data_dependencies %}
+        "{{dependency.buildable_target}}",
+    {%- endfor %}
+    ],
+    {%- else %} glob(["**"]),
     {%- endif %}
-    data = glob(["**"]),
     edition = "{{ crate.edition }}",
     {%- if crate.default_deps.build_proc_macro_dependencies %}
     proc_macro_deps = [
