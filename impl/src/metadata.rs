@@ -14,7 +14,7 @@
 
 use std::{
   collections::HashMap,
-  fs,
+  env, fs,
   path::{Path, PathBuf},
   string::String,
 };
@@ -48,7 +48,9 @@ struct CargoMetadataFetcher {
 impl Default for CargoMetadataFetcher {
   fn default() -> CargoMetadataFetcher {
     CargoMetadataFetcher {
-      cargo_bin_path: SYSTEM_CARGO_BIN_PATH.into(),
+      cargo_bin_path: env::var("CARGO")
+        .unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string())
+        .into(),
     }
   }
 }
@@ -476,7 +478,7 @@ impl RazeMetadataFetcher {
 impl Default for RazeMetadataFetcher {
   fn default() -> RazeMetadataFetcher {
     RazeMetadataFetcher::new(
-      SYSTEM_CARGO_BIN_PATH,
+      env::var("CARGO").unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string()),
       // UNWRAP: The default is covered by testing and should never return err
       Url::parse(DEFAULT_CRATE_REGISTRY_URL).unwrap(),
       Url::parse(DEFAULT_CRATE_INDEX_URL).unwrap(),
@@ -559,7 +561,7 @@ pub mod tests {
         .with_context(|| {
           format!(
             "Failed to run `{} metadata` with contents:\n{}",
-            SYSTEM_CARGO_BIN_PATH,
+            env::var("CARGO").unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string()),
             fs::read_to_string(working_dir.join("Cargo.toml")).unwrap()
           )
         })
@@ -586,7 +588,7 @@ pub mod tests {
     let tempdir = TempDir::new().unwrap();
     let mock_server = MockServer::start();
     let mut fetcher = RazeMetadataFetcher::new(
-      SYSTEM_CARGO_BIN_PATH,
+      env::var("CARGO").unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string()),
       Url::parse(&mock_server.base_url()).unwrap(),
       Url::parse(&format!("file://{}", tempdir.as_ref().display())).unwrap(),
     );

@@ -24,6 +24,7 @@ use semver::VersionReq;
 use serde::{Deserialize, Serialize};
 use std::{
   collections::HashMap,
+  env,
   hash::Hash,
   path::{Path, PathBuf},
 };
@@ -711,7 +712,9 @@ pub struct SettingsMetadataFetcher {
 impl Default for SettingsMetadataFetcher {
   fn default() -> SettingsMetadataFetcher {
     SettingsMetadataFetcher {
-      cargo_bin_path: SYSTEM_CARGO_BIN_PATH.into(),
+      cargo_bin_path: env::var("CARGO")
+        .unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string())
+        .into(),
     }
   }
 }
