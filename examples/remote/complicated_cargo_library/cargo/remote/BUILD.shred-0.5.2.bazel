@@ -55,6 +55,7 @@ rust_library(
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
+    data = [],
     edition = "2015",
     proc_macro_deps = [
         "@remote_complicated_cargo_library__shred_derive__0_3_0//:shred_derive",
