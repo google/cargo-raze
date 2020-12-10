@@ -19,7 +19,7 @@ use std::{
   str::FromStr,
 };
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use cargo_lock::SourceId;
 use cargo_metadata::{DependencyKind, Node, Package};
 use cargo_platform::Platform;
@@ -193,7 +193,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       sha256: &checksum_opt.map(|c| c.to_owned()),
     };
 
-    Some(crate_subplanner.produce_context())
+    Some(crate_subplanner.produce_context(&self.metadata.cargo_workspace_root))
   }
 
   fn crate_settings(&self, package: &Package) -> Result<Option<&CrateSettings>> {
@@ -242,7 +242,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
 impl<'planner> CrateSubplanner<'planner> {
   /** Builds a crate context from internal state. */
-  fn produce_context(&self) -> Result<CrateContext> {
+  fn produce_context(&self, cargo_workspace_root: &Path) -> Result<CrateContext> {
     let (
       DependencySet {
         build_deps,
@@ -335,6 +335,24 @@ impl<'planner> CrateSubplanner<'planner> {
     let is_workspace_member_dependency = !&workspace_member_dependents.is_empty();
     let is_binary_dependency = self.settings.binary_deps.contains_key(&package.name);
 
+    let mut raze_settings = self.crate_settings.cloned().unwrap_or_default();
+
+    // Generate canonicalized paths to additional build files so they're guaranteed to exist
+    // and always locatable.
+    if let Some(additional_build_file) = raze_settings.additional_build_file {
+      let canonicalized_path = cargo_workspace_root
+        .join(&additional_build_file)
+        .canonicalize()
+        .with_context(|| {
+          format!(
+            "Failed to find additional_build_file: {}",
+            &additional_build_file.display()
+          )
+        })?;
+
+      raze_settings.additional_build_file = Some(canonicalized_path);
+    }
+
     let context = CrateContext {
       pkg_name: package.name.clone(),
       pkg_version: package.version.clone(),
@@ -356,7 +374,7 @@ impl<'planner> CrateSubplanner<'planner> {
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings)?,
       build_script_target: build_script_target_opt,
       links: package.links.clone(),
-      raze_settings: self.crate_settings.cloned().unwrap_or_default(),
+      raze_settings,
       source_details: self.produce_source_details(&package, &package_root),
       expected_build_path: self.crate_catalog_entry.local_build_path(&self.settings)?,
       sha256: self.sha256.clone(),

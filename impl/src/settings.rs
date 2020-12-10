@@ -16,7 +16,7 @@ use crate::{
   error::RazeError,
   metadata::{DEFAULT_CRATE_INDEX_URL, DEFAULT_CRATE_REGISTRY_URL},
 };
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use semver::VersionReq;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs::File, io::Read, path::Path, path::PathBuf};
@@ -380,77 +380,50 @@ pub fn format_registry_url(registry_url: &str, name: &str, version: &str) -> Str
     .replace("{version}", version)
 }
 
-fn validate_crate_setting_additional_build_file_is_relative(
-  file_path: &Path,
-  crate_name: &str,
-  version: &VersionReq,
-) -> Result<(), RazeError> {
-  if file_path.is_absolute() {
-    return Err(RazeError::Config {
-      field_path_opt: Some(format!(
-        "raze.crates.{}.{}.additional_build_file",
-        crate_name,
-        version.to_string()
-      )),
-      message: "additional_build_file flags should be relative paths from the manifest containing \
-                the definition"
-        .to_owned(),
-    });
+/** Check that the the `additional_build_file` represents a path to a file from the cargo workspace root */
+fn validate_crate_setting_additional_build_file(
+  additional_build_file: &Path,
+  cargo_workspace_root: &Path,
+) -> Result<()> {
+  let additional_build_file = cargo_workspace_root.join(&additional_build_file);
+  if !additional_build_file.exists() {
+    return Err(anyhow!(
+      "File not found. `{}` should be a relative path from the cargo workspace root: {}",
+      additional_build_file.display(),
+      cargo_workspace_root.display()
+    ));
   }
 
   Ok(())
 }
 
-/** Ensures crate settings which specify additional build files have canonicalized paths */
-fn canonicalize_crate_setting_additional_build_file(
-  additional_build_file: &mut &mut PathBuf,
-  toml_path: &Path,
-  crate_name: &str,
-  version: &VersionReq,
-) -> Result<()> {
-  validate_crate_setting_additional_build_file_is_relative(
-    additional_build_file,
-    crate_name,
-    version,
-  )?;
-
-  **additional_build_file = toml_path.join(&additional_build_file).canonicalize()?;
-
-  Ok(())
-}
-
 /** Ensures crate settings associatd with the parsed [RazeSettings](crate::settings::RazeSettings) have valid crate settings */
-fn validate_crate_settings(settings: &mut RazeSettings, toml_path: &Path) -> Result<(), RazeError> {
+fn validate_crate_settings(
+  settings: &RazeSettings,
+  cargo_workspace_root: &Path,
+) -> Result<(), RazeError> {
   let mut errors = Vec::new();
 
-  for (crate_name, crate_settings) in settings.crates.iter_mut() {
-    for (version, crate_settings) in crate_settings.iter_mut() {
+  for (crate_name, crate_settings) in settings.crates.iter() {
+    for (version, crate_settings) in crate_settings.iter() {
       if crate_settings.additional_build_file.is_none() {
         continue;
       }
 
-      let additional_build_file: &mut &mut PathBuf =
-        &mut crate_settings.additional_build_file.as_mut().unwrap();
-
-      let result = canonicalize_crate_setting_additional_build_file(
-        additional_build_file,
-        toml_path,
-        crate_name,
-        version,
+      let result = validate_crate_setting_additional_build_file(
+        // UNWRAP: Safe due to check above
+        crate_settings.additional_build_file.as_ref().unwrap(),
+        cargo_workspace_root,
       );
 
-      if result.is_err() {
+      if let Some(err) = result.err() {
         errors.push(RazeError::Config {
           field_path_opt: Some(format!(
             "raze.crates.{}.{}.additional_build_file",
             crate_name,
             version.to_string()
           )),
-          message: format!(
-            "Failed to canonicalize string with error: {}",
-            // UNWRAP: safe inside this block
-            result.err().unwrap().to_string()
-          ),
+          message: err.to_string(),
         });
       }
     }
@@ -468,7 +441,10 @@ fn validate_crate_settings(settings: &mut RazeSettings, toml_path: &Path) -> Res
 }
 
 /** Verifies that the provided settings make sense. */
-fn validate_settings(settings: &mut RazeSettings, toml_path: &Path) -> Result<(), RazeError> {
+fn validate_settings(
+  settings: &mut RazeSettings,
+  cargo_workspace_path: &Path,
+) -> Result<(), RazeError> {
   if !settings.workspace_path.starts_with("//") {
     return Err(
       RazeError::Config {
@@ -495,7 +471,7 @@ fn validate_settings(settings: &mut RazeSettings, toml_path: &Path) -> Result<()
     settings.genmode = GenMode::Vendored;
   }
 
-  validate_crate_settings(settings, toml_path)?;
+  validate_crate_settings(settings, cargo_workspace_path)?;
 
   Ok(())
 }
