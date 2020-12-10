@@ -117,6 +117,7 @@ pub struct CrateContext {
   pub pkg_version: Version,
   pub edition: String,
   pub raze_settings: CrateSettings,
+  pub canonical_additional_build_file: Option<PathBuf>,
   pub default_deps: CrateDependencyContext,
   pub targeted_deps: Vec<CrateTargetedDepContext>,
   pub license: LicenseData,

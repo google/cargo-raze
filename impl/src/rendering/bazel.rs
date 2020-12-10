@@ -13,8 +13,6 @@
 // limitations under the License.
 
 use anyhow::Result;
-
-use pathdiff::diff_paths;
 use tera::{self, Context, Tera};
 
 use crate::{
@@ -24,7 +22,7 @@ use crate::{
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
 };
 
-use std::{error::Error, path::Path};
+use std::error::Error;
 
 macro_rules! unwind_tera_error {
   ($err:ident) => {{
@@ -211,15 +209,14 @@ impl BazelRenderer {
 fn include_additional_build_file(
   package: &CrateContext,
   existing_contents: String,
-  output_file_path: &Path,
 ) -> Result<String> {
-  match &package.raze_settings.additional_build_file {
+  match &package.canonical_additional_build_file {
     Some(file_path) => {
-      // Generate a relative path if possible so the output files are more consistent by not
-      // including full paths to the file on the current machine. This should cause the file
-      // `/home/user/code/bazel_project/crates/BUILD.additional.bazel` to be renderd as
-      // `./BUILD.additional.bazel`.
-      let display_path = &diff_paths(file_path, output_file_path).unwrap_or(file_path.clone());
+      assert!(
+        package.raze_settings.additional_build_file.is_some(),
+        "The raze_settings.additional_build_file should always be set if \
+         canonical_additional_build_file is set"
+      );
       let additional_content =
         std::fs::read_to_string(file_path).map_err(|e| RazeError::Rendering {
           crate_name_opt: Some(package.pkg_name.to_owned()),
@@ -233,7 +230,13 @@ fn include_additional_build_file(
       Ok(format!(
         "{}\n# Additional content from {}\n{}",
         existing_contents,
-        display_path.display(),
+        // UNWRAP: Safe due to assert above
+        package
+          .raze_settings
+          .additional_build_file
+          .as_ref()
+          .unwrap()
+          .display(),
         additional_content
       ))
     },
@@ -267,13 +270,11 @@ impl BuildRenderer for BazelRenderer {
             message: unwind_tera_error!(e),
           })?;
 
-      let output_file_path = path_prefix.as_path().join(&package.expected_build_path);
-
       let final_crate_build_file =
-        include_additional_build_file(package, rendered_crate_build_file, &output_file_path)?;
+        include_additional_build_file(package, rendered_crate_build_file)?;
 
       file_outputs.push(FileOutputs {
-        path: output_file_path,
+        path: path_prefix.as_path().join(&package.expected_build_path),
         contents: final_crate_build_file,
       })
     }
@@ -315,13 +316,11 @@ impl BuildRenderer for BazelRenderer {
           message: unwind_tera_error!(e),
         })?;
 
-      let output_file_path = path_prefix.as_path().join(&package.expected_build_path);
-
       let final_crate_build_file =
-        include_additional_build_file(package, rendered_crate_build_file, &output_file_path)?;
+        include_additional_build_file(package, rendered_crate_build_file)?;
 
       file_outputs.push(FileOutputs {
-        path: output_file_path,
+        path: path_prefix.as_path().join(&package.expected_build_path),
         contents: final_crate_build_file,
       })
     }
@@ -421,6 +420,7 @@ mod tests {
       expected_build_path: format!("vendor/test-binary-1.1.1/{}", buildfile_suffix),
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
+      canonical_additional_build_file: CrateSettings::default().additional_build_file,
       default_deps: CrateDependencyContext {
         dependencies: Vec::new(),
         proc_macro_dependencies: Vec::new(),
@@ -462,6 +462,7 @@ mod tests {
       edition: "2015".to_owned(),
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
+      canonical_additional_build_file: CrateSettings::default().additional_build_file,
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
       expected_build_path: format!("vendor/test-library-1.1.1/{}", buildfile_suffix),
       default_deps: CrateDependencyContext {
@@ -675,6 +676,7 @@ mod tests {
           additional_build_file: Some("non-existent-file".into()),
           ..Default::default()
         },
+        canonical_additional_build_file: Some("non-existent-file".into()),
         ..dummy_library_crate()
       }]),
     );
@@ -691,27 +693,25 @@ mod tests {
     )
     .unwrap();
 
+    let additional_build_file = tmp_dir.as_ref().join("some_additional_build_file");
+
     let file_outputs = render_crates_for_test(vec![CrateContext {
       raze_settings: CrateSettings {
-        additional_build_file: Some(tmp_dir.as_ref().join("some_additional_build_file")),
+        additional_build_file: Some(additional_build_file.clone()),
         ..Default::default()
       },
+      canonical_additional_build_file: Some(additional_build_file.clone()),
       ..dummy_library_crate()
     }]);
 
     let file_name =
       "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD".to_owned();
-    let display_path = diff_paths(
-      tmp_dir.as_ref().join("some_additional_build_file"),
-      &file_name,
-    )
-    .unwrap();
     let crate_build_contents = extract_contents_matching_path(&file_outputs, &file_name);
 
     expect(
       crate_build_contents.contains(&format!(
         "# Additional content from {}",
-        display_path.display()
+        additional_build_file.display()
       )),
       format!(
         "expected crate build contents to include additional_build_file, but it just contained \

@@ -335,23 +335,24 @@ impl<'planner> CrateSubplanner<'planner> {
     let is_workspace_member_dependency = !&workspace_member_dependents.is_empty();
     let is_binary_dependency = self.settings.binary_deps.contains_key(&package.name);
 
-    let mut raze_settings = self.crate_settings.cloned().unwrap_or_default();
+    let raze_settings = self.crate_settings.cloned().unwrap_or_default();
 
     // Generate canonicalized paths to additional build files so they're guaranteed to exist
     // and always locatable.
-    if let Some(additional_build_file) = raze_settings.additional_build_file {
-      let canonicalized_path = cargo_workspace_root
-        .join(&additional_build_file)
-        .canonicalize()
-        .with_context(|| {
-          format!(
-            "Failed to find additional_build_file: {}",
-            &additional_build_file.display()
-          )
-        })?;
-
-      raze_settings.additional_build_file = Some(canonicalized_path);
-    }
+    let canonical_additional_build_file = match &raze_settings.additional_build_file {
+      Some(build_file) => Some(
+        cargo_workspace_root
+          .join(&build_file)
+          .canonicalize()
+          .with_context(|| {
+            format!(
+              "Failed to find additional_build_file: {}",
+              &build_file.display()
+            )
+          })?,
+      ),
+      None => None,
+    };
 
     let context = CrateContext {
       pkg_name: package.name.clone(),
@@ -375,6 +376,7 @@ impl<'planner> CrateSubplanner<'planner> {
       build_script_target: build_script_target_opt,
       links: package.links.clone(),
       raze_settings,
+      canonical_additional_build_file,
       source_details: self.produce_source_details(&package, &package_root),
       expected_build_path: self.crate_catalog_entry.local_build_path(&self.settings)?,
       sha256: self.sha256.clone(),
