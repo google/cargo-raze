@@ -14,7 +14,6 @@
 
 use std::{
   collections::HashMap,
-  path::PathBuf,
   str::{self},
 };
 
@@ -24,10 +23,10 @@ use cargo_metadata::{Metadata, Node, Package, PackageId};
 use crate::{
   error::RazeError,
   settings::{GenMode, RazeSettings},
-  util::{self, find_bazel_workspace_root},
+  util,
+  util::package_ident,
 };
 
-pub const VENDOR_DIR: &str = "vendor/";
 /** An entry in the Crate catalog for a single crate. */
 pub struct CrateCatalogEntry {
   // The package metadata for the crate
@@ -55,7 +54,7 @@ impl CrateCatalogEntry {
 
     Self {
       package: package.clone(),
-      package_ident: format!("{}-{}", &package.name, &package.version),
+      package_ident: package_ident(&package.name, &package.version.to_string()),
       sanitized_name,
       sanitized_version,
       is_workspace_crate,
@@ -77,23 +76,6 @@ impl CrateCatalogEntry {
   /** Returns whether or not this is a member of the root workspace. */
   pub fn is_workspace_crate(&self) -> bool {
     self.is_workspace_crate
-  }
-
-  /**
-   * Returns the packages expected path during current execution.
-   *
-   * Not for use except during planning as path is local to run location.
-   */
-  pub fn expected_vendored_path(&self, workspace_path: &str) -> String {
-    let mut dir = find_bazel_workspace_root().unwrap_or(PathBuf::from("."));
-
-    // Trim the absolute label identifier from the start of the workspace path
-    dir.push(workspace_path.trim_start_matches('/'));
-
-    dir.push(VENDOR_DIR);
-    dir.push(&self.package_ident);
-
-    return dir.display().to_string();
   }
 
   /** Yields the expected location of the build file (relative to execution path). */
@@ -224,11 +206,6 @@ impl CrateCatalog {
       entries,
       package_id_to_entries_idx,
     })
-  }
-
-  /** Yields the internally contained entry set. */
-  pub fn entries(&self) -> &Vec<CrateCatalogEntry> {
-    &self.entries
   }
 
   /** Finds and returns the catalog entry with the given package id if present. */

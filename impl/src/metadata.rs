@@ -29,6 +29,8 @@ use rustc_serialize::hex::ToHex;
 use tempfile::TempDir;
 use url::Url;
 
+use crate::util::package_ident;
+
 const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
 pub(crate) const DEFAULT_CRATE_REGISTRY_URL: &str = "https://crates.io";
 pub(crate) const DEFAULT_CRATE_INDEX_URL: &str = "https://github.com/rust-lang/crates.io-index";
@@ -98,8 +100,10 @@ pub struct RazeMetadata {
   // `cargo metadata` output of the current project
   pub metadata: Metadata,
 
-  // The absolute path to the current project's cargo workspace root
-  pub workspace_root: PathBuf,
+  // The absolute path to the current project's cargo workspace root. Note that the workspace
+  // root in `metadata` will be inside of a temporary directory. For details see:
+  // https://doc.rust-lang.org/cargo/reference/workspaces.html#root-package
+  pub cargo_workspace_root: PathBuf,
 
   // The metadata of a lockfile that was generated as a result of fetching metadata
   pub lockfile: Option<Lockfile>,
@@ -111,7 +115,7 @@ pub struct RazeMetadata {
 impl RazeMetadata {
   /** Get the checksum of a crate using a unique formatter. */
   pub fn checksum_for(&self, name: &str, version: &str) -> Option<&String> {
-    self.checksums.get(&format!("{}-{}", name, version))
+    self.checksums.get(&package_ident(name, version))
   }
 }
 
@@ -136,9 +140,9 @@ fn make_symlink(src: &Path, dest: &Path) -> Result<()> {
     .with_context(|| "Failed to create symlink for generating metadata")
 }
 
-/** 
- * A workspace metadata fetcher that uses the Cargo commands to gather information about a Cargo 
- * project and it's transitive dependencies for planning and rendering of Bazel BUILD files. 
+/**
+ * A workspace metadata fetcher that uses the Cargo commands to gather information about a Cargo
+ * project and it's transitive dependencies for planning and rendering of Bazel BUILD files.
  */
 pub struct RazeMetadataFetcher {
   registry_url: Url,
@@ -255,9 +259,10 @@ impl RazeMetadataFetcher {
     assert!(files.lock_path_opt.as_ref().map_or(true, |p| p.is_file()));
 
     // First gather metadata without downloading any dependencies so we can identify any path dependencies.
-    let no_deps_metadata = self
-      .metadata_fetcher
-      .fetch_metadata(files.toml_path.parent().unwrap(), /*include_deps=*/false)?;
+    let no_deps_metadata = self.metadata_fetcher.fetch_metadata(
+      files.toml_path.parent().unwrap(),
+      /*include_deps=*/ false,
+    )?;
 
     // There should be a `Cargo.toml` file in the workspace root
     fs::copy(
@@ -306,7 +311,7 @@ impl RazeMetadataFetcher {
       &Vec::new(),
     )?;
 
-    let crate_dir = dir.join(format!("{}-{}", name, version));
+    let crate_dir = dir.join(package_ident(name, version));
     if !crate_dir.exists() {
       return Err(anyhow!("Directory does not exist"));
     }
@@ -411,7 +416,7 @@ impl RazeMetadataFetcher {
     binary_dep_info: Option<&HashMap<String, cargo_toml::Dependency>>,
     override_lockfile: Option<PathBuf>,
   ) -> Result<RazeMetadata> {
-    let (cargo_dir, workspace_root) = self.make_temp_workspace(files)?;
+    let (cargo_dir, cargo_workspace_root) = self.make_temp_workspace(files)?;
     let cargo_root_toml = cargo_dir.as_ref().join("Cargo.toml");
 
     let mut checksums: HashMap<String, String> = HashMap::new();
@@ -426,7 +431,7 @@ impl RazeMetadataFetcher {
           let version = info.req().to_string();
           let src_dir = self.fetch_crate_src(cargo_dir.as_ref(), &name, &version)?;
           checksums.insert(
-            format!("{}-{}", &name, &version),
+            package_ident(&name, &version),
             self.fetch_crate_checksum(&name, &version)?,
           );
           if let Some(dirname) = src_dir.file_name() {
@@ -451,11 +456,7 @@ impl RazeMetadataFetcher {
       for package in &lockfile.packages {
         if let Some(checksum) = &package.checksum {
           checksums.insert(
-            format!(
-              "{}-{}",
-              package.name.to_string(),
-              package.version.to_string()
-            ),
+            package_ident(&package.name.to_string(), &package.version.to_string()),
             checksum.to_string(),
           );
         }
@@ -464,12 +465,12 @@ impl RazeMetadataFetcher {
 
     let metadata = self
       .metadata_fetcher
-      .fetch_metadata(cargo_dir.as_ref(), /*include_deps=*/true)?;
+      .fetch_metadata(cargo_dir.as_ref(), /*include_deps=*/ true)?;
 
     Ok(RazeMetadata {
       metadata,
       checksums,
-      workspace_root,
+      cargo_workspace_root,
       lockfile: output_lockfile,
     })
   }

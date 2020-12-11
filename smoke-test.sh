@@ -22,7 +22,7 @@ command_exists "bazel"
 echo "Building local Cargo Raze"
 cd "$IMPL_DIR"
 cargo build --quiet
-RAZE="$IMPL_DIR/target/debug/cargo-raze raze"
+RAZE="$IMPL_DIR/target/debug/cargo-raze"
 
 # Clean the `examples` directory
 echo "Cleaning examples directory"
@@ -75,10 +75,10 @@ for ex in $(find $EXAMPLES_DIR/vendored -maxdepth 1 -type d | tail -n+2); do
     cargo vendor -q --versioned-dirs "$ex/cargo/vendor"
 done
 
+cd "$EXAMPLES_DIR"
 for ex in $(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d); do
     echo "Running Cargo Raze for $(basename $ex)"
-    cd "$ex"
-    eval "$RAZE"
+    eval "$RAZE" --manifest-path "$ex/Cargo.toml"
 done
 
 # Print Bazel version info
@@ -86,7 +86,6 @@ echo "Bazel version info"
 bazel version
 
 # Run the Bazel build for all targets
-cd "$EXAMPLES_DIR"
 echo "Running Bazel 'build' and 'test' for all examples"
 bazel build //...
 bazel test //...

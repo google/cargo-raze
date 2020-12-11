@@ -24,6 +24,7 @@ use anyhow::Result;
 use docopt::Docopt;
 
 use cargo_raze::{
+  checks,
   metadata::{CargoWorkspaceFiles, RazeMetadataFetcher},
   planning::{BuildPlanner, BuildPlannerImpl},
   rendering::{bazel::BazelRenderer, BuildRenderer, RenderDetails},
@@ -37,7 +38,6 @@ use url::Url;
 
 #[derive(Debug, Deserialize)]
 struct Options {
-  arg_buildprefix: Option<String>,
   flag_verbose: Option<bool>,
   flag_quiet: Option<bool>,
   flag_host: Option<String>,
@@ -46,6 +46,7 @@ struct Options {
   flag_dryrun: Option<bool>,
   flag_cargo_bin_path: Option<String>,
   flag_output: Option<String>,
+  flag_manifest_path: Option<String>,
 }
 
 const USAGE: &str = r#"
@@ -53,9 +54,8 @@ Generate BUILD files for your pre-vendored Cargo dependencies.
 
 Usage:
     cargo raze (-h | --help)
-    cargo raze [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>] [--output=<PATH>]
-    cargo raze <buildprefix> [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>]
-                             [--output=<PATH>]
+    cargo raze [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>] 
+               [--manifest-path=<PATH>] [--output=<PATH>] 
     cargo raze (-V | --version)
 
 Options:
@@ -66,6 +66,7 @@ Options:
     --color=<WHEN>                      Coloring: auto, always, never
     -d, --dryrun                        Do not emit any files
     --cargo-bin-path=<PATH>             Path to the cargo binary to be used for loading workspace metadata
+    --manifest-path=<PATH>              Path to the Cargo.toml file to generate BUILD files for
     --output=<PATH>                     Path to output the generated into.
 "#;
 
@@ -81,7 +82,13 @@ fn main() -> Result<()> {
     .unwrap_or_else(|e| e.exit());
 
   // Load settings
-  let settings = load_settings("Cargo.toml")?;
+  let manifest_path = PathBuf::from(
+    options
+      .flag_manifest_path
+      .unwrap_or("./Cargo.toml".to_owned()),
+  )
+  .canonicalize()?;
+  let settings = load_settings(&manifest_path)?;
   if options.flag_verbose.unwrap_or(false) {
     println!("Loaded override settings: {:#?}", settings);
   }
@@ -95,21 +102,25 @@ fn main() -> Result<()> {
     ),
     None => RazeMetadataFetcher::default(),
   };
-  let toml_path = PathBuf::from("./Cargo.toml");
-  let lock_path_opt = fs::metadata("./Cargo.lock")
-    .ok()
-    .map(|_| PathBuf::from("./Cargo.lock"));
+  let cargo_raze_working_dir =
+    find_bazel_workspace_root(&manifest_path).unwrap_or(std::env::current_dir()?);
+  let lock_path_opt = if let Some(parent) = manifest_path.parent() {
+    let lock_path = parent.join("Cargo.lock");
+    fs::metadata(&lock_path).ok().map(|_| lock_path)
+  } else {
+    None
+  };
   let files = CargoWorkspaceFiles {
-    toml_path,
+    toml_path: manifest_path,
     lock_path_opt,
   };
-  let cargo_raze_working_dir = find_bazel_workspace_root().unwrap_or(std::env::current_dir()?);
   let remote_genmode_inputs = gather_remote_genmode_inputs(&cargo_raze_working_dir, &settings);
   let metadata = metadata_fetcher.fetch_metadata(
     &files,
     remote_genmode_inputs.binary_deps,
     remote_genmode_inputs.override_lockfile,
   )?;
+  checks::check_metadata(&metadata.metadata, &settings, &cargo_raze_working_dir)?;
 
   // Do Planning
   let platform_details = match &settings.target {
@@ -122,7 +133,7 @@ fn main() -> Result<()> {
   // Render BUILD files
   let mut bazel_renderer = BazelRenderer::new();
   let render_details = RenderDetails {
-    cargo_root: metadata.workspace_root,
+    cargo_root: metadata.cargo_workspace_root,
     path_prefix: PathBuf::from(&settings.workspace_path.trim_start_matches("/")),
     workspace_member_output_dir: settings.workspace_member_dir,
     vendored_buildfile_name: settings.output_buildfile_suffix,

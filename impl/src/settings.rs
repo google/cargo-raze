@@ -16,9 +16,10 @@ use crate::{
   error::RazeError,
   metadata::{DEFAULT_CRATE_INDEX_URL, DEFAULT_CRATE_REGISTRY_URL},
 };
+use anyhow::{anyhow, Result};
 use semver::VersionReq;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fs::File, io::Read, path::Path};
+use std::{collections::HashMap, fs::File, io::Read, path::Path, path::PathBuf};
 
 pub type CrateSettingsPerVersion = HashMap<VersionReq, CrateSettings>;
 
@@ -148,6 +149,14 @@ pub struct RazeSettings {
    */
   #[serde(default = "default_raze_settings_rust_rules_workspace_name")]
   pub rust_rules_workspace_name: String,
+
+  /**
+   * The expected path relative to the `Cargo.toml` file where vendored sources can
+   * be found. This should match the path passed to the `cargo vendor` command. eg:
+   * `cargo vendor -q --versioned-dirs "cargo/vendor"
+   */
+  #[serde(default = "default_raze_settings_vendor_dir")]
+  pub vendor_dir: String,
 }
 
 /** Override settings for individual crates (as part of `RazeSettings`). */
@@ -269,9 +278,12 @@ pub struct CrateSettings {
    * For example, some crates include non-Rust code typically built through a build.rs script. They
    * can be made compatible by manually writing appropriate Bazel targets, and including them into
    * the crate through a combination of additional_build_file and additional_deps.
+   *
+   * Note: This field should be a path to a file relative to the Cargo workspace root. For more
+   * context, see https://doc.rust-lang.org/cargo/reference/workspaces.html#root-package
    */
   #[serde(default)]
-  pub additional_build_file: Option<String>,
+  pub additional_build_file: Option<PathBuf>,
 }
 
 /**
@@ -344,6 +356,10 @@ fn default_raze_settings_rust_rules_workspace_name() -> String {
   "io_bazel_rules_rust".to_owned()
 }
 
+fn default_raze_settings_vendor_dir() -> String {
+  "vendor".to_owned()
+}
+
 fn default_crate_settings_field_gen_buildrs() -> Option<bool> {
   None
 }
@@ -367,8 +383,71 @@ pub fn format_registry_url(registry_url: &str, name: &str, version: &str) -> Str
     .replace("{version}", version)
 }
 
+/** Check that the the `additional_build_file` represents a path to a file from the cargo workspace root */
+fn validate_crate_setting_additional_build_file(
+  additional_build_file: &Path,
+  cargo_workspace_root: &Path,
+) -> Result<()> {
+  let additional_build_file = cargo_workspace_root.join(&additional_build_file);
+  if !additional_build_file.exists() {
+    return Err(anyhow!(
+      "File not found. `{}` should be a relative path from the cargo workspace root: {}",
+      additional_build_file.display(),
+      cargo_workspace_root.display()
+    ));
+  }
+
+  Ok(())
+}
+
+/** Ensures crate settings associatd with the parsed [RazeSettings](crate::settings::RazeSettings) have valid crate settings */
+fn validate_crate_settings(
+  settings: &RazeSettings,
+  cargo_workspace_root: &Path,
+) -> Result<(), RazeError> {
+  let mut errors = Vec::new();
+
+  for (crate_name, crate_settings) in settings.crates.iter() {
+    for (version, crate_settings) in crate_settings.iter() {
+      if crate_settings.additional_build_file.is_none() {
+        continue;
+      }
+
+      let result = validate_crate_setting_additional_build_file(
+        // UNWRAP: Safe due to check above
+        crate_settings.additional_build_file.as_ref().unwrap(),
+        cargo_workspace_root,
+      );
+
+      if let Some(err) = result.err() {
+        errors.push(RazeError::Config {
+          field_path_opt: Some(format!(
+            "raze.crates.{}.{}.additional_build_file",
+            crate_name,
+            version.to_string()
+          )),
+          message: err.to_string(),
+        });
+      }
+    }
+  }
+
+  // Surface all errors
+  if !errors.is_empty() {
+    return Err(RazeError::Config {
+      field_path_opt: None,
+      message: format!("{:?}", errors),
+    });
+  }
+
+  Ok(())
+}
+
 /** Verifies that the provided settings make sense. */
-fn validate_settings(settings: &mut RazeSettings) -> Result<(), RazeError> {
+fn validate_settings(
+  settings: &mut RazeSettings,
+  cargo_workspace_path: &Path,
+) -> Result<(), RazeError> {
   if !settings.workspace_path.starts_with("//") {
     return Err(
       RazeError::Config {
@@ -394,6 +473,8 @@ fn validate_settings(settings: &mut RazeSettings) -> Result<(), RazeError> {
     );
     settings.genmode = GenMode::Vendored;
   }
+
+  validate_crate_settings(settings, cargo_workspace_path)?;
 
   Ok(())
 }
@@ -466,7 +547,9 @@ pub fn load_settings<T: AsRef<Path>>(cargo_toml_path: T) -> Result<RazeSettings,
   };
 
   let mut settings = parse_raze_settings(toml_contents)?;
-  validate_settings(&mut settings)?;
+
+  // UNWRAP: Safe due to the fact that `path` was read as a file earlier
+  validate_settings(&mut settings, path.parent().unwrap())?;
 
   Ok(settings)
 }
@@ -496,6 +579,7 @@ pub mod tests {
       registry: default_raze_settings_registry(),
       index_url: default_raze_settings_index_url(),
       rust_rules_workspace_name: default_raze_settings_rust_rules_workspace_name(),
+      vendor_dir: default_raze_settings_vendor_dir(),
     }
   }
 

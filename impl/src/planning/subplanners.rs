@@ -19,7 +19,7 @@ use std::{
   str::FromStr,
 };
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use cargo_lock::SourceId;
 use cargo_metadata::{DependencyKind, Node, Package};
 use cargo_platform::Platform;
@@ -35,15 +35,10 @@ use crate::{
   metadata::RazeMetadata,
   planning::license,
   settings::{format_registry_url, CrateSettings, GenMode, RazeSettings},
-  util::get_workspace_member_path,
-  util::{
-    self, filter_bazel_triples, generate_bazel_conditions, get_matching_bazel_triples,
-    is_bazel_supported_platform, PlatformDetails,
-  },
+  util,
 };
 
 use super::{
-  checks,
   crate_catalog::{CrateCatalog, CrateCatalogEntry},
   PlannedBuild,
 };
@@ -86,7 +81,7 @@ struct TargetedDependencySet {
 struct CrateSubplanner<'planner> {
   // Workspace-Wide details
   settings: &'planner RazeSettings,
-  platform_details: &'planner Option<PlatformDetails>,
+  platform_details: &'planner Option<util::PlatformDetails>,
   crate_catalog: &'planner CrateCatalog,
   // Crate specific content
   crate_catalog_entry: &'planner CrateCatalogEntry,
@@ -99,7 +94,7 @@ struct CrateSubplanner<'planner> {
 /** An internal working planner for generating context for a whole workspace. */
 pub struct WorkspaceSubplanner<'planner> {
   pub(super) settings: &'planner RazeSettings,
-  pub(super) platform_details: &'planner Option<PlatformDetails>,
+  pub(super) platform_details: &'planner Option<util::PlatformDetails>,
   pub(super) crate_catalog: &'planner CrateCatalog,
   pub(super) metadata: &'planner RazeMetadata,
 }
@@ -107,18 +102,9 @@ pub struct WorkspaceSubplanner<'planner> {
 impl<'planner> WorkspaceSubplanner<'planner> {
   /** Produces a planned build using internal state. */
   pub fn produce_planned_build(&self) -> Result<PlannedBuild> {
-    // Check for errors
-    checks::check_resolve_matches_packages(&self.crate_catalog.metadata)?;
-    if self.settings.genmode == GenMode::Vendored {
-      checks::check_all_vendored(self.crate_catalog.entries(), &self.settings.workspace_path)?;
-    }
-
-    // Check for warnings
-    let packages: Vec<&Package> = self.crate_catalog.metadata.packages.iter().collect();
-    checks::warn_unused_settings(&self.settings.crates, &packages);
-
     // Produce planned build
     let crate_contexts = self.produce_crate_contexts()?;
+
     Ok(PlannedBuild {
       workspace_context: self.produce_workspace_context(),
       crate_contexts,
@@ -146,7 +132,10 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           if self.settings.binary_deps.contains_key(&pkg.name) {
             None
           } else {
-            get_workspace_member_path(&pkg.manifest_path, &self.metadata.metadata.workspace_root)
+            util::get_workspace_member_path(
+              &pkg.manifest_path,
+              &self.metadata.metadata.workspace_root,
+            )
           }
         } else {
           None
@@ -204,7 +193,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       sha256: &checksum_opt.map(|c| c.to_owned()),
     };
 
-    Some(crate_subplanner.produce_context())
+    Some(crate_subplanner.produce_context(&self.metadata.cargo_workspace_root))
   }
 
   fn crate_settings(&self, package: &Package) -> Result<Option<&CrateSettings>> {
@@ -253,7 +242,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
 impl<'planner> CrateSubplanner<'planner> {
   /** Builds a crate context from internal state. */
-  fn produce_context(&self) -> Result<CrateContext> {
+  fn produce_context(&self, cargo_workspace_root: &Path) -> Result<CrateContext> {
     let (
       DependencySet {
         build_deps,
@@ -288,8 +277,8 @@ impl<'planner> CrateSubplanner<'planner> {
     // Build a list of dependencies while addression a potential whitelist of target triples
     let mut filtered_deps = Vec::new();
     for dep_set in targeted_deps.iter() {
-      let mut target_triples = get_matching_bazel_triples(&dep_set.target)?;
-      filter_bazel_triples(
+      let mut target_triples = util::get_matching_bazel_triples(&dep_set.target)?;
+      util::filter_bazel_triples(
         &mut target_triples,
         self
           .settings
@@ -314,7 +303,7 @@ impl<'planner> CrateSubplanner<'planner> {
           dev_dependencies: dep_set.dependencies.dev_deps.clone(),
           aliased_dependencies: dep_set.dependencies.aliased_deps.clone(),
         },
-        conditions: generate_bazel_conditions(
+        conditions: util::generate_bazel_conditions(
           &self.settings.rust_rules_workspace_name,
           &target_triples,
         )?,
@@ -335,7 +324,7 @@ impl<'planner> CrateSubplanner<'planner> {
           .iter()
           .find(|pkg| pkg.id == *pkg_id);
         if let Some(package) = workspace_member {
-          get_workspace_member_path(
+          util::get_workspace_member_path(
             &package.manifest_path,
             &self.crate_catalog.metadata.workspace_root,
           )
@@ -347,6 +336,25 @@ impl<'planner> CrateSubplanner<'planner> {
 
     let is_workspace_member_dependency = !&workspace_member_dependents.is_empty();
     let is_binary_dependency = self.settings.binary_deps.contains_key(&package.name);
+
+    let raze_settings = self.crate_settings.cloned().unwrap_or_default();
+
+    // Generate canonicalized paths to additional build files so they're guaranteed to exist
+    // and always locatable.
+    let canonical_additional_build_file = match &raze_settings.additional_build_file {
+      Some(build_file) => Some(
+        cargo_workspace_root
+          .join(&build_file)
+          .canonicalize()
+          .with_context(|| {
+            format!(
+              "Failed to find additional_build_file: {}",
+              &build_file.display()
+            )
+          })?,
+      ),
+      None => None,
+    };
 
     let context = CrateContext {
       pkg_name: package.name.clone(),
@@ -371,7 +379,8 @@ impl<'planner> CrateSubplanner<'planner> {
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings)?,
       build_script_target: build_script_target_opt,
       links: package.links.clone(),
-      raze_settings: self.crate_settings.cloned().unwrap_or_default(),
+      raze_settings,
+      canonical_additional_build_file,
       source_details: self.produce_source_details(&package, &package_root),
       expected_build_path: self.crate_catalog_entry.local_build_path(&self.settings)?,
       sha256: self.sha256.clone(),
@@ -429,7 +438,10 @@ impl<'planner> CrateSubplanner<'planner> {
         .package();
 
       // Skip settings-indicated deps to skip
-      if all_skipped_deps.contains(&format!("{}-{}", dep_package.name, dep_package.version)) {
+      if all_skipped_deps.contains(&util::package_ident(
+        &dep_package.name,
+        &dep_package.version.to_string(),
+      )) {
         continue;
       }
 
@@ -555,7 +567,8 @@ impl<'planner> CrateSubplanner<'planner> {
           }
         }
 
-        let (is_bazel_platform, matches_all_platforms) = is_bazel_supported_platform(&target_str);
+        let (is_bazel_platform, matches_all_platforms) =
+          util::is_bazel_supported_platform(&target_str);
         // If the target is not supported by Bazel, we ignore it
         if !is_bazel_platform {
           continue;

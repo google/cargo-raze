@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use anyhow::Result;
-
 use tera::{self, Context, Tera};
 
 use crate::{
@@ -211,20 +210,36 @@ fn include_additional_build_file(
   package: &CrateContext,
   existing_contents: String,
 ) -> Result<String> {
-  match &package.raze_settings.additional_build_file {
+  match &package.canonical_additional_build_file {
     Some(file_path) => {
+      assert!(
+        package.raze_settings.additional_build_file.is_some(),
+        "The raze_settings.additional_build_file should always be set if \
+         canonical_additional_build_file is set"
+      );
       let additional_content =
         std::fs::read_to_string(file_path).map_err(|e| RazeError::Rendering {
           crate_name_opt: Some(package.pkg_name.to_owned()),
-          message: format!("failed to read additional_build_file: {}", e),
+          message: format!(
+            "failed to read additional_build_file '{}': {}",
+            file_path.display(),
+            e
+          ),
         })?;
 
       Ok(format!(
         "{}\n# Additional content from {}\n{}",
-        existing_contents, file_path, additional_content
+        existing_contents,
+        // UNWRAP: Safe due to assert above
+        package
+          .raze_settings
+          .additional_build_file
+          .as_ref()
+          .unwrap()
+          .display(),
+        additional_content
       ))
     },
-
     None => Ok(existing_contents),
   }
 }
@@ -344,7 +359,7 @@ impl BuildRenderer for BazelRenderer {
         path: crates_bzl_pkg_file,
         contents: self
           .internal_renderer
-          .render("templates/partials/header.template", &Context::new())?,
+          .render("templates/partials/header.template", &tera::Context::new())?,
       });
     }
 
@@ -357,6 +372,7 @@ mod tests {
   use hamcrest2::{core::expect, prelude::*};
 
   use semver::Version;
+  use tempfile::TempDir;
 
   use crate::{
     context::*,
@@ -368,7 +384,7 @@ mod tests {
 
   use super::*;
 
-  use std::{path::PathBuf, str::FromStr};
+  use std::{fs, path::PathBuf, str::FromStr};
 
   fn dummy_render_details(buildfile_suffix: &str) -> RenderDetails {
     RenderDetails {
@@ -404,6 +420,7 @@ mod tests {
       expected_build_path: format!("vendor/test-binary-1.1.1/{}", buildfile_suffix),
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
+      canonical_additional_build_file: CrateSettings::default().additional_build_file,
       default_deps: CrateDependencyContext {
         dependencies: Vec::new(),
         proc_macro_dependencies: Vec::new(),
@@ -447,6 +464,7 @@ mod tests {
       edition: "2015".to_owned(),
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
+      canonical_additional_build_file: CrateSettings::default().additional_build_file,
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
       expected_build_path: format!("vendor/test-library-1.1.1/{}", buildfile_suffix),
       default_deps: CrateDependencyContext {
@@ -662,6 +680,7 @@ mod tests {
           additional_build_file: Some("non-existent-file".into()),
           ..Default::default()
         },
+        canonical_additional_build_file: Some("non-existent-file".into()),
         ..dummy_library_crate()
       }]),
     );
@@ -671,20 +690,33 @@ mod tests {
 
   #[test]
   fn additional_build_file_included() {
+    let tmp_dir = TempDir::new().unwrap();
+    fs::write(
+      tmp_dir.as_ref().join("some_additional_build_file"),
+      "This is some additional BUILD file.",
+    )
+    .unwrap();
+
+    let additional_build_file = tmp_dir.as_ref().join("some_additional_build_file");
+
     let file_outputs = render_crates_for_test(vec![CrateContext {
       raze_settings: CrateSettings {
-        additional_build_file: Some("README.md".into()),
+        additional_build_file: Some(additional_build_file.clone()),
         ..Default::default()
       },
+      canonical_additional_build_file: Some(additional_build_file.clone()),
       ..dummy_library_crate()
     }]);
-    let crate_build_contents = extract_contents_matching_path(
-      &file_outputs,
-      "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD",
-    );
+
+    let file_name =
+      "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD".to_owned();
+    let crate_build_contents = extract_contents_matching_path(&file_outputs, &file_name);
 
     expect(
-      crate_build_contents.contains("# Additional content from README.md"),
+      crate_build_contents.contains(&format!(
+        "# Additional content from {}",
+        additional_build_file.display()
+      )),
       format!(
         "expected crate build contents to include additional_build_file, but it just contained \
          [{}]",

@@ -12,19 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use cargo_metadata::{Metadata, PackageId};
 use flate2::Compression;
 use httpmock::{Method::GET, MockRef, MockServer};
 use indoc::{formatdoc, indoc};
+use semver::Version;
 use serde_json::json;
+use tempfile::TempDir;
+
 use std::{
   collections::HashMap,
   fs::{create_dir_all, write, File},
   io::Write,
   path::Path,
 };
-use tempfile::TempDir;
 
-use crate::metadata::CargoWorkspaceFiles;
+use crate::{
+  metadata::{tests::dummy_raze_metadata, CargoWorkspaceFiles},
+  util::package_ident,
+};
 
 pub const fn basic_toml_contents() -> &'static str {
   indoc! { r#"
@@ -209,7 +215,7 @@ pub fn mock_remote_crate<'server>(
     let mut tar = tar::Builder::new(enc);
     tar
       .append_dir_all(
-        format!("{}-{}", name, version),
+        package_ident(name, version),
         dir.as_ref().join("archive"),
       )
       .unwrap();
@@ -286,4 +292,38 @@ pub fn mock_crate_index(
   } else {
     None
   }
+}
+
+/** Generate some basic metadata with an injected mock dependency */
+pub fn dummy_modified_metadata() -> Metadata {
+  let mut metadata = dummy_raze_metadata().metadata.clone();
+
+  let mut resolve = metadata.resolve.take().unwrap();
+  let mut new_node = resolve.nodes[0].clone();
+  let name = "test_dep";
+  let name_id = "test_dep_id";
+
+  // Add the new dependency.
+  let id = PackageId {
+    repr: name_id.to_string(),
+  };
+  resolve.nodes[0].dependencies.push(id.clone());
+
+  // Add the new node representing the dependency.
+  new_node.id = id;
+  new_node.deps = Vec::new();
+  new_node.dependencies = Vec::new();
+  new_node.features = Vec::new();
+  resolve.nodes.push(new_node);
+  metadata.resolve = Some(resolve);
+
+  let mut new_package = metadata.packages[0].clone();
+  new_package.name = name.to_string();
+  new_package.id = PackageId {
+    repr: name_id.to_string(),
+  };
+  new_package.version = Version::new(0, 0, 1);
+  metadata.packages.push(new_package);
+
+  metadata
 }
