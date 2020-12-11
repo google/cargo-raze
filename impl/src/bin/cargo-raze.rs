@@ -135,7 +135,7 @@ fn main() -> Result<()> {
   let render_details = RenderDetails {
     cargo_root: metadata.cargo_workspace_root,
     path_prefix: PathBuf::from(&settings.workspace_path.trim_start_matches("/")),
-    workspace_member_output_dir: settings.workspace_member_dir,
+    package_aliases_dir: settings.package_aliases_dir,
     vendored_buildfile_name: settings.output_buildfile_suffix,
     bazel_root: cargo_raze_working_dir,
   };

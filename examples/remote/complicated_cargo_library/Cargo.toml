@@ -18,6 +18,7 @@ security-framework-sys = "=0.2.2"
 workspace_path = "//remote/complicated_cargo_library/cargo"
 gen_workspace_prefix = "remote_complicated_cargo_library"
 genmode = "Remote"
+package_aliases_dir = "cargo"
 
 [package.metadata.raze.crates.proc-macro2.'0.4.30']
 additional_flags = [

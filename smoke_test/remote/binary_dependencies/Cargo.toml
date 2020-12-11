@@ -15,6 +15,7 @@ workspace_path = "//remote/binary_dependencies/cargo"
 gen_workspace_prefix = "remote_binary_dependencies"
 genmode = "Remote"
 default_gen_buildrs = true
+package_aliases_dir = "cargo"
 
 [package.metadata.raze.binary_deps]
 texture-synthesis-cli = "0.8.0"

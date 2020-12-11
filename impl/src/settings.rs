@@ -54,11 +54,15 @@ pub struct RazeSettings {
   pub workspace_path: String,
 
   /**
-   * The path within each workspace member directory where dependencies of that
-   * specifc package will be rendered.
+   * The relative path within each workspace member directory where aliases the member's dependencies should be rendered. 
+   * 
+   * By default, a new directory will be created next to the `Cargo.toml` file named `cargo` for users to refer to them
+   * as. For example, the toml file `//my/package:Cargo.toml`  will have aliases rendered as something like 
+   * `//my/package/cargo:dependency`. Note that setting this value to `"."` will cause the BUILD file in the same package 
+   * as the Cargo.toml file to be overwritten.
    */
-  #[serde(default = "default_workspace_member_dir")]
-  pub workspace_member_dir: String,
+  #[serde(default = "default_package_aliases_dir")]
+  pub package_aliases_dir: String,
 
   /**
    * If true, will force the `workspace_path` setting will be treated as a Bazel label.
@@ -368,8 +372,8 @@ fn default_crate_settings_field_data_attr() -> Option<String> {
   None
 }
 
-fn default_workspace_member_dir() -> String {
-  "cargo".to_string()
+fn default_package_aliases_dir() -> String {
+  ".".to_owned()
 }
 
 fn incompatible_relative_workspace_path() -> bool {
@@ -566,7 +570,7 @@ pub mod tests {
   pub fn dummy_raze_settings() -> RazeSettings {
     RazeSettings {
       workspace_path: "//cargo".to_owned(),
-      workspace_member_dir: "cargo".to_owned(),
+      package_aliases_dir: "cargo".to_owned(),
       target: Some("x86_64-unknown-linux-gnu".to_owned()),
       targets: None,
       crates: HashMap::new(),

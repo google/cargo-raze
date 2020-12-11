@@ -21,6 +21,7 @@ workspace_path = "//vendored/non_cratesio_library/cargo"
 target = "x86_64-unknown-linux-gnu"
 gen_workspace_prefix = "vendored_non_cratesio_library"
 genmode = "Vendored"
+package_aliases_dir = "cargo"
 
 [package.metadata.raze.crates.log.'0.4.11']
 additional_flags = [
