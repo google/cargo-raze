@@ -222,6 +222,12 @@ pub struct CrateSettings {
   pub data_attr: Option<String>,
 
   /**
+   * The verbatim `compile_data` clause to be included for the generated build targets.
+   */
+  #[serde(default)]
+  pub compile_data_attr: Option<String>,
+
+  /**
    * Additional environment variables to add when running the build script.
    */
   #[serde(default)]
@@ -318,6 +324,7 @@ impl Default for CrateSettings {
       additional_env: HashMap::new(),
       gen_buildrs: default_crate_settings_field_gen_buildrs(),
       data_attr: default_crate_settings_field_data_attr(),
+      compile_data_attr: None,
       buildrs_additional_environment_variables: HashMap::new(),
       patch_args: Vec::new(),
       patch_cmds: Vec::new(),

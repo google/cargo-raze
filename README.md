@@ -350,7 +350,7 @@ time:
 
 ```
 [package.metadata.raze.crates.ring.'*']
-data_attr = "glob([\"src/**\"])"
+compile_data_attr = "glob([\"**/*.der\"])"
 ```
 
 If you wish to disable the build script on an individual crate, you can do so

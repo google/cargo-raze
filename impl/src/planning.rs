@@ -642,6 +642,7 @@ mod tests {
       assert!(test_dep.skipped_deps.is_empty());
       assert!(test_dep.additional_build_file.is_none());
       assert!(test_dep.data_attr.is_none());
+      assert!(test_dep.compile_data_attr.is_none());
     };
 
     assert_dep_not_match("anyhow", "*");
