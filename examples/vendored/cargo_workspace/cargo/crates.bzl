@@ -5,31 +5,46 @@ cargo-raze generated Bazel file.
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
 
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")  # buildifier: disable=load
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")  # buildifier: disable=load
-load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")  # buildifier: disable=load
-
 # A mapping of package names to a set of normal dependencies for the Rust targets of that package.
 DEPENDENCIES = {
-    "remote/no_deps": {
+    "vendored/cargo_workspace/num_printer": {
+        "clap": "//vendored/cargo_workspace/cargo/vendor/clap-2.33.3:clap",
+    },
+    "vendored/cargo_workspace/printer": {
+        "ferris-says": "//vendored/cargo_workspace/cargo/vendor/ferris-says-0.2.0:ferris_says",
+    },
+    "vendored/cargo_workspace/rng": {
+        "rand": "//vendored/cargo_workspace/cargo/vendor/rand-0.7.3:rand",
     },
 }
 
 # A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
 PROC_MACRO_DEPENDENCIES = {
-    "remote/no_deps": {
+    "vendored/cargo_workspace/num_printer": {
+    },
+    "vendored/cargo_workspace/printer": {
+    },
+    "vendored/cargo_workspace/rng": {
     },
 }
 
 # A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
 DEV_DEPENDENCIES = {
-    "remote/no_deps": {
+    "vendored/cargo_workspace/num_printer": {
+    },
+    "vendored/cargo_workspace/printer": {
+    },
+    "vendored/cargo_workspace/rng": {
     },
 }
 
 # A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
 DEV_PROC_MACRO_DEPENDENCIES = {
-    "remote/no_deps": {
+    "vendored/cargo_workspace/num_printer": {
+    },
+    "vendored/cargo_workspace/printer": {
+    },
+    "vendored/cargo_workspace/rng": {
     },
 }
 
@@ -144,7 +159,3 @@ def all_crates(normal = False, proc_macro = False, dev = False, dev_only = False
         fail("The package {} has no dependencies, use of this macro should be removed".format(native.package_name()))
 
     return dependencies[native.package_name()].values()
-
-def remote_no_deps_fetch_remote_crates():
-    """No crates were detected in the source Cargo.toml. This is a no-op"""
-    pass

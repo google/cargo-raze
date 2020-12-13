@@ -9,6 +9,161 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")  # bui
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")  # buildifier: disable=load
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")  # buildifier: disable=load
 
+# A mapping of package names to a set of normal dependencies for the Rust targets of that package.
+DEPENDENCIES = {
+    "remote/cargo_workspace/num_printer": {
+        "clap": "@remote_cargo_workspace__clap__2_33_3//:clap",
+    },
+    "remote/cargo_workspace/printer": {
+        "ferris-says": "@remote_cargo_workspace__ferris_says__0_2_0//:ferris_says",
+    },
+    "remote/cargo_workspace/rng": {
+        "rand": "@remote_cargo_workspace__rand__0_7_3//:rand",
+    },
+}
+
+# A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
+PROC_MACRO_DEPENDENCIES = {
+    "remote/cargo_workspace/num_printer": {
+    },
+    "remote/cargo_workspace/printer": {
+    },
+    "remote/cargo_workspace/rng": {
+    },
+}
+
+# A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
+DEV_DEPENDENCIES = {
+    "remote/cargo_workspace/num_printer": {
+    },
+    "remote/cargo_workspace/printer": {
+    },
+    "remote/cargo_workspace/rng": {
+    },
+}
+
+# A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
+DEV_PROC_MACRO_DEPENDENCIES = {
+    "remote/cargo_workspace/num_printer": {
+    },
+    "remote/cargo_workspace/printer": {
+    },
+    "remote/cargo_workspace/rng": {
+    },
+}
+
+def crates(deps):
+    """Finds the fully qualified label of the requested crates for the package where this macro is called.
+
+    Args:
+        deps (list or str): Either a list of dependencies or a string of one which will
+            be converted into a list.
+    Returns:
+        list: A list of labels to cargo-raze generated targets (str)
+    """
+
+    # Join both sets of dependencies
+    dependencies = dict()
+    for dep_map in [DEPENDENCIES, PROC_MACRO_DEPENDENCIES, DEV_DEPENDENCIES, DEV_PROC_MACRO_DEPENDENCIES]:
+        for package_name in DEPENDENCIES:
+            if package_name in dependencies:
+                dependencies[package_name].extend(dep_map[package_name])
+            else:
+                dependencies[package_name].update(dep_map[package_name])
+
+    if not dependencies:
+        fail("No crates have been rendered. Use of this macro should be removed")
+
+    if not deps:
+        fail("An invalid argument has been provided. Please pass a crate name or a list of crate names")
+
+    if type(deps) == "string":
+        deps = [deps]
+
+    errors = []
+    crates = []
+    for crate in deps:
+        if crate not in dependencies[native.package_name()]:
+            errors.append(crate)
+        else:
+            crates.append(dependencies[native.package_name()][crate])
+
+    if errors:
+        fail("Missing crates `{}` for package `{}`. Available crates `{}".format(
+            errors,
+            native.package_name(),
+            dependencies[native.package_name()],
+        ))
+
+    return crates
+
+def all_crates(normal = False, proc_macro = False, dev = False, dev_only = False):
+    """Finds the fully qualified label of all requested direct crate dependencies \
+    for the package where this macro is called.
+
+    If no parameters are set, all normal and proc_macro dependencies are returned.
+    Setting any one flag will otherwise impact the contents of the returned list
+
+    Args:
+        normal (bool, optional): If True, normal dependencies are included in the
+            output list. Defaults to False.
+        proc_macro (bool, optional): If True, proc_macro dependencies will be
+            included in the output list. Defaults to False.
+        dev (bool, optional): If True, dev dependencies are included when the
+            `normal` and `proc_macro` parameters are used. Defaults to False.
+        dev_only (bool, optional): If True, only development dependencies will be
+            returned by this list. This paramter otherwise follows the same rules
+            as `dev`. Defaults to False.
+
+    Returns:
+        list: A list of labels to cargo-raze generated targets (str)
+    """
+
+    # Determine the relevant maps to use
+    dependencies = dict()
+    all_maps = []
+    if normal:
+        if not dev_only:
+            all_maps.append(DEPENDENCIES)
+        if dev or dev_only:
+            all_maps.append(DEV_DEPENDENCIES)
+    if proc_macro:
+        if not dev_only:
+            all_maps.append(PROC_MACRO_DEPENDENCIES)
+        if dev or dev_only:
+            all_maps.append(DEV_PROC_MACRO_DEPENDENCIES)
+
+    # Default to always using normal dependencies
+    if not all_maps:
+        if not dev_only:
+            all_maps.append(DEPENDENCIES)
+        if dev or dev_only:
+            all_maps.append(DEV_DEPENDENCIES)
+
+    if not all_maps:
+        fail("Failed to add at least 1 map to the `all_maps` list with parameters: " +
+             "normal = {normal}, proc_macro = {proc_macro}, dev = {dev}, dev_only = {dev_only}".format(
+                 normal = normal,
+                 proc_macro = proc_macro,
+                 dev = dev,
+                 dev_only = dev_only,
+             ))
+
+    for dep_map in all_maps:
+        for package_name in dep_map:
+            if package_name in dependencies:
+                dependencies[package_name].extend(dep_map[package_name])
+            else:
+                dependencies[package_name] = dep_map[package_name]
+
+    if not dependencies:
+        fail("No crates have been rendered. Use of this macro should be removed")
+
+    if not dependencies[native.package_name()]:
+        fail("The package {} has no dependencies, use of this macro should be removed".format(native.package_name()))
+
+    return dependencies[native.package_name()].values()
+
 def remote_cargo_workspace_fetch_remote_crates():
     """This function defines a collection of repos and should be called in a WORKSPACE file"""
     maybe(
