@@ -130,19 +130,10 @@ mod tests {
     assert!(planned_build_res.unwrap().crate_contexts.is_empty());
   }
 
-  fn dummy_injecting_metadata() -> RazeMetadata {
-    RazeMetadata {
-      metadata: dummy_modified_metadata(),
-      cargo_workspace_root: PathBuf::from("/some/crate"),
-      lockfile: None,
-      checksums: HashMap::new(),
-    }
-  }
-
   #[test]
   fn test_plan_build_minimum_workspace_dependency() {
     let planned_build_res =
-      BuildPlannerImpl::new(dummy_injecting_metadata(), dummy_raze_settings()).plan_build(Some(
+      BuildPlannerImpl::new(dummy_modified_metadata(), dummy_raze_settings()).plan_build(Some(
         PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
       ));
 
