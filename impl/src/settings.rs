@@ -704,6 +704,7 @@ fn parse_raze_settings(metadata: Metadata) -> Result<RazeSettings> {
   parse_raze_settings_any_package(&metadata)
 }
 
+/** A cargo command wrapper for gathering cargo metadata used to parse [RazeSettings](crate::settings::RazeSettings) */
 struct SettingsMetadataFetcher {
   pub cargo_bin_path: PathBuf,
 }
