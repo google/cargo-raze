@@ -710,7 +710,7 @@ struct SettingsMetadataFetcher {
 
 impl MetadataFetcher for SettingsMetadataFetcher {
   fn fetch_metadata(&self, working_dir: &Path, _include_deps: bool) -> Result<Metadata> {
-    // This fetch should not require network access.
+    // This fetch does not require network access.
     MetadataCommand::new()
       .cargo_path(&self.cargo_bin_path)
       .no_deps()
