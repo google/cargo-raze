@@ -39,11 +39,11 @@ pub struct RazeSettings {
   pub workspace_path: String,
 
   /**
-   * The relative path within each workspace member directory where aliases the member's dependencies should be rendered. 
-   * 
+   * The relative path within each workspace member directory where aliases the member's dependencies should be rendered.
+   *
    * By default, a new directory will be created next to the `Cargo.toml` file named `cargo` for users to refer to them
-   * as. For example, the toml file `//my/package:Cargo.toml`  will have aliases rendered as something like 
-   * `//my/package/cargo:dependency`. Note that setting this value to `"."` will cause the BUILD file in the same package 
+   * as. For example, the toml file `//my/package:Cargo.toml`  will have aliases rendered as something like
+   * `//my/package/cargo:dependency`. Note that setting this value to `"."` will cause the BUILD file in the same package
    * as the Cargo.toml file to be overwritten.
    */
   #[serde(default = "default_package_aliases_dir")]
@@ -694,8 +694,8 @@ fn parse_raze_settings(metadata: Metadata) -> Result<RazeSettings> {
   // Attempt to load legacy settings but do not allow failures to propogate
   if let Ok(settings) = parse_raze_settings_legacy(&metadata) {
     eprintln!(
-      "WARNING: The top-level `[raze]` key is deprecated. Please set `[workspace.metadata.raze]` or \
-       `[package.metadata.raze]` instead."
+      "WARNING: The top-level `[raze]` key is deprecated. Please set `[workspace.metadata.raze]` \
+       or `[package.metadata.raze]` instead."
     );
     return Ok(settings);
   }
@@ -740,8 +740,13 @@ pub fn load_settings<T: AsRef<Path>>(
       .into(),
   };
 
-  // UNWRAP: safe due to earlier assert
-  let cargo_toml_dir = cargo_toml_path.as_ref().parent().unwrap();
+  let cargo_toml_dir = cargo_toml_path
+    .as_ref()
+    .parent()
+    .ok_or(RazeError::Generic(format!(
+      "Failed to find parent directory for cargo toml file: {:?}",
+      cargo_toml_path.as_ref().display(),
+    )))?;
   let metadata = {
     let result = fetcher.fetch_metadata(cargo_toml_dir, false);
     if result.is_err() {
@@ -861,7 +866,7 @@ pub mod tests {
     let cargo_toml_path = temp_workspace_dir.path().join("Cargo.toml");
     std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
 
-    let settings = load_settings(cargo_toml_path, None).unwrap();
+    let settings = load_settings(cargo_toml_path, /*cargo_bin_path=*/ None).unwrap();
     assert!(settings.binary_deps.len() > 0);
   }
 
