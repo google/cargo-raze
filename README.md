@@ -375,6 +375,10 @@ included in the resulting output directory. Lockfiles for targets specified unde
 `[package.metadata.raze.binary_deps]` will be generated into a `lockfiles` directory inside the path
 specified by `workspace_path`.
 
+Note that the `binary_deps` field can go in workspace _and_ package metadata, however, only one
+definition of a binary dependency can exist at a time. If you have multiple packages that depend
+on a single binary dependency, that definition needs to be be moved to the workspace metadata.
+
 ### Build scripts by default
 
 Setting default_gen_buildrs to true will cause cargo-raze to generate build scripts
