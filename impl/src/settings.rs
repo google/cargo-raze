@@ -542,7 +542,7 @@ impl RawRazeSettings {
 
     if self.incompatible_relative_workspace_path.unwrap_or(false) {
       eprintln!(
-        "WARNING: `[*.raze.incompatible_relative_workspace_path]` will is deprecated. Please set \
+        "WARNING: `[*.raze.incompatible_relative_workspace_path]` is deprecated. Please set \
          this flag to true and make sure `workspace_path` is the label where the Cargo-raze is \
          expected to write it's output."
       );
@@ -550,7 +550,7 @@ impl RawRazeSettings {
 
     if self.target.is_some() {
       eprintln!(
-        "WARNING: `[*.raze.target]` will soon be deprecated. Please update your project to use \
+        "WARNING: `[*.raze.target]` is deprecated. Please update your project to use \
          `[*.raze.targets]`."
       );
     }
