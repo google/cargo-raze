@@ -82,13 +82,10 @@ fn main() -> Result<()> {
     .unwrap_or_else(|e| e.exit());
 
   // Load settings
-  let manifest_path = PathBuf::from(
-    options
-      .flag_manifest_path
-      .unwrap_or("./Cargo.toml".to_owned()),
-  )
-  .canonicalize()?;
-  let settings = load_settings(&manifest_path)?;
+  let manifest_path = PathBuf::from(options
+    .flag_manifest_path
+    .unwrap_or("./Cargo.toml".to_owned())).canonicalize()?;
+  let settings = load_settings(&manifest_path, options.flag_cargo_bin_path.clone())?;
   if options.flag_verbose.unwrap_or(false) {
     println!("Loaded override settings: {:#?}", settings);
   }

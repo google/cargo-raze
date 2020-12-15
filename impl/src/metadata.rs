@@ -31,7 +31,7 @@ use url::Url;
 
 use crate::util::package_ident;
 
-const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
+pub(crate) const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
 pub(crate) const DEFAULT_CRATE_REGISTRY_URL: &str = "https://crates.io";
 pub(crate) const DEFAULT_CRATE_INDEX_URL: &str = "https://github.com/rust-lang/crates.io-index";
 
@@ -42,7 +42,15 @@ pub trait MetadataFetcher {
 
 /** A lockfile generator which simply wraps the `cargo_metadata::MetadataCommand` command */
 struct CargoMetadataFetcher {
-  cargo_bin_path: PathBuf,
+  pub cargo_bin_path: PathBuf,
+}
+
+impl Default for CargoMetadataFetcher {
+  fn default() -> CargoMetadataFetcher {
+    CargoMetadataFetcher {
+      cargo_bin_path: SYSTEM_CARGO_BIN_PATH.into(),
+    }
+  }
 }
 
 impl MetadataFetcher for CargoMetadataFetcher {

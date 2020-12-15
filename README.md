@@ -46,37 +46,25 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "io_bazel_rules_rust",
-    sha256 = "b5d4d1c7609714dfef821355f40353c58aa1afb3803401b3442ed2355db9b0c7",
-    strip_prefix = "rules_rust-8d2b4eeeff9dce24f5cbb36018f2d60ecd676639",
+    sha256 = "0e2e633bf0f7f25392ffb477d677c88eb34fe70ffae05e3ad92fdd9f8d6579db",
+    strip_prefix = "rules_rust-bc0578798f50d018ca4278ad5610598c400992c9",
     urls = [
-        # Master branch as of 2020-11-10
-        "https://github.com/bazelbuild/rules_rust/archive/8d2b4eeeff9dce24f5cbb36018f2d60ecd676639.tar.gz",
+        # Master branch as of 2020-12-05
+        "https://github.com/bazelbuild/rules_rust/archive/bc0578798f50d018ca4278ad5610598c400992c9.tar.gz",
     ],
 )
 
 load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
 
 rust_repositories()
-
-load("@io_bazel_rules_rust//:workspace.bzl", "rust_workspace")
-
-rust_workspace()
 ```
 
-### Vendoring Mode
+### Generate a Cargo.toml
 
-In Vendoring mode, a root directly is selected that will house the vendored
-dependencies and become the gateway to those build rules. "//cargo" is
-conventional, but "//third_party/cargo" may be desirable to satisfy
-organizational needs. Vendoring directly into root isn't well supported due to
-implementation-specific idiosyncracies, but it may be supported in the future.
-From here forward, "//cargo" will be the assumed directory.
-
-#### Generate a Cargo.toml
-
-First, generate a standard Cargo.toml with the dependencies of interest. Take
-care to include a `[lib]` directive so that Cargo does not complain about
-missing source files for this mock crate. Here is an example:
+For Bazel only projects, users should first generate a standard Cargo.toml
+with the dependencies of interest. Take care to include a `[lib]` directive
+so that Cargo does not complain about missing source files for this mock
+crate. Here is an example:
 
 ```toml
 [package]
@@ -90,6 +78,39 @@ path = "fake_lib.rs"
 [dependencies]
 log = "=0.3.6"
 
+[workspace.metadata.raze]
+# The path relative path to the Bazel workspace root (location of
+# WORKSPACE.bazel/WORKSPACE file). If no workspace file is found,
+# the current working directory is used.
+workspace_path = "//cargo"
+
+# This causes aliases for dependencies to be rendered in the BUILD
+# file located next to this `Cargo.toml` file.
+package_aliases_dir = "."
+
+# The set of targets to generate BUILD rules for.
+targets = [
+    "x86_64-apple-darwin",
+    "x86_64-pc-windows-msvc",
+    "x86_64-unknown-linux-gnu",
+]
+
+# The two acceptable options are "Remote" and "Vendored" which
+# is used to idnicate whether the user is using a non-vendored or
+# vendored set of dependencies.
+genmode = "Remote"
+```
+
+### Using existing Cargo.toml
+
+Almost all canonical cargo setups should be able to function inplace with
+`cargo-raze`. Assuming the Cargo workspace is now nested under a Bazel workspace,
+Users can simply add [RazeSettings](./impl/src/settings.rs) to their Cargo.toml
+files to be used for generating Bazel files
+
+```toml
+# Above this line should be the contents of your Cargo.toml file
+
 [package.metadata.raze]
 # The path relative path to the Bazel workspace root (location of
 # WORKSPACE.bazel/WORKSPACE file). If no workspace file is found,
@@ -100,34 +121,50 @@ workspace_path = "//cargo"
 # file located next to this `Cargo.toml` file.
 package_aliases_dir = "."
 
-# The target to generate BUILD rules for.
-target = "x86_64-unknown-linux-gnu"
+# The set of targets to generate BUILD rules for.
+targets = [
+    "x86_64-apple-darwin",
+    "x86_64-pc-windows-msvc",
+    "x86_64-unknown-linux-gnu",
+]
+
+# The two acceptable options are "Remote" and "Vendored" which
+# is used to idnicate whether the user is using a non-vendored or
+# vendored set of dependencies.
+genmode = "Remote"
 ```
 
-#### Generate buildable targets
+#### Cargo workspace projects
 
-First, install the required tools for vendoring and generating BUILDable
-targets.
+In projects that use [cargo workspaces](cargo_workspaces) uses should organize
+all of their `raze` settings into the `[workspace.metadata.raze]` field in the
+top level `Cargo.toml` file which contains the `[workspace]` definition. These
+settings should be identical to the ones seen in `[package.metadata.raze]` in
+[the previous section](#Using existing Cargo.toml). However, crate settings may still
+be placed in the `Cargo.toml` files of the workspace memebers:
 
-```bash
-$ cargo install cargo-raze
+```toml
+# Above this line should be the contents of your package's Cargo.toml file
+
+# Note that `some-dependency` is the name of an example dependency and
+# `<0.3.0` is a semver version for the dependency crate's version. This
+# should always be compaitble in some way with the dependency version
+# specified in the `[dependencies]` section of the package defined in
+# this file
+[package.metadata.raze.crates.some-dependency.'<0.3.0']
+additional_flags = [
+    "--cfg=optional_feature_a",
+    "--cfg=optional_feature_b",
+]
+
+# This demonstrates that multiple crate settings may be defined.
+[package.metadata.raze.crates.some-other-dependency.'*']
+additional_flags = [
+    "--cfg=special_feature",
+]
 ```
 
-Following that, vendor your dependencies from within the cargo/ directory. This
-will also update your `Cargo.lock` file.
-
-```bash
-$ cargo vendor --versioned-dirs
-```
-
-Finally, generate your BUILD files, again from within the `cargo/` directory
-
-```bash
-$ cargo raze
-```
-
-You can now depend on any _explicit_ dependencies in any Rust rule by depending on
-`//cargo:your_dependency_name`.
+[cargo_workspaces]: https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html)
 
 ### Remote Dependency Mode
 
@@ -135,28 +172,6 @@ In Remote mode, a directory similar to the vendoring mode is selected. In this
 case, though, it contains only BUILD files, a vendoring instruction for the
 WORKSPACE, and aliases to the explicit dependencies. Slightly different plumbing
 is required.
-
-#### Generate a Cargo.toml
-
-Generate a Cargo.toml, similar to Vendoring mode but add a new `genmode` directive in the
-`[package.metadata.raze]` section
-
-```toml
-[package.metadata.raze]
-# The path relative path to the Bazel workspace root (location of
-# WORKSPACE.bazel/WORKSPACE file). If no workspace file is found,
-# the current working directory is used.
-workspace_path = "//cargo"
-
-# This causes aliases for dependencies to be rendered in the BUILD
-# file located next to this `Cargo.toml` file.
-package_aliases_dir = "."
-
-# The target to generate BUILD rules for.
-target = "x86_64-unknown-linux-gnu"
-
-genmode = "Remote"
-```
 
 This tells Raze not to expect the dependencies to be vendored and to generate
 different files.
@@ -184,11 +199,45 @@ raze_fetch_remote_crates()
 ```
 
 This tells Bazel where to get the dependencies from, and how to build them:
-using the files generated into //cargo.
+using the files generated into `//cargo`.
 
 _Note that this method's name depends on your `gen_workspace_prefix` setting_.
 
 You can depend on any _explicit_ dependencies in any Rust rule by depending on
+`//cargo:your_dependency_name`.
+
+### Vendoring Mode
+
+In Vendoring mode, a root directly is selected that will house the vendored
+dependencies and become the gateway to those build rules. `//cargo` is
+conventional, but `//third_party/cargo` may be desirable to satisfy
+organizational needs. Vendoring directly into root isn't well supported due to
+implementation-specific idiosyncracies, but it may be supported in the future.
+From here forward, `//cargo` will be the assumed directory.
+
+#### Generate buildable targets (vendored)
+
+First, install the required tools for vendoring and generating BUILDable
+targets.
+
+```bash
+$ cargo install cargo-raze
+```
+
+Following that, vendor your dependencies from within the cargo/ directory. This
+will also update your `Cargo.lock` file.
+
+```bash
+$ cargo vendor --versioned-dirs
+```
+
+Finally, generate your BUILD files, again from within the `cargo/` directory
+
+```bash
+$ cargo raze
+```
+
+You can now depend on any _explicit_ dependencies in any Rust rule by depending on
 `//cargo:your_dependency_name`.
 
 ### Handling Unconventional Crates
@@ -224,9 +273,9 @@ Cargo.toml, in the following manner
 ```toml
 [package.metadata.raze.crates.unicase.'2.1.0']
 additional_flags = [
-  # Rustc is 1.15, enable all optional settings
-  "--cfg=__unicase__iter_cmp",
-  "--cfg=__unicase__defauler_hasher",
+    # Rustc is 1.15, enable all optional settings
+    "--cfg=__unicase__iter_cmp",
+    "--cfg=__unicase__defauler_hasher",
 ]
 ```
 
@@ -245,21 +294,21 @@ openssl, this may in part look like:
 ```toml
 [package.metadata.raze.crates.openssl-sys.'0.9.24']
 additional_flags = [
-  # Vendored openssl is 1.0.2m
-  "--cfg=ossl102",
-  "--cfg=version=102",
+    # Vendored openssl is 1.0.2m
+    "--cfg=ossl102",
+    "--cfg=version=102",
 ]
 additional_deps = [
-  "@//third_party/openssl:crypto",
-  "@//third_party/openssl:ssl",
+    "@//third_party/openssl:crypto",
+    "@//third_party/openssl:ssl",
 ]
 
 [package.metadata.raze.crates.openssl.'0.10.2']
 additional_flags = [
-  # Vendored openssl is 1.0.2m
-  "--cfg=ossl102",
-  "--cfg=version=102",
-  "--cfg=ossl10x",
+    # Vendored openssl is 1.0.2m
+    "--cfg=ossl102",
+    "--cfg=version=102",
+    "--cfg=ossl10x",
 ]
 ```
 
@@ -271,7 +320,7 @@ something like:
 ```python
 new_local_repository(
     name = "llvm",
-    build_file = "llvm.BUILD",
+    build_file = "BUILD.llvm.bazel",
     path = "/usr/lib/llvm-3.9",
 )
 ```
@@ -283,10 +332,10 @@ pre-generation:
 ```toml
 [package.metadata.raze.crates.sdl2.'0.31.0']
 skipped_deps = [
-  "sdl2-sys-0.31.0"
+    "sdl2-sys-0.31.0"
 ]
 additional_deps = [
-  "@//cargo/overrides/sdl2-sys:sdl2_sys"
+    "@//cargo/overrides/sdl2-sys:sdl2_sys"
 ]
 ```
 
@@ -301,7 +350,7 @@ to tell Bazel to expose such binaries for you:
 [package.metadata.raze.crates.bindgen.'0.32.2']
 gen_buildrs = true # needed to build bindgen
 extra_aliased_targets = [
-  "cargo_bin_bindgen"
+    "cargo_bin_bindgen"
 ]
 ```
 
@@ -326,12 +375,16 @@ included in the resulting output directory. Lockfiles for targets specified unde
 `[package.metadata.raze.binary_deps]` will be generated into a `lockfiles` directory inside the path
 specified by `workspace_path`.
 
+Note that the `binary_deps` field can go in workspace _and_ package metadata, however, only one
+definition of a binary dependency can exist at a time. If you have multiple packages that depend
+on a single binary dependency, that definition needs to be be moved to the workspace metadata.
+
 ### Build scripts by default
 
 Setting default_gen_buildrs to true will cause cargo-raze to generate build scripts
 for all crates that require them:
 
-```
+```toml
 [package.metadata.raze]
 workspace_path = "//cargo"
 genmode = "Remote"
@@ -348,7 +401,7 @@ Even with this setting enabled, you may still need to provide extra settings for
 a few crates. For example, the ring crate needs access to the source tree at build
 time:
 
-```
+```toml
 [package.metadata.raze.crates.ring.'*']
 compile_data_attr = "glob([\"**/*.der\"])"
 ```
@@ -356,7 +409,7 @@ compile_data_attr = "glob([\"**/*.der\"])"
 If you wish to disable the build script on an individual crate, you can do so
 as follows:
 
-```
+```toml
 [package.metadata.raze.crates.some_dependency.'*']
 gen_buildrs = false
 ```
