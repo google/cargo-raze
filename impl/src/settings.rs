@@ -531,6 +531,47 @@ impl RawRazeSettings {
       || self.rust_rules_workspace_name.is_some()
       || self.vendor_dir.is_some()
   }
+
+  fn print_notices_and_warnings(&self) {
+    if self.default_gen_buildrs.is_none() {
+      eprintln!(
+        "NOTICE: The default of `[*.raze.default_gen_buildrs]` will soon be set to `true`. Please \
+         explicitly set this flag to prevent a change in behavior."
+      );
+    }
+
+    if self.incompatible_relative_workspace_path.unwrap_or(false) {
+      eprintln!(
+        "WARNING: `[*.raze.incompatible_relative_workspace_path]` is deprecated. Please set \
+         this flag to true and make sure `workspace_path` is the label where the Cargo-raze is \
+         expected to write it's output."
+      );
+    }
+
+    if self.target.is_some() {
+      eprintln!(
+        "WARNING: `[*.raze.target]` is deprecated. Please update your project to use \
+         `[*.raze.targets]`."
+      );
+    }
+
+    if self.rust_rules_workspace_name.is_none() {
+      eprintln!(
+        "WARNING: The default of `[*.raze.rust_rules_workspace_name]` will soon be set to \
+         `\"rules_rust\"`. Please explicitly set this flag to prevent a change in behavior or \
+         upgrade your code to use the latest version of `rules_rust` and change references of \
+         `io_bazel_rules_rust` to `rules_rust` in your project."
+      );
+    }
+
+    if self.package_aliases_dir.is_none() {
+      eprintln!(
+        "WARNING: The default of `[*.raze.package_aliases_dir]` will soon be set to `\"cargo\"`. \
+         Please explicitly set this flag to `\".\"` to prevent a change in behavior or update \
+         your project structure to account for this change."
+      );
+    }
+  }
 }
 
 /** Grows a list with duplicate keys between two maps */
@@ -560,6 +601,7 @@ fn parse_raze_settings_workspace(
   metadata_value: &serde_json::value::Value,
   metadata: &Metadata,
 ) -> Result<RazeSettings> {
+  RawRazeSettings::deserialize(metadata_value)?.print_notices_and_warnings();
   let mut settings = RazeSettings::deserialize(metadata_value)?;
 
   let workspace_packages: Vec<&Package> = metadata
@@ -626,6 +668,7 @@ fn parse_raze_settings_root_package(
   metadata_value: &serde_json::value::Value,
   root_package: &Package,
 ) -> Result<RazeSettings> {
+  RawRazeSettings::deserialize(metadata_value)?.print_notices_and_warnings();
   return RazeSettings::deserialize(metadata_value).with_context(|| {
     format!(
       "Failed to load raze settings from root package: {}",
@@ -660,6 +703,7 @@ fn parse_raze_settings_any_package(metadata: &Metadata) -> Result<RazeSettings> 
 
   // UNWRAP: Safe due to checks above
   let settings_value = settings_packages[0].metadata.get("raze").unwrap();
+  RawRazeSettings::deserialize(settings_value)?.print_notices_and_warnings();
   RazeSettings::deserialize(settings_value)
     .with_context(|| format!("Failed to deserialize raze settings: {:?}", settings_value))
 }

@@ -12,3 +12,4 @@ workspace_path = "//remote/no_deps/cargo"
 genmode = "Remote"
 gen_workspace_prefix = "remote_no_deps"
 package_aliases_dir = "cargo"
+default_gen_buildrs = true

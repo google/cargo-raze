@@ -17,6 +17,7 @@ workspace_path = "//vendored/complicated_cargo_library/cargo"
 gen_workspace_prefix = "vendored_complicated_cargo_library"
 genmode = "Vendored"
 package_aliases_dir = "cargo"
+default_gen_buildrs = false
 
 [package.metadata.raze.crates.proc-macro2.'0.4.30']
 additional_flags = [
