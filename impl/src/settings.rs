@@ -314,7 +314,7 @@ fn default_raze_settings_index_url() -> String {
 }
 
 fn default_raze_settings_rust_rules_workspace_name() -> String {
-  "io_bazel_rules_rust".to_owned()
+  "rules_rust".to_owned()
 }
 
 fn default_raze_settings_vendor_dir() -> String {
@@ -506,15 +506,6 @@ impl RawRazeSettings {
       eprintln!(
         "WARNING: `[*.raze.target]` is deprecated. Please update your project to use \
          `[*.raze.targets]`."
-      );
-    }
-
-    if self.rust_rules_workspace_name.is_none() {
-      eprintln!(
-        "WARNING: The default of `[*.raze.rust_rules_workspace_name]` will soon be set to \
-         `\"rules_rust\"`. Please explicitly set this flag to prevent a change in behavior or \
-         upgrade your code to use the latest version of `rules_rust` and change references of \
-         `io_bazel_rules_rust` to `rules_rust` in your project."
       );
     }
   }
