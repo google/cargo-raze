@@ -314,7 +314,7 @@ fn default_crate_settings_field_data_attr() -> Option<String> {
 }
 
 fn default_package_aliases_dir() -> String {
-  ".".to_owned()
+  "cargo".to_owned()
 }
 
 fn default_render_package_aliases() -> bool {
@@ -499,14 +499,6 @@ impl RawRazeSettings {
          `\"rules_rust\"`. Please explicitly set this flag to prevent a change in behavior or \
          upgrade your code to use the latest version of `rules_rust` and change references of \
          `io_bazel_rules_rust` to `rules_rust` in your project."
-      );
-    }
-
-    if self.package_aliases_dir.is_none() {
-      eprintln!(
-        "WARNING: The default of `[*.raze.package_aliases_dir]` will soon be set to `\"cargo\"`. \
-         Please explicitly set this flag to `\".\"` to prevent a change in behavior or update \
-         your project structure to account for this change."
       );
     }
   }
