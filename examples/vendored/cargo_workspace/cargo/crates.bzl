@@ -6,7 +6,7 @@ DO NOT EDIT! Replaced on runs of cargo-raze
 """
 
 # A mapping of package names to a set of normal dependencies for the Rust targets of that package.
-DEPENDENCIES = {
+_DEPENDENCIES = {
     "vendored/cargo_workspace/num_printer": {
         "clap": "//vendored/cargo_workspace/cargo/vendor/clap-2.33.3:clap",
     },
@@ -19,7 +19,7 @@ DEPENDENCIES = {
 }
 
 # A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
-PROC_MACRO_DEPENDENCIES = {
+_PROC_MACRO_DEPENDENCIES = {
     "vendored/cargo_workspace/num_printer": {
     },
     "vendored/cargo_workspace/printer": {
@@ -29,7 +29,7 @@ PROC_MACRO_DEPENDENCIES = {
 }
 
 # A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
-DEV_DEPENDENCIES = {
+_DEV_DEPENDENCIES = {
     "vendored/cargo_workspace/num_printer": {
     },
     "vendored/cargo_workspace/printer": {
@@ -39,7 +39,7 @@ DEV_DEPENDENCIES = {
 }
 
 # A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
-DEV_PROC_MACRO_DEPENDENCIES = {
+_DEV_PROC_MACRO_DEPENDENCIES = {
     "vendored/cargo_workspace/num_printer": {
     },
     "vendored/cargo_workspace/printer": {
@@ -49,7 +49,9 @@ DEV_PROC_MACRO_DEPENDENCIES = {
 }
 
 def crates(deps):
-    """Finds the fully qualified label of the requested crates for the package where this macro is called.
+    """EXPERIMENTAL: Finds the fully qualified label of the requested crates for the package where this macro is called.
+
+    WARNING: This macro is part of an expeirmental API and is subject to change.
 
     Args:
         deps (list or str): Either a list of dependencies or a string of one which will
@@ -60,8 +62,8 @@ def crates(deps):
 
     # Join both sets of dependencies
     dependencies = dict()
-    for dep_map in [DEPENDENCIES, PROC_MACRO_DEPENDENCIES, DEV_DEPENDENCIES, DEV_PROC_MACRO_DEPENDENCIES]:
-        for package_name in DEPENDENCIES:
+    for dep_map in [_DEPENDENCIES, _PROC_MACRO_DEPENDENCIES, _DEV_DEPENDENCIES, _DEV_PROC_MACRO_DEPENDENCIES]:
+        for package_name in _DEPENDENCIES:
             if package_name in dependencies:
                 dependencies[package_name].extend(dep_map[package_name])
             else:
@@ -94,11 +96,13 @@ def crates(deps):
     return crates
 
 def all_crates(normal = False, proc_macro = False, dev = False, dev_only = False):
-    """Finds the fully qualified label of all requested direct crate dependencies \
+    """EXPERIMENTAL: Finds the fully qualified label of all requested direct crate dependencies \
     for the package where this macro is called.
 
     If no parameters are set, all normal and proc_macro dependencies are returned.
     Setting any one flag will otherwise impact the contents of the returned list
+
+    WARNING: This macro is part of an expeirmental API and is subject to change.
 
     Args:
         normal (bool, optional): If True, normal dependencies are included in the
@@ -120,21 +124,21 @@ def all_crates(normal = False, proc_macro = False, dev = False, dev_only = False
     all_maps = []
     if normal:
         if not dev_only:
-            all_maps.append(DEPENDENCIES)
+            all_maps.append(_DEPENDENCIES)
         if dev or dev_only:
-            all_maps.append(DEV_DEPENDENCIES)
+            all_maps.append(_DEV_DEPENDENCIES)
     if proc_macro:
         if not dev_only:
-            all_maps.append(PROC_MACRO_DEPENDENCIES)
+            all_maps.append(_PROC_MACRO_DEPENDENCIES)
         if dev or dev_only:
-            all_maps.append(DEV_PROC_MACRO_DEPENDENCIES)
+            all_maps.append(_DEV_PROC_MACRO_DEPENDENCIES)
 
     # Default to always using normal dependencies
     if not all_maps:
         if not dev_only:
-            all_maps.append(DEPENDENCIES)
+            all_maps.append(_DEPENDENCIES)
         if dev or dev_only:
-            all_maps.append(DEV_DEPENDENCIES)
+            all_maps.append(_DEV_DEPENDENCIES)
 
     if not all_maps:
         fail("Failed to add at least 1 map to the `all_maps` list with parameters: " +
