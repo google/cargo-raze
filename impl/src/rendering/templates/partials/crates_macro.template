@@ -1,4 +1,4 @@
-# A mapping of package names to a set of normal dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of normal dependencies for the Rust targets of that package.
 _DEPENDENCIES = {
 {%- for workspace_member in workspace.workspace_members %}
 {%- if workspace_member %}
@@ -16,7 +16,7 @@ _DEPENDENCIES = {
 {%- endfor %}
 }
 
-# A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
 _PROC_MACRO_DEPENDENCIES = {
 {%- for workspace_member in workspace.workspace_members %}
 {%- if workspace_member %}
@@ -34,7 +34,7 @@ _PROC_MACRO_DEPENDENCIES = {
 {%- endfor %}
 }
 
-# A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
 _DEV_DEPENDENCIES = {
 {%- for workspace_member in workspace.workspace_members %}
 {%- if workspace_member %}
@@ -52,7 +52,7 @@ _DEV_DEPENDENCIES = {
 {%- endfor %}
 }
 
-# A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
 _DEV_PROC_MACRO_DEPENDENCIES = {
 {%- for workspace_member in workspace.workspace_members %}
 {%- if workspace_member %}
