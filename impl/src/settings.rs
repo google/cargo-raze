@@ -50,16 +50,6 @@ pub struct RazeSettings {
   pub package_aliases_dir: String,
 
   /**
-   * If true, will force the `workspace_path` setting will be treated as a Bazel label.
-   *
-   * When false, the `workspace_path` setting describes a path relative to the `Cargo.toml` file
-   * where raze will output content. Setting this field to true will instead interpret `workspace_path`
-   * to be a Bazel label and raze will generate content in the described Bazel package location.
-   */
-  #[serde(default = "incompatible_relative_workspace_path")]
-  pub incompatible_relative_workspace_path: bool,
-
-  /**
    * The platform target to generate BUILD rules for.
    *
    * This comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
@@ -368,10 +358,6 @@ fn default_package_aliases_dir() -> String {
   ".".to_owned()
 }
 
-fn incompatible_relative_workspace_path() -> bool {
-  true
-}
-
 /** Formats a registry url to include the name and version fo the target package */
 pub fn format_registry_url(registry_url: &str, name: &str, version: &str) -> String {
   registry_url
@@ -507,8 +493,6 @@ struct RawRazeSettings {
   #[serde(default)]
   pub index_url: Option<String>,
   #[serde(default)]
-  pub incompatible_relative_workspace_path: Option<bool>,
-  #[serde(default)]
   pub rust_rules_workspace_name: Option<String>,
   #[serde(default)]
   pub vendor_dir: Option<String>,
@@ -527,7 +511,6 @@ impl RawRazeSettings {
       || self.default_gen_buildrs.is_some()
       || self.registry.is_some()
       || self.index_url.is_some()
-      || self.incompatible_relative_workspace_path.is_some()
       || self.rust_rules_workspace_name.is_some()
       || self.vendor_dir.is_some()
   }
@@ -537,14 +520,6 @@ impl RawRazeSettings {
       eprintln!(
         "NOTICE: The default of `[*.raze.default_gen_buildrs]` will soon be set to `true`. Please \
          explicitly set this flag to prevent a change in behavior."
-      );
-    }
-
-    if self.incompatible_relative_workspace_path.unwrap_or(false) {
-      eprintln!(
-        "WARNING: `[*.raze.incompatible_relative_workspace_path]` is deprecated. Please set \
-         this flag to true and make sure `workspace_path` is the label where the Cargo-raze is \
-         expected to write it's output."
       );
     }
 
@@ -841,7 +816,6 @@ pub mod tests {
       genmode: GenMode::Remote,
       output_buildfile_suffix: "BUILD".to_owned(),
       default_gen_buildrs: default_raze_settings_field_gen_buildrs(),
-      incompatible_relative_workspace_path: incompatible_relative_workspace_path(),
       binary_deps: HashMap::new(),
       registry: default_raze_settings_registry(),
       index_url: default_raze_settings_index_url(),
