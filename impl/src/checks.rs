@@ -241,7 +241,7 @@ mod tests {
     settings.genmode = GenMode::Vendored;
 
     let result = check_all_vendored(
-      &dummy_modified_metadata(),
+      &dummy_modified_metadata().metadata,
       &settings,
       &PathBuf::from("/tmp/some/path"),
     );

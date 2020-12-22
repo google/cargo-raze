@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo_metadata::{Metadata, PackageId};
 use flate2::Compression;
 use httpmock::{Method::GET, MockRef, MockServer};
 use indoc::{formatdoc, indoc};
-use semver::Version;
 use serde_json::json;
 use tempfile::TempDir;
 
@@ -28,7 +26,10 @@ use std::{
 };
 
 use crate::{
-  metadata::{tests::dummy_raze_metadata, CargoWorkspaceFiles},
+  metadata::{
+    tests::{dummy_raze_metadata_fetcher, DummyCargoMetadataFetcher},
+    CargoWorkspaceFiles, RazeMetadata,
+  },
   util::package_ident,
 };
 
@@ -214,10 +215,7 @@ pub fn mock_remote_crate<'server>(
     let enc = flate2::write::GzEncoder::new(tar_gz, Compression::default());
     let mut tar = tar::Builder::new(enc);
     tar
-      .append_dir_all(
-        package_ident(name, version),
-        dir.as_ref().join("archive"),
-      )
+      .append_dir_all(package_ident(name, version), dir.as_ref().join("archive"))
       .unwrap();
   }
 
@@ -295,35 +293,14 @@ pub fn mock_crate_index(
 }
 
 /** Generate some basic metadata with an injected mock dependency */
-pub fn dummy_modified_metadata() -> Metadata {
-  let mut metadata = dummy_raze_metadata().metadata.clone();
+pub fn dummy_modified_metadata() -> RazeMetadata {
+  let (_dir, files) = make_basic_workspace();
+  let (mut fetcher, _server, _index_dir) = dummy_raze_metadata_fetcher();
 
-  let mut resolve = metadata.resolve.take().unwrap();
-  let mut new_node = resolve.nodes[0].clone();
-  let name = "test_dep";
-  let name_id = "test_dep_id";
+  // Always render basic metadata
+  fetcher.set_metadata_fetcher(Box::new(DummyCargoMetadataFetcher {
+    metadata_template: Some("dummy_modified_metadata.json.template".to_string()),
+  }));
 
-  // Add the new dependency.
-  let id = PackageId {
-    repr: name_id.to_string(),
-  };
-  resolve.nodes[0].dependencies.push(id.clone());
-
-  // Add the new node representing the dependency.
-  new_node.id = id;
-  new_node.deps = Vec::new();
-  new_node.dependencies = Vec::new();
-  new_node.features = Vec::new();
-  resolve.nodes.push(new_node);
-  metadata.resolve = Some(resolve);
-
-  let mut new_package = metadata.packages[0].clone();
-  new_package.name = name.to_string();
-  new_package.id = PackageId {
-    repr: name_id.to_string(),
-  };
-  new_package.version = Version::new(0, 0, 1);
-  metadata.packages.push(new_package);
-
-  metadata
+  fetcher.fetch_metadata(&files, None, None).unwrap()
 }
