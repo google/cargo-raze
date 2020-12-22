@@ -137,7 +137,6 @@ pub struct CrateContext {
   pub source_details: SourceDetails,
   pub sha256: Option<String>,
   pub registry_url: String,
-  pub is_proc_macro: bool,
 
   // TODO(acmcarther): This is used internally by renderer to know where to put the build file. It
   // probably should live somewhere else. Renderer params (separate from context) should live
@@ -149,6 +148,9 @@ pub struct CrateContext {
   // The name of the main lib target for this crate (if present).
   // Currently only one such lib can exist per crate.
   pub lib_target_name: Option<String>,
+  // This field tracks whether or not the lib target of `lib_target_name`
+  // is a proc_macro library or not.
+  pub is_proc_macro: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
