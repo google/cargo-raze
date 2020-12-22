@@ -9,7 +9,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")  # bui
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")  # buildifier: disable=load
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")  # buildifier: disable=load
 
-# A mapping of package names to a set of normal dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of normal dependencies for the Rust targets of that package.
 _DEPENDENCIES = {
     "remote/cargo_workspace/num_printer": {
         "clap": "@remote_cargo_workspace__clap__2_33_3//:clap",
@@ -22,7 +22,7 @@ _DEPENDENCIES = {
     },
 }
 
-# A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
 _PROC_MACRO_DEPENDENCIES = {
     "remote/cargo_workspace/num_printer": {
     },
@@ -32,7 +32,7 @@ _PROC_MACRO_DEPENDENCIES = {
     },
 }
 
-# A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
 _DEV_DEPENDENCIES = {
     "remote/cargo_workspace/num_printer": {
     },
@@ -42,7 +42,7 @@ _DEV_DEPENDENCIES = {
     },
 }
 
-# A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
 _DEV_PROC_MACRO_DEPENDENCIES = {
     "remote/cargo_workspace/num_printer": {
     },

@@ -9,7 +9,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")  # bui
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")  # buildifier: disable=load
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")  # buildifier: disable=load
 
-# A mapping of package names to a set of normal dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of normal dependencies for the Rust targets of that package.
 _DEPENDENCIES = {
     "remote/non_cratesio": {
         "env_logger": "@remote_non_cratesio__env_logger__0_5_5//:env_logger",
@@ -18,19 +18,19 @@ _DEPENDENCIES = {
     },
 }
 
-# A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
 _PROC_MACRO_DEPENDENCIES = {
     "remote/non_cratesio": {
     },
 }
 
-# A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
 _DEV_DEPENDENCIES = {
     "remote/non_cratesio": {
     },
 }
 
-# A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
 _DEV_PROC_MACRO_DEPENDENCIES = {
     "remote/non_cratesio": {
     },

@@ -5,7 +5,7 @@ cargo-raze generated Bazel file.
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
 
-# A mapping of package names to a set of normal dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of normal dependencies for the Rust targets of that package.
 _DEPENDENCIES = {
     "vendored/hello_cargo_library": {
         "fern": "//vendored/hello_cargo_library/cargo/vendor/fern-0.3.5:fern",
@@ -13,19 +13,19 @@ _DEPENDENCIES = {
     },
 }
 
-# A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
 _PROC_MACRO_DEPENDENCIES = {
     "vendored/hello_cargo_library": {
     },
 }
 
-# A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
 _DEV_DEPENDENCIES = {
     "vendored/hello_cargo_library": {
     },
 }
 
-# A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
 _DEV_PROC_MACRO_DEPENDENCIES = {
     "vendored/hello_cargo_library": {
     },

@@ -5,7 +5,7 @@ cargo-raze generated Bazel file.
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
 
-# A mapping of package names to a set of normal dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of normal dependencies for the Rust targets of that package.
 _DEPENDENCIES = {
     "vendored/cargo_workspace/num_printer": {
         "clap": "//vendored/cargo_workspace/cargo/vendor/clap-2.33.3:clap",
@@ -18,7 +18,7 @@ _DEPENDENCIES = {
     },
 }
 
-# A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
 _PROC_MACRO_DEPENDENCIES = {
     "vendored/cargo_workspace/num_printer": {
     },
@@ -28,7 +28,7 @@ _PROC_MACRO_DEPENDENCIES = {
     },
 }
 
-# A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
 _DEV_DEPENDENCIES = {
     "vendored/cargo_workspace/num_printer": {
     },
@@ -38,7 +38,7 @@ _DEV_DEPENDENCIES = {
     },
 }
 
-# A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
+# EXPERIMENTAL: A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
 _DEV_PROC_MACRO_DEPENDENCIES = {
     "vendored/cargo_workspace/num_printer": {
     },
