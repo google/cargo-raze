@@ -5,7 +5,7 @@ cargo-raze generated Bazel file.
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
 
-# EXPERIMENTAL: A mapping of package names to a set of normal dependencies for the Rust targets of that package.
+# EXPERIMENTAL -- MAY CHANGE AT ANY TIME: A mapping of package names to a set of normal dependencies for the Rust targets of that package.
 _DEPENDENCIES = {
     "vendored/cargo_workspace/num_printer": {
         "clap": "//vendored/cargo_workspace/cargo/vendor/clap-2.33.3:clap",
@@ -18,7 +18,7 @@ _DEPENDENCIES = {
     },
 }
 
-# EXPERIMENTAL: A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
+# EXPERIMENTAL -- MAY CHANGE AT ANY TIME: A mapping of package names to a set of proc_macro dependencies for the Rust targets of that package.
 _PROC_MACRO_DEPENDENCIES = {
     "vendored/cargo_workspace/num_printer": {
     },
@@ -28,7 +28,7 @@ _PROC_MACRO_DEPENDENCIES = {
     },
 }
 
-# EXPERIMENTAL: A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
+# EXPERIMENTAL -- MAY CHANGE AT ANY TIME: A mapping of package names to a set of normal dev dependencies for the Rust targets of that package.
 _DEV_DEPENDENCIES = {
     "vendored/cargo_workspace/num_printer": {
     },
@@ -38,7 +38,7 @@ _DEV_DEPENDENCIES = {
     },
 }
 
-# EXPERIMENTAL: A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
+# EXPERIMENTAL -- MAY CHANGE AT ANY TIME: A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
 _DEV_PROC_MACRO_DEPENDENCIES = {
     "vendored/cargo_workspace/num_printer": {
     },
@@ -49,7 +49,7 @@ _DEV_PROC_MACRO_DEPENDENCIES = {
 }
 
 def crates(deps):
-    """EXPERIMENTAL: Finds the fully qualified label of the requested crates for the package where this macro is called.
+    """EXPERIMENTAL -- MAY CHANGE AT ANY TIME: Finds the fully qualified label of the requested crates for the package where this macro is called.
 
     WARNING: This macro is part of an expeirmental API and is subject to change.
 
@@ -96,7 +96,7 @@ def crates(deps):
     return crates
 
 def all_crates(normal = False, proc_macro = False, dev = False, dev_only = False):
-    """EXPERIMENTAL: Finds the fully qualified label of all requested direct crate dependencies \
+    """EXPERIMENTAL -- MAY CHANGE AT ANY TIME: Finds the fully qualified label of all requested direct crate dependencies \
     for the package where this macro is called.
 
     If no parameters are set, all normal and proc_macro dependencies are returned.
