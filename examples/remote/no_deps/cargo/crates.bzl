@@ -52,11 +52,11 @@ def crates(deps):
             else:
                 dependencies[package_name].update(dep_map[package_name])
 
-    if not dependencies:
-        fail("No crates have been rendered. Use of this macro should be removed")
-
     if not deps:
         fail("An invalid argument has been provided. Please pass a crate name or a list of crate names")
+
+    if not dependencies:
+        return []
 
     if type(deps) == "string":
         deps = [deps]
@@ -138,10 +138,7 @@ def all_crates(normal = False, proc_macro = False, dev = False, dev_only = False
                 dependencies[package_name] = dep_map[package_name]
 
     if not dependencies:
-        fail("No crates have been rendered. Use of this macro should be removed")
-
-    if not dependencies[native.package_name()]:
-        fail("The package {} has no dependencies, use of this macro should be removed".format(native.package_name()))
+        return []
 
     return dependencies[native.package_name()].values()
 
