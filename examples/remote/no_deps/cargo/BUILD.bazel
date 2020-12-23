@@ -11,4 +11,9 @@ licenses([
     "notice",  # See individual crates for specific licenses
 ])
 
+# Export file for Stardoc support
+exports_files([
+    "crates.bzl",
+])
+
 # No targets defined
