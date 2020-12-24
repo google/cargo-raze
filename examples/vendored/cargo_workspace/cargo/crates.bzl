@@ -146,11 +146,13 @@ def _flatten_dependency_maps(all_dependency_maps):
     Dependency maps have the following structure:
 
     ```python
-    MAP = {
-        # The first key in the map is a Bazel package name of the workspace this file is defined in.
+    DEPENDENCIES_MAP = {
+        # The first key in the map is a Bazel package
+        # name of the workspace this file is defined in.
         "package_name": {
-            # An alias to a crate target.     # The fully qualified label of
-            # Aliases are only crate names.   # the actual crate target.
+
+            # An alias to a crate target.     # The label of the crate target the
+            # Aliases are only crate names.   # alias refers to.
             "alias":                          "@full//:label",
         }
     }
@@ -167,6 +169,7 @@ def _flatten_dependency_maps(all_dependency_maps):
     for dep_map in all_dependency_maps:
         for pkg_name in dep_map:
             if pkg_name not in dependencies:
+                # Add a non-frozen dict to the collection of dependencies
                 dependencies.setdefault(pkg_name, dict(dep_map[pkg_name].items()))
                 continue
 
