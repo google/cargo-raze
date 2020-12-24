@@ -98,21 +98,21 @@ def crates(deps, package_name = None):
         return []
 
     missing_crates = []
-    crates = []
-    for crate in deps:
-        if crate not in dependencies[package_name]:
-            missing_crates.append(crate)
+    crate_targets = []
+    for crate_target in deps:
+        if crate_target not in dependencies[package_name]:
+            missing_crates.append(crate_target)
         else:
-            crates.append(dependencies[package_name][crate])
+            crate_targets.append(dependencies[package_name][crate_target])
 
     if missing_crates:
-        fail("Missing crates `{}` for package `{}`. Available crates `{}".format(
+        fail("Could not find crates `{}` among dependencies of `{}`. Available dependencies were `{}`".format(
             missing_crates,
             package_name,
             dependencies[package_name],
         ))
 
-    return crates
+    return crate_targets
 
 def all_crates(normal = False, normal_dev = False, proc_macro = False, proc_macro_dev = False, package_name = None):
     """EXPERIMENTAL -- MAY CHANGE AT ANY TIME: Finds the fully qualified label of all requested direct crate dependencies \
