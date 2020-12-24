@@ -11,3 +11,5 @@ gen_workspace_prefix = "vendored_cargo_workspace"
 genmode = "Vendored"
 default_gen_buildrs = true
 package_aliases_dir = "cargo"
+experimental_api = true
+
