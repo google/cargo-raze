@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use anyhow::Result;
-use indoc::indoc;
 use tera::{self, Context, Tera};
 
 use crate::{
@@ -39,6 +38,17 @@ macro_rules! unwind_tera_error {
     messages.join("\n|__")
   }};
 }
+
+// A Bazel block that exposts the `crates.bz` files renderd in Remote genmode
+const EXPORTS_FILES: &str = r#"
+# Export file for Stardoc support
+exports_files(
+    [
+        "crates.bzl",
+    ],
+    visibility = ["//visibility:public"],
+)
+"#;
 
 #[derive(Default)]
 pub struct BazelRenderer {
@@ -183,7 +193,7 @@ impl BazelRenderer {
         .cloned()
         .collect();
 
-      let rendered_alias_build_file = if is_remote_mode {
+      let mut rendered_alias_build_file = if is_remote_mode {
         self
           .render_remote_aliases(&planned_build.workspace_context, &all_packages)
           .map_err(|e| RazeError::Rendering {
@@ -198,6 +208,8 @@ impl BazelRenderer {
             message: unwind_tera_error!(e),
           })?
       };
+
+      rendered_alias_build_file += EXPORTS_FILES;
 
       file_outputs.push(FileOutputs {
         path: render_details
@@ -226,16 +238,7 @@ impl BazelRenderer {
       .internal_renderer
       .render("templates/partials/header.template", &tera::Context::new())?;
 
-    contents += indoc! { r#"
-
-      # Export file for Stardoc support
-      exports_files(
-          [
-              "crates.bzl",
-          ],
-          visibility = ["//visibility:public"],
-      )
-    "# };
+    contents += EXPORTS_FILES;
 
     Ok(Some(FileOutputs {
       path: PathBuf::from(output_path),

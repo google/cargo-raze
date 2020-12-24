@@ -4,13 +4,6 @@ package(default_visibility = ["//visibility:public"])
 licenses([
     "notice",  # See individual crates for specific licenses
 ])
-{%- if is_remote_mode %}
-
-# Export file for Stardoc support
-exports_files([
-    "crates.bzl",
-])
-{%- endif %}
 {%- if crates %}
 
 # Aliased targets
