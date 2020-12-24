@@ -53,13 +53,12 @@ def crates(deps, package_name = None):
         package_name = native.package_name()
 
     # Join both sets of dependencies
-    dependencies = dict()
-    for dep_map in [_DEPENDENCIES, _PROC_MACRO_DEPENDENCIES, _DEV_DEPENDENCIES, _DEV_PROC_MACRO_DEPENDENCIES]:
-        for pkg_name in _DEPENDENCIES:
-            if pkg_name in dependencies:
-                dependencies[pkg_name].extend(dep_map[pkg_name])
-            else:
-                dependencies[pkg_name].update(dep_map[pkg_name])
+    dependencies = _flatten_dependency_maps([
+        _DEPENDENCIES, 
+        _PROC_MACRO_DEPENDENCIES, 
+        _DEV_DEPENDENCIES, 
+        _DEV_PROC_MACRO_DEPENDENCIES,
+    ])
 
     if not deps:
         return []
@@ -122,25 +121,57 @@ def all_crates(normal = False, normal_dev = False, proc_macro = False, proc_macr
         all_dependency_maps.append(_DEV_DEPENDENCIES)
     if proc_macro:
         all_dependency_maps.append(_PROC_MACRO_DEPENDENCIES)
-    if proc_macro:
+    if proc_macro_dev:
         all_dependency_maps.append(_DEV_PROC_MACRO_DEPENDENCIES)
 
     # Default to always using normal dependencies
     if not all_dependency_maps:
         all_dependency_maps.append(_DEPENDENCIES)
 
-    dependencies = dict()
-    for dep_map in all_dependency_maps:
-        for pkg_name in dep_map:
-            if pkg_name in dependencies:
-                dependencies[pkg_name].extend(dep_map[pkg_name])
-            else:
-                dependencies[pkg_name] = dep_map[pkg_name]
+    dependencies = _flatten_dependency_maps(all_dependency_maps)
 
     if not dependencies:
         return []
 
     return dependencies[package_name].values()
+
+def _flatten_dependency_maps(all_dependency_maps):
+    """Flatten a list of dependency maps into one dictionary.
+
+    Dependency maps have the following structure:
+
+    ```python
+    MAP = {
+        # The first key in the map is a Bazel package name of the workspace this file is defined in.
+        "package_name": {
+            # An alias to a crate target.     # The fully qualified label of 
+            # Aliases are only crate names.   # the actual crate target.
+            "alias":                          "@full//:label",
+        }
+    }
+    ```
+
+    Args:
+        all_dependency_maps (list): A list of dicts as described above
+
+    Returns:
+        dict: A dictionary as described above
+    """
+    dependencies = {}
+
+    for dep_map in all_dependency_maps:
+        for pkg_name in dep_map:
+            if pkg_name not in dependencies:
+                dependencies.setdefault(pkg_name, dict(dep_map[pkg_name].items()))
+                continue
+            
+            duplicate_crate_aliases = [key for key in dependencies[pkg_name] if key in dep_map[pkg_name]]
+            if duplicate_crate_aliases:
+                fail("There should be no duplicate crate aliases: {}".format(duplicate_crate_aliases))
+
+            dependencies[pkg_name].update(dep_map[pkg_name])
+
+    return dependencies
 
 def remote_non_cratesio_fetch_remote_crates():
     """This function defines a collection of repos and should be called in a WORKSPACE file"""
