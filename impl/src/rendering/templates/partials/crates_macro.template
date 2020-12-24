@@ -97,17 +97,17 @@ def crates(deps, package_name = None):
     if not deps:
         return []
 
-    errors = []
+    missing_crates = []
     crates = []
     for crate in deps:
         if crate not in dependencies[package_name]:
-            errors.append(crate)
+            missing_crates.append(crate)
         else:
             crates.append(dependencies[package_name][crate])
 
-    if errors:
+    if missing_crates:
         fail("Missing crates `{}` for package `{}`. Available crates `{}".format(
-            errors,
+            missing_crates,
             package_name,
             dependencies[package_name],
         ))
