@@ -37,26 +37,30 @@ _DEV_PROC_MACRO_DEPENDENCIES = {
     },
 }
 
-def crates(deps):
+def crates(deps, package_name = None):
     """EXPERIMENTAL -- MAY CHANGE AT ANY TIME: Finds the fully qualified label of the requested crates for the package where this macro is called.
 
     WARNING: This macro is part of an expeirmental API and is subject to change.
 
     Args:
-        deps (list or str): Either a list of dependencies or a string of one which will
-            be converted into a list.
+        deps (list): The desired list of crate targets.
+        package_name (str, optional): The package name of the set of dependencies to look up.
+            Defaults to `native.package_name()`.
     Returns:
         list: A list of labels to cargo-raze generated targets (str)
     """
 
+    if not package_name:
+        package_name = native.package_name()
+
     # Join both sets of dependencies
     dependencies = dict()
     for dep_map in [_DEPENDENCIES, _PROC_MACRO_DEPENDENCIES, _DEV_DEPENDENCIES, _DEV_PROC_MACRO_DEPENDENCIES]:
-        for package_name in _DEPENDENCIES:
-            if package_name in dependencies:
-                dependencies[package_name].extend(dep_map[package_name])
+        for pkg_name in _DEPENDENCIES:
+            if pkg_name in dependencies:
+                dependencies[pkg_name].extend(dep_map[pkg_name])
             else:
-                dependencies[package_name].update(dep_map[package_name])
+                dependencies[pkg_name].update(dep_map[pkg_name])
 
     if not deps:
         fail("An invalid argument has been provided. Please pass a crate name or a list of crate names")
@@ -70,85 +74,73 @@ def crates(deps):
     errors = []
     crates = []
     for crate in deps:
-        if crate not in dependencies[native.package_name()]:
+        if crate not in dependencies[package_name]:
             errors.append(crate)
         else:
-            crates.append(dependencies[native.package_name()][crate])
+            crates.append(dependencies[package_name][crate])
 
     if errors:
         fail("Missing crates `{}` for package `{}`. Available crates `{}".format(
             errors,
-            native.package_name(),
-            dependencies[native.package_name()],
+            package_name,
+            dependencies[package_name],
         ))
 
     return crates
 
-def all_crates(normal = False, proc_macro = False, dev = False, dev_only = False):
+def all_crates(normal = False, normal_dev = False, proc_macro = False, proc_macro_dev = False, package_name = None):
     """EXPERIMENTAL -- MAY CHANGE AT ANY TIME: Finds the fully qualified label of all requested direct crate dependencies \
     for the package where this macro is called.
 
-    If no parameters are set, all normal and proc_macro dependencies are returned.
-    Setting any one flag will otherwise impact the contents of the returned list
-
-    WARNING: This macro is part of an expeirmental API and is subject to change.
+    If no parameters are set, all normal dependencies are returned. Setting any one flag will
+    otherwise impact the contents of the returned list.
 
     Args:
         normal (bool, optional): If True, normal dependencies are included in the
             output list. Defaults to False.
-        proc_macro (bool, optional): If True, proc_macro dependencies will be
+        normal_dev (bool, optional): If True, normla dev dependencies will be
             included in the output list. Defaults to False.
-        dev (bool, optional): If True, dev dependencies are included when the
-            `normal` and `proc_macro` parameters are used. Defaults to False.
-        dev_only (bool, optional): If True, only development dependencies will be
-            returned by this list. This paramter otherwise follows the same rules
-            as `dev`. Defaults to False.
+        proc_macro (bool, optional): If True, proc_macro dependencies are included
+            in the output list. Defaults to False.
+        proc_macro_dev (bool, optional): If True, dev proc_macro dependencies are
+            included in the output list. Defaults to False.
+        package_name (str, optional): The package name of the set of dependencies to look up.
+            Defaults to `native.package_name()`.
 
     Returns:
         list: A list of labels to cargo-raze generated targets (str)
     """
 
+    if not package_name:
+        package_name = native.package_name()
+
     # Determine the relevant maps to use
-    dependencies = dict()
-    all_maps = []
+    all_dependency_maps = []
     if normal:
-        if not dev_only:
-            all_maps.append(_DEPENDENCIES)
-        if dev or dev_only:
-            all_maps.append(_DEV_DEPENDENCIES)
+        all_dependency_maps.append(_DEPENDENCIES)
+    if normal_dev:
+        all_dependency_maps.append(_DEV_DEPENDENCIES)
     if proc_macro:
-        if not dev_only:
-            all_maps.append(_PROC_MACRO_DEPENDENCIES)
-        if dev or dev_only:
-            all_maps.append(_DEV_PROC_MACRO_DEPENDENCIES)
+        all_dependency_maps.append(_PROC_MACRO_DEPENDENCIES)
+    if proc_macro:
+        all_dependency_maps.append(_DEV_PROC_MACRO_DEPENDENCIES)
 
     # Default to always using normal dependencies
-    if not all_maps:
-        if not dev_only:
-            all_maps.append(_DEPENDENCIES)
-        if dev or dev_only:
-            all_maps.append(_DEV_DEPENDENCIES)
+    if not all_dependency_maps:
+        all_dependency_maps.append(_DEPENDENCIES)
 
-    if not all_maps:
-        fail("Failed to add at least 1 map to the `all_maps` list with parameters: " +
-             "normal = {normal}, proc_macro = {proc_macro}, dev = {dev}, dev_only = {dev_only}".format(
-                 normal = normal,
-                 proc_macro = proc_macro,
-                 dev = dev,
-                 dev_only = dev_only,
-             ))
-
-    for dep_map in all_maps:
-        for package_name in dep_map:
-            if package_name in dependencies:
-                dependencies[package_name].extend(dep_map[package_name])
+    dependencies = dict()
+    for dep_map in all_dependency_maps:
+        for pkg_name in dep_map:
+            if pkg_name in dependencies:
+                dependencies[pkg_name].extend(dep_map[pkg_name])
             else:
-                dependencies[package_name] = dep_map[package_name]
+                dependencies[pkg_name] = dep_map[pkg_name]
 
     if not dependencies:
         return []
 
-    return dependencies[native.package_name()].values()
+    return dependencies[package_name].values()
 
 def remote_complicated_cargo_library_fetch_remote_crates():
     """This function defines a collection of repos and should be called in a WORKSPACE file"""
