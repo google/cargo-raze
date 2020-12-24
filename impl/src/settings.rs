@@ -136,6 +136,13 @@ pub struct RazeSettings {
    */
   #[serde(default = "default_raze_settings_vendor_dir")]
   pub vendor_dir: String,
+
+  /**
+   * If true, an experimetnal API for accessing crates will be rendered into
+   * `crates.bzl` for both Remote and Vendored genmodes.
+   */
+  #[serde(default = "default_raze_settings_experimental_api")]
+  pub experimental_api: bool,
 }
 
 /** Override settings for individual crates (as part of `RazeSettings`). */
@@ -346,6 +353,10 @@ fn default_raze_settings_vendor_dir() -> String {
   "vendor".to_owned()
 }
 
+fn default_raze_settings_experimental_api() -> bool {
+  false
+}
+
 fn default_crate_settings_field_gen_buildrs() -> Option<bool> {
   None
 }
@@ -496,6 +507,8 @@ struct RawRazeSettings {
   pub rust_rules_workspace_name: Option<String>,
   #[serde(default)]
   pub vendor_dir: Option<String>,
+  #[serde(default)]
+  pub experimental_api: Option<bool>
 }
 
 impl RawRazeSettings {
@@ -513,6 +526,7 @@ impl RawRazeSettings {
       || self.index_url.is_some()
       || self.rust_rules_workspace_name.is_some()
       || self.vendor_dir.is_some()
+      || self.experimental_api.is_some()
   }
 
   fn print_notices_and_warnings(&self) {
@@ -821,6 +835,7 @@ pub mod tests {
       index_url: default_raze_settings_index_url(),
       rust_rules_workspace_name: default_raze_settings_rust_rules_workspace_name(),
       vendor_dir: default_raze_settings_vendor_dir(),
+      experimental_api: default_raze_settings_experimental_api(),
     }
   }
 

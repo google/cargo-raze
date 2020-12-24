@@ -3,9 +3,9 @@
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")  # buildifier: disable=load
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")  # buildifier: disable=load
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")  # buildifier: disable=load
-
+{% if experimental_api %}
 {% include "templates/partials/crates_macro.template" %}
-
+{% endif %}
 def {{workspace.gen_workspace_prefix}}_fetch_remote_crates():
 {%- if crates %}
     """This function defines a collection of repos and should be called in a WORKSPACE file"""

@@ -48,4 +48,5 @@ pub struct RenderDetails {
   pub package_aliases_dir: String,
   pub vendored_buildfile_name: String,
   pub bazel_root: PathBuf,
+  pub experimental_api: bool,
 }
