@@ -75,13 +75,6 @@ def crates(deps, package_name = None):
     if not deps:
         return []
 
-    if not dependencies:
-        if deps:
-            fail("A list of dependencies was requested but no dependencies are available: {}".format(
-                deps,
-            ))
-        return []
-
     errors = []
     crates = []
     for crate in deps:
