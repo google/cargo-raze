@@ -63,13 +63,14 @@ def crates(deps, package_name = None):
                 dependencies[pkg_name].update(dep_map[pkg_name])
 
     if not deps:
-        fail("An invalid argument has been provided. Please pass a crate name or a list of crate names")
-
-    if not dependencies:
         return []
 
-    if type(deps) == "string":
-        deps = [deps]
+    if not dependencies:
+        if deps:
+            fail("A list of dependencies was requested but no dependencies are available: {}".format(
+                deps,
+            ))
+        return []
 
     errors = []
     crates = []
