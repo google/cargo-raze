@@ -88,9 +88,9 @@ def crates(deps, package_name = None):
 
     # Join both sets of dependencies
     dependencies = _flatten_dependency_maps([
-        _DEPENDENCIES, 
-        _PROC_MACRO_DEPENDENCIES, 
-        _DEV_DEPENDENCIES, 
+        _DEPENDENCIES,
+        _PROC_MACRO_DEPENDENCIES,
+        _DEV_DEPENDENCIES,
         _DEV_PROC_MACRO_DEPENDENCIES,
     ])
 
@@ -178,7 +178,7 @@ def _flatten_dependency_maps(all_dependency_maps):
     MAP = {
         # The first key in the map is a Bazel package name of the workspace this file is defined in.
         "package_name": {
-            # An alias to a crate target.     # The fully qualified label of 
+            # An alias to a crate target.     # The fully qualified label of
             # Aliases are only crate names.   # the actual crate target.
             "alias":                          "@full//:label",
         }
@@ -198,7 +198,7 @@ def _flatten_dependency_maps(all_dependency_maps):
             if pkg_name not in dependencies:
                 dependencies.setdefault(pkg_name, dict(dep_map[pkg_name].items()))
                 continue
-            
+
             duplicate_crate_aliases = [key for key in dependencies[pkg_name] if key in dep_map[pkg_name]]
             if duplicate_crate_aliases:
                 fail("There should be no duplicate crate aliases: {}".format(duplicate_crate_aliases))
