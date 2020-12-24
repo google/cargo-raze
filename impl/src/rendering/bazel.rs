@@ -24,7 +24,7 @@ use crate::{
 
 use std::{
   error::Error,
-  path::{Path, PathBuf},
+  path::Path,
 };
 
 macro_rules! unwind_tera_error {
@@ -225,11 +225,12 @@ impl BazelRenderer {
 
   fn render_crates_bzl_package_file(
     &self,
-    output_path: &Path,
+    path_prefix: &Path,
     file_outputs: &Vec<FileOutputs>,
   ) -> Result<Option<FileOutputs>> {
+    let crates_bzl_pkg_file = path_prefix.join("BUILD.bazel");
     let outputs_contain_crates_bzl_build_file =
-      file_outputs.iter().any(|output| output.path == output_path);
+      file_outputs.iter().any(|output| output.path == crates_bzl_pkg_file);
     if outputs_contain_crates_bzl_build_file {
       return Ok(None);
     }
@@ -241,7 +242,7 @@ impl BazelRenderer {
     contents += EXPORTS_FILES;
 
     Ok(Some(FileOutputs {
-      path: PathBuf::from(output_path),
+      path: crates_bzl_pkg_file,
       contents,
     }))
   }
@@ -391,9 +392,8 @@ impl BuildRenderer for BazelRenderer {
     }
 
     // Ensure there is always a `BUILD.bazel` file to accompany `crates.bzl`
-    let crates_bzl_pkg_file = path_prefix.as_path().join("BUILD.bazel");
     if let Some(rendered_output) =
-      self.render_crates_bzl_package_file(&crates_bzl_pkg_file, &file_outputs)?
+      self.render_crates_bzl_package_file(&path_prefix, &file_outputs)?
     {
       file_outputs.push(rendered_output);
     }
