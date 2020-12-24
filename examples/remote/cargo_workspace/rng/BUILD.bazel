@@ -1,5 +1,5 @@
 load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
-load("//remote/cargo_workspace/cargo:crates.bzl", "all_crates")
+load("//remote/cargo_workspace/cargo:crates.bzl", "crates")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -7,5 +7,7 @@ rust_library(
     name = "rng",
     srcs = ["src/lib.rs"],
     edition = "2018",
-    deps = all_crates(),
+    deps = crates([
+        "rand",
+    ]),
 )
