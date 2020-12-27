@@ -135,6 +135,7 @@ fn main() -> Result<()> {
     package_aliases_dir: settings.package_aliases_dir,
     vendored_buildfile_name: settings.output_buildfile_suffix,
     bazel_root: cargo_raze_working_dir,
+    rust_rules_workspace_name: settings.rust_rules_workspace_name,
     experimental_api: settings.experimental_api,
   };
   let bazel_file_outputs = match &settings.genmode {
