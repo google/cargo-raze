@@ -127,10 +127,12 @@ impl BazelRenderer {
     &self,
     workspace_context: &WorkspaceContext,
     package: &CrateContext,
+    rust_rules_workspace_name: &str,
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
     context.insert("workspace", &workspace_context);
     context.insert("crate", &package);
+    context.insert("rust_rules_workspace_name", rust_rules_workspace_name);
     self
       .internal_renderer
       .render("templates/crate.BUILD.template", &context)
@@ -154,10 +156,12 @@ impl BazelRenderer {
     &self,
     workspace_context: &WorkspaceContext,
     package: &CrateContext,
+    rust_rules_workspace_name: &str,
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
     context.insert("workspace", &workspace_context);
     context.insert("crate", &package);
+    context.insert("rust_rules_workspace_name", rust_rules_workspace_name);
     self
       .internal_renderer
       .render("templates/crate.BUILD.template", &context)
@@ -358,13 +362,16 @@ impl BuildRenderer for BazelRenderer {
     }
 
     for package in crate_contexts {
-      let rendered_crate_build_file =
-        self
-          .render_crate(&workspace_context, &package)
-          .map_err(|e| RazeError::Rendering {
-            crate_name_opt: None,
-            message: unwind_tera_error!(e),
-          })?;
+      let rendered_crate_build_file = self
+        .render_crate(
+          &workspace_context,
+          &package,
+          &render_details.rust_rules_workspace_name,
+        )
+        .map_err(|e| RazeError::Rendering {
+          crate_name_opt: None,
+          message: unwind_tera_error!(e),
+        })?;
 
       let final_crate_build_file =
         include_additional_build_file(package, rendered_crate_build_file)?;
@@ -406,7 +413,11 @@ impl BuildRenderer for BazelRenderer {
 
     for package in crate_contexts {
       let rendered_crate_build_file = self
-        .render_remote_crate(&workspace_context, &package)
+        .render_remote_crate(
+          &workspace_context,
+          &package,
+          &render_details.rust_rules_workspace_name,
+        )
         .map_err(|e| RazeError::Rendering {
           crate_name_opt: Some(package.pkg_name.to_owned()),
           message: unwind_tera_error!(e),
@@ -488,6 +499,7 @@ mod tests {
       package_aliases_dir: "cargo".to_string(),
       vendored_buildfile_name: buildfile_suffix.to_owned(),
       bazel_root: PathBuf::from("/some/bazel/root"),
+      rust_rules_workspace_name: "rules_rust".to_owned(),
       experimental_api: true,
     }
   }

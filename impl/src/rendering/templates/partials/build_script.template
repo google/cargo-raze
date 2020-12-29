@@ -1,6 +1,6 @@
 # buildifier: disable=load-on-top
 load(
-    "@io_bazel_rules_rust//cargo:cargo_build_script.bzl",
+    "@{{ rust_rules_workspace_name }}//cargo:cargo_build_script.bzl",
     "cargo_build_script",
 )
 

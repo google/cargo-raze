@@ -48,5 +48,6 @@ pub struct RenderDetails {
   pub package_aliases_dir: String,
   pub vendored_buildfile_name: String,
   pub bazel_root: PathBuf,
+  pub rust_rules_workspace_name: String,
   pub experimental_api: bool,
 }
