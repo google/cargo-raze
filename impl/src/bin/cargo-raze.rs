@@ -14,22 +14,25 @@
 
 use std::{
   collections::HashMap,
+  env,
   fs::{self, File},
   io::Write,
   path::{Path, PathBuf},
 };
 
-use anyhow::Result;
+use anyhow::{anyhow, Context, Result};
 
+use cargo_metadata::Metadata;
 use docopt::Docopt;
 
 use cargo_raze::{
   checks,
-  metadata::{CargoWorkspaceFiles, RazeMetadataFetcher},
-  planning::{BuildPlanner, BuildPlannerImpl},
+  metadata::{CargoWorkspaceFiles, MetadataFetcher, RazeMetadata, RazeMetadataFetcher},
+  planning::{BuildPlanner, BuildPlannerImpl, PlannedBuild},
+  rendering::FileOutputs,
   rendering::{bazel::BazelRenderer, BuildRenderer, RenderDetails},
   settings::RazeSettings,
-  settings::{load_settings, GenMode},
+  settings::{load_settings, GenMode, SettingsMetadataFetcher},
   util::{find_bazel_workspace_root, PlatformDetails},
 };
 
@@ -72,6 +75,28 @@ Options:
 
 fn main() -> Result<()> {
   // Parse options
+  let options = parse_options();
+
+  // Load settings
+  let (local_metadata, settings) = load_raze_settings(&options)?;
+
+  // Fetch metadata
+  let raze_metadata = fetch_raze_metadata(&options, &settings, &local_metadata)?;
+
+  // Do Planning
+  let planned_build = do_planning(&settings, &raze_metadata)?;
+
+  // Render BUILD files
+  let (render_details, bazel_file_outputs) =
+    render_files(&settings, &raze_metadata, &planned_build, &local_metadata)?;
+
+  // Write BUILD files
+  write_files(&bazel_file_outputs, &render_details, &settings, &options)?;
+
+  Ok(())
+}
+
+fn parse_options() -> Options {
   let options: Options = Docopt::new(USAGE)
     .map(|d| {
       d.version(Some(
@@ -81,16 +106,61 @@ fn main() -> Result<()> {
     .and_then(|d| d.deserialize())
     .unwrap_or_else(|e| e.exit());
 
-  // Load settings
-  let manifest_path = PathBuf::from(options
-    .flag_manifest_path
-    .unwrap_or("./Cargo.toml".to_owned())).canonicalize()?;
-  let settings = load_settings(&manifest_path, options.flag_cargo_bin_path.clone())?;
+  options
+}
+
+fn load_raze_settings(options: &Options) -> Result<(Metadata, RazeSettings)> {
+  let metadata = fetch_local_metadata(options)?;
+
+  // Parse settings with that metadata
+  let settings = match load_settings(&metadata) {
+    Ok(settings) => settings,
+    Err(err) => return Err(anyhow!(err.to_string())),
+  };
+
   if options.flag_verbose.unwrap_or(false) {
     println!("Loaded override settings: {:#?}", settings);
   }
 
-  // Fetch metadata
+  Ok((metadata, settings))
+}
+
+fn fetch_local_metadata(options: &Options) -> Result<Metadata> {
+  // Gather basic, offline metadata to parse settings from
+  let fetcher = if let Some(cargo_bin_path) = &options.flag_cargo_bin_path {
+    SettingsMetadataFetcher {
+      cargo_bin_path: PathBuf::from(cargo_bin_path),
+    }
+  } else {
+    SettingsMetadataFetcher::default()
+  };
+
+  let working_directory = if let Some(manifest_path) = &options.flag_manifest_path {
+    let manifest_path = PathBuf::from(manifest_path).canonicalize()?;
+    if !manifest_path.is_file() {
+      return Err(anyhow!("manifest path `{}` is not a file.", manifest_path.display()));
+    }
+    // UNWRAP: Unwrap safe due to check above.
+    PathBuf::from(manifest_path.parent().unwrap())
+  } else {
+    env::current_dir()?
+  };
+
+  fetcher
+    .fetch_metadata(&working_directory, false)
+    .with_context(|| {
+      format!(
+        "Failed to fetch metadata for {}",
+        working_directory.display()
+      )
+    })
+}
+
+fn fetch_raze_metadata(
+  options: &Options,
+  settings: &RazeSettings,
+  local_metadata: &Metadata,
+) -> Result<RazeMetadata> {
   let metadata_fetcher: RazeMetadataFetcher = match options.flag_cargo_bin_path {
     Some(ref cargo_bin_path) => RazeMetadataFetcher::new(
       cargo_bin_path,
@@ -99,41 +169,61 @@ fn main() -> Result<()> {
     ),
     None => RazeMetadataFetcher::default(),
   };
+
   let cargo_raze_working_dir =
-    find_bazel_workspace_root(&manifest_path).unwrap_or(std::env::current_dir()?);
-  let lock_path_opt = if let Some(parent) = manifest_path.parent() {
-    let lock_path = parent.join("Cargo.lock");
+    find_bazel_workspace_root(&local_metadata.workspace_root).unwrap_or(env::current_dir()?);
+
+  let toml_path = local_metadata.workspace_root.join("Cargo.toml");
+  let lock_path_opt = {
+    let lock_path = local_metadata.workspace_root.join("Cargo.lock");
     fs::metadata(&lock_path).ok().map(|_| lock_path)
-  } else {
-    None
   };
+
   let files = CargoWorkspaceFiles {
-    toml_path: manifest_path,
+    toml_path,
     lock_path_opt,
   };
+
   let remote_genmode_inputs = gather_remote_genmode_inputs(&cargo_raze_working_dir, &settings);
-  let metadata = metadata_fetcher.fetch_metadata(
+
+  let raze_metadata = metadata_fetcher.fetch_metadata(
     &files,
     remote_genmode_inputs.binary_deps,
     remote_genmode_inputs.override_lockfile,
   )?;
-  checks::check_metadata(&metadata.metadata, &settings, &cargo_raze_working_dir)?;
 
-  // Do Planning
+  checks::check_metadata(&raze_metadata.metadata, &settings, &cargo_raze_working_dir)?;
+  Ok(raze_metadata)
+}
+
+fn do_planning(
+  settings: &RazeSettings,
+  metadata: &RazeMetadata,
+) -> Result<PlannedBuild> {
   let platform_details = match &settings.target {
     Some(target) => Some(PlatformDetails::new_using_rustc(target)?),
     None => None,
   };
-  let planned_build =
-    BuildPlannerImpl::new(metadata.clone(), settings.clone()).plan_build(platform_details)?;
 
-  // Render BUILD files
+  BuildPlannerImpl::new(metadata.clone(), settings.clone())
+    .plan_build(platform_details)
+}
+
+fn render_files(
+  settings: &RazeSettings,
+  metadata: &RazeMetadata,
+  planned_build: &PlannedBuild,
+  local_metadata: &Metadata,
+) -> Result<(RenderDetails, Vec<FileOutputs>)> {
+  let cargo_raze_working_dir =
+    find_bazel_workspace_root(&local_metadata.workspace_root).unwrap_or(env::current_dir()?);
+
   let mut bazel_renderer = BazelRenderer::new();
   let render_details = RenderDetails {
-    cargo_root: metadata.cargo_workspace_root,
+    cargo_root: metadata.cargo_workspace_root.clone(),
     path_prefix: PathBuf::from(&settings.workspace_path.trim_start_matches("/")),
-    package_aliases_dir: settings.package_aliases_dir,
-    vendored_buildfile_name: settings.output_buildfile_suffix,
+    package_aliases_dir: settings.package_aliases_dir.clone(),
+    vendored_buildfile_name: settings.output_buildfile_suffix.clone(),
     bazel_root: cargo_raze_working_dir,
     experimental_api: settings.experimental_api,
   };
@@ -146,11 +236,19 @@ fn main() -> Result<()> {
     GenMode::Unspecified => Vec::new(),
   };
 
-  // Write BUILD files
+  Ok((render_details, bazel_file_outputs))
+}
+
+fn write_files(
+  bazel_file_outputs: &Vec<FileOutputs>,
+  render_details: &RenderDetails,
+  settings: &RazeSettings,
+  options: &Options,
+) -> Result<()> {
   if &settings.genmode == &GenMode::Remote {
     let remote_dir = render_details
       .bazel_root
-      .join(render_details.path_prefix)
+      .join(&render_details.path_prefix)
       .join("remote");
     // Clean out the "remote" directory so users can easily see what build files are relevant
     if remote_dir.exists() {
@@ -162,6 +260,7 @@ fn main() -> Result<()> {
       }
     }
   }
+
   for output in bazel_file_outputs.iter() {
     if options.flag_dryrun.unwrap_or(false) {
       println!("{}:\n{}", output.path.display(), output.contents);
