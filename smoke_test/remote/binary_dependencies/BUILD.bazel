@@ -1,5 +1,5 @@
 load("@io_bazel_rules_rust//rust:rust.bzl", "rust_binary")
-load("//remote/binary_dependencies/cargo:crates.bzl", "all_crates")
+load("//remote/binary_dependencies/cargo:crates.bzl", "all_crate_deps")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -9,5 +9,5 @@ rust_binary(
     data = [
         "//remote/binary_dependencies/cargo:cargo_bin_texture_synthesis",
     ],
-    deps = all_crates(),
+    deps = all_crate_deps(),
 )
