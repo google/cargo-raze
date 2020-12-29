@@ -331,7 +331,7 @@ fn default_raze_settings_field_output_buildfile_suffix() -> String {
 }
 
 fn default_raze_settings_field_gen_buildrs() -> bool {
-  false
+  true
 }
 
 fn default_raze_settings_registry() -> String {
@@ -531,12 +531,6 @@ impl RawRazeSettings {
   }
 
   fn print_notices_and_warnings(&self) {
-    if self.default_gen_buildrs.is_none() {
-      eprintln!(
-        "NOTICE: The default of `[*.raze.default_gen_buildrs]` will soon be set to `true`. Please \
-         explicitly set this flag to prevent a change in behavior."
-      );
-    }
 
     if self.target.is_some() {
       eprintln!(
