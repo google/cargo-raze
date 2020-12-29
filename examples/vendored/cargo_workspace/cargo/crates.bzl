@@ -48,7 +48,7 @@ _DEV_PROC_MACRO_DEPENDENCIES = {
     },
 }
 
-def crates(deps, package_name = None):
+def crate_deps(deps, package_name = None):
     """EXPERIMENTAL -- MAY CHANGE AT ANY TIME: Finds the fully qualified label of the requested crates for the package where this macro is called.
 
     WARNING: This macro is part of an expeirmental API and is subject to change.
@@ -92,7 +92,7 @@ def crates(deps, package_name = None):
 
     return crate_targets
 
-def all_crates(normal = False, normal_dev = False, proc_macro = False, proc_macro_dev = False, package_name = None):
+def all_crate_deps(normal = False, normal_dev = False, proc_macro = False, proc_macro_dev = False, package_name = None):
     """EXPERIMENTAL -- MAY CHANGE AT ANY TIME: Finds the fully qualified label of all requested direct crate dependencies \
     for the package where this macro is called.
 
