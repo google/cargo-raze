@@ -22,7 +22,10 @@ use crate::{
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
 };
 
-use std::error::Error;
+use std::{
+  error::Error,
+  path::Path,
+};
 
 macro_rules! unwind_tera_error {
   ($err:ident) => {{
@@ -35,6 +38,17 @@ macro_rules! unwind_tera_error {
     messages.join("\n|__")
   }};
 }
+
+// A Bazel block that exposts the `crates.bz` files renderd in Remote genmode
+const EXPORTS_FILES: &str = r#"
+# Export file for Stardoc support
+exports_files(
+    [
+        "crates.bzl",
+    ],
+    visibility = ["//visibility:public"],
+)
+"#;
 
 #[derive(Default)]
 pub struct BazelRenderer {
@@ -116,6 +130,7 @@ impl BazelRenderer {
     let mut context = Context::new();
     context.insert("workspace", &workspace_context);
     context.insert("crates", &all_packages);
+    context.insert("is_remote_mode", &false);
     self
       .internal_renderer
       .render("templates/workspace.BUILD.template", &context)
@@ -142,6 +157,7 @@ impl BazelRenderer {
     let mut context = Context::new();
     context.insert("workspace", &workspace_context);
     context.insert("crates", &all_packages);
+    context.insert("is_remote_mode", &true);
     self
       .internal_renderer
       .render("templates/workspace.BUILD.template", &context)
@@ -177,7 +193,7 @@ impl BazelRenderer {
         .cloned()
         .collect();
 
-      let rendered_alias_build_file = if is_remote_mode {
+      let mut rendered_alias_build_file = if is_remote_mode {
         self
           .render_remote_aliases(&planned_build.workspace_context, &all_packages)
           .map_err(|e| RazeError::Rendering {
@@ -193,6 +209,8 @@ impl BazelRenderer {
           })?
       };
 
+      rendered_alias_build_file += EXPORTS_FILES;
+
       file_outputs.push(FileOutputs {
         path: render_details
           .cargo_root
@@ -203,6 +221,30 @@ impl BazelRenderer {
       });
     }
     Ok(file_outputs)
+  }
+
+  fn render_crates_bzl_package_file(
+    &self,
+    path_prefix: &Path,
+    file_outputs: &Vec<FileOutputs>,
+  ) -> Result<Option<FileOutputs>> {
+    let crates_bzl_pkg_file = path_prefix.join("BUILD.bazel");
+    let outputs_contain_crates_bzl_build_file =
+      file_outputs.iter().any(|output| output.path == crates_bzl_pkg_file);
+    if outputs_contain_crates_bzl_build_file {
+      return Ok(None);
+    }
+
+    let mut contents = self
+      .internal_renderer
+      .render("templates/partials/header.template", &tera::Context::new())?;
+
+    contents += EXPORTS_FILES;
+
+    Ok(Some(FileOutputs {
+      path: crates_bzl_pkg_file,
+      contents,
+    }))
   }
 }
 
@@ -350,17 +392,10 @@ impl BuildRenderer for BazelRenderer {
     }
 
     // Ensure there is always a `BUILD.bazel` file to accompany `crates.bzl`
-    let crates_bzl_pkg_file = path_prefix.as_path().join("BUILD.bazel");
-    let outputs_contain_crates_bzl_build_file = file_outputs
-      .iter()
-      .any(|output| output.path == crates_bzl_pkg_file);
-    if !outputs_contain_crates_bzl_build_file {
-      file_outputs.push(FileOutputs {
-        path: crates_bzl_pkg_file,
-        contents: self
-          .internal_renderer
-          .render("templates/partials/header.template", &tera::Context::new())?,
-      });
+    if let Some(rendered_output) =
+      self.render_crates_bzl_package_file(&path_prefix, &file_outputs)?
+    {
+      file_outputs.push(rendered_output);
     }
 
     Ok(file_outputs)
