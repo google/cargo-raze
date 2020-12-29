@@ -19,7 +19,7 @@ use std::{
   str::FromStr,
 };
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use cargo_lock::SourceId;
 use cargo_metadata::{DependencyKind, Node, Package};
 use cargo_platform::Platform;
@@ -265,9 +265,15 @@ impl<'planner> CrateSubplanner<'planner> {
     let build_script_target_opt = self.take_build_script_target(&mut targets);
 
     let mut lib_target_name = None;
+    let mut is_proc_macro = false;
     {
       for target in &targets {
-        if target.kind == "lib" || target.kind == "proc-macro" {
+        if target.kind == "lib" {
+          lib_target_name = Some(target.name.clone());
+          break;
+        }
+        if target.kind == "proc-macro" {
+          is_proc_macro = true;
           lib_target_name = Some(target.name.clone());
           break;
         }
@@ -312,35 +318,53 @@ impl<'planner> CrateSubplanner<'planner> {
 
     filtered_deps.sort();
 
-    let workspace_member_dependents: Vec<PathBuf> = self
-      .crate_catalog_entry
-      .workspace_member_dependents
-      .iter()
-      .filter_map(|pkg_id| {
-        let workspace_member = self
-          .crate_catalog
-          .metadata
-          .packages
+    let mut workspace_member_dependents: Vec<PathBuf> = Vec::new();
+    let mut workspace_member_dev_dependents: Vec<PathBuf> = Vec::new();
+
+    for pkg_id in self.crate_catalog_entry.workspace_member_dependents.iter() {
+      let workspace_member = self
+        .crate_catalog
+        .metadata
+        .packages
+        .iter()
+        .find(|pkg| pkg.id == *pkg_id);
+
+      if let Some(member) = workspace_member {
+        // UNWRAP: This should always return a dependency
+        let current_dependency = member
+          .dependencies
           .iter()
-          .find(|pkg| pkg.id == *pkg_id);
-        if let Some(package) = workspace_member {
-          util::get_workspace_member_path(
-            &package.manifest_path,
-            &self.crate_catalog.metadata.workspace_root,
-          )
-        } else {
-          None
+          .find(|dep| dep.name == package.name)
+          .unwrap();
+
+        let workspace_member_path = util::get_workspace_member_path(
+          &member.manifest_path,
+          &self.crate_catalog.metadata.workspace_root,
+        )
+        .ok_or(anyhow!(
+          "Failed to generate workspace_member_path for {} and {}",
+          &package.manifest_path.display(),
+          &self.crate_catalog.metadata.workspace_root.display()
+        ))?;
+
+        match current_dependency.kind {
+          DependencyKind::Development => {
+            workspace_member_dev_dependents.push(workspace_member_path)
+          },
+          DependencyKind::Normal => workspace_member_dependents.push(workspace_member_path),
+          /* TODO: For now only Development and Normal dependencies are
+          needed but Build surely has it's use as well */
+          _ => {},
         }
-      })
-      .collect();
+      }
+    }
 
     let is_workspace_member_dependency = !&workspace_member_dependents.is_empty();
     let is_binary_dependency = self.settings.binary_deps.contains_key(&package.name);
 
-    let raze_settings = self.crate_settings.cloned().unwrap_or_default();
-
     // Generate canonicalized paths to additional build files so they're guaranteed to exist
     // and always locatable.
+    let raze_settings = self.crate_settings.cloned().unwrap_or_default();
     let canonical_additional_build_file = match &raze_settings.additional_build_file {
       Some(build_file) => Some(
         cargo_workspace_root
@@ -362,9 +386,11 @@ impl<'planner> CrateSubplanner<'planner> {
       edition: package.edition.clone(),
       license: self.produce_license(),
       features: self.node.features.clone(),
-      workspace_member_dependents: workspace_member_dependents,
+      workspace_member_dependents,
+      workspace_member_dev_dependents,
       is_workspace_member_dependency: is_workspace_member_dependency,
       is_binary_dependency: is_binary_dependency,
+      is_proc_macro,
       default_deps: CrateDependencyContext {
         dependencies: normal_deps,
         proc_macro_dependencies: proc_macro_deps,
@@ -590,7 +616,7 @@ impl<'planner> CrateSubplanner<'planner> {
                   aliased_dep_names: HashMap::new(),
                 },
               );
-              // This unwrap should be safe given the insert above
+              // UNWRAP: This unwrap should be safe given the insert above
               targeted_dep_names.get_mut(&target_str).unwrap()
             },
           };

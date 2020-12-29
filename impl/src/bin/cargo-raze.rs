@@ -135,6 +135,7 @@ fn main() -> Result<()> {
     package_aliases_dir: settings.package_aliases_dir,
     vendored_buildfile_name: settings.output_buildfile_suffix,
     bazel_root: cargo_raze_working_dir,
+    experimental_api: settings.experimental_api,
   };
   let bazel_file_outputs = match &settings.genmode {
     GenMode::Vendored => bazel_renderer.render_planned_build(&render_details, &planned_build)?,

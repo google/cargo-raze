@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use anyhow::Result;
+use pathdiff::diff_paths;
 use tera::{self, Context, Tera};
 
 use crate::{
@@ -55,10 +56,19 @@ pub struct BazelRenderer {
   internal_renderer: Tera,
 }
 
+/** Generate the expected Bazel package name */
+fn bazel_package_name(render_details: &RenderDetails) -> String {
+  if let Some(package_name) = diff_paths(&render_details.cargo_root, &render_details.bazel_root) {
+    package_name.display().to_string().replace("\\", "/")
+  } else {
+    "".to_owned()
+  }
+}
+
 impl BazelRenderer {
   pub fn new() -> Self {
     // Configure tera with a bogus template dir: We don't want any runtime template support
-    let mut internal_renderer = Tera::new("src/not/a/dir/*").unwrap();
+    let mut internal_renderer = Tera::new("/tmp/cargo-raze/doesnt/exist/*").unwrap();
     internal_renderer
       .add_raw_templates(vec![
         (
@@ -72,6 +82,10 @@ impl BazelRenderer {
         (
           "templates/partials/common_attrs.template",
           include_str!("templates/partials/common_attrs.template"),
+        ),
+        (
+          "templates/partials/crates_macro.template",
+          include_str!("templates/partials/crates_macro.template"),
         ),
         (
           "templates/partials/header.template",
@@ -163,14 +177,20 @@ impl BazelRenderer {
       .render("templates/workspace.BUILD.template", &context)
   }
 
-  pub fn render_bzl_fetch(
+  pub fn render_crates_bzl(
     &self,
     workspace_context: &WorkspaceContext,
     all_packages: &[CrateContext],
+    bazel_package_name: &str,
+    is_remote_genmode: bool,
+    experimental_api: bool,
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
     context.insert("workspace", &workspace_context);
     context.insert("crates", &all_packages);
+    context.insert("bazel_package_name", &bazel_package_name);
+    context.insert("is_remote_genmode", &is_remote_genmode);
+    context.insert("experimental_api", &experimental_api);
     self
       .internal_renderer
       .render("templates/remote_crates.bzl.template", &context)
@@ -303,6 +323,40 @@ impl BuildRenderer for BazelRenderer {
       .as_path()
       .join(&render_details.path_prefix);
 
+    if render_details.experimental_api {
+      let crates_bzl_file_path = path_prefix.as_path().join("crates.bzl");
+      let rendered_crates_bzl_file = self
+        .render_crates_bzl(
+          &workspace_context,
+          &crate_contexts,
+          &bazel_package_name(render_details),
+          /*is_remote_genmode=*/ false,
+          render_details.experimental_api,
+        )
+        .map_err(|e| RazeError::Rendering {
+          crate_name_opt: None,
+          message: unwind_tera_error!(e),
+        })?;
+      file_outputs.push(FileOutputs {
+        path: crates_bzl_file_path,
+        contents: rendered_crates_bzl_file,
+      });
+
+      // Ensure there is always a `BUILD.bazel` file to accompany `crates.bzl`
+      let crates_bzl_pkg_file = path_prefix.as_path().join("BUILD.bazel");
+      let outputs_contain_crates_bzl_build_file = file_outputs
+        .iter()
+        .any(|output| output.path == crates_bzl_pkg_file);
+      if !outputs_contain_crates_bzl_build_file {
+        file_outputs.push(FileOutputs {
+          path: crates_bzl_pkg_file,
+          contents: self
+            .internal_renderer
+            .render("templates/partials/header.template", &tera::Context::new())?,
+        });
+      }
+    }
+
     for package in crate_contexts {
       let rendered_crate_build_file =
         self
@@ -369,16 +423,22 @@ impl BuildRenderer for BazelRenderer {
 
     file_outputs.extend(self.render_aliases(planned_build, render_details, true)?);
 
-    let bzl_fetch_file_path = path_prefix.as_path().join("crates.bzl");
+    let crates_bzl_file_path = path_prefix.as_path().join("crates.bzl");
     let rendered_bzl_fetch_file = self
-      .render_bzl_fetch(&workspace_context, &crate_contexts)
+      .render_crates_bzl(
+        &workspace_context,
+        &crate_contexts,
+        &bazel_package_name(render_details),
+        /*is_remote_genmode=*/ true,
+        render_details.experimental_api,
+      )
       .map_err(|e| RazeError::Rendering {
         crate_name_opt: None,
         message: unwind_tera_error!(e),
       })?;
 
     file_outputs.push(FileOutputs {
-      path: bzl_fetch_file_path,
+      path: crates_bzl_file_path,
       contents: rendered_bzl_fetch_file,
     });
 
@@ -428,6 +488,7 @@ mod tests {
       package_aliases_dir: "cargo".to_string(),
       vendored_buildfile_name: buildfile_suffix.to_owned(),
       bazel_root: PathBuf::from("/some/bazel/root"),
+      experimental_api: true,
     }
   }
 
@@ -468,8 +529,10 @@ mod tests {
       },
       targeted_deps: Vec::new(),
       workspace_member_dependents: Vec::new(),
+      workspace_member_dev_dependents: Vec::new(),
       is_workspace_member_dependency: false,
       is_binary_dependency: false,
+      is_proc_macro: false,
       workspace_path_to_crate: "@raze__test_binary__1_1_1//".to_owned(),
       targets: vec![BuildableTarget {
         name: "some_binary".to_owned(),
@@ -514,8 +577,10 @@ mod tests {
       },
       targeted_deps: Vec::new(),
       workspace_member_dependents: Vec::new(),
+      workspace_member_dev_dependents: Vec::new(),
       is_workspace_member_dependency: false,
       is_binary_dependency: false,
+      is_proc_macro: false,
       workspace_path_to_crate: "@raze__test_library__1_1_1//".to_owned(),
       targets: vec![BuildableTarget {
         name: "some_library".to_owned(),
@@ -577,7 +642,9 @@ mod tests {
     assert_that!(
       &file_names,
       contains(vec![
-        "/some/cargo/root/some/crate/cargo/BUILD.bazel".to_string()
+        "/some/bazel/root/./some_render_prefix/BUILD.bazel".to_owned(),
+        "/some/bazel/root/./some_render_prefix/crates.bzl".to_owned(),
+        "/some/cargo/root/some/crate/cargo/BUILD.bazel".to_owned(),
       ])
       .exactly()
     );
@@ -594,8 +661,10 @@ mod tests {
     assert_that!(
       &file_names,
       contains(vec![
-        "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD".to_string(),
-        "/some/cargo/root/some/crate/cargo/BUILD.bazel".to_string(),
+        "/some/bazel/root/./some_render_prefix/BUILD.bazel".to_owned(),
+        "/some/bazel/root/./some_render_prefix/crates.bzl".to_owned(), 
+        "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD".to_owned(),
+        "/some/cargo/root/some/crate/cargo/BUILD.bazel".to_owned(),
       ])
       .exactly()
     );
@@ -615,8 +684,10 @@ mod tests {
     assert_that!(
       &file_names,
       contains(vec![
-        "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD.bazel".to_string(),
-        "/some/cargo/root/some/crate/cargo/BUILD.bazel".to_string(),
+        "/some/bazel/root/./some_render_prefix/BUILD.bazel".to_owned(),
+        "/some/bazel/root/./some_render_prefix/crates.bzl".to_owned(),
+        "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD.bazel".to_owned(),
+        "/some/cargo/root/some/crate/cargo/BUILD.bazel".to_owned(),
       ])
       .exactly()
     );

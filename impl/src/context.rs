@@ -128,6 +128,7 @@ pub struct CrateContext {
   pub features: Vec<String>,
   pub workspace_path_to_crate: String,
   pub workspace_member_dependents: Vec<PathBuf>,
+  pub workspace_member_dev_dependents: Vec<PathBuf>,
   pub is_workspace_member_dependency: bool,
   pub is_binary_dependency: bool,
   pub targets: Vec<BuildableTarget>,
@@ -147,6 +148,9 @@ pub struct CrateContext {
   // The name of the main lib target for this crate (if present).
   // Currently only one such lib can exist per crate.
   pub lib_target_name: Option<String>,
+  // This field tracks whether or not the lib target of `lib_target_name`
+  // is a proc_macro library or not.
+  pub is_proc_macro: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
