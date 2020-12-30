@@ -340,6 +340,8 @@ impl BuildRenderer for BazelRenderer {
       .as_path()
       .join(&render_details.path_prefix);
 
+    file_outputs.extend(self.render_aliases(planned_build, render_details, false)?);
+
     if render_details.experimental_api {
       let crates_bzl_file_path = path_prefix.as_path().join("crates.bzl");
       let rendered_crates_bzl_file = self
@@ -387,8 +389,6 @@ impl BuildRenderer for BazelRenderer {
         contents: final_crate_build_file,
       })
     }
-
-    file_outputs.extend(self.render_aliases(planned_build, render_details, false)?);
 
     Ok(file_outputs)
   }
