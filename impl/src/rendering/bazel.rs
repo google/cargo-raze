@@ -233,7 +233,20 @@ impl BazelRenderer {
           })?
       };
 
-      rendered_alias_build_file += EXPORTS_FILES;
+      // Only the root package will have a `crates.bzl` file to export
+      let is_root_workspace_member = member_path
+        .to_str()
+        // Root workspace paths will are represented by an exmpty string
+        .and_then(|member_path| Some(member_path.is_empty()))
+        .unwrap_or(false);
+      if is_root_workspace_member {
+        // In remote genmode, a `crates.bzl` file will always be rendered. For
+        // vendored genmode, one is only rendered when using the experimental
+        // api so it would otherwise be incorrect to export a nonexistent file.
+        if is_remote_mode || render_details.experimental_api {
+          rendered_alias_build_file += EXPORTS_FILES;
+        }
+      }
 
       file_outputs.push(FileOutputs {
         path: render_details
@@ -327,6 +340,8 @@ impl BuildRenderer for BazelRenderer {
       .as_path()
       .join(&render_details.path_prefix);
 
+    file_outputs.extend(self.render_aliases(planned_build, render_details, false)?);
+
     if render_details.experimental_api {
       let crates_bzl_file_path = path_prefix.as_path().join("crates.bzl");
       let rendered_crates_bzl_file = self
@@ -347,17 +362,10 @@ impl BuildRenderer for BazelRenderer {
       });
 
       // Ensure there is always a `BUILD.bazel` file to accompany `crates.bzl`
-      let crates_bzl_pkg_file = path_prefix.as_path().join("BUILD.bazel");
-      let outputs_contain_crates_bzl_build_file = file_outputs
-        .iter()
-        .any(|output| output.path == crates_bzl_pkg_file);
-      if !outputs_contain_crates_bzl_build_file {
-        file_outputs.push(FileOutputs {
-          path: crates_bzl_pkg_file,
-          contents: self
-            .internal_renderer
-            .render("templates/partials/header.template", &tera::Context::new())?,
-        });
+      if let Some(rendered_output) =
+        self.render_crates_bzl_package_file(&path_prefix, &file_outputs)?
+      {
+        file_outputs.push(rendered_output);
       }
     }
 
@@ -381,8 +389,6 @@ impl BuildRenderer for BazelRenderer {
         contents: final_crate_build_file,
       })
     }
-
-    file_outputs.extend(self.render_aliases(planned_build, render_details, false)?);
 
     Ok(file_outputs)
   }
