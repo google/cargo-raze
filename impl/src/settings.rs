@@ -33,7 +33,11 @@ pub type CrateSettingsPerVersion = HashMap<VersionReq, CrateSettings>;
 /// The configuration settings for `cargo-raze`, included in a projects Cargo metadata
 #[derive(Debug, Clone, Deserialize)]
 pub struct RazeSettings {
-  /// The path to the Cargo.toml working directory.
+  /// The path to write BUILD file outputs to.
+  ///
+  /// This may be a workspace-relative path (e.g. `//foo/bar`) or a path relative to the `Cargo.toml` file's directory
+  /// (e.g. if the Cargo metadata file is `//foo:Cargo.toml`, this could be `third_party` to put
+  /// outputs in `//foo/third_party`.)
   pub workspace_path: String,
 
   /// The relative path within each workspace member directory where aliases the member's dependencies should be rendered.
@@ -44,7 +48,7 @@ pub struct RazeSettings {
   /// as the Cargo.toml file to be overwritten.
   #[serde(default = "default_package_aliases_dir")]
   pub package_aliases_dir: String,
-  
+
   /// If true, package alises will be rendered based on the functionality described by `package_aliases_dir`.
   #[serde(default = "default_render_package_aliases")]
   pub render_package_aliases: bool,
@@ -462,7 +466,7 @@ struct RawRazeSettings {
   #[serde(default)]
   pub vendor_dir: Option<String>,
   #[serde(default)]
-  pub experimental_api: Option<bool>
+  pub experimental_api: Option<bool>,
 }
 
 impl RawRazeSettings {
@@ -485,7 +489,6 @@ impl RawRazeSettings {
   }
 
   fn print_notices_and_warnings(&self) {
-
     if self.target.is_some() {
       eprintln!(
         "WARNING: `[*.raze.target]` is deprecated. Please update your project to use \
