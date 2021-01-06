@@ -432,11 +432,11 @@ impl RazeMetadataFetcher {
         let mut src_dirnames: Vec<String> = Vec::new();
 
         for (name, info) in binary_dep_info.iter() {
-          let version = info.req().to_string();
-          let src_dir = self.fetch_crate_src(cargo_dir.as_ref(), &name, &version)?;
+          let version = info.req();
+          let src_dir = self.fetch_crate_src(cargo_dir.as_ref(), &name, version)?;
           checksums.insert(
-            package_ident(&name, &version),
-            self.fetch_crate_checksum(&name, &version)?,
+            package_ident(name, version),
+            self.fetch_crate_checksum(name, version)?,
           );
           if let Some(dirname) = src_dir.file_name() {
             if let Some(dirname_str) = dirname.to_str() {
@@ -613,7 +613,7 @@ pub mod tests {
 
     // Always render basic metadata
     fetcher.set_metadata_fetcher(Box::new(DummyCargoMetadataFetcher {
-      metadata_template: Some("basic_metadata.json.template".to_string()),
+      metadata_template: Some(templates::BASIC_METADATA.to_string()),
     }));
 
     fetcher.fetch_metadata(&files, None, None).unwrap()

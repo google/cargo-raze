@@ -131,7 +131,7 @@ mod tests {
   #[test]
   fn test_plan_build_minimum_workspace_dependency() {
     let planned_build_res =
-      BuildPlannerImpl::new(dummy_modified_metadata(), dummy_raze_settings()).plan_build(Some(
+      BuildPlannerImpl::new(template_raze_metadata(templates::DUMMY_MODIFIED_METADATA), dummy_raze_settings()).plan_build(Some(
         PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
       ));
 
@@ -196,7 +196,7 @@ mod tests {
     settings.genmode = GenMode::Vendored;
 
     let planner = BuildPlannerImpl::new(
-      dummy_workspace_crate_metadata("basic_metadata.json.template"),
+      dummy_workspace_crate_metadata(templates::BASIC_METADATA),
       settings,
     );
     // N.B. This will fail if we don't correctly ignore workspace crates.
@@ -213,7 +213,7 @@ mod tests {
     settings.genmode = GenMode::Remote;
 
     let planner = BuildPlannerImpl::new(
-      dummy_workspace_crate_metadata("plan_build_produces_aliased_dependencies.json.template"),
+      dummy_workspace_crate_metadata(templates::PLAN_BUILD_PRODUCES_ALIASED_DEPENDENCIES),
       settings,
     );
     // N.B. This will fail if we don't correctly ignore workspace crates.
@@ -258,7 +258,7 @@ mod tests {
     settings.genmode = GenMode::Remote;
 
     let planner = BuildPlannerImpl::new(
-      dummy_workspace_crate_metadata("plan_build_produces_proc_macro_dependencies.json.template"),
+      dummy_workspace_crate_metadata(templates::PLAN_BUILD_PRODUCES_PROC_MACRO_DEPENDENCIES),
       settings,
     );
     let planned_build = planner
@@ -298,7 +298,7 @@ mod tests {
 
     let planner = BuildPlannerImpl::new(
       dummy_workspace_crate_metadata(
-        "plan_build_produces_build_proc_macro_dependencies.json.template",
+        templates::PLAN_BUILD_PRODUCES_BUILD_PROC_MACRO_DEPENDENCIES,
       ),
       settings,
     );
@@ -336,7 +336,7 @@ mod tests {
   fn test_subplan_produces_crate_root_with_forward_slash() {
     let planner = BuildPlannerImpl::new(
       dummy_workspace_crate_metadata(
-        "subplan_produces_crate_root_with_forward_slash.json.template",
+        templates::SUBPLAN_PRODUCES_CRATE_ROOT_WITH_FORWARD_SLASH,
       ),
       dummy_raze_settings(),
     );
@@ -360,9 +360,9 @@ mod tests {
     // than the standard metadata. So we use a generated template to represent that state.
     let dummy_metadata_fetcher = DummyCargoMetadataFetcher {
       metadata_template: if is_remote_genmode {
-        Some("dummy_binary_dependency_remote.json.template".to_string())
+        Some(templates::DUMMY_BINARY_DEPENDENCY_REMOTE.to_string())
       } else {
-        Some("basic_metadata.json.template".to_string())
+        Some(templates::BASIC_METADATA.to_string())
       },
     };
     fetcher.set_metadata_fetcher(Box::new(dummy_metadata_fetcher));
@@ -592,7 +592,7 @@ mod tests {
     };
 
     let planner = BuildPlannerImpl::new(
-      dummy_workspace_crate_metadata("semver_matching.json.template"),
+      dummy_workspace_crate_metadata(templates::SEMVER_MATCHING),
       settings,
     );
 

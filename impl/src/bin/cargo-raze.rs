@@ -192,7 +192,7 @@ fn fetch_raze_metadata(
     remote_genmode_inputs.override_lockfile,
   )?;
 
-  checks::check_metadata(&raze_metadata.metadata, &settings, &cargo_raze_working_dir)?;
+  checks::check_metadata(&raze_metadata, &settings, &cargo_raze_working_dir)?;
   Ok(raze_metadata)
 }
 
@@ -287,7 +287,7 @@ fn write_to_file(path: &Path, contents: &str, verbose: bool) -> Result<()> {
   Ok(())
 }
 
-/* Represents the inputs specific to the Remote genmode. */
+/// Represents the inputs specific to the Remote genmode.
 struct RemoteGenModeInputs<'settings> {
   pub override_lockfile: Option<PathBuf>,
   pub binary_deps: Option<&'settings HashMap<String, cargo_toml::Dependency>>,
