@@ -19,11 +19,8 @@ use spdx::{
   Expression,
 };
 
-/**
- * The list of Bazel-known license types
- *
- * KEEP ORDERED: The order dictates the preference.
- */
+// KEEP ORDERED: The order dictates the preference.
+/// The list of Bazel-known license types
 #[derive(Eq, PartialEq, Ord, PartialOrd, Debug, Hash, Clone)]
 pub enum BazelLicenseType {
   Unencumbered,
@@ -47,9 +44,7 @@ impl BazelLicenseType {
   }
 }
 
-/**
- * A data structure for calculating a crate's license restrictions
- */
+/// A data structure for calculating a crate's license restrictions
 #[derive(Debug)]
 struct BazelSpdxLicense {
   // The name of the license this struct represents
@@ -81,11 +76,9 @@ impl BazelSpdxLicense {
     format!("{} {} {}", expr_str1, operator, expr_str2)
   }
 
-  /**
-   * Takes a BazelSpdxLicense as an argument, and returns a new BazelSpdxLicense based on the more
-   * restrictive license. If both licenses are equally restrictive, self's license is used. The
-   * new BazelSpdxLicense's expression will represent the "AND" of the two expressions.
-   */
+  /// Takes a BazelSpdxLicense as an argument, and returns a new BazelSpdxLicense based on the more
+  /// restrictive license. If both licenses are equally restrictive, self's license is used. The
+  /// new BazelSpdxLicense's expression will represent the "AND" of the two expressions.
   pub fn and(&self, other_license: Self) -> Self {
     let combined_expr = Self::combine_license_expr(self, &other_license, "AND");
     if self.license >= other_license.license {
@@ -103,11 +96,9 @@ impl BazelSpdxLicense {
     }
   }
 
-  /**
-   * Takes a BazelSpdxLicense as an argument, and returns a new BazelSpdxLicense based on the less
-   * restrictive license. If both licenses are equally restrictive, self's license is used. The
-   * new BazelSpdxLicense's expression will represent the "OR" of the two expressions.
-   */
+  /// Takes a BazelSpdxLicense as an argument, and returns a new BazelSpdxLicense based on the less
+  /// restrictive license. If both licenses are equally restrictive, self's license is used. The
+  /// new BazelSpdxLicense's expression will represent the "OR" of the two expressions.
   pub fn or(&self, other_license: Self) -> Self {
     let combined_expr = Self::combine_license_expr(&self, &other_license, "OR");
     if self.license <= other_license.license {
@@ -126,7 +117,7 @@ impl BazelSpdxLicense {
   }
 }
 
-/** Breaks apart a cargo license string and yields the available license types. */
+/// Breaks apart a cargo license string and yields the available license types.
 pub fn get_license_from_str(cargo_license_str: &str) -> LicenseData {
   if cargo_license_str.len() == 0 {
     return LicenseData::default();

@@ -35,7 +35,7 @@ use cargo_metadata::{Metadata, Package, PackageId};
 const MAX_DISPLAYED_MISSING_VENDORED_CRATES: usize = 5;
 const MAX_DISPLAYED_MISSING_RESOLVE_PACKAGES: usize = 5;
 
-/** Ensure that the given Metadata is valid and ready to use for planning. */
+/// Ensure that the given Metadata is valid and ready to use for planning.
 pub fn check_metadata(
   metadata: &Metadata,
   settings: &RazeSettings,
@@ -54,7 +54,7 @@ pub fn check_metadata(
   Ok(())
 }
 
-/** Verifies that all provided packages are vendored (in settings.vendor_dir relative to CWD) */
+/// Verifies that all provided packages are vendored (in settings.vendor_dir relative to CWD)
 fn check_all_vendored(
   metadata: &Metadata,
   settings: &RazeSettings,
@@ -116,7 +116,7 @@ fn vendor_path(bazel_workspace_root: &Path, workspace_path: &str, vendor_dir: &s
     .join(vendor_dir)
 }
 
-/** Returns the packages expected path during current execution. */
+/// Returns the packages expected path during current execution.
 fn expected_vendored_path(
   package: &Package,
   bazel_workspace_root: &Path,
@@ -124,10 +124,7 @@ fn expected_vendored_path(
   vendor_dir: &str,
 ) -> String {
   vendor_path(bazel_workspace_root, workspace_path, vendor_dir)
-    .join(package_ident(
-      &package.name,
-      &package.version.to_string(),
-    ))
+    .join(package_ident(&package.name, &package.version.to_string()))
     .display()
     .to_string()
 }

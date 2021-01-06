@@ -154,7 +154,7 @@ pub fn make_workspace_with_dependency() -> (TempDir, CargoWorkspaceFiles) {
   make_workspace(advanced_toml_contents(), Some(advanced_lock_contents()))
 }
 
-/** A helper stuct for mocking a crates.io remote crate endpoint */
+/// A helper stuct for mocking a crates.io remote crate endpoint
 pub struct MockRemoteCrateInfo<'http_mock_server> {
   // A directory of mock data to pull via a mocked endpoint
   pub data_dir: TempDir,
@@ -162,10 +162,8 @@ pub struct MockRemoteCrateInfo<'http_mock_server> {
   pub endpoints: Vec<MockRef<'http_mock_server>>,
 }
 
-/**
- * Configures the given mock_server (representing a crates.io remote) to return
- * mock responses for the given crate and version .
- */
+/// Configures the given mock_server (representing a crates.io remote) to return
+/// mock responses for the given crate and version .
 pub fn mock_remote_crate<'server>(
   name: &str,
   version: &str,
@@ -236,7 +234,7 @@ pub fn mock_remote_crate<'server>(
   }
 }
 
-/** A helper macro for passing a `crates` to  `mock_crate_index` */
+/// A helper macro for passing a `crates` to  `mock_crate_index`
 pub fn to_index_crates_map(list: Vec<(&str, &str)>) -> HashMap<String, String> {
   list
     .iter()
@@ -244,7 +242,7 @@ pub fn to_index_crates_map(list: Vec<(&str, &str)>) -> HashMap<String, String> {
     .collect()
 }
 
-/** Create a mock cache in a temporary direcotry that contains a set of given crates */
+/// Create a mock cache in a temporary direcotry that contains a set of given crates
 pub fn mock_crate_index(
   crates: &HashMap<String, String>,
   mock_dir: Option<&Path>,
@@ -292,7 +290,7 @@ pub fn mock_crate_index(
   }
 }
 
-/** Generate some basic metadata with an injected mock dependency */
+/// Generate some basic metadata with an injected mock dependency
 pub fn dummy_modified_metadata() -> RazeMetadata {
   let (_dir, files) = make_basic_workspace();
   let (mut fetcher, _server, _index_dir) = dummy_raze_metadata_fetcher();

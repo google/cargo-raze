@@ -14,7 +14,7 @@
 
 use std::fmt;
 
-pub const PLEASE_FILE_A_BUG: &str =
+pub(crate) const PLEASE_FILE_A_BUG: &str =
   "Please file an issue at github.com/google/cargo-raze with details.";
 
 #[derive(Debug)]

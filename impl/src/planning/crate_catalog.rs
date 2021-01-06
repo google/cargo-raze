@@ -27,7 +27,7 @@ use crate::{
   util::package_ident,
 };
 
-/** An entry in the Crate catalog for a single crate. */
+/// An entry in the Crate catalog for a single crate.
 pub struct CrateCatalogEntry {
   // The package metadata for the crate
   pub package: Package,
@@ -62,23 +62,23 @@ impl CrateCatalogEntry {
     }
   }
 
-  /** Yields the name of the default target for this crate (sanitized). */
+  /// Yields the name of the default target for this crate (sanitized).
   #[allow(dead_code)]
   pub fn default_build_target_name(&self) -> &str {
     &self.sanitized_name
   }
 
-  /** Returns a reference to the contained package. */
+  /// Returns a reference to the contained package.
   pub fn package(&self) -> &Package {
     &self.package
   }
 
-  /** Returns whether or not this is a member of the root workspace. */
+  /// Returns whether or not this is a member of the root workspace.
   pub fn is_workspace_crate(&self) -> bool {
     self.is_workspace_crate
   }
 
-  /** Yields the expected location of the build file (relative to execution path). */
+  /// Yields the expected location of the build file (relative to execution path).
   pub fn local_build_path(&self, settings: &RazeSettings) -> Result<String> {
     match settings.genmode {
       GenMode::Remote => Ok(format!("remote/BUILD.{}.bazel", &self.package_ident,)),
@@ -93,7 +93,7 @@ impl CrateCatalogEntry {
     }
   }
 
-  /** Yields the precise path to this dependency for the provided settings. */
+  /// Yields the precise path to this dependency for the provided settings.
   pub fn workspace_path(&self, settings: &RazeSettings) -> Result<String> {
     match settings.genmode {
       GenMode::Remote => Ok(format!(
@@ -120,7 +120,7 @@ impl CrateCatalogEntry {
     }
   }
 
-  /** Emits a complete path to this dependency and default target using the given settings. */
+  /// Emits a complete path to this dependency and default target using the given settings.
   pub fn workspace_path_and_default_target(&self, settings: &RazeSettings) -> Result<String> {
     match settings.genmode {
       GenMode::Remote => Ok(format!(
@@ -151,7 +151,7 @@ impl CrateCatalogEntry {
   }
 }
 
-/** An intermediate structure that contains details about all crates in the workspace. */
+/// An intermediate structure that contains details about all crates in the workspace.
 pub struct CrateCatalog {
   pub metadata: Metadata,
   pub entries: Vec<CrateCatalogEntry>,
@@ -159,7 +159,7 @@ pub struct CrateCatalog {
 }
 
 impl CrateCatalog {
-  /** Produces a CrateCatalog using the package entries from a metadata blob.*/
+  /// Produces a CrateCatalog using the package entries from a metadata blob.
   pub fn new(metadata: &Metadata) -> Result<Self> {
     let resolve = metadata
       .resolve
@@ -208,7 +208,7 @@ impl CrateCatalog {
     })
   }
 
-  /** Finds and returns the catalog entry with the given package id if present. */
+  /// Finds and returns the catalog entry with the given package id if present.
   pub fn entry_for_package_id(&self, package_id: &PackageId) -> Option<&CrateCatalogEntry> {
     self
       .package_id_to_entries_idx

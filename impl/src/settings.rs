@@ -30,116 +30,90 @@ use std::{
 
 pub type CrateSettingsPerVersion = HashMap<VersionReq, CrateSettings>;
 
-/** The configuration settings for `cargo-raze`, included in a projects Cargo metadata */
+/// The configuration settings for `cargo-raze`, included in a projects Cargo metadata
 #[derive(Debug, Clone, Deserialize)]
 pub struct RazeSettings {
-  /**
-   * The path to the Cargo.toml working directory.
-   */
+  /// The path to the Cargo.toml working directory.
   pub workspace_path: String,
 
-  /**
-   * The relative path within each workspace member directory where aliases the member's dependencies should be rendered.
-   *
-   * By default, a new directory will be created next to the `Cargo.toml` file named `cargo` for users to refer to them
-   * as. For example, the toml file `//my/package:Cargo.toml`  will have aliases rendered as something like
-   * `//my/package/cargo:dependency`. Note that setting this value to `"."` will cause the BUILD file in the same package
-   * as the Cargo.toml file to be overwritten.
-   */
+  /// The relative path within each workspace member directory where aliases the member's dependencies should be rendered.
+  ///
+  /// By default, a new directory will be created next to the `Cargo.toml` file named `cargo` for users to refer to them
+  /// as. For example, the toml file `//my/package:Cargo.toml`  will have aliases rendered as something like
+  /// `//my/package/cargo:dependency`. Note that setting this value to `"."` will cause the BUILD file in the same package
+  /// as the Cargo.toml file to be overwritten.
   #[serde(default = "default_package_aliases_dir")]
   pub package_aliases_dir: String,
-
-  /**
-   * If true, package alises will be rendered based on the functionality described by `package_aliases_dir`. 
-   */
+  
+  /// If true, package alises will be rendered based on the functionality described by `package_aliases_dir`.
   #[serde(default = "default_render_package_aliases")]
   pub render_package_aliases: bool,
 
-  /**
-   * The platform target to generate BUILD rules for.
-   *
-   * This comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
-   */
+  /// The platform target to generate BUILD rules for.
+  ///
+  /// This comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
   #[serde(default)]
   pub target: Option<String>,
 
-  /**
-   * A list of targets to generate BUILD rules for.
-   *
-   * Each item comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
-   */
+  /// A list of targets to generate BUILD rules for.
+  ///
+  /// Each item comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
   #[serde(default)]
   pub targets: Option<Vec<String>>,
 
-  /**
-   * A list of binary dependencies.
-   */
+  /// A list of binary dependencies.
   #[serde(default)]
   pub binary_deps: HashMap<String, cargo_toml::Dependency>,
 
-  /** Any crate-specific configuration. See CrateSettings for details. */
+  /// Any crate-specific configuration. See CrateSettings for details.
   #[serde(default)]
   pub crates: HashMap<String, CrateSettingsPerVersion>,
 
-  /**
-   * Prefix for generated Bazel workspaces (from workspace_rules)
-   *
-   * This is only useful with remote genmode. It prefixes the names of the workspaces for
-   * dependencies (@PREFIX_crateName_crateVersion) as well as the name of the repository function
-   * generated in crates.bzl (PREFIX_fetch_remote_crates()).
-   *
-   * TODO(acmcarther): Does this have a non-bazel analogue?
-   */
+  // TODO(acmcarther): Does this have a non-bazel analogue?
+  /// Prefix for generated Bazel workspaces (from workspace_rules)
+  ///
+  /// This is only useful with remote genmode. It prefixes the names of the workspaces for
+  /// dependencies (@PREFIX_crateName_crateVersion) as well as the name of the repository function
+  /// generated in crates.bzl (PREFIX_fetch_remote_crates()).
   #[serde(default = "default_raze_settings_field_gen_workspace_prefix")]
   pub gen_workspace_prefix: String,
 
-  /** How to generate the dependencies. See GenMode for details. */
+  /// How to generate the dependencies. See GenMode for details.
   #[serde(default = "default_raze_settings_field_genmode")]
   pub genmode: GenMode,
 
-  /**
-   * The name of the output BUILD files when `genmode == "Vendored"`
-   * Default: BUILD.bazel
-   */
+  /// The name of the output BUILD files when `genmode == "Vendored"`
+  ///
+  /// Default: BUILD.bazel
   #[serde(default = "default_raze_settings_field_output_buildfile_suffix")]
   pub output_buildfile_suffix: String,
 
-  /**
-   * Default value for per-crate gen_buildrs setting if it's not explicitly for a crate.
-   *
-   * See that setting for more information.
-   */
+  /// Default value for per-crate gen_buildrs setting if it's not explicitly for a crate.
+  ///
+  /// See [crate::settings::CrateSettings::gen_buildrs] for more information.
   #[serde(default = "default_raze_settings_field_gen_buildrs")]
   pub default_gen_buildrs: bool,
 
-  /**
-   * The default crates registry.
-   *
-   * The patterns `{crate}` and `{version}` will be used to fill
-   * in the package's name (eg: rand) and version (eg: 0.7.1).
-   * See https://doc.rust-lang.org/cargo/reference/registries.html#index-format
-   */
+  /// The default crates registry.
+  ///
+  /// The patterns `{crate}` and `{version}` will be used to fill
+  /// in the package's name (eg: rand) and version (eg: 0.7.1).
+  /// See https://doc.rust-lang.org/cargo/reference/registries.html#index-format
   #[serde(default = "default_raze_settings_registry")]
   pub registry: String,
 
-  /**
-   * The index url to use for Binary dependencies
-   */
+  /// The index url to use for Binary dependencies
   #[serde(default = "default_raze_settings_index_url")]
   pub index_url: String,
 
-  /**
-   * The name of the [rules_rust](https://github.com/bazelbuild/rules_rust) repository
-   * used in the generated workspace.
-   */
+  /// The name of the [rules_rust](https://github.com/bazelbuild/rules_rust) repository
+  /// used in the generated workspace.
   #[serde(default = "default_raze_settings_rust_rules_workspace_name")]
   pub rust_rules_workspace_name: String,
 
-  /**
-   * The expected path relative to the `Cargo.toml` file where vendored sources can
-   * be found. This should match the path passed to the `cargo vendor` command. eg:
-   * `cargo vendor -q --versioned-dirs "cargo/vendor"
-   */
+  /// The expected path relative to the `Cargo.toml` file where vendored sources can
+  /// be found. This should match the path passed to the `cargo vendor` command. eg:
+  /// `cargo vendor -q --versioned-dirs "cargo/vendor"
   #[serde(default = "default_raze_settings_vendor_dir")]
   pub vendor_dir: String,
 
@@ -151,154 +125,122 @@ pub struct RazeSettings {
   pub experimental_api: bool,
 }
 
-/** Override settings for individual crates (as part of `RazeSettings`). */
+/// Override settings for individual crates (as part of `RazeSettings`).
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct CrateSettings {
-  /**
-   * Dependencies to be added to a crate.
-   *
-   * Importantly, the format of dependency references depends on the genmode.
-   * Remote: @{gen_workspace_prefix}__{dep_name}__{dep_version_sanitized}/:{dep_name}
-   * Vendored: //{workspace_path}/vendor/{dep_name}-{dep_version}:{dep_name}
-   *
-   * In addition, the added deps must be accessible from a remote workspace under Remote GenMode.
-   * Usually, this means they _also_ need to be remote, but a "local" build path prefixed with
-   * "@", in the form "@//something_local" may work.
-   */
+  /// Dependencies to be added to a crate.
+  ///
+  /// Importantly, the format of dependency references depends on the genmode.
+  /// Remote: @{gen_workspace_prefix}__{dep_name}__{dep_version_sanitized}/:{dep_name}
+  /// Vendored: //{workspace_path}/vendor/{dep_name}-{dep_version}:{dep_name}
+  ///
+  /// In addition, the added deps must be accessible from a remote workspace under Remote GenMode.
+  /// Usually, this means they _also_ need to be remote, but a "local" build path prefixed with
+  /// "@", in the form "@//something_local" may work.
   #[serde(default)]
   pub additional_deps: Vec<String>,
 
-  /**
-   * Dependencies to be removed from a crate, in the form "{dep-name}-{dep-version}"
-   *
-   * This is applied during Cargo analysis, so it uses Cargo-style labeling
-   */
+  /// Dependencies to be removed from a crate, in the form "{dep-name}-{dep-version}"
+  ///
+  /// This is applied during Cargo analysis, so it uses Cargo-style labeling
   #[serde(default)]
   pub skipped_deps: Vec<String>,
 
-  /**
-   * Library targets that should be aliased in the root BUILD file.
-   *
-   * This is useful to facilitate using binary utility crates, such as bindgen, as part of genrules.
-   */
+  /// Library targets that should be aliased in the root BUILD file.
+  ///
+  /// This is useful to facilitate using binary utility crates, such as bindgen, as part of genrules.
   #[serde(default)]
   pub extra_aliased_targets: Vec<String>,
 
-  /** Flags to be added to the crate compilation process, in the form "--flag". */
+  /// Flags to be added to the crate compilation process, in the form "--flag".
   #[serde(default)]
   pub additional_flags: Vec<String>,
 
-  /** Environment variables to be added to the crate compilation process. */
+  /// Environment variables to be added to the crate compilation process.
   #[serde(default)]
   pub additional_env: HashMap<String, String>,
 
-  /**
-   * Whether or not to generate the build script that goes with this crate.
-   *
-   * Many build scripts will not function, as they will still be built hermetically. However, build
-   * scripts that merely generate files into OUT_DIR may be fully functional.
-   */
+  /// Whether or not to generate the build script that goes with this crate.
+  ///
+  /// Many build scripts will not function, as they will still be built hermetically. However, build
+  /// scripts that merely generate files into OUT_DIR may be fully functional.
   #[serde(default = "default_crate_settings_field_gen_buildrs")]
   pub gen_buildrs: Option<bool>,
 
-  /**
-   * The verbatim `data` clause to be included for the generated build targets.
-   *
-   * N.B. Build scripts are always provided all crate files for their `data` attr.
-   */
+  // N.B. Build scripts are always provided all crate files for their `data` attr.
+  /// The verbatim `data` clause to be included for the generated build targets.
   #[serde(default = "default_crate_settings_field_data_attr")]
   pub data_attr: Option<String>,
 
-  /**
-   * The verbatim `compile_data` clause to be included for the generated build targets.
-   */
+  /// The verbatim `compile_data` clause to be included for the generated build targets.
   #[serde(default)]
   pub compile_data_attr: Option<String>,
 
-  /**
-   * Additional environment variables to add when running the build script.
-   */
+  /// Additional environment variables to add when running the build script.
   #[serde(default)]
   pub buildrs_additional_environment_variables: HashMap<String, String>,
 
-  /**
-   * The arguments given to the patch tool.
-   *
-   * Defaults to `-p0`, however `-p1` will usually be needed for patches generated by git.
-   *
-   * If multiple `-p` arguments are specified, the last one will take effect.
-   * If arguments other than `-p` are specified, Bazel will fall back to use patch command line
-   * tool instead of the Bazel-native patch implementation.
-   *
-   * When falling back to `patch` command line tool and `patch_tool` attribute is not specified,
-   * `patch` will be used.
-   */
+  /// The arguments given to the patch tool.
+  ///
+  /// Defaults to `-p0`, however `-p1` will usually be needed for patches generated by git.
+  ///
+  /// If multiple `-p` arguments are specified, the last one will take effect.
+  /// If arguments other than `-p` are specified, Bazel will fall back to use patch command line
+  /// tool instead of the Bazel-native patch implementation.
+  ///
+  /// When falling back to `patch` command line tool and `patch_tool` attribute is not specified,
+  /// `patch` will be used.
   #[serde(default)]
   pub patch_args: Vec<String>,
 
-  /**
-   * Sequence of Bash commands to be applied on Linux/Macos after patches are applied.
-   */
+  /// Sequence of Bash commands to be applied on Linux/Macos after patches are applied.
   #[serde(default)]
   pub patch_cmds: Vec<String>,
 
-  /**
-   * Sequence of Powershell commands to be applied on Windows after patches are applied.
-   *
-   * If this attribute is not set, patch_cmds will be executed on Windows, which requires Bash
-   * binary to exist.
-   */
+  /// Sequence of Powershell commands to be applied on Windows after patches are applied.
+  ///
+  /// If this attribute is not set, patch_cmds will be executed on Windows, which requires Bash
+  /// binary to exist.
   #[serde(default)]
   pub patch_cmds_win: Vec<String>,
 
-  /**
-   * The `patch(1)` utility to use.
-   *
-   * If this is specified, Bazel will use the specifed patch tool instead of the Bazel-native patch
-   * implementation.
-   */
+  /// The `patch(1)` utility to use.
+  ///
+  /// If this is specified, Bazel will use the specifed patch tool instead of the Bazel-native patch
+  /// implementation.
   #[serde(default)]
   pub patch_tool: Option<String>,
 
-  /**
-   * A list of files that are to be applied as patches after extracting the archive.
-   *
-   * By default, it uses the Bazel-native patch implementation which doesn't support fuzz match and
-   * binary patch, but Bazel will fall back to use patch command line tool if `patch_tool`
-   * attribute is specified or there are arguments other than `-p` in `patch_args` attribute.
-   */
+  /// A list of files that are to be applied as patches after extracting the archive.
+  ///
+  /// By default, it uses the Bazel-native patch implementation which doesn't support fuzz match and
+  /// binary patch, but Bazel will fall back to use patch command line tool if `patch_tool`
+  /// attribute is specified or there are arguments other than `-p` in `patch_args` attribute.
   #[serde(default)]
   pub patches: Vec<String>,
 
-  /**
-   * Path to a file to be included as part of the generated BUILD file.
-   *
-   * For example, some crates include non-Rust code typically built through a build.rs script. They
-   * can be made compatible by manually writing appropriate Bazel targets, and including them into
-   * the crate through a combination of additional_build_file and additional_deps.
-   *
-   * Note: This field should be a path to a file relative to the Cargo workspace root. For more
-   * context, see https://doc.rust-lang.org/cargo/reference/workspaces.html#root-package
-   */
+  /// Path to a file to be included as part of the generated BUILD file.
+  ///
+  /// For example, some crates include non-Rust code typically built through a build.rs script. They
+  /// can be made compatible by manually writing appropriate Bazel targets, and including them into
+  /// the crate through a combination of additional_build_file and additional_deps.
+  ///
+  /// Note: This field should be a path to a file relative to the Cargo workspace root. For more
+  /// context, see https://doc.rust-lang.org/cargo/reference/workspaces.html#root-package
   #[serde(default)]
   pub additional_build_file: Option<PathBuf>,
 }
 
-/**
- * Describes how dependencies should be managed in tree. Options are {Remote, Vendored}.
- *
- * Remote:
- * This mode assumes that files are not locally vendored, and generates a workspace-level
- * function that can bring them in.
- *
- * Vendored:
- * This mode assumes that files are vendored (into vendor/), and generates BUILD files
- * accordingly
- */
+/// Describes how dependencies should be managed in tree.
 #[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
 pub enum GenMode {
+  /// This mode assumes that files are vendored (into vendor/), and generates BUILD files
+  /// accordingly
   Vendored,
+  /// This mode assumes that files are not locally vendored, and generates a workspace-level
+  /// function that can bring them in.
   Remote,
+  /// A representation of a GenMode that has not yet been specified
   Unspecified,
 }
 
@@ -379,14 +321,14 @@ fn default_render_package_aliases() -> bool {
   true
 }
 
-/** Formats a registry url to include the name and version fo the target package */
+/// Formats a registry url to include the name and version fo the target package
 pub fn format_registry_url(registry_url: &str, name: &str, version: &str) -> String {
   registry_url
     .replace("{crate}", name)
     .replace("{version}", version)
 }
 
-/** Check that the the `additional_build_file` represents a path to a file from the cargo workspace root */
+/// Check that the the `additional_build_file` represents a path to a file from the cargo workspace root
 fn validate_crate_setting_additional_build_file(
   additional_build_file: &Path,
   cargo_workspace_root: &Path,
@@ -403,7 +345,7 @@ fn validate_crate_setting_additional_build_file(
   Ok(())
 }
 
-/** Ensures crate settings associatd with the parsed [RazeSettings](crate::settings::RazeSettings) have valid crate settings */
+/// Ensures crate settings associatd with the parsed [RazeSettings](crate::settings::RazeSettings) have valid crate settings
 fn validate_crate_settings(
   settings: &RazeSettings,
   cargo_workspace_root: &Path,
@@ -446,7 +388,7 @@ fn validate_crate_settings(
   Ok(())
 }
 
-/** Verifies that the provided settings make sense. */
+/// Verifies that the provided settings make sense.
 fn validate_settings(
   settings: &mut RazeSettings,
   cargo_workspace_path: &Path,
@@ -482,11 +424,10 @@ fn validate_settings(
   Ok(())
 }
 
-/** The intermediate configuration settings for `cargo-raze`, included in a project's Cargo metadata
- *
- * Note that this struct should contain only `Option` and match all public fields of
- * [`RazeSettings`](crate::settings::RazeSettings)
- */
+/// The intermediate configuration settings for `cargo-raze`, included in a project's Cargo metadata
+///
+/// Note that this struct should contain only `Option` and match all public fields of
+/// [RazeSettings](crate::settings::RazeSettings)
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct RawRazeSettings {
@@ -525,7 +466,7 @@ struct RawRazeSettings {
 }
 
 impl RawRazeSettings {
-  /** Checks whether or not the settings have non-package specific settings specified */
+  /// Checks whether or not the settings have non-package specific settings specified
   fn contains_primary_options(&self) -> bool {
     self.workspace_path.is_some()
       || self.package_aliases_dir.is_some()
@@ -571,7 +512,7 @@ impl RawRazeSettings {
   }
 }
 
-/** Grows a list with duplicate keys between two maps */
+/// Grows a list with duplicate keys between two maps
 fn extend_duplicates<K: Hash + Eq + Clone, V>(
   extended_list: &mut Vec<K>,
   main_map: &HashMap<K, V>,
@@ -593,7 +534,7 @@ fn extend_duplicates<K: Hash + Eq + Clone, V>(
   );
 }
 
-/** Parse [`RazeSettings`](crate::settings::RazeSettings) from workspace metadata */
+/// Parse [RazeSettings](crate::settings::RazeSettings) from workspace metadata
 fn parse_raze_settings_workspace(
   metadata_value: &serde_json::value::Value,
   metadata: &Metadata,
@@ -660,7 +601,7 @@ fn parse_raze_settings_workspace(
   Ok(settings)
 }
 
-/** Parse [`RazeSettings`](crate::settings::RazeSettings) from a project's root package's metadata */
+/// Parse [RazeSettings](crate::settings::RazeSettings) from a project's root package's metadata
 fn parse_raze_settings_root_package(
   metadata_value: &serde_json::value::Value,
   root_package: &Package,
@@ -674,7 +615,7 @@ fn parse_raze_settings_root_package(
   });
 }
 
-/** Parse [`RazeSettings`](crate::settings::RazeSettings) from any workspace member's metadata */
+/// Parse [RazeSettings](crate::settings::RazeSettings) from any workspace member's metadata
 fn parse_raze_settings_any_package(metadata: &Metadata) -> Result<RazeSettings> {
   let mut settings_packages = Vec::new();
 
@@ -705,13 +646,13 @@ fn parse_raze_settings_any_package(metadata: &Metadata) -> Result<RazeSettings> 
     .with_context(|| format!("Failed to deserialize raze settings: {:?}", settings_value))
 }
 
-/** A struct only to deserialize a Cargo.toml to in search of the legacy syntax for [`RazeSettings`](crate::settings::RazeSettings) */
+/// A struct only to deserialize a Cargo.toml to in search of the legacy syntax for [RazeSettings](crate::settings::RazeSettings)
 #[derive(Debug, Clone, Deserialize)]
 pub struct LegacyCargoToml {
   pub raze: RazeSettings,
 }
 
-/** Parse [`RazeSettings`](crate::settings::RazeSettings) from a Cargo.toml file using the legacy syntax `[raze]` */
+/// Parse [RazeSettings](crate::settings::RazeSettings) from a Cargo.toml file using the legacy syntax `[raze]`
 fn parse_raze_settings_legacy(metadata: &Metadata) -> Result<RazeSettings> {
   let root_toml = metadata.workspace_root.join("Cargo.toml");
   let toml_contents = std::fs::read_to_string(&root_toml)?;
@@ -724,7 +665,7 @@ fn parse_raze_settings_legacy(metadata: &Metadata) -> Result<RazeSettings> {
   Ok(data.raze)
 }
 
-/** Parses raze settings from the contents of a `Cargo.toml` file */
+/// Parses raze settings from the contents of a `Cargo.toml` file
 fn parse_raze_settings(metadata: &Metadata) -> Result<RazeSettings> {
   // Workspace takes precedence
   let workspace_level_settigns = metadata.workspace_metadata.get("raze");
@@ -752,7 +693,7 @@ fn parse_raze_settings(metadata: &Metadata) -> Result<RazeSettings> {
   parse_raze_settings_any_package(&metadata)
 }
 
-/** A cargo command wrapper for gathering cargo metadata used to parse [RazeSettings](crate::settings::RazeSettings) */
+/// A cargo command wrapper for gathering cargo metadata used to parse [RazeSettings](crate::settings::RazeSettings)
 pub struct SettingsMetadataFetcher {
   pub cargo_bin_path: PathBuf,
 }
@@ -784,7 +725,7 @@ impl MetadataFetcher for SettingsMetadataFetcher {
   }
 }
 
-/** Load settings from a given Cargo manifest */
+/// Load settings from a given Cargo manifest
 pub fn load_settings_from_manifest<T: AsRef<Path>>(
   cargo_toml_path: T,
   cargo_bin_path: Option<String>,
@@ -816,7 +757,7 @@ pub fn load_settings_from_manifest<T: AsRef<Path>>(
   load_settings(&metadata)
 }
 
-/** Load settings used to configure the functionality of Cargo Raze */
+/// Load settings used to configure the functionality of Cargo Raze
 pub fn load_settings(metadata: &Metadata) -> Result<RazeSettings, RazeError> {
   let mut settings = {
     let result = parse_raze_settings(metadata);

@@ -29,7 +29,7 @@ use crate::{
 use crate_catalog::CrateCatalog;
 use subplanners::WorkspaceSubplanner;
 
-/** A ready-to-be-rendered build, containing renderable context for each crate. */
+/// A ready-to-be-rendered build, containing renderable context for each crate.
 #[derive(Debug)]
 pub struct PlannedBuild {
   pub workspace_context: WorkspaceContext,
@@ -37,23 +37,21 @@ pub struct PlannedBuild {
   pub lockfile: Option<Lockfile>,
 }
 
-/** An entity that can produce an organized, planned build ready to be rendered. */
+/// An entity that can produce an organized, planned build ready to be rendered.
 pub trait BuildPlanner {
-  /**
-   * A function that returns a completely planned build using internally generated metadata, along
-   * with settings, platform specifications, and critical file locations.
-   */
+  /// A function that returns a completely planned build using internally generated metadata, along
+  /// with settings, platform specifications, and critical file locations.
   fn plan_build(&self, platform_details: Option<PlatformDetails>) -> Result<PlannedBuild>;
 }
 
-/** The default implementation of a `BuildPlanner`. */
+/// The default implementation of a `BuildPlanner`.
 pub struct BuildPlannerImpl {
   metadata: RazeMetadata,
   settings: RazeSettings,
 }
 
 impl BuildPlanner for BuildPlannerImpl {
-  /** Retrieves metadata for local workspace and produces a build plan. */
+  /// Retrieves metadata for local workspace and produces a build plan.
   fn plan_build(&self, platform_details: Option<PlatformDetails>) -> Result<PlannedBuild> {
     // Create one combined metadata object which includes all dependencies and binaries
     let crate_catalog = CrateCatalog::new(&self.metadata.metadata)?;
