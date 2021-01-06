@@ -23,10 +23,7 @@ use crate::{
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
 };
 
-use std::{
-  error::Error,
-  path::Path,
-};
+use std::{error::Error, path::Path};
 
 macro_rules! unwind_tera_error {
   ($err:ident) => {{
@@ -266,8 +263,9 @@ impl BazelRenderer {
     file_outputs: &Vec<FileOutputs>,
   ) -> Result<Option<FileOutputs>> {
     let crates_bzl_pkg_file = path_prefix.join("BUILD.bazel");
-    let outputs_contain_crates_bzl_build_file =
-      file_outputs.iter().any(|output| output.path == crates_bzl_pkg_file);
+    let outputs_contain_crates_bzl_build_file = file_outputs
+      .iter()
+      .any(|output| output.path == crates_bzl_pkg_file);
     if outputs_contain_crates_bzl_build_file {
       return Ok(None);
     }
@@ -340,8 +338,6 @@ impl BuildRenderer for BazelRenderer {
       .as_path()
       .join(&render_details.path_prefix);
 
-    file_outputs.extend(self.render_aliases(planned_build, render_details, false)?);
-
     if render_details.experimental_api {
       let crates_bzl_file_path = path_prefix.as_path().join("crates.bzl");
       let rendered_crates_bzl_file = self
@@ -361,12 +357,18 @@ impl BuildRenderer for BazelRenderer {
         contents: rendered_crates_bzl_file,
       });
 
+      if render_details.render_package_aliases {
+        file_outputs.extend(self.render_aliases(planned_build, render_details, false)?);
+      }
+
       // Ensure there is always a `BUILD.bazel` file to accompany `crates.bzl`
       if let Some(rendered_output) =
         self.render_crates_bzl_package_file(&path_prefix, &file_outputs)?
       {
         file_outputs.push(rendered_output);
       }
+    } else {
+      file_outputs.extend(self.render_aliases(planned_build, render_details, false)?);
     }
 
     for package in crate_contexts {
@@ -390,6 +392,7 @@ impl BuildRenderer for BazelRenderer {
       })
     }
 
+    file_outputs.sort();
     Ok(file_outputs)
   }
 
@@ -438,7 +441,9 @@ impl BuildRenderer for BazelRenderer {
       })
     }
 
-    file_outputs.extend(self.render_aliases(planned_build, render_details, true)?);
+    if render_details.render_package_aliases {
+      file_outputs.extend(self.render_aliases(planned_build, render_details, true)?);
+    }
 
     let crates_bzl_file_path = path_prefix.as_path().join("crates.bzl");
     let rendered_bzl_fetch_file = self
@@ -475,6 +480,7 @@ impl BuildRenderer for BazelRenderer {
       file_outputs.push(rendered_output);
     }
 
+    file_outputs.sort();
     Ok(file_outputs)
   }
 }
@@ -507,6 +513,7 @@ mod tests {
       bazel_root: PathBuf::from("/some/bazel/root"),
       rust_rules_workspace_name: "rules_rust".to_owned(),
       experimental_api: true,
+      render_package_aliases: true,
     }
   }
 
@@ -680,7 +687,7 @@ mod tests {
       &file_names,
       contains(vec![
         "/some/bazel/root/./some_render_prefix/BUILD.bazel".to_owned(),
-        "/some/bazel/root/./some_render_prefix/crates.bzl".to_owned(), 
+        "/some/bazel/root/./some_render_prefix/crates.bzl".to_owned(),
         "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD".to_owned(),
         "/some/cargo/root/some/crate/cargo/BUILD.bazel".to_owned(),
       ])

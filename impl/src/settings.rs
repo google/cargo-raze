@@ -50,6 +50,12 @@ pub struct RazeSettings {
   pub package_aliases_dir: String,
 
   /**
+   * If true, package alises will be rendered based on the functionality described by `package_aliases_dir`. 
+   */
+  #[serde(default = "default_render_package_aliases")]
+  pub render_package_aliases: bool,
+
+  /**
    * The platform target to generate BUILD rules for.
    *
    * This comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
@@ -369,6 +375,10 @@ fn default_package_aliases_dir() -> String {
   ".".to_owned()
 }
 
+fn default_render_package_aliases() -> bool {
+  true
+}
+
 /** Formats a registry url to include the name and version fo the target package */
 pub fn format_registry_url(registry_url: &str, name: &str, version: &str) -> String {
   registry_url
@@ -485,6 +495,8 @@ struct RawRazeSettings {
   #[serde(default)]
   pub package_aliases_dir: Option<String>,
   #[serde(default)]
+  pub render_package_aliases: Option<bool>,
+  #[serde(default)]
   pub target: Option<String>,
   #[serde(default)]
   pub targets: Option<Vec<String>>,
@@ -517,6 +529,7 @@ impl RawRazeSettings {
   fn contains_primary_options(&self) -> bool {
     self.workspace_path.is_some()
       || self.package_aliases_dir.is_some()
+      || self.render_package_aliases.is_some()
       || self.target.is_some()
       || self.targets.is_some()
       || self.gen_workspace_prefix.is_some()
@@ -831,6 +844,7 @@ pub mod tests {
     RazeSettings {
       workspace_path: "//cargo".to_owned(),
       package_aliases_dir: "cargo".to_owned(),
+      render_package_aliases: default_render_package_aliases(),
       target: Some("x86_64-unknown-linux-gnu".to_owned()),
       targets: None,
       crates: HashMap::new(),
