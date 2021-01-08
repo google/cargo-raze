@@ -545,10 +545,8 @@ mod tests {
       default_deps: CrateDependencyContext {
         dependencies: Vec::new(),
         proc_macro_dependencies: Vec::new(),
-        data_dependencies: Vec::new(),
         build_dependencies: Vec::new(),
         build_proc_macro_dependencies: Vec::new(),
-        build_data_dependencies: Vec::new(),
         dev_dependencies: Vec::new(),
         aliased_dependencies: Vec::new(),
       },
@@ -593,10 +591,8 @@ mod tests {
       default_deps: CrateDependencyContext {
         dependencies: Vec::new(),
         proc_macro_dependencies: Vec::new(),
-        data_dependencies: Vec::new(),
         build_dependencies: Vec::new(),
         build_proc_macro_dependencies: Vec::new(),
-        build_data_dependencies: Vec::new(),
         dev_dependencies: Vec::new(),
         aliased_dependencies: Vec::new(),
       },
