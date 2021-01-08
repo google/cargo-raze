@@ -53,7 +53,7 @@ pub struct BazelRenderer {
   internal_renderer: Tera,
 }
 
-/** Generate the expected Bazel package name */
+/// Generate the expected Bazel package name
 fn bazel_package_name(render_details: &RenderDetails) -> String {
   if let Some(package_name) = diff_paths(&render_details.cargo_root, &render_details.bazel_root) {
     package_name.display().to_string().replace("\\", "/")
