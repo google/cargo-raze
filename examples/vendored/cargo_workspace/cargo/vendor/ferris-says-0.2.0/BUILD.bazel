@@ -50,13 +50,12 @@ rust_binary(
     version = "0.2.0",
     # buildifier: leave-alone
     deps = [
-        # Binaries get an implicit dependency on their crate's lib
-        ":ferris_says",
         "//vendored/cargo_workspace/cargo/vendor/clap-2.33.3:clap",
         "//vendored/cargo_workspace/cargo/vendor/error-chain-0.10.0:error_chain",
         "//vendored/cargo_workspace/cargo/vendor/smallvec-0.4.5:smallvec",
         "//vendored/cargo_workspace/cargo/vendor/textwrap-0.11.0:textwrap",
         "//vendored/cargo_workspace/cargo/vendor/unicode-width-0.1.8:unicode_width",
+        ":ferris_says",
     ],
 )
 

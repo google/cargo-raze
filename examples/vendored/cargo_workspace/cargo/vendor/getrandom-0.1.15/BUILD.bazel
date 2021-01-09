@@ -119,8 +119,8 @@ rust_library(
     version = "0.1.15",
     # buildifier: leave-alone
     deps = [
-        ":getrandom_build_script",
         "//vendored/cargo_workspace/cargo/vendor/cfg-if-0.1.10:cfg_if",
+        ":getrandom_build_script",
     ] + selects.with_or({
         # cfg(target_os = "wasi")
         (

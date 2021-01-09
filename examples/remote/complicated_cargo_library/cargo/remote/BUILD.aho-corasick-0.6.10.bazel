@@ -52,7 +52,6 @@ rust_binary(
     version = "0.6.10",
     # buildifier: leave-alone
     deps = [
-        # Binaries get an implicit dependency on their crate's lib
         ":aho_corasick",
         "@remote_complicated_cargo_library__memchr__2_3_3//:memchr",
     ],

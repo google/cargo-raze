@@ -78,7 +78,7 @@ rust_library(
     version = "0.4.3",
     # buildifier: leave-alone
     deps = [
-        ":miniz_oxide_build_script",
         "//vendored/cargo_workspace/cargo/vendor/adler-0.2.3:adler",
+        ":miniz_oxide_build_script",
     ],
 )

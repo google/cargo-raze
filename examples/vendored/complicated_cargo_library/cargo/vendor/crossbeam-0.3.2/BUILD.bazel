@@ -50,7 +50,6 @@ rust_binary(
     version = "0.3.2",
     # buildifier: leave-alone
     deps = [
-        # Binaries get an implicit dependency on their crate's lib
         ":crossbeam",
     ],
 )
@@ -75,7 +74,6 @@ rust_binary(
     version = "0.3.2",
     # buildifier: leave-alone
     deps = [
-        # Binaries get an implicit dependency on their crate's lib
         ":crossbeam",
     ],
 )
