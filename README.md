@@ -78,28 +78,10 @@ path = "fake_lib.rs"
 [dependencies]
 log = "=0.3.6"
 
-[workspace.metadata.raze]
-# The path relative path to the Bazel workspace root (location of
-# WORKSPACE.bazel/WORKSPACE file). If no workspace file is found,
-# the current working directory is used.
-workspace_path = "//cargo"
-
-# This causes aliases for dependencies to be rendered in the BUILD
-# file located next to this `Cargo.toml` file.
-package_aliases_dir = "."
-
-# The set of targets to generate BUILD rules for.
-targets = [
-    "x86_64-apple-darwin",
-    "x86_64-pc-windows-msvc",
-    "x86_64-unknown-linux-gnu",
-]
-
-# The two acceptable options are "Remote" and "Vendored" which
-# is used to idnicate whether the user is using a non-vendored or
-# vendored set of dependencies.
-genmode = "Remote"
 ```
+
+Once the standard Cargo.toml is in place, add the `[package.metadata.raze]`
+directives per the next section.
 
 ### Using existing Cargo.toml
 
@@ -112,9 +94,11 @@ files to be used for generating Bazel files
 # Above this line should be the contents of your Cargo.toml file
 
 [package.metadata.raze]
-# The path relative path to the Bazel workspace root (location of
-# WORKSPACE.bazel/WORKSPACE file). If no workspace file is found,
-# the current working directory is used.
+# The path at which to write output files.
+#
+# `cargo raze` will generate Bazel-compatible BUILD files into this path.
+# This can either be a relative path (e.g. "foo/bar"), relative to this
+# Cargo.toml file; or relative to the Bazel workspace root (e.g. "//foo/bar").
 workspace_path = "//cargo"
 
 # This causes aliases for dependencies to be rendered in the BUILD
@@ -129,7 +113,7 @@ targets = [
 ]
 
 # The two acceptable options are "Remote" and "Vendored" which
-# is used to idnicate whether the user is using a non-vendored or
+# is used to indicate whether the user is using a non-vendored or
 # vendored set of dependencies.
 genmode = "Remote"
 ```
@@ -140,7 +124,7 @@ In projects that use [cargo workspaces](cargo_workspaces) uses should organize
 all of their `raze` settings into the `[workspace.metadata.raze]` field in the
 top level `Cargo.toml` file which contains the `[workspace]` definition. These
 settings should be identical to the ones seen in `[package.metadata.raze]` in
-[the previous section](#Using existing Cargo.toml). However, crate settings may still
+[the previous section](#using-existing-cargotoml). However, crate settings may still
 be placed in the `Cargo.toml` files of the workspace memebers:
 
 ```toml
@@ -164,7 +148,7 @@ additional_flags = [
 ]
 ```
 
-[cargo_workspaces]: https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html)
+[cargo_workspaces]: https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html
 
 ### Remote Dependency Mode
 
