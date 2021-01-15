@@ -253,6 +253,93 @@ mod tests {
   }
 
   #[test]
+  fn test_plan_build_produces_aliased_dependencies_with_duplicate_deps_no_aliases() {
+    let mut settings = dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+
+    let planner = BuildPlannerImpl::new(
+      dummy_workspace_crate_metadata("plan_build_produces_aliased_dependencies_duplicate_deps_no_aliases.json.template"),
+      settings,
+    );
+    // N.B. This will fail if we don't correctly ignore workspace crates.
+    let planned_build_res = planner.plan_build(Some(PlatformDetails::new(
+      "some_target_triple".to_owned(),
+      Vec::new(), /* attrs */
+    )));
+
+    let crates_with_aliased_deps: Vec<CrateContext> = planned_build_res
+      .unwrap()
+      .crate_contexts
+      .into_iter()
+      .filter(|krate| krate.default_deps.aliased_dependencies.len() != 0)
+      .collect();
+
+    // Serenity should not be in crates_with_aliased_deps
+    let serenity_position = crates_with_aliased_deps
+      .iter()
+      .position(|krate| krate.pkg_name == "serenity");
+    assert!(serenity_position.is_none());
+  }
+  #[test]
+  fn test_plan_build_produces_aliased_dependencies_with_duplicate_deps_with_aliases() {
+    let mut settings = dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+
+    let planner = BuildPlannerImpl::new(
+      dummy_workspace_crate_metadata("plan_build_produces_aliased_dependencies_duplicate_deps_with_aliases.json.template"),
+      settings,
+    );
+    // N.B. This will fail if we don't correctly ignore workspace crates.
+    let planned_build_res = planner.plan_build(Some(PlatformDetails::new(
+      "some_target_triple".to_owned(),
+      Vec::new(), /* attrs */
+    )));
+
+    let crates_with_aliased_deps: Vec<CrateContext> = planned_build_res
+      .unwrap()
+      .crate_contexts
+      .into_iter()
+      .filter(|krate| krate.default_deps.aliased_dependencies.len() != 0)
+      .collect();
+
+    // Vec length shouldn't be 0
+    assert!(
+      crates_with_aliased_deps.len() != 0,
+      "Crates with aliased dependencies is 0"
+    );
+
+    // Find the serenity crate
+    let serenity_position = crates_with_aliased_deps
+      .iter()
+      .position(|krate| krate.pkg_name == "serenity");
+    assert!(serenity_position.is_some());
+
+    // Get crate context using computed position
+    let serenity_context = crates_with_aliased_deps[serenity_position.unwrap()].clone();
+
+    assert_eq!(serenity_context.default_deps.aliased_dependencies.len(), 4);
+    assert_eq!(
+      serenity_context.default_deps.aliased_dependencies[0].target,
+      "@raze_test__async_tungstenite__0_9_3//:async_tungstenite"
+    );
+    assert_eq!(serenity_context.default_deps.aliased_dependencies[0].alias, "async_tungstenite_compat");
+    assert_eq!(
+      serenity_context.default_deps.aliased_dependencies[1].target,
+      "@raze_test__bytes__0_5_6//:bytes"
+    );
+    assert_eq!(serenity_context.default_deps.aliased_dependencies[1].alias, "bytes_compat");
+    assert_eq!(
+      serenity_context.default_deps.aliased_dependencies[2].target,
+      "@raze_test__reqwest__0_10_10//:reqwest"
+    );
+    assert_eq!(serenity_context.default_deps.aliased_dependencies[2].alias, "reqwest_compat");
+    assert_eq!(
+      serenity_context.default_deps.aliased_dependencies[3].target,
+      "@raze_test__tokio__0_2_24//:tokio"
+    );
+    assert_eq!(serenity_context.default_deps.aliased_dependencies[3].alias,"tokio_compat");
+  }
+  #[test]
   fn test_plan_build_produces_proc_macro_dependencies() {
     let mut settings = dummy_raze_settings();
     settings.genmode = GenMode::Remote;
