@@ -3,7 +3,11 @@
 _bash_script = """\
 #!/bin/bash
 
-exec "{target}"
+if [[ -f "{target}" ]]; then
+    exec "{target}"
+else
+    exec "external/{target}"
+fi
 """
 
 # buildifier: disable=unnamed-macro
@@ -14,6 +18,8 @@ def launch_test(target):
         target (str): The label or package of the target to test. In the case
             of the package being passed, the target is assumed to have the
             same name.
+    Returns:
+        string: The name of the generated test target.
     """
 
     # Account for a missing target (since Buildifier will remove it if it matches the package name)
@@ -30,7 +36,7 @@ def launch_test(target):
         srcs = [target_label],
         cmd = "echo '{}' > $@".format(
             _bash_script.format(
-                target = str(target_label).lstrip("/").replace(":", "/"),
+                target = str(target_label).lstrip("@/").replace("//", "/").replace(":", "/"),
             ),
         ),
         tags = ["manual"],
@@ -46,3 +52,5 @@ def launch_test(target):
             target_label,
         ],
     )
+
+    return name + "_launch_test"

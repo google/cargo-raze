@@ -78,12 +78,14 @@ if ! [[ -z "$(git status --porcelain)" ]]; then
   exit 1
 fi
 
-PWD="$(pwd)"
+if [[ -z "$BUILD_WORKSPACE_DIRECTORY" ]]; then
+  SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  REPO_ROOT="$(dirname $SCRIPT_DIR)"
+else
+  REPO_ROOT="$BUILD_WORKSPACE_DIRECTORY"
+fi
 
-REPO_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "$REPO_ROOT/impl"
-
+pushd "$REPO_ROOT/impl"
 set -x
 publish_crate_version "$NEXT_CRATE_VERSION"
-
-cd "$PWD"
+popd

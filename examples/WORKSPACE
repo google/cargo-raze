@@ -1,14 +1,14 @@
-workspace(name = "com_github_google_cargo_raze_examples")
+workspace(name = "cargo_raze_examples")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "io_bazel_rules_rust",
-    sha256 = "0e2e633bf0f7f25392ffb477d677c88eb34fe70ffae05e3ad92fdd9f8d6579db",
-    strip_prefix = "rules_rust-bc0578798f50d018ca4278ad5610598c400992c9",
+    sha256 = "8e1bae501e0df40e8feb2497ebab37c84930bf00b332f8f55315dfc08d85c30a",
+    strip_prefix = "rules_rust-df18ddbece5b68f86e63414ea4b50d691923039a",
     urls = [
-        # Master branch as of 2020-12-05
-        "https://github.com/bazelbuild/rules_rust/archive/bc0578798f50d018ca4278ad5610598c400992c9.tar.gz",
+        # Master branch as of 2021-01-01
+        "https://github.com/bazelbuild/rules_rust/archive/df18ddbece5b68f86e63414ea4b50d691923039a.tar.gz",
     ],
 )
 
@@ -16,22 +16,6 @@ load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
 
 rust_repositories()
 
-load("//remote/binary_dependencies/cargo:crates.bzl", "remote_binary_dependencies_fetch_remote_crates")
+load("//:repositories.bzl", "repositories")
 
-remote_binary_dependencies_fetch_remote_crates()
-
-load("//remote/cargo_workspace/cargo:crates.bzl", "remote_cargo_workspace_fetch_remote_crates")
-
-remote_cargo_workspace_fetch_remote_crates()
-
-load("//remote/complicated_cargo_library/cargo:crates.bzl", "remote_complicated_cargo_library_fetch_remote_crates")
-
-remote_complicated_cargo_library_fetch_remote_crates()
-
-load("//remote/no_deps/cargo:crates.bzl", "remote_no_deps_fetch_remote_crates")
-
-remote_no_deps_fetch_remote_crates()
-
-load("//remote/non_cratesio/cargo:crates.bzl", "remote_non_cratesio_fetch_remote_crates")
-
-remote_non_cratesio_fetch_remote_crates()
+repositories()

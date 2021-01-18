@@ -5,20 +5,19 @@ successfully as well
 
 load("//tests:launch_test.bzl", "launch_test")
 
-launch_test(target = "//remote/binary_dependencies:binary_dependencies_bin")
-
-launch_test(target = "//remote/cargo_workspace/num_printer:number_printer")
-
-launch_test(target = "//remote/complicated_cargo_library")
-
-launch_test(target = "//remote/no_deps")
-
-launch_test(target = "//remote/non_cratesio:non_cratesio_remote")
-
-launch_test(target = "//vendored/cargo_workspace/num_printer:number_printer")
-
-launch_test(target = "//vendored/complicated_cargo_library")
-
-launch_test(target = "//vendored/hello_cargo_library")
-
-launch_test(target = "//vendored/non_cratesio_library")
+test_suite(
+    name = "launch_tests",
+    tags = ["small"],
+    tests = [
+        launch_test(target = "@cargo_raze_examples//remote/binary_dependencies:binary_dependencies_bin"),
+        launch_test(target = "@cargo_raze_examples//remote/cargo_workspace/num_printer:number_printer"),
+        launch_test(target = "@cargo_raze_examples//remote/complicated_cargo_library"),
+        launch_test(target = "@cargo_raze_examples//remote/no_deps"),
+        launch_test(target = "@cargo_raze_examples//remote/non_cratesio:non_cratesio_remote"),
+        launch_test(target = "@cargo_raze_examples//vendored/cargo_workspace/num_printer:number_printer"),
+        launch_test(target = "@cargo_raze_examples//vendored/complicated_cargo_library"),
+        launch_test(target = "@cargo_raze_examples//vendored/hello_cargo_library"),
+        launch_test(target = "@cargo_raze_examples//vendored/non_cratesio_library"),
+    ],
+    visibility = ["//visibility:public"],
+)
