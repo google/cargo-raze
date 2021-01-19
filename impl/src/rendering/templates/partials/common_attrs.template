@@ -23,10 +23,9 @@
     data = []
     {%- if crate.raze_settings.data_attr %} + {{crate.raze_settings.data_attr}}
     {%- endif -%}
-    {# Note: data_dependencies can only be set when using cargo-raze as a library at the moment #}
-    {%- if crate.default_deps.data_dependencies %} + [
-    {%- for dependency in crate.default_deps.data_dependencies %}
-        "{{dependency.buildable_target}}",
+    {%- if crate.raze_settings.data_dependencies %} + [
+    {%- for dependency in crate.raze_settings.data_dependencies %}
+        "{{dependency}}",
     {%- endfor %}
     ]
     {%- endif %},

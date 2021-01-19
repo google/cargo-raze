@@ -176,13 +176,25 @@ pub struct CrateSettings {
   #[serde(default = "default_crate_settings_field_data_attr")]
   pub data_attr: Option<String>,
 
+  /// A list of targets for the `data` attribute of a Rust target
+  #[serde(default)]
+  pub data_dependencies: Vec<String>,
+
   /// The verbatim `compile_data` clause to be included for the generated build targets.
   #[serde(default)]
   pub compile_data_attr: Option<String>,
 
+  /// The `data` attribute for buildrs targets
+  #[serde(default)]
+  pub build_data_dependencies: Vec<String>,
+
   /// Additional environment variables to add when running the build script.
   #[serde(default)]
   pub buildrs_additional_environment_variables: HashMap<String, String>,
+
+  /// Additional dependencies for buildrs targets. See `additional_deps`
+  #[serde(default)]
+  pub buildrs_additional_deps: Vec<String>,
 
   /// The arguments given to the patch tool.
   ///
@@ -258,7 +270,10 @@ impl Default for CrateSettings {
       additional_env: HashMap::new(),
       gen_buildrs: default_crate_settings_field_gen_buildrs(),
       data_attr: default_crate_settings_field_data_attr(),
+      data_dependencies: Vec::new(),
       compile_data_attr: None,
+      build_data_dependencies: Vec::new(),
+      buildrs_additional_deps: Vec::new(),
       buildrs_additional_environment_variables: HashMap::new(),
       patch_args: Vec::new(),
       patch_cmds: Vec::new(),
