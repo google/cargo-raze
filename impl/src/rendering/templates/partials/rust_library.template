@@ -12,16 +12,20 @@ alias(
 rust_library(
     name = "{{ target_name_sanitized }}",
 {% include "templates/partials/common_attrs.template" %}
-    # buildifier: leave-alone
+{%- set deps = [] %}
+{%- if crate.build_script_target %}
+    {%- set deps = deps | concat(with=":" ~ crate_name_sanitized ~ "_build_script") %}
+{%- endif %}
+{%- for dependency in crate.default_deps.dependencies %}
+    {%- set_global deps = deps | concat(with=dependency.buildable_target) %}
+{%- endfor %}
+{%- for dependency in crate.raze_settings.additional_deps %}
+    {%- set_global deps = deps | concat(with=dependency) %}
+{%- endfor %}
+    # buildifier: leave-alone{# TODO: https://github.com/google/cargo-raze/issues/348 #}
     deps = [
-        {%- if crate.build_script_target %}
-        ":{{ crate_name_sanitized }}_build_script",
-        {%- endif %}
-        {%- for dependency in crate.default_deps.dependencies %}
-        "{{dependency.buildable_target}}",
-        {%- endfor %}
-        {%- for dependency in crate.raze_settings.additional_deps %}
-        "{{dependency}}",
+        {%- for dep in deps | sort %}
+        "{{ dep }}",
         {%- endfor %}
     ]
     {%- if crate.targeted_deps %} 
