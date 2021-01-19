@@ -16,7 +16,7 @@ rust_binary(
 {%- for dependency in crate.raze_settings.additional_deps %}
     {%- set_global deps = deps | concat(with=dependency) %}
 {%- endfor %}
-    # buildifier: leave-alone{# The sort below is different from what Buildifier does. Buildifier should ignore this section #}
+    # buildifier: leave-alone{# TODO: The sort below is different from what Buildifier does. We should write a Buildifier compliant sort function and register it so we can use it below. See https://tera.netlify.app/docs#filters for details #}
     deps = [
         {%- for dep in deps | sort %}
         "{{ dep }}",
