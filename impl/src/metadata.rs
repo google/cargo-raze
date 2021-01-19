@@ -34,7 +34,6 @@ use crate::util::package_ident;
 pub(crate) const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
 pub(crate) const DEFAULT_CRATE_REGISTRY_URL: &str = "https://crates.io";
 pub(crate) const DEFAULT_CRATE_INDEX_URL: &str = "https://github.com/rust-lang/crates.io-index";
-pub(crate) const RAZE_LOCKFILE_NAME: &str = "Cargo.raze.lock";
 
 /// An entity that can generate Cargo metadata within a Cargo workspace
 pub trait MetadataFetcher {
@@ -483,26 +482,6 @@ impl Default for RazeMetadataFetcher {
       Url::parse(DEFAULT_CRATE_INDEX_URL).unwrap(),
     )
   }
-}
-
-/// Locates a lockfile for the associated crate. A `Cargo.raze.lock` file in the
-/// [RazeSettings::workspace_path](crate::settings::RazeSettings::workspace_path)
-/// direcotry will take precidence over a standard `Cargo.lock` file.
-pub fn find_lockfile(cargo_workspace_root: &Path, raze_output_dir: &Path) -> Option<PathBuf> {
-  // The custom raze lockfile will always take precidence
-  let raze_lockfile = raze_output_dir.join(RAZE_LOCKFILE_NAME);
-  if raze_lockfile.exists() {
-    return Some(raze_lockfile);
-  }
-
-  // If there is an existing standard lockfile, use it.
-  let cargo_lockfile = cargo_workspace_root.join("Cargo.lock");
-  if cargo_lockfile.exists() {
-    return Some(cargo_lockfile);
-  }
-
-  // No lockfile is available.
-  None
 }
 
 /// A struct containing information about a binary dependency

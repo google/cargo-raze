@@ -26,13 +26,13 @@ use docopt::Docopt;
 
 use cargo_raze::{
   checks,
-  metadata::{find_lockfile, MetadataFetcher, RazeMetadata, RazeMetadataFetcher},
+  metadata::{MetadataFetcher, RazeMetadata, RazeMetadataFetcher},
   planning::{BuildPlanner, BuildPlannerImpl, PlannedBuild},
   rendering::FileOutputs,
   rendering::{bazel::BazelRenderer, BuildRenderer, RenderDetails},
   settings::RazeSettings,
   settings::{load_settings, GenMode, SettingsMetadataFetcher},
-  util::{find_bazel_workspace_root, PlatformDetails},
+  util::{find_bazel_workspace_root, find_lockfile, PlatformDetails},
 };
 
 use serde::Deserialize;
