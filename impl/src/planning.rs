@@ -131,7 +131,7 @@ mod tests {
   #[test]
   fn test_plan_build_minimum_workspace_dependency() {
     let planned_build_res =
-      BuildPlannerImpl::new(dummy_modified_metadata(), dummy_raze_settings()).plan_build(Some(
+      BuildPlannerImpl::new(template_raze_metadata(templates::DUMMY_MODIFIED_METADATA), dummy_raze_settings()).plan_build(Some(
         PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
       ));
 
@@ -153,7 +153,7 @@ mod tests {
   }
 
   fn dummy_workspace_crate_metadata(metadata_template: &str) -> RazeMetadata {
-    let (_dir, files) = make_basic_workspace();
+    let dir = make_basic_workspace();
     let (mut fetcher, _server, _index_dir) = dummy_raze_metadata_fetcher();
 
     // Ensure we render the given template
@@ -161,7 +161,7 @@ mod tests {
       metadata_template: Some(metadata_template.to_string()),
     }));
 
-    let raze_metadata = fetcher.fetch_metadata(&files, None, None).unwrap();
+    let raze_metadata = fetcher.fetch_metadata(dir.as_ref(), None, None).unwrap();
     let mut metadata = raze_metadata.metadata;
 
     // Phase 1: Create a workspace package, add it to the packages list.
@@ -196,7 +196,7 @@ mod tests {
     settings.genmode = GenMode::Vendored;
 
     let planner = BuildPlannerImpl::new(
-      dummy_workspace_crate_metadata("basic_metadata.json.template"),
+      dummy_workspace_crate_metadata(templates::BASIC_METADATA),
       settings,
     );
     // N.B. This will fail if we don't correctly ignore workspace crates.
@@ -213,7 +213,7 @@ mod tests {
     settings.genmode = GenMode::Remote;
 
     let planner = BuildPlannerImpl::new(
-      dummy_workspace_crate_metadata("plan_build_produces_aliased_dependencies.json.template"),
+      dummy_workspace_crate_metadata(templates::PLAN_BUILD_PRODUCES_ALIASED_DEPENDENCIES),
       settings,
     );
     // N.B. This will fail if we don't correctly ignore workspace crates.
@@ -263,7 +263,7 @@ mod tests {
     settings.genmode = GenMode::Remote;
 
     let planner = BuildPlannerImpl::new(
-      dummy_workspace_crate_metadata("plan_build_produces_proc_macro_dependencies.json.template"),
+      dummy_workspace_crate_metadata(templates::PLAN_BUILD_PRODUCES_PROC_MACRO_DEPENDENCIES),
       settings,
     );
     let planned_build = planner
@@ -303,7 +303,7 @@ mod tests {
 
     let planner = BuildPlannerImpl::new(
       dummy_workspace_crate_metadata(
-        "plan_build_produces_build_proc_macro_dependencies.json.template",
+        templates::PLAN_BUILD_PRODUCES_BUILD_PROC_MACRO_DEPENDENCIES,
       ),
       settings,
     );
@@ -341,7 +341,7 @@ mod tests {
   fn test_subplan_produces_crate_root_with_forward_slash() {
     let planner = BuildPlannerImpl::new(
       dummy_workspace_crate_metadata(
-        "subplan_produces_crate_root_with_forward_slash.json.template",
+        templates::SUBPLAN_PRODUCES_CRATE_ROOT_WITH_FORWARD_SLASH,
       ),
       dummy_raze_settings(),
     );
@@ -365,9 +365,9 @@ mod tests {
     // than the standard metadata. So we use a generated template to represent that state.
     let dummy_metadata_fetcher = DummyCargoMetadataFetcher {
       metadata_template: if is_remote_genmode {
-        Some("dummy_binary_dependency_remote.json.template".to_string())
+        Some(templates::DUMMY_BINARY_DEPENDENCY_REMOTE.to_string())
       } else {
-        Some("basic_metadata.json.template".to_string())
+        Some(templates::BASIC_METADATA.to_string())
       },
     };
     fetcher.set_metadata_fetcher(Box::new(dummy_metadata_fetcher));
@@ -385,9 +385,9 @@ mod tests {
       cargo_toml::Dependency::Simple("3.3.3".to_string()),
     );
 
-    let (_dir, files) = make_basic_workspace();
+    let dir = make_basic_workspace();
     let raze_metadata = fetcher
-      .fetch_metadata(&files, Some(&settings.binary_deps), None)
+      .fetch_metadata(dir.as_ref(), Some(&settings.binary_deps), None)
       .unwrap();
 
     for mock in mock.endpoints.iter() {
@@ -592,12 +592,13 @@ mod tests {
     "#};
 
     let settings = {
-      let (_temp_dir, files) = make_workspace(toml_file, None);
-      crate::settings::load_settings_from_manifest(&files.toml_path, None).unwrap()
+      let temp_dir = make_workspace(toml_file, None);
+      let manifest_path = temp_dir.as_ref().join("Cargo.toml");
+      crate::settings::load_settings_from_manifest(&manifest_path, None).unwrap()
     };
 
     let planner = BuildPlannerImpl::new(
-      dummy_workspace_crate_metadata("semver_matching.json.template"),
+      dummy_workspace_crate_metadata(templates::SEMVER_MATCHING),
       settings,
     );
 
@@ -725,7 +726,7 @@ mod tests {
       ]
     "# };
 
-    let (crate_dir, files) = make_workspace(&workspace_toml, Some(&workspace_lock));
+    let crate_dir = make_workspace(&workspace_toml, Some(&workspace_lock));
 
     for (member, dep_version) in vec![("lib_a", "0.2.1"), ("lib_b", "0.1.0")].iter() {
       let member_dir = crate_dir.as_ref().join(&member);
@@ -737,7 +738,9 @@ mod tests {
       .unwrap();
     }
 
-    fetcher.fetch_metadata(&files, None, None).unwrap()
+    fetcher
+      .fetch_metadata(crate_dir.as_ref(), None, None)
+      .unwrap()
   }
 
   #[test]

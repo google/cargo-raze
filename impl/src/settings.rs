@@ -898,7 +898,7 @@ pub mod tests {
       genmode = "Remote"
     "# };
 
-    let (dir, files) = make_workspace(toml_contents, None);
+    let dir = make_workspace(toml_contents, None);
     for member in vec!["crate_a", "crate_b"].iter() {
       let crate_toml = dir.as_ref().join(member).join("Cargo.toml");
       std::fs::create_dir_all(crate_toml.parent().unwrap()).unwrap();
@@ -913,7 +913,7 @@ pub mod tests {
       std::fs::write(crate_toml, toml_contents).unwrap();
     }
 
-    let settings = load_settings_from_manifest(files.toml_path, None).unwrap();
+    let settings = load_settings_from_manifest(dir.as_ref().join("Cargo.toml"), None).unwrap();
     assert_eq!(&settings.workspace_path, "//workspace_path/raze");
     assert_eq!(settings.genmode, GenMode::Remote);
     assert_eq!(settings.crates.len(), 2);

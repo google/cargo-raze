@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use std::{
-  collections::HashMap,
   env,
   fs::{self, File},
   io::Write,
@@ -27,13 +26,13 @@ use docopt::Docopt;
 
 use cargo_raze::{
   checks,
-  metadata::{CargoWorkspaceFiles, MetadataFetcher, RazeMetadata, RazeMetadataFetcher},
+  metadata::{MetadataFetcher, RazeMetadata, RazeMetadataFetcher},
   planning::{BuildPlanner, BuildPlannerImpl, PlannedBuild},
   rendering::FileOutputs,
   rendering::{bazel::BazelRenderer, BuildRenderer, RenderDetails},
   settings::RazeSettings,
   settings::{load_settings, GenMode, SettingsMetadataFetcher},
-  util::{find_bazel_workspace_root, PlatformDetails},
+  util::{find_bazel_workspace_root, find_lockfile, PlatformDetails},
 };
 
 use serde::Deserialize;
@@ -50,6 +49,7 @@ struct Options {
   flag_cargo_bin_path: Option<String>,
   flag_output: Option<String>,
   flag_manifest_path: Option<String>,
+  flag_generate_lockfile: Option<bool>,
 }
 
 const USAGE: &str = r#"
@@ -58,7 +58,7 @@ Generate BUILD files for your pre-vendored Cargo dependencies.
 Usage:
     cargo raze (-h | --help)
     cargo raze [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>] 
-               [--manifest-path=<PATH>] [--output=<PATH>] 
+               [--manifest-path=<PATH>] [--output=<PATH>] [--generate-lockfile]
     cargo raze (-V | --version)
 
 Options:
@@ -71,6 +71,7 @@ Options:
     --cargo-bin-path=<PATH>             Path to the cargo binary to be used for loading workspace metadata
     --manifest-path=<PATH>              Path to the Cargo.toml file to generate BUILD files for
     --output=<PATH>                     Path to output the generated into.
+    --generate-lockfile                 Force a new `Cargo.raze.lock` file to be generated
 "#;
 
 fn main() -> Result<()> {
@@ -173,26 +174,28 @@ fn fetch_raze_metadata(
   let cargo_raze_working_dir =
     find_bazel_workspace_root(&local_metadata.workspace_root).unwrap_or(env::current_dir()?);
 
-  let toml_path = local_metadata.workspace_root.join("Cargo.toml");
-  let lock_path_opt = {
-    let lock_path = local_metadata.workspace_root.join("Cargo.lock");
-    fs::metadata(&lock_path).ok().map(|_| lock_path)
+  let binary_dep_info = if settings.genmode == GenMode::Remote {
+    Some(&settings.binary_deps)
+  } else {
+    None
   };
 
-  let files = CargoWorkspaceFiles {
-    toml_path,
-    lock_path_opt,
+  let reused_lockfile = if !options.flag_generate_lockfile.unwrap_or(false) {
+    find_lockfile(
+      &local_metadata.workspace_root,
+      &cargo_raze_working_dir.join(settings.workspace_path.trim_start_matches("/")),
+    )
+  } else {
+    None
   };
-
-  let remote_genmode_inputs = gather_remote_genmode_inputs(&cargo_raze_working_dir, &settings);
 
   let raze_metadata = metadata_fetcher.fetch_metadata(
-    &files,
-    remote_genmode_inputs.binary_deps,
-    remote_genmode_inputs.override_lockfile,
+    &local_metadata.workspace_root,
+    binary_dep_info,
+    reused_lockfile,
   )?;
 
-  checks::check_metadata(&raze_metadata.metadata, &settings, &cargo_raze_working_dir)?;
+  checks::check_metadata(&raze_metadata, &settings, &cargo_raze_working_dir)?;
   Ok(raze_metadata)
 }
 
@@ -285,36 +288,4 @@ fn write_to_file(path: &Path, contents: &str, verbose: bool) -> Result<()> {
     println!("Generated {} successfully", path.display());
   }
   Ok(())
-}
-
-/* Represents the inputs specific to the Remote genmode. */
-struct RemoteGenModeInputs<'settings> {
-  pub override_lockfile: Option<PathBuf>,
-  pub binary_deps: Option<&'settings HashMap<String, cargo_toml::Dependency>>,
-}
-
-/// Gathers inputs for the `genmode = "Remote"` builds.
-fn gather_remote_genmode_inputs<'settings>(
-  bazel_root: &Path,
-  settings: &'settings RazeSettings,
-) -> RemoteGenModeInputs<'settings> {
-  if settings.genmode != GenMode::Remote {
-    return RemoteGenModeInputs {
-      override_lockfile: None,
-      binary_deps: None,
-    };
-  }
-
-  let lockfile = bazel_root
-    .join(settings.workspace_path.trim_start_matches("/"))
-    .join("Cargo.raze.lock");
-
-  RemoteGenModeInputs {
-    override_lockfile: if lockfile.exists() {
-      Some(lockfile)
-    } else {
-      None
-    },
-    binary_deps: Some(&settings.binary_deps),
-  }
 }

@@ -21,6 +21,8 @@ use cargo_platform::Cfg;
 use cfg_expr::{targets::get_builtin_target_by_triple, Expression, Predicate};
 use pathdiff::diff_paths;
 
+pub(crate) const RAZE_LOCKFILE_NAME: &str = "Cargo.raze.lock";
+
 static SUPPORTED_PLATFORM_TRIPLES: &'static [&'static str] = &[
   // SUPPORTED_T1_PLATFORM_TRIPLES
   "i686-apple-darwin",
@@ -319,6 +321,26 @@ pub fn get_workspace_member_path(manifest_path: &Path, workspace_root: &Path) ->
 
 pub fn package_ident(package_name: &str, package_version: &str) -> String {
   format!("{}-{}", package_name, package_version)
+}
+
+/// Locates a lockfile for the associated crate. A `Cargo.raze.lock` file in the
+/// [RazeSettings::workspace_path](crate::settings::RazeSettings::workspace_path)
+/// direcotry will take precidence over a standard `Cargo.lock` file.
+pub fn find_lockfile(cargo_workspace_root: &Path, raze_output_dir: &Path) -> Option<PathBuf> {
+  // The custom raze lockfile will always take precidence
+  let raze_lockfile = raze_output_dir.join(RAZE_LOCKFILE_NAME);
+  if raze_lockfile.exists() {
+    return Some(raze_lockfile);
+  }
+
+  // If there is an existing standard lockfile, use it.
+  let cargo_lockfile = cargo_workspace_root.join("Cargo.lock");
+  if cargo_lockfile.exists() {
+    return Some(cargo_lockfile);
+  }
+
+  // No lockfile is available.
+  None
 }
 
 #[cfg(test)]
