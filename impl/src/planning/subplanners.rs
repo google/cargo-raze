@@ -52,7 +52,7 @@ struct DependencyNames {
   // Dependencies that are required for tests
   dev_dep_names: Vec<String>,
   // Dependencies that have been renamed and need to be aliased in the build rule
-  aliased_dep_names: HashMap<String, String>,
+  aliased_dep_names: HashMap<String, (semver::VersionReq, String)>,
 }
 
 // TODO(acmcarther): Remove this struct -- move it into CrateContext.
@@ -525,11 +525,15 @@ impl<'planner> CrateSubplanner<'planner> {
           dep_set.normal_deps.push(buildable_dependency);
         }
         // Only add aliased normal deps to the Vec
-        if let Some(alias) = aliased_dep_names.get(&dep_package.name) {
-          dep_set.aliased_deps.push(DependencyAlias {
-            target: buildable_target.clone(),
-            alias: util::sanitize_ident(alias),
-          })
+        if let Some(alias_pair) = aliased_dep_names.get(&dep_package.name) {
+          // Check whether the package's version matches the semver requirement
+          // of the package that had an alias
+          if alias_pair.0.matches(&dep_package.version) {
+            dep_set.aliased_deps.push(DependencyAlias {
+              target: buildable_target.clone(),
+              alias: util::sanitize_ident(&alias_pair.1),
+            })
+          }
         }
       }
     }
@@ -644,7 +648,7 @@ impl<'planner> CrateSubplanner<'planner> {
       if let Some(alias) = dep.rename.as_ref() {
         dep_names
           .aliased_dep_names
-          .insert(dep.name.clone(), alias.clone());
+          .insert(dep.name.clone(), (dep.req.clone(), alias.clone()));
       }
     }
 
