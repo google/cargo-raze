@@ -1,0 +1,43 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_binary", "rust_library", "rust_test")
+load("//third_party/cargo:crates.bzl", "all_crate_deps")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "cargo_raze",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/bin/cargo-raze.rs"],
+    ),
+    data = glob(
+        ["src/**/*.template"],
+        exclude = ["src/testing/**/*.template"],
+    ),
+    proc_macro_deps = all_crate_deps(proc_macro = True),
+    deps = all_crate_deps(),
+)
+
+rust_binary(
+    name = "cargo_raze_bin",
+    srcs = [
+        "src/bin/cargo-raze.rs",
+    ],
+    proc_macro_deps = all_crate_deps(proc_macro = True),
+    deps = [":cargo_raze"] + all_crate_deps(),
+)
+
+rust_test(
+    name = "cargo_raze_lib_test",
+    crate = ":cargo_raze",
+    data = glob(["src/**/*.template"]),
+    proc_macro_deps = all_crate_deps(proc_macro_dev = True),
+    deps = all_crate_deps(normal_dev = True),
+)
+
+rust_test(
+    name = "cargo_raze_bin_test",
+    crate = ":cargo_raze_bin",
+    data = glob(["src/**/*.template"]),
+    proc_macro_deps = all_crate_deps(proc_macro_dev = True),
+    deps = all_crate_deps(normal_dev = True),
+)

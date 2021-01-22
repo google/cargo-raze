@@ -12,4 +12,4 @@ genmode = "Vendored"
 default_gen_buildrs = true
 package_aliases_dir = "cargo"
 experimental_api = true
-
+render_package_aliases = false

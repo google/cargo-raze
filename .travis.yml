@@ -23,11 +23,6 @@ before_install:
   - chmod +x install.sh
   - ./install.sh --user
   - rm -f install.sh
-  - wget -O ./buildifier https://github.com/bazelbuild/buildtools/releases/download/3.4.0/buildifier
-  - chmod +x ./buildifier
-
-before_script:
-  - cargo install cargo-vendor --debug
 
 rust:
   - stable
@@ -36,24 +31,13 @@ matrix:
     - rust: nightly
 
 script:
-  - cd impl
-  - cargo build --verbose
-  - cargo test --verbose
-  - cargo install --debug -f --path .
-  - cd ../
-  - ./smoke-test.sh
-  # Run Buildifier as a linter step for /examples
-  - |
-    LINT="$(./buildifier -lint=warn -mode=check -r examples 2>&1)"
-    if [ -n "${LINT}" ]; then
-      echo 'Buildifier linting failed for `./examples`.' >&2 
-      echo "${LINT}"
-      exit 1
-    fi
-    rm -f ./buildifier
+  - bazel build //... && bazel test //...
   # Check that /examples has no changes
   - |
+    bazel run //tools:examples_raze
     if [ -n "$(git status --porcelain)" ]; then 
-      echo '/examples is out of date. Please run `./smoke-test.sh` locally and commit the changes' >&2
+      echo '/examples is out of date. Please rerun all tests and commit the changes generated from this command' >&2
       exit 1
     fi
+  # Run Buildifier as a linter step
+  - bazel run //:buildifier_check
