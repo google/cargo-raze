@@ -56,10 +56,10 @@ const USAGE: &str = r#"
 Generate BUILD files for your pre-vendored Cargo dependencies.
 
 Usage:
-    cargo raze (-h | --help)
-    cargo raze [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>] 
+    cargo-raze (-h | --help)
+    cargo-raze (-V | --version)
+    cargo-raze [--verbose] [--quiet] [--color=<WHEN>] [--dryrun] [--cargo-bin-path=<PATH>] 
                [--manifest-path=<PATH>] [--output=<PATH>] [--generate-lockfile]
-    cargo raze (-V | --version)
 
 Options:
     -h, --help                          Print this message
@@ -98,12 +98,22 @@ fn main() -> Result<()> {
 }
 
 fn parse_options() -> Options {
+  // When used as a cargo subcommand, the string "raze" will always be
+  // passed as the second `argv` entry. We need to remove that to keep
+  // the behavior consistent between direct uses and cargo subcommand
+  // uses.
+  let mut args: Vec<String> = env::args().collect();
+  if args.len() > 1 && args[1] == "raze" {
+    args.remove(1);
+  }
+
   let options: Options = Docopt::new(USAGE)
     .map(|d| {
       d.version(Some(
         concat!("cargo-raze ", env!("CARGO_PKG_VERSION")).to_string(),
       ))
     })
+    .and_then(|d| d.argv(args).parse())
     .and_then(|d| d.deserialize())
     .unwrap_or_else(|e| e.exit());
 
