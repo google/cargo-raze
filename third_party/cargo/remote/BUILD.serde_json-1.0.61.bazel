@@ -86,6 +86,6 @@ rust_library(
         ":serde_json_build_script",
         "@cargo_raze__itoa__0_4_7//:itoa",
         "@cargo_raze__ryu__1_0_5//:ryu",
-        "@cargo_raze__serde__1_0_118//:serde",
+        "@cargo_raze__serde__1_0_120//:serde",
     ],
 )

@@ -51,9 +51,9 @@ rust_library(
     version = "0.5.3",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__futures_channel__0_3_8//:futures_channel",
-        "@cargo_raze__futures_core__0_3_8//:futures_core",
-        "@cargo_raze__futures_io__0_3_8//:futures_io",
+        "@cargo_raze__futures_channel__0_3_12//:futures_channel",
+        "@cargo_raze__futures_core__0_3_12//:futures_core",
+        "@cargo_raze__futures_io__0_3_12//:futures_io",
     ],
 )
 

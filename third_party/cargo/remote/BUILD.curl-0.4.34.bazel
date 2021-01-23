@@ -114,7 +114,7 @@ rust_library(
     deps = [
         ":curl_build_script",
         "@cargo_raze__curl_sys__0_4_39_curl_7_74_0//:curl_sys",
-        "@cargo_raze__libc__0_2_81//:libc",
+        "@cargo_raze__libc__0_2_82//:libc",
         "@cargo_raze__socket2__0_3_19//:socket2",
     ] + selects.with_or({
         # cfg(all(unix, not(target_os = "macos")))

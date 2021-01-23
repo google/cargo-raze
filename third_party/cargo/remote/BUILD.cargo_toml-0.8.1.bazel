@@ -40,7 +40,7 @@ rust_library(
     data = [],
     edition = "2018",
     proc_macro_deps = [
-        "@cargo_raze__serde_derive__1_0_118//:serde_derive",
+        "@cargo_raze__serde_derive__1_0_120//:serde_derive",
     ],
     rustc_flags = [
         "--cap-lints=allow",
@@ -52,7 +52,7 @@ rust_library(
     version = "0.8.1",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__serde__1_0_118//:serde",
+        "@cargo_raze__serde__1_0_120//:serde",
         "@cargo_raze__toml__0_5_8//:toml",
     ],
 )

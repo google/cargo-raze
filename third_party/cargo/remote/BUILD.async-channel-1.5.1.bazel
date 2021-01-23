@@ -51,7 +51,7 @@ rust_library(
     deps = [
         "@cargo_raze__concurrent_queue__1_2_2//:concurrent_queue",
         "@cargo_raze__event_listener__2_5_1//:event_listener",
-        "@cargo_raze__futures_core__0_3_8//:futures_core",
+        "@cargo_raze__futures_core__0_3_12//:futures_core",
     ],
 )
 

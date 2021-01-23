@@ -52,10 +52,10 @@ rust_library(
     deps = [
         "@cargo_raze__bumpalo__3_4_0//:bumpalo",
         "@cargo_raze__lazy_static__1_4_0//:lazy_static",
-        "@cargo_raze__log__0_4_11//:log",
+        "@cargo_raze__log__0_4_13//:log",
         "@cargo_raze__proc_macro2__1_0_24//:proc_macro2",
         "@cargo_raze__quote__1_0_8//:quote",
-        "@cargo_raze__syn__1_0_57//:syn",
+        "@cargo_raze__syn__1_0_58//:syn",
         "@cargo_raze__wasm_bindgen_shared__0_2_69//:wasm_bindgen_shared",
     ],
 )

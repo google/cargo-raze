@@ -94,7 +94,7 @@ rust_library(
     deps = [
         ":wasm_bindgen_build_script",
         "@cargo_raze__cfg_if__1_0_0//:cfg_if",
-        "@cargo_raze__serde__1_0_118//:serde",
+        "@cargo_raze__serde__1_0_120//:serde",
         "@cargo_raze__serde_json__1_0_61//:serde_json",
     ],
 )

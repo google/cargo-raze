@@ -51,8 +51,8 @@ rust_library(
     version = "0.11.0",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__semver_parser__0_10_0//:semver_parser",
-        "@cargo_raze__serde__1_0_118//:serde",
+        "@cargo_raze__semver_parser__0_10_2//:semver_parser",
+        "@cargo_raze__serde__1_0_120//:serde",
     ],
 )
 
