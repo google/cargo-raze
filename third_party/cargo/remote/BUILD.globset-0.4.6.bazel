@@ -54,7 +54,7 @@ rust_library(
         "@cargo_raze__aho_corasick__0_7_15//:aho_corasick",
         "@cargo_raze__bstr__0_2_14//:bstr",
         "@cargo_raze__fnv__1_0_7//:fnv",
-        "@cargo_raze__log__0_4_11//:log",
-        "@cargo_raze__regex__1_4_2//:regex",
+        "@cargo_raze__log__0_4_13//:log",
+        "@cargo_raze__regex__1_4_3//:regex",
     ],
 )

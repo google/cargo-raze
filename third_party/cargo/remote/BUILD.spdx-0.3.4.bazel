@@ -50,7 +50,7 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__lazy_static__1_4_0//:lazy_static",
-        "@cargo_raze__regex__1_4_2//:regex",
-        "@cargo_raze__smallvec__1_6_0//:smallvec",
+        "@cargo_raze__regex__1_4_3//:regex",
+        "@cargo_raze__smallvec__1_6_1//:smallvec",
     ],
 )

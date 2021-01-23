@@ -52,7 +52,6 @@ rust_binary(
     version = "1.0.66",
     # buildifier: leave-alone
     deps = [
-        # Binaries get an implicit dependency on their crate's lib
         ":cc",
         "@cargo_raze__jobserver__0_1_21//:jobserver",
     ],

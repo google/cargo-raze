@@ -59,7 +59,7 @@ rust_library(
     version = "0.4.39+curl-7.74.0",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__libc__0_2_81//:libc",
+        "@cargo_raze__libc__0_2_82//:libc",
         "@cargo_raze__libnghttp2_sys__0_1_5_1_42_0//:libnghttp2_sys",
         "@cargo_raze__libz_sys__1_1_2//:libz_sys",
         "@curl//:curl",

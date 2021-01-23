@@ -50,10 +50,9 @@ rust_binary(
     version = "6.0.0",
     # buildifier: leave-alone
     deps = [
-        # Binaries get an implicit dependency on their crate's lib
         ":cargo_lock",
         "@cargo_raze__semver__0_11_0//:semver",
-        "@cargo_raze__serde__1_0_118//:serde",
+        "@cargo_raze__serde__1_0_120//:serde",
         "@cargo_raze__toml__0_5_8//:toml",
         "@cargo_raze__url__2_2_0//:url",
     ],
@@ -79,7 +78,7 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__semver__0_11_0//:semver",
-        "@cargo_raze__serde__1_0_118//:serde",
+        "@cargo_raze__serde__1_0_120//:serde",
         "@cargo_raze__toml__0_5_8//:toml",
         "@cargo_raze__url__2_2_0//:url",
     ],

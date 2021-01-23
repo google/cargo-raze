@@ -62,7 +62,7 @@ rust_library(
         "@cargo_raze__concurrent_queue__1_2_2//:concurrent_queue",
         "@cargo_raze__fastrand__1_4_0//:fastrand",
         "@cargo_raze__futures_lite__1_11_3//:futures_lite",
-        "@cargo_raze__log__0_4_11//:log",
+        "@cargo_raze__log__0_4_13//:log",
         "@cargo_raze__nb_connect__1_0_2//:nb_connect",
         "@cargo_raze__once_cell__1_5_2//:once_cell",
         "@cargo_raze__parking__2_0_0//:parking",
@@ -88,7 +88,7 @@ rust_library(
             "@io_bazel_rules_rust//rust/platform:x86_64-apple-darwin",
             "@io_bazel_rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
-            "@cargo_raze__libc__0_2_81//:libc",
+            "@cargo_raze__libc__0_2_82//:libc",
         ],
         "//conditions:default": [],
     }) + selects.with_or({

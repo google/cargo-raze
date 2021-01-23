@@ -41,7 +41,6 @@ cargo_build_script(
     build_script_env = {
     },
     crate_features = [
-        "std",
     ],
     crate_root = "build.rs",
     data = glob(["**"]),
@@ -79,7 +78,6 @@ rust_library(
     aliases = {
     },
     crate_features = [
-        "std",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -107,7 +105,7 @@ rust_library(
             "@io_bazel_rules_rust//rust/platform:x86_64-apple-darwin",
             "@io_bazel_rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
-            "@cargo_raze__libc__0_2_81//:libc",
+            "@cargo_raze__libc__0_2_82//:libc",
         ],
         "//conditions:default": [],
     }),

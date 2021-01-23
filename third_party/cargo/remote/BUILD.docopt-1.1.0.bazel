@@ -50,11 +50,10 @@ rust_binary(
     version = "1.1.0",
     # buildifier: leave-alone
     deps = [
-        # Binaries get an implicit dependency on their crate's lib
         ":docopt",
         "@cargo_raze__lazy_static__1_4_0//:lazy_static",
-        "@cargo_raze__regex__1_4_2//:regex",
-        "@cargo_raze__serde__1_0_118//:serde",
+        "@cargo_raze__regex__1_4_3//:regex",
+        "@cargo_raze__serde__1_0_120//:serde",
         "@cargo_raze__strsim__0_9_3//:strsim",
     ],
 )
@@ -91,8 +90,8 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__lazy_static__1_4_0//:lazy_static",
-        "@cargo_raze__regex__1_4_2//:regex",
-        "@cargo_raze__serde__1_0_118//:serde",
+        "@cargo_raze__regex__1_4_3//:regex",
+        "@cargo_raze__serde__1_0_120//:serde",
         "@cargo_raze__strsim__0_9_3//:strsim",
     ],
 )
