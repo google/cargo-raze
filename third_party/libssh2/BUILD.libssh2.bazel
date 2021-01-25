@@ -20,17 +20,13 @@ _LINUX_CACHE_ENTRIES = dict(_CACHE_ENTRIES.items() + {
 cmake_external(
     name = "libssh2",
     cache_entries = select({
-        "@bazel_tools//src/conditions:linux_aarch64": _LINUX_CACHE_ENTRIES,
-        "@bazel_tools//src/conditions:linux_ppc": _LINUX_CACHE_ENTRIES,
-        "@bazel_tools//src/conditions:linux_ppc64le": _LINUX_CACHE_ENTRIES,
-        "@bazel_tools//src/conditions:linux_s390x": _LINUX_CACHE_ENTRIES,
-        "@bazel_tools//src/conditions:linux_x86_64": _LINUX_CACHE_ENTRIES,
+        "@platforms//os:linux": _LINUX_CACHE_ENTRIES,
         "//conditions:default": _CACHE_ENTRIES,
     }),
     lib_source = "@libssh2//:all",
     static_libraries = select({
         # TODO: I'm guessing at this name. Needs to be checked on windows.
-        "@bazel_tools//src/conditions:windows": ["ssh2.lib"],
+        "@platforms//os:windows": ["ssh2.lib"],
         "//conditions:default": ["libssh2.a"],
     }),
     visibility = ["//visibility:public"],

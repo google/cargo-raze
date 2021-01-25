@@ -25,18 +25,14 @@ _LINUX_CACHE_ENTRIES = dict(_CACHE_ENTRIES.items() + {
 cmake_external(
     name = "curl",
     cache_entries = select({
-        "@bazel_tools//src/conditions:darwin": _MACOS_CACHE_ENTRIES,
-        "@bazel_tools//src/conditions:linux_aarch64": _LINUX_CACHE_ENTRIES,
-        "@bazel_tools//src/conditions:linux_ppc": _LINUX_CACHE_ENTRIES,
-        "@bazel_tools//src/conditions:linux_ppc64le": _LINUX_CACHE_ENTRIES,
-        "@bazel_tools//src/conditions:linux_s390x": _LINUX_CACHE_ENTRIES,
-        "@bazel_tools//src/conditions:linux_x86_64": _LINUX_CACHE_ENTRIES,
+        "@platforms//os:macos": _MACOS_CACHE_ENTRIES,
+        "@platforms//os:linux": _LINUX_CACHE_ENTRIES,
         "//conditions:default": _CACHE_ENTRIES,
     }),
     lib_source = ":all",
     static_libraries = select({
         # TODO: I'm guessing at this name. Needs to be checked on windows.
-        "@bazel_tools//src/conditions:windows": ["curl.lib"],
+        "@platforms//os:windows": ["curl.lib"],
         "//conditions:default": ["libcurl.a"],
     }),
     visibility = ["//visibility:public"],
@@ -44,7 +40,7 @@ cmake_external(
         "@zlib//:zlib",
     ] + select({
         "@io_bazel_rules_rust//rust/platform:ios": [],
-        "@bazel_tools//src/conditions:windows": [],
+        "@platforms//os:windows": [],
         "//conditions:default": [
             "@openssl//:openssl",
         ],

@@ -26,17 +26,13 @@ _LINUX_CACHE_ENTRIES = dict(_CACHE_ENTRIES.items() + {
 cmake_external(
     name = "libgit2",
     cache_entries = select({
-        "@bazel_tools//src/conditions:linux_aarch64": _LINUX_CACHE_ENTRIES,
-        "@bazel_tools//src/conditions:linux_ppc": _LINUX_CACHE_ENTRIES,
-        "@bazel_tools//src/conditions:linux_ppc64le": _LINUX_CACHE_ENTRIES,
-        "@bazel_tools//src/conditions:linux_s390x": _LINUX_CACHE_ENTRIES,
-        "@bazel_tools//src/conditions:linux_x86_64": _LINUX_CACHE_ENTRIES,
+        "@platforms//os:linux": _LINUX_CACHE_ENTRIES,
         "//conditions:default": _CACHE_ENTRIES,
     }),
     lib_source = ":all",
     static_libraries = select({
         # TODO: I'm guessing at this name. Needs to be checked on windows.
-        "@bazel_tools//src/conditions:windows": ["git2.lib"],
+        "@platforms//os:windows": ["git2.lib"],
         "//conditions:default": ["libgit2.a"],
     }),
     visibility = ["//visibility:public"],
@@ -45,12 +41,8 @@ cmake_external(
         "@zlib",
         "@openssl",
     ] + select({
-        "@bazel_tools//src/conditions:darwin": ["@iconv"],
-        "@bazel_tools//src/conditions:linux_aarch64": ["@pcre"],
-        "@bazel_tools//src/conditions:linux_ppc": ["@pcre"],
-        "@bazel_tools//src/conditions:linux_ppc64le": ["@pcre"],
-        "@bazel_tools//src/conditions:linux_s390x": ["@pcre"],
-        "@bazel_tools//src/conditions:linux_x86_64": ["@pcre"],
+        "@platforms//os:macos": ["@iconv"],
+        "@platforms//os:linux": ["@pcre"],
         "//conditions:default": [],
     }),
 )

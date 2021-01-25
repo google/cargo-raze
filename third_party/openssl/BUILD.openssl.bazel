@@ -21,12 +21,12 @@ configure_make(
     name = "openssl",
     configure_command = "config",
     configure_env_vars = select({
-        "@bazel_tools//src/conditions:darwin": {"AR": ""},
+        "@platforms//os:macos": {"AR": ""},
         "//conditions:default": {},
     }),
     configure_in_place = True,
     configure_options = select({
-        "@bazel_tools//src/conditions:darwin": [
+        "@platforms//os:macos": [
             "ARFLAGS=r",
             "no-afalgeng",
             "no-asm",
