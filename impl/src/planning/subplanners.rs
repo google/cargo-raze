@@ -531,7 +531,7 @@ impl<'planner> CrateSubplanner<'planner> {
           if alias_pair.0.matches(&dep_package.version) {
             dep_set.aliased_deps.push(DependencyAlias {
               target: buildable_target.clone(),
-              alias: util::sanitize_ident(&alias_pair.1),
+              alias: (&alias_pair.1).replace("-", "_"),
             })
           }
         }

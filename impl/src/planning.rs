@@ -247,15 +247,15 @@ mod tests {
     let krate_context = crates_with_aliased_deps[krate_position.unwrap()].clone();
 
     // There are two default dependencies for cargo-raze-alias-test, log^0.4 and log^0.3
-    // However, log^0.3 is aliased to old_log while log^0.4 isn't aliased. Therefore, we
-    // should only see one aliased dependency (log^0.3 -> old_log) which shows that the
+    // However, log^0.3 is aliased to old_log_ while log^0.4 isn't aliased. Therefore, we
+    // should only see one aliased dependency (log^0.3 -> old_log_) which shows that the
     // name and semver matching for aliased dependencies is working correctly
     assert!(krate_context.default_deps.aliased_dependencies.len() == 1);
     assert_eq!(
       krate_context.default_deps.aliased_dependencies[0].target,
       "@raze_test__log__0_3_9//:log"
     );
-    assert_eq!(krate_context.default_deps.aliased_dependencies[0].alias, "old_log");
+    assert_eq!(krate_context.default_deps.aliased_dependencies[0].alias, "old_log_");
   }
   #[test]
   fn test_plan_build_produces_proc_macro_dependencies() {
