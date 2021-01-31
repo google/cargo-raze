@@ -7,7 +7,6 @@ load("//tests:launch_test.bzl", "launch_test")
 
 test_suite(
     name = "examples_tests",
-    tags = ["medium"],
     tests = [
         launch_test(target = "@cargo_raze_examples//remote/binary_dependencies:binary_dependencies_bin"),
         launch_test(target = "@cargo_raze_examples//remote/cargo_workspace/num_printer:number_printer"),

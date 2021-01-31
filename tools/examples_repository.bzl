@@ -1,7 +1,7 @@
 """A module defining a repository rule that ensures the vendored examples have 
 actual vendored sources"""
 
-load("@io_bazel_rules_rust//rust:repositories.bzl", "load_arbitrary_tool")
+load("@rules_rust//rust:repositories.bzl", "load_arbitrary_tool")
 
 def _examples_dir(repository_ctx):
     """Returns the path to the cargo-raze workspace root
