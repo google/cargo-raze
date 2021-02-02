@@ -30,9 +30,7 @@ rust_binary(
 rust_test(
     name = "cargo_raze_lib_test",
     crate = ":cargo_raze",
-    data = glob(
-        ["src/**/*.template"],
-    ),
+    data = glob(["src/**/*.template"]),
     proc_macro_deps = all_crate_deps(proc_macro_dev = True),
     deps = all_crate_deps(normal_dev = True),
 )
