@@ -26,10 +26,13 @@ rust_binary(
     deps = [":cargo_raze"] + all_crate_deps(),
 )
 
+# NOTE: Non-hermetic. Depends on `cargo` binary.
 rust_test(
     name = "cargo_raze_lib_test",
     crate = ":cargo_raze",
-    data = glob(["src/**/*.template"]),
+    data = glob(
+        ["src/**/*.template"],
+    ),
     proc_macro_deps = all_crate_deps(proc_macro_dev = True),
     deps = all_crate_deps(normal_dev = True),
 )
