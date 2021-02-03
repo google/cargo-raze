@@ -6,8 +6,8 @@ successfully as well
 load("//tests:launch_test.bzl", "launch_test")
 
 test_suite(
-    name = "launch_tests",
-    tags = ["small"],
+    name = "examples_tests",
+    tags = ["medium"],
     tests = [
         launch_test(target = "@cargo_raze_examples//remote/binary_dependencies:binary_dependencies_bin"),
         launch_test(target = "@cargo_raze_examples//remote/cargo_workspace/num_printer:number_printer"),
@@ -18,6 +18,7 @@ test_suite(
         launch_test(target = "@cargo_raze_examples//vendored/complicated_cargo_library"),
         launch_test(target = "@cargo_raze_examples//vendored/hello_cargo_library"),
         launch_test(target = "@cargo_raze_examples//vendored/non_cratesio_library"),
+        "@cargo_raze_examples//remote/dev_dependencies:dev_dependencies_test",
     ],
     visibility = ["//visibility:public"],
 )
