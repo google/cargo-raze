@@ -7,12 +7,13 @@ tasks:
   ubuntu1804:
     shell_commands:
       - "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+      - "source $HOME/.cargo/env"
     build_targets:
       - "..."
     test_targets:
       - "..."
   windows:
-    shell_commands:
+    batch_commands:
       - "curl.exe --proto '=https' --tlsv1.2 -sSf https://win.rustup.rs/"
       - "rustup-init.exe -y --default-host x86_64-pc-windows-msvc --default-toolchain nightly"
     build_targets:
@@ -22,6 +23,7 @@ tasks:
   macos:
     shell_commands:
       - "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+      - "source $HOME/.cargo/env"
     build_targets:
       - "..."
     test_targets:
