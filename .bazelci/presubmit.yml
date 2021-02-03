@@ -18,7 +18,7 @@ tasks:
       - "curl.exe https://win.rustup.rs/ -o rustup-init.exe"
       - "rustup-init.exe -y --default-host x86_64-pc-windows-msvc --default-toolchain nightly"
     test_flags:
-      - "--test_env=CARGO=%USERPROFILE%\.cargo\\bin\\cargo.exe"
+      - "--test_env=CARGO=%USERPROFILE%\\.cargo\\bin\\cargo.exe"
     build_targets:
       - "..."
     test_targets:
