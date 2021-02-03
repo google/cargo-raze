@@ -209,7 +209,9 @@ impl BazelRenderer {
         .crate_contexts
         .iter()
         .filter(|ctx| {
-          ctx.is_binary_dependency || ctx.workspace_member_dependents.contains(member_path)
+          ctx.is_binary_dependency
+            || ctx.workspace_member_dependents.contains(member_path)
+            || ctx.workspace_member_dev_dependents.contains(member_path)
         })
         .cloned()
         .collect();

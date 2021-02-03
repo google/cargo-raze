@@ -359,7 +359,8 @@ impl<'planner> CrateSubplanner<'planner> {
       }
     }
 
-    let is_workspace_member_dependency = !&workspace_member_dependents.is_empty();
+    let is_workspace_member_dependency =
+      !&workspace_member_dependents.is_empty() || !&workspace_member_dev_dependents.is_empty();
     let is_binary_dependency = self.settings.binary_deps.contains_key(&package.name);
 
     // Generate canonicalized paths to additional build files so they're guaranteed to exist
