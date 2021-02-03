@@ -130,10 +130,14 @@ mod tests {
 
   #[test]
   fn test_plan_build_minimum_workspace_dependency() {
-    let planned_build_res =
-      BuildPlannerImpl::new(template_raze_metadata(templates::DUMMY_MODIFIED_METADATA), dummy_raze_settings()).plan_build(Some(
-        PlatformDetails::new("some_target_triple".to_owned(), Vec::new() /* attrs */),
-      ));
+    let planned_build_res = BuildPlannerImpl::new(
+      template_raze_metadata(templates::DUMMY_MODIFIED_METADATA),
+      dummy_raze_settings(),
+    )
+    .plan_build(Some(PlatformDetails::new(
+      "some_target_triple".to_owned(),
+      Vec::new(), /* attrs */
+    )));
 
     let planned_build = planned_build_res.unwrap();
     assert_eq!(planned_build.crate_contexts.len(), 1);
@@ -255,7 +259,10 @@ mod tests {
       krate_context.default_deps.aliased_dependencies[0].target,
       "@raze_test__log__0_3_9//:log"
     );
-    assert_eq!(krate_context.default_deps.aliased_dependencies[0].alias, "old_log");
+    assert_eq!(
+      krate_context.default_deps.aliased_dependencies[0].alias,
+      "old_log"
+    );
   }
   #[test]
   fn test_plan_build_produces_proc_macro_dependencies() {
@@ -302,9 +309,7 @@ mod tests {
     settings.genmode = GenMode::Remote;
 
     let planner = BuildPlannerImpl::new(
-      dummy_workspace_crate_metadata(
-        templates::PLAN_BUILD_PRODUCES_BUILD_PROC_MACRO_DEPENDENCIES,
-      ),
+      dummy_workspace_crate_metadata(templates::PLAN_BUILD_PRODUCES_BUILD_PROC_MACRO_DEPENDENCIES),
       settings,
     );
     let planned_build = planner
@@ -340,9 +345,7 @@ mod tests {
   #[test]
   fn test_subplan_produces_crate_root_with_forward_slash() {
     let planner = BuildPlannerImpl::new(
-      dummy_workspace_crate_metadata(
-        templates::SUBPLAN_PRODUCES_CRATE_ROOT_WITH_FORWARD_SLASH,
-      ),
+      dummy_workspace_crate_metadata(templates::SUBPLAN_PRODUCES_CRATE_ROOT_WITH_FORWARD_SLASH),
       dummy_raze_settings(),
     );
     let planned_build = planner

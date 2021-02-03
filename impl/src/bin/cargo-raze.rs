@@ -149,7 +149,10 @@ fn fetch_local_metadata(options: &Options) -> Result<Metadata> {
   let working_directory = if let Some(manifest_path) = &options.flag_manifest_path {
     let manifest_path = PathBuf::from(manifest_path).canonicalize()?;
     if !manifest_path.is_file() {
-      return Err(anyhow!("manifest path `{}` is not a file.", manifest_path.display()));
+      return Err(anyhow!(
+        "manifest path `{}` is not a file.",
+        manifest_path.display()
+      ));
     }
     // UNWRAP: Unwrap safe due to check above.
     PathBuf::from(manifest_path.parent().unwrap())
