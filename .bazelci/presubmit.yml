@@ -9,6 +9,8 @@ tasks:
       - "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
       - "echo \". $HOME/.cargo/env\" >> ~/.profile"
       - ". ~/.profile"
+    environment:
+      - "PATH=$PATH\\:/$HOME/.cargo/bin"
     build_targets:
       - "..."
     test_targets:
@@ -25,7 +27,8 @@ tasks:
     shell_commands:
       - "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
       - ". $HOME/.cargo/env"
-      - "PATH=$PATH\\:/$HOME/.cargo/bin ; export PATH "
+    environment:
+      - "PATH=$PATH\\:/$HOME/.cargo/bin"
     build_targets:
       - "..."
     test_targets:
