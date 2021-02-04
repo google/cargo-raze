@@ -22,7 +22,7 @@ use cargo_metadata::{Metadata, MetadataCommand, Package};
 use semver::VersionReq;
 use serde::{Deserialize, Serialize};
 use std::{
-  collections::HashMap,
+  collections::{HashMap, HashSet},
   hash::Hash,
   path::{Path, PathBuf},
 };
@@ -62,7 +62,7 @@ pub struct RazeSettings {
   ///
   /// Each item comes in the form of a "triple", such as "x86_64-unknown-linux-gnu"
   #[serde(default)]
-  pub targets: Option<Vec<String>>,
+  pub targets: Option<HashSet<String>>,
 
   /// A list of binary dependencies.
   #[serde(default)]

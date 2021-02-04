@@ -17,7 +17,7 @@ use pathdiff::diff_paths;
 use tera::{self, Context, Tera};
 
 use crate::{
-  context::{CrateContext, WorkspaceContext},
+  context::{CrateContext, DependencyAlias, WorkspaceContext},
   error::RazeError,
   planning::PlannedBuild,
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
@@ -37,7 +37,7 @@ macro_rules! unwind_tera_error {
   }};
 }
 
-// A Bazel block that exposts the `crates.bz` files rendered in Remote genmode
+// A Bazel block that exports the `crates.bzl` files rendered in Remote genmode
 const EXPORTS_FILES: &str = r#"
 # Export file for Stardoc support
 exports_files(
@@ -133,15 +133,16 @@ impl BazelRenderer {
       .render("templates/crate.BUILD.template", &context)
   }
 
-  pub fn render_vendored_aliases(
+  pub fn render_workspace_aliases(
     &self,
     workspace_context: &WorkspaceContext,
-    all_packages: &[CrateContext],
+    workspace_aliases: &[DependencyAlias],
+    is_remote_mode: bool,
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
     context.insert("workspace", &workspace_context);
-    context.insert("crates", &all_packages);
-    context.insert("is_remote_mode", &false);
+    context.insert("aliases", &workspace_aliases);
+    context.insert("is_remote_mode", &is_remote_mode);
     self
       .internal_renderer
       .render("templates/workspace.BUILD.template", &context)
@@ -160,20 +161,6 @@ impl BazelRenderer {
     self
       .internal_renderer
       .render("templates/crate.BUILD.template", &context)
-  }
-
-  pub fn render_remote_aliases(
-    &self,
-    workspace_context: &WorkspaceContext,
-    all_packages: &[CrateContext],
-  ) -> Result<String, tera::Error> {
-    let mut context = Context::new();
-    context.insert("workspace", &workspace_context);
-    context.insert("crates", &all_packages);
-    context.insert("is_remote_mode", &true);
-    self
-      .internal_renderer
-      .render("templates/workspace.BUILD.template", &context)
   }
 
   pub fn render_crates_bzl(
@@ -203,33 +190,17 @@ impl BazelRenderer {
   ) -> Result<Vec<FileOutputs>> {
     let mut file_outputs = Vec::new();
     for member_path in planned_build.workspace_context.workspace_members.iter() {
-      let all_packages: Vec<CrateContext> = planned_build
-        .crate_contexts
-        .iter()
-        .filter(|ctx| {
-          ctx.is_binary_dependency
-            || ctx.workspace_member_dependents.contains(member_path)
-            || ctx.workspace_member_dev_dependents.contains(member_path)
-            || ctx.workspace_member_build_dependents.contains(member_path)
-        })
-        .cloned()
-        .collect();
+      let rendered_alias_build_file_res = self.render_workspace_aliases(
+        &planned_build.workspace_context,
+        &planned_build.workspace_aliases,
+        is_remote_mode,
+      );
 
-      let mut rendered_alias_build_file = if is_remote_mode {
-        self
-          .render_remote_aliases(&planned_build.workspace_context, &all_packages)
-          .map_err(|e| RazeError::Rendering {
-            crate_name_opt: None,
-            message: unwind_tera_error!(e),
-          })?
-      } else {
-        self
-          .render_vendored_aliases(&planned_build.workspace_context, &all_packages)
-          .map_err(|e| RazeError::Rendering {
-            crate_name_opt: None,
-            message: unwind_tera_error!(e),
-          })?
-      };
+      let mut rendered_alias_build_file =
+        rendered_alias_build_file_res.map_err(|e| RazeError::Rendering {
+          crate_name_opt: None,
+          message: unwind_tera_error!(e),
+        })?;
 
       // Only the root package will have a `crates.bzl` file to export
       let is_root_workspace_member = member_path
@@ -518,7 +489,10 @@ mod tests {
     }
   }
 
-  fn dummy_planned_build(crate_contexts: Vec<CrateContext>) -> PlannedBuild {
+  fn dummy_planned_build(
+    crate_contexts: Vec<CrateContext>,
+    aliases: Vec<DependencyAlias>,
+  ) -> PlannedBuild {
     PlannedBuild {
       workspace_context: WorkspaceContext {
         workspace_path: "//workspace/prefix".to_owned(),
@@ -529,6 +503,7 @@ mod tests {
         workspace_members: vec![PathBuf::from("some/crate")],
       },
       crate_contexts,
+      workspace_aliases: aliases,
       lockfile: None,
     }
   }
@@ -543,16 +518,7 @@ mod tests {
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
       canonical_additional_build_file: CrateSettings::default().additional_build_file,
-      default_deps: CrateDependencyContext {
-        dependencies: Vec::new(),
-        proc_macro_dependencies: Vec::new(),
-        data_dependencies: Vec::new(),
-        build_dependencies: Vec::new(),
-        build_proc_macro_dependencies: Vec::new(),
-        build_data_dependencies: Vec::new(),
-        dev_dependencies: Vec::new(),
-        aliased_dependencies: Vec::new(),
-      },
+      default_deps: CrateDependencyContext::default(),
       targeted_deps: Vec::new(),
       workspace_member_dependents: Vec::new(),
       workspace_member_dev_dependents: Vec::new(),
@@ -590,16 +556,7 @@ mod tests {
       canonical_additional_build_file: CrateSettings::default().additional_build_file,
       features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
       expected_build_path: format!("vendor/test-library-1.1.1/{}", buildfile_suffix),
-      default_deps: CrateDependencyContext {
-        dependencies: Vec::new(),
-        proc_macro_dependencies: Vec::new(),
-        data_dependencies: Vec::new(),
-        build_dependencies: Vec::new(),
-        build_proc_macro_dependencies: Vec::new(),
-        build_data_dependencies: Vec::new(),
-        dev_dependencies: Vec::new(),
-        aliased_dependencies: Vec::new(),
-      },
+      default_deps: CrateDependencyContext::default(),
       targeted_deps: Vec::new(),
       workspace_member_dependents: Vec::new(),
       workspace_member_dev_dependents: Vec::new(),
@@ -642,22 +599,26 @@ mod tests {
   fn render_crates_for_test_with_name(
     buildfile_suffix: &str,
     crate_contexts: Vec<CrateContext>,
+    aliases: Vec<DependencyAlias>,
   ) -> Vec<FileOutputs> {
     BazelRenderer::new()
       .render_planned_build(
         &dummy_render_details(buildfile_suffix),
-        &dummy_planned_build(crate_contexts),
+        &dummy_planned_build(crate_contexts, aliases),
       )
       .unwrap()
   }
 
-  fn render_crates_for_test(crate_contexts: Vec<CrateContext>) -> Vec<FileOutputs> {
-    return render_crates_for_test_with_name("BUILD", crate_contexts);
+  fn render_crates_for_test(
+    crate_contexts: Vec<CrateContext>,
+    aliases: Vec<DependencyAlias>,
+  ) -> Vec<FileOutputs> {
+    return render_crates_for_test_with_name("BUILD", crate_contexts, aliases);
   }
 
   #[test]
   fn all_plans_contain_root_build_file() {
-    let file_outputs = render_crates_for_test(Vec::new());
+    let file_outputs = render_crates_for_test(vec![], vec![]);
     let file_names = file_outputs
       .iter()
       .map(|output| output.path.display().to_string())
@@ -676,7 +637,7 @@ mod tests {
 
   #[test]
   fn crates_generate_build_files() {
-    let file_outputs = render_crates_for_test(vec![dummy_library_crate()]);
+    let file_outputs = render_crates_for_test(vec![dummy_library_crate()], vec![]);
     let file_names = file_outputs
       .iter()
       .map(|output| output.path.display().to_string())
@@ -699,6 +660,7 @@ mod tests {
     let file_outputs = render_crates_for_test_with_name(
       "BUILD.bazel",
       vec![dummy_library_crate_with_name("BUILD.bazel")],
+      vec![],
     );
     let file_names = file_outputs
       .iter()
@@ -725,7 +687,12 @@ mod tests {
       .workspace_member_dependents
       .push(PathBuf::from("some/crate"));
 
-    let file_outputs = render_crates_for_test(vec![context]);
+    let aliases = vec![DependencyAlias {
+      target: "target".to_string(),
+      alias: "alias".to_string(),
+    }];
+
+    let file_outputs = render_crates_for_test(vec![context], aliases);
     let workspace_crate_build_contents = extract_contents_matching_path(
       &file_outputs,
       "/some/cargo/root/some/crate/cargo/BUILD.bazel",
@@ -748,7 +715,7 @@ mod tests {
     non_workspace_crate.workspace_member_dependents = Vec::new();
     non_workspace_crate.is_workspace_member_dependency = false;
 
-    let file_outputs = render_crates_for_test(vec![non_workspace_crate]);
+    let file_outputs = render_crates_for_test(vec![non_workspace_crate], vec![]);
     let root_build_contents = extract_contents_matching_path(
       &file_outputs,
       "/some/cargo/root/some/crate/cargo/BUILD.bazel",
@@ -767,7 +734,7 @@ mod tests {
 
   #[test]
   fn binaries_get_rust_binary_rules() {
-    let file_outputs = render_crates_for_test(vec![dummy_binary_crate()]);
+    let file_outputs = render_crates_for_test(vec![dummy_binary_crate()], vec![]);
     let crate_build_contents = extract_contents_matching_path(
       &file_outputs,
       "/some/bazel/root/./some_render_prefix/vendor/test-binary-1.1.1/BUILD",
@@ -785,7 +752,7 @@ mod tests {
 
   #[test]
   fn libraries_get_rust_library_rules() {
-    let file_outputs = render_crates_for_test(vec![dummy_library_crate()]);
+    let file_outputs = render_crates_for_test(vec![dummy_library_crate()], vec![]);
     let crate_build_contents = extract_contents_matching_path(
       &file_outputs,
       "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD",
@@ -805,14 +772,17 @@ mod tests {
   fn additional_build_file_missing_file_failure() {
     let render_result = BazelRenderer::new().render_planned_build(
       &dummy_render_details("BUILD"),
-      &dummy_planned_build(vec![CrateContext {
-        raze_settings: CrateSettings {
-          additional_build_file: Some("non-existent-file".into()),
-          ..Default::default()
-        },
-        canonical_additional_build_file: Some("non-existent-file".into()),
-        ..dummy_library_crate()
-      }]),
+      &dummy_planned_build(
+        vec![CrateContext {
+          raze_settings: CrateSettings {
+            additional_build_file: Some("non-existent-file".into()),
+            ..Default::default()
+          },
+          canonical_additional_build_file: Some("non-existent-file".into()),
+          ..dummy_library_crate()
+        }],
+        vec![],
+      ),
     );
 
     assert_that!(render_result, err());
@@ -829,14 +799,17 @@ mod tests {
 
     let additional_build_file = tmp_dir.as_ref().join("some_additional_build_file");
 
-    let file_outputs = render_crates_for_test(vec![CrateContext {
-      raze_settings: CrateSettings {
-        additional_build_file: Some(additional_build_file.clone()),
-        ..Default::default()
-      },
-      canonical_additional_build_file: Some(additional_build_file.clone()),
-      ..dummy_library_crate()
-    }]);
+    let file_outputs = render_crates_for_test(
+      vec![CrateContext {
+        raze_settings: CrateSettings {
+          additional_build_file: Some(additional_build_file.clone()),
+          ..Default::default()
+        },
+        canonical_additional_build_file: Some(additional_build_file.clone()),
+        ..dummy_library_crate()
+      }],
+      vec![],
+    );
 
     let file_name =
       "/some/bazel/root/./some_render_prefix/vendor/test-library-1.1.1/BUILD".to_owned();
@@ -859,7 +832,7 @@ mod tests {
   #[test]
   fn test_generate_lockfile() {
     let render_details = dummy_render_details("BUILD.bazel");
-    let mut planned_build = dummy_planned_build(Vec::new());
+    let mut planned_build = dummy_planned_build(vec![], vec![]);
     planned_build.lockfile = Some(cargo_lock::Lockfile::from_str(basic_lock_contents()).unwrap());
 
     let render_result = BazelRenderer::new()
@@ -897,7 +870,7 @@ mod tests {
     let mut lib_b = dummy_library_crate();
     lib_b.workspace_member_dependents = vec![PathBuf::from("lib_b")];
 
-    let mut planned_build = dummy_planned_build(vec![lib_a, lib_b]);
+    let mut planned_build = dummy_planned_build(vec![lib_a, lib_b], vec![]);
 
     // Render files
     planned_build.workspace_context = WorkspaceContext {

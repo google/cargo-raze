@@ -438,7 +438,7 @@ impl RazeMetadataFetcher {
           let version = info.req();
           let src_dir = self.fetch_crate_src(cargo_dir.as_ref(), &name, version)?;
           checksums.insert(
-            package_ident(name, version),
+            package_ident(name, &version),
             self.fetch_crate_checksum(name, version)?,
           );
           if let Some(dirname) = src_dir.file_name() {
