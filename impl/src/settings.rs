@@ -414,17 +414,14 @@ fn validate_settings(
   cargo_workspace_path: &Path,
 ) -> Result<(), RazeError> {
   if !settings.workspace_path.starts_with("//") {
-    return Err(
-      RazeError::Config {
-        field_path_opt: Some("raze.workspace_path".to_owned()),
-        message: concat!(
-          "Path must start with \"//\". Paths into local repositories (such as ",
-          "@local//path) are currently unsupported."
-        )
-        .to_owned(),
-      }
-      .into(),
-    );
+    return Err(RazeError::Config {
+      field_path_opt: Some("raze.workspace_path".to_owned()),
+      message: concat!(
+        "Path must start with \"//\". Paths into local repositories (such as ",
+        "@local//path) are currently unsupported."
+      )
+      .to_owned(),
+    });
   }
 
   if settings.workspace_path != "//" && settings.workspace_path.ends_with('/') {
@@ -596,13 +593,13 @@ fn parse_raze_settings_workspace(
   }
 
   // Check for duplication errors
-  if duplicate_binary_deps.len() > 0 {
+  if !duplicate_binary_deps.is_empty() {
     return Err(anyhow!(
       "Duplicate `raze.binary_deps` values detected accross various crates: {:?}",
       duplicate_binary_deps
     ));
   }
-  if duplicate_crate_settings.len() > 0 {
+  if !duplicate_crate_settings.is_empty() {
     return Err(anyhow!(
       "Duplicate `raze.crates.*` values detected accross various crates: {:?}",
       duplicate_crate_settings
@@ -618,12 +615,12 @@ fn parse_raze_settings_root_package(
   root_package: &Package,
 ) -> Result<RazeSettings> {
   RawRazeSettings::deserialize(metadata_value)?.print_notices_and_warnings();
-  return RazeSettings::deserialize(metadata_value).with_context(|| {
+  RazeSettings::deserialize(metadata_value).with_context(|| {
     format!(
       "Failed to load raze settings from root package: {}",
       root_package.name,
     )
-  });
+  })
 }
 
 /// Parse [RazeSettings](crate::settings::RazeSettings) from any workspace member's metadata
@@ -713,7 +710,7 @@ impl Default for SettingsMetadataFetcher {
   fn default() -> SettingsMetadataFetcher {
     SettingsMetadataFetcher {
       cargo_bin_path: env::var("CARGO")
-        .unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string())
+        .unwrap_or_else(|_| SYSTEM_CARGO_BIN_PATH.to_string())
         .into(),
     }
   }
@@ -747,17 +744,16 @@ pub fn load_settings_from_manifest<T: AsRef<Path>>(
   // or a fallback expected to be found on the system.
   let fetcher = SettingsMetadataFetcher {
     cargo_bin_path: cargo_bin_path
-      .unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string())
+      .unwrap_or_else(|| SYSTEM_CARGO_BIN_PATH.to_string())
       .into(),
   };
 
-  let cargo_toml_dir = cargo_toml_path
-    .as_ref()
-    .parent()
-    .ok_or(RazeError::Generic(format!(
+  let cargo_toml_dir = cargo_toml_path.as_ref().parent().ok_or_else(|| {
+    RazeError::Generic(format!(
       "Failed to find parent directory for cargo toml file: {:?}",
       cargo_toml_path.as_ref().display(),
-    )))?;
+    ))
+  })?;
   let metadata = {
     let result = fetcher.fetch_metadata(cargo_toml_dir, false);
     if result.is_err() {

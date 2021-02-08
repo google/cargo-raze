@@ -119,7 +119,7 @@ impl BazelSpdxLicense {
 
 /// Breaks apart a cargo license string and yields the available license types.
 pub fn get_license_from_str(cargo_license_str: &str) -> LicenseData {
-  if cargo_license_str.len() == 0 {
+  if cargo_license_str.is_empty() {
     return LicenseData::default();
   }
 

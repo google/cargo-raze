@@ -196,7 +196,7 @@ fn fetch_raze_metadata(
   let reused_lockfile = if !options.flag_generate_lockfile.unwrap_or(false) {
     find_lockfile(
       &local_metadata.workspace_root,
-      &cargo_raze_working_dir.join(settings.workspace_path.trim_start_matches("/")),
+      &cargo_raze_working_dir.join(settings.workspace_path.trim_start_matches('/')),
     )
   } else {
     None
@@ -233,7 +233,7 @@ fn render_files(
   let mut bazel_renderer = BazelRenderer::new();
   let render_details = RenderDetails {
     cargo_root: metadata.cargo_workspace_root.clone(),
-    path_prefix: PathBuf::from(&settings.workspace_path.trim_start_matches("/")),
+    path_prefix: PathBuf::from(&settings.workspace_path.trim_start_matches('/')),
     package_aliases_dir: settings.package_aliases_dir.clone(),
     vendored_buildfile_name: settings.output_buildfile_suffix.clone(),
     bazel_root: cargo_raze_working_dir,
@@ -254,12 +254,12 @@ fn render_files(
 }
 
 fn write_files(
-  bazel_file_outputs: &Vec<FileOutputs>,
+  bazel_file_outputs: &[FileOutputs],
   render_details: &RenderDetails,
   settings: &RazeSettings,
   options: &Options,
 ) -> Result<()> {
-  if &settings.genmode == &GenMode::Remote {
+  if settings.genmode == GenMode::Remote {
     let remote_dir = render_details
       .bazel_root
       .join(&render_details.path_prefix)
