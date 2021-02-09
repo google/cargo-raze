@@ -66,25 +66,23 @@ jobs:
           command: fmt
           args: --manifest-path impl/Cargo.toml --all -- --check
 
-  # TODO: enable when clippy lints are fixed.  There's enough that
-  # it didn't make sense to change all of them right now.
-  # clippy:
-  #   name: Clippy
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       rust:
-  #         - stable
-  #         - 1.45.0
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions-rs/toolchain@v1
-  #       with:
-  #         profile: minimal
-  #         toolchain: ${{ matrix.rust }}
-  #         override: true
-  #     - run: rustup component add clippy
-  #     - uses: actions-rs/cargo@v1
-  #       with:
-  #         command: clippy
-  #         args: --manifest-path impl/Cargo.toml -- -D warnings
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - 1.45.0
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - run: rustup component add clippy
+      - uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --manifest-path impl/Cargo.toml -- -D warnings

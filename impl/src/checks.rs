@@ -15,7 +15,6 @@
 use std::{
   collections::{HashMap, HashSet},
   fs,
-  iter::FromIterator,
   path::Path,
   path::PathBuf,
 };
@@ -238,7 +237,7 @@ fn warn_unused_settings(
     .iter()
     .map(|pkg| &pkg.name)
     .collect::<HashSet<_>>();
-  let setting_names = HashSet::from_iter(all_crate_settings.keys());
+  let setting_names: HashSet<_> = all_crate_settings.keys().collect();
   for missing in setting_names.difference(&pkg_names) {
     eprintln!("Found unused raze crate settings for `{}`", missing);
   }

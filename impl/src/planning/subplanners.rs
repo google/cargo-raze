@@ -189,7 +189,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       crate_catalog_entry: &own_crate_catalog_entry,
       source_id: &own_source_id,
       node: &node,
-      crate_settings: crate_settings,
+      crate_settings,
       sha256: &checksum_opt.map(|c| c.to_owned()),
     };
 
@@ -293,7 +293,7 @@ impl<'planner> CrateSubplanner<'planner> {
           .unwrap_or(&Vec::<String>::new()),
       );
 
-      if target_triples.len() == 0 {
+      if target_triples.is_empty() {
         continue;
       }
 
@@ -341,11 +341,13 @@ impl<'planner> CrateSubplanner<'planner> {
           &member.manifest_path,
           &self.crate_catalog.metadata.workspace_root,
         )
-        .ok_or(anyhow!(
-          "Failed to generate workspace_member_path for {} and {}",
-          &package.manifest_path.display(),
-          &self.crate_catalog.metadata.workspace_root.display()
-        ))?;
+        .ok_or_else(|| {
+          anyhow!(
+            "Failed to generate workspace_member_path for {} and {}",
+            &package.manifest_path.display(),
+            &self.crate_catalog.metadata.workspace_root.display()
+          )
+        })?;
 
         match current_dependency.kind {
           DependencyKind::Development => {
@@ -389,8 +391,8 @@ impl<'planner> CrateSubplanner<'planner> {
       features: self.node.features.clone(),
       workspace_member_dependents,
       workspace_member_dev_dependents,
-      is_workspace_member_dependency: is_workspace_member_dependency,
-      is_binary_dependency: is_binary_dependency,
+      is_workspace_member_dependency,
+      is_binary_dependency,
       is_proc_macro,
       default_deps: CrateDependencyContext {
         dependencies: normal_deps,
@@ -716,14 +718,16 @@ impl<'planner> CrateSubplanner<'planner> {
         .components()
         .map(|c| c.as_os_str().to_str())
         .try_fold("".to_owned(), |res, v| Some(format!("{}/{}", res, v?)))
-        .ok_or(io::Error::new(
-          io::ErrorKind::InvalidData,
-          format!(
-            "{:?} contains non UTF-8 characters and is not a legal path in Bazel",
-            &target.src_path
-          ),
-        ))?
-        .trim_start_matches("/")
+        .ok_or_else(|| {
+          io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!(
+              "{:?} contains non UTF-8 characters and is not a legal path in Bazel",
+              &target.src_path
+            ),
+          )
+        })?
+        .trim_start_matches('/')
         .to_owned();
 
       for kind in &target.kind {
