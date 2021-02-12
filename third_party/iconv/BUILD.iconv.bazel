@@ -10,7 +10,7 @@ filegroup(
 configure_make(
     name = "iconv",
     configure_env_vars = select({
-        "@bazel_tools//src/conditions:darwin": {"AR": ""},
+        "@platforms//os:macos": {"AR": ""},
         "//conditions:default": {},
     }),
     configure_in_place = True,
