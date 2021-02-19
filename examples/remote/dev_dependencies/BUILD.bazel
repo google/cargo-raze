@@ -1,11 +1,11 @@
-load("@io_bazel_rules_rust//rust:rust.bzl", "rust_binary", "rust_test")
+load("@rules_rust//rust:rust.bzl", "rust_binary", "rust_test")
 
 package(default_visibility = ["//visibility:public"])
 
 rust_binary(
     name = "dev_dependencies_bin",
     srcs = ["src/main.rs"],
-    deps = all_crate_deps(),
+    deps = ["@cargo_raze_examples//remote/dev_dependencies/cargo:ferris_says"],
 )
 
 rust_test(

@@ -39,7 +39,7 @@ cmake_external(
     deps = [
         "@zlib//:zlib",
     ] + select({
-        "@io_bazel_rules_rust//rust/platform:ios": [],
+        "@rules_rust//rust/platform:ios": [],
         "@platforms//os:windows": [],
         "//conditions:default": [
             "@openssl//:openssl",

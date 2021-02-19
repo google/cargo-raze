@@ -45,16 +45,16 @@ WORKSPACE. Here is an example:
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
-    name = "io_bazel_rules_rust",
-    sha256 = "0e2e633bf0f7f25392ffb477d677c88eb34fe70ffae05e3ad92fdd9f8d6579db",
-    strip_prefix = "rules_rust-bc0578798f50d018ca4278ad5610598c400992c9",
+    name = "rules_rust",
+    sha256 = "42e60f81e2b269d28334b73b70d02fb516c8de0c16242f5d376bfe6d94a3509f",
+    strip_prefix = "rules_rust-58f709ffec90da93c4e622d8d94f0cd55cd2ef54",
     urls = [
-        # Master branch as of 2020-12-05
-        "https://github.com/bazelbuild/rules_rust/archive/bc0578798f50d018ca4278ad5610598c400992c9.tar.gz",
+        # Main branch as of 2021-02-04
+        "https://github.com/bazelbuild/rules_rust/archive/58f709ffec90da93c4e622d8d94f0cd55cd2ef54.tar.gz",
     ],
 )
 
-load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
+load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 
 rust_repositories()
 ```
