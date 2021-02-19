@@ -23,9 +23,9 @@ load("//third_party:third_party_repositories.bzl", "third_party_repositories")
 
 third_party_repositories()
 
-load("//third_party:third_party_deps.bzl", "third_party_deps")
+load("//third_party:third_party_transitive_deps.bzl", "third_party_transitive_deps")
 
-third_party_deps()
+third_party_transitive_deps()
 
 load("//tools:examples_repository.bzl", "examples_repository")
 
