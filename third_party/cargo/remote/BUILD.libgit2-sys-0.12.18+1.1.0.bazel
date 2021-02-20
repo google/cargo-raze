@@ -59,9 +59,9 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__libc__0_2_82//:libc",
+        "@cargo_raze__libgit2//:libgit2",
         "@cargo_raze__libssh2_sys__0_2_20//:libssh2_sys",
         "@cargo_raze__libz_sys__1_1_2//:libz_sys",
-        "@libgit2//:libgit2",
     ] + selects.with_or({
         # cfg(unix)
         (
