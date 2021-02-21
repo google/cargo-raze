@@ -17,7 +17,7 @@ use crate::{
   metadata::{MetadataFetcher, DEFAULT_CRATE_INDEX_URL, DEFAULT_CRATE_REGISTRY_URL},
   util,
 };
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use cargo_metadata::{Metadata, MetadataCommand, Package};
 use semver::VersionReq;
 use serde::{Deserialize, Serialize};
@@ -626,14 +626,20 @@ fn parse_raze_settings_any_package(metadata: &Metadata) -> Result<RazeSettings> 
   }
 
   // There should only be one package with raze
-  if settings_packages.len() > 1 {
-    return Err(anyhow!(
+  let settings_count = settings_packages.len();
+  if settings_count == 0 {
+    bail!(
+      "No raze settings were specified in the Cargo.toml file, see README.md for details on \
+       expected fields"
+    );
+  } else if settings_count > 1 {
+    bail!(
       "Multiple packages contain primary raze settings: {:?}",
       settings_packages
         .iter()
         .map(|pkg| &pkg.name)
         .collect::<Vec<&String>>()
-    ));
+    );
   }
 
   // UNWRAP: Safe due to checks above
@@ -801,6 +807,25 @@ pub mod tests {
       vendor_dir: default_raze_settings_vendor_dir(),
       experimental_api: default_raze_settings_experimental_api(),
     }
+  }
+
+  #[test]
+  fn test_loading_without_package_settings() {
+    let toml_contents = indoc! { r#"
+    [package]
+    name = "test"
+    version = "0.0.1"
+
+    [dependencies]
+    "# };
+
+    let temp_workspace_dir = TempDir::new()
+      .ok()
+      .expect("Failed to set up temporary directory");
+    let cargo_toml_path = temp_workspace_dir.path().join("Cargo.toml");
+    std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
+
+    assert!(load_settings_from_manifest(cargo_toml_path, None).is_err());
   }
 
   #[test]
