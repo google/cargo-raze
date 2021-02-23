@@ -19,13 +19,13 @@ rust_repositories(
     version = "1.49.0",
 )
 
-load("//third_party:third_party_repositories.bzl", "third_party_repositories")
+load("//:repositories.bzl", "cargo_raze_repositories")
 
-third_party_repositories()
+cargo_raze_repositories()
 
-load("//third_party:third_party_transitive_deps.bzl", "third_party_transitive_deps")
+load("//:transitive_deps.bzl", "cargo_raze_transitive_deps")
 
-third_party_transitive_deps()
+cargo_raze_transitive_deps()
 
 load("//tools:examples_repository.bzl", "examples_repository")
 
