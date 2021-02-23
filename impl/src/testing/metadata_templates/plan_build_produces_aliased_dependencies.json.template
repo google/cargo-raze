@@ -104,7 +104,7 @@ cargo-raze-alias-test = "0.1"
                     "source": "registry+https://github.com/rust-lang/crates.io-index",
                     "req": "^0.3",
                     "kind": null,
-                    "rename": "old_log",
+                    "rename": "old_log_",
                     "optional": false,
                     "uses_default_features": true,
                     "features": [],
