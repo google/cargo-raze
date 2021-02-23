@@ -65,11 +65,11 @@ def _examples_repository_impl(repository_ctx):
             vendor_script,
             "vendor",
         ],
-        environment = {
-            "EXAMPLES_DIR": str(examples_dir),
-            "CARGO": "{}/bin/cargo".format(repository_ctx.path(".")),
-        },
         quiet = True,
+        environment = {
+            "CARGO": "{}/bin/cargo".format(repository_ctx.path(".")),
+            "EXAMPLES_DIR": str(examples_dir),
+        },
     )
 
     if results.return_code != 0:
