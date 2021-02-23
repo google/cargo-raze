@@ -747,8 +747,9 @@ pub fn load_settings_from_manifest<T: AsRef<Path>>(
   // or a fallback expected to be found on the system.
   let fetcher = SettingsMetadataFetcher {
     cargo_bin_path: cargo_bin_path
-      .unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string())
-      .into(),
+        .or_else(|| env::var("CARGO").ok())
+        .unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string())
+        .into(),
   };
 
   let cargo_toml_dir = cargo_toml_path
