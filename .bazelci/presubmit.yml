@@ -7,6 +7,10 @@ tasks:
   ubuntu1804:
     shell_commands:
       - "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+      - "ls /var/lib/buildkite-agent/.cargo/bin/"
+      - "ls /var/lib/buildkite-agent/"
+      - "ls /var/lib/"
+      - "/var/lib/buildkite-agent/.cargo/bin/cargo --version"
     test_flags:
       - "--test_env=CARGO=$HOME/.cargo/bin/cargo"
     build_targets:
