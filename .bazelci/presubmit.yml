@@ -1,5 +1,7 @@
 ---
-buildifier: latest
+buildifier:
+  version: latest
+  warnings: "all"
 tasks:
   ubuntu2004:
     build_targets:
@@ -8,11 +10,11 @@ tasks:
       - "..."
     run_targets:
       - "//tools:examples_check"
-  windows:
-    build_targets:
-      - "..."
-    test_targets:
-      - "..."
+# windows
+#   build_targets:
+#     - "..."
+#   test_targets:
+#     - "..."
   macos:
     build_targets:
       - "..."

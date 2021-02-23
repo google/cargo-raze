@@ -1,5 +1,3 @@
-load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
-
 alias(
     name = "cargo_raze",
     actual = "//impl:cargo_raze",
@@ -29,11 +27,5 @@ test_suite(
     tests = [
         "@cargo_raze_examples//tests:examples_tests",
     ],
-    visibility = ["//visibility:private"],
-)
-
-buildifier(
-    name = "buildifier_check",
-    mode = "check",
     visibility = ["//visibility:private"],
 )
