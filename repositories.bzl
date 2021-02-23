@@ -17,10 +17,10 @@ def cargo_raze_repositories():
     maybe(
         http_archive,
         name = "rules_foreign_cc",
-        sha256 = "379b1cd5cd13da154ba99df3aeb91f9cbb81910641fc520bb90f2a95e324353d",
-        strip_prefix = "rules_foreign_cc-689c96aaa7337eb129235e5388f4ebc88fa14e87",
+        sha256 = "a45511a054598dd9b87d4d5765a18df4e5777736026087cf96ffc30704e6c918",
+        strip_prefix = "rules_foreign_cc-87df6b25f6c009883da87f07ea680d38780a4d6f",
         urls = [
-            "https://github.com/bazelbuild/rules_foreign_cc/archive/689c96aaa7337eb129235e5388f4ebc88fa14e87.zip",
+            "https://github.com/bazelbuild/rules_foreign_cc/archive/87df6b25f6c009883da87f07ea680d38780a4d6f.zip",
         ],
     )
 
