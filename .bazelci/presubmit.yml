@@ -3,13 +3,14 @@ buildifier:
   version: latest
   warnings: "all"
 tasks:
-  # TODO(acmcarther): Add check to verify that examples are up-to-date.
-  ubuntu1804:
+  ubuntu2004:
     build_targets:
       - "..."
     test_targets:
       - "..."
-# windows:
+    run_targets:
+      - "//tools:examples_check"
+# windows
 #   build_targets:
 #     - "..."
 #   test_targets:
