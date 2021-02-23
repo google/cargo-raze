@@ -550,10 +550,11 @@ pub mod tests {
           return Ok(metadata);
         }
       }
+      let cargo_path = env::var("CARGO").unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string());
 
       // Ensure no the command is ran in `offline` mode and no dependencies are checked.
       MetadataCommand::new()
-        .cargo_path(SYSTEM_CARGO_BIN_PATH)
+        .cargo_path(&cargo_path)
         .no_deps()
         .current_dir(working_dir)
         .other_options(vec!["--offline".to_string()])
@@ -561,7 +562,7 @@ pub mod tests {
         .with_context(|| {
           format!(
             "Failed to run `{} metadata` with contents:\n{}",
-            env::var("CARGO").unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string()),
+            &cargo_path,
             fs::read_to_string(working_dir.join("Cargo.toml")).unwrap()
           )
         })
