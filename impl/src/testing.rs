@@ -37,14 +37,19 @@ use crate::{
 /// A module containing constants for each metadata template
 pub mod templates {
   pub const BASIC_METADATA: &str = "basic_metadata.json.template";
-  pub const DUMMY_BINARY_DEPENDENCY_REMOTE: &str =  "dummy_binary_dependency_remote.json.template";
-  pub const DUMMY_MODIFIED_METADATA: &str =  "dummy_modified_metadata.json.template";
-  pub const DUMMY_WORKSPACE_MEMBERS_METADATA: &str =  "dummy_workspace_members_metadata.json.template";
-  pub const PLAN_BUILD_PRODUCES_ALIASED_DEPENDENCIES: &str =  "plan_build_produces_aliased_dependencies.json.template";
-  pub const PLAN_BUILD_PRODUCES_BUILD_PROC_MACRO_DEPENDENCIES: &str =  "plan_build_produces_build_proc_macro_dependencies.json.template";
-  pub const PLAN_BUILD_PRODUCES_PROC_MACRO_DEPENDENCIES: &str =  "plan_build_produces_proc_macro_dependencies.json.template";
-  pub const SEMVER_MATCHING: &str =  "semver_matching.json.template";
-  pub const SUBPLAN_PRODUCES_CRATE_ROOT_WITH_FORWARD_SLASH: &str =  "subplan_produces_crate_root_with_forward_slash.json.template";
+  pub const DUMMY_BINARY_DEPENDENCY_REMOTE: &str = "dummy_binary_dependency_remote.json.template";
+  pub const DUMMY_MODIFIED_METADATA: &str = "dummy_modified_metadata.json.template";
+  pub const DUMMY_WORKSPACE_MEMBERS_METADATA: &str =
+    "dummy_workspace_members_metadata.json.template";
+  pub const PLAN_BUILD_PRODUCES_ALIASED_DEPENDENCIES: &str =
+    "plan_build_produces_aliased_dependencies.json.template";
+  pub const PLAN_BUILD_PRODUCES_BUILD_PROC_MACRO_DEPENDENCIES: &str =
+    "plan_build_produces_build_proc_macro_dependencies.json.template";
+  pub const PLAN_BUILD_PRODUCES_PROC_MACRO_DEPENDENCIES: &str =
+    "plan_build_produces_proc_macro_dependencies.json.template";
+  pub const SEMVER_MATCHING: &str = "semver_matching.json.template";
+  pub const SUBPLAN_PRODUCES_CRATE_ROOT_WITH_FORWARD_SLASH: &str =
+    "subplan_produces_crate_root_with_forward_slash.json.template";
 }
 
 pub const fn basic_toml_contents() -> &'static str {
@@ -300,14 +305,14 @@ pub fn mock_crate_index(
 /// Generate RazeMetadata from a cargo metadata template
 pub fn template_raze_metadata(template_path: &str) -> RazeMetadata {
   let dir = make_basic_workspace();
-    let (mut fetcher, _server, _index_dir) = dummy_raze_metadata_fetcher();
+  let (mut fetcher, _server, _index_dir) = dummy_raze_metadata_fetcher();
 
-    // Always render basic metadata
-    fetcher.set_metadata_fetcher(Box::new(DummyCargoMetadataFetcher {
-      metadata_template: Some(template_path.to_string()),
-    }));
+  // Always render basic metadata
+  fetcher.set_metadata_fetcher(Box::new(DummyCargoMetadataFetcher {
+    metadata_template: Some(template_path.to_string()),
+  }));
 
-    fetcher.fetch_metadata(dir.as_ref(), None, None).unwrap()
+  fetcher.fetch_metadata(dir.as_ref(), None, None).unwrap()
 }
 
 /// Load a cargo metadata template

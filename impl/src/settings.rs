@@ -14,17 +14,15 @@
 
 use crate::{
   error::RazeError,
-  metadata::{
-    MetadataFetcher, DEFAULT_CRATE_INDEX_URL, DEFAULT_CRATE_REGISTRY_URL, SYSTEM_CARGO_BIN_PATH,
-  },
+  metadata::{MetadataFetcher, DEFAULT_CRATE_INDEX_URL, DEFAULT_CRATE_REGISTRY_URL},
+  util,
 };
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use cargo_metadata::{Metadata, MetadataCommand, Package};
 use semver::VersionReq;
 use serde::{Deserialize, Serialize};
 use std::{
   collections::HashMap,
-  env,
   hash::Hash,
   path::{Path, PathBuf},
 };
@@ -314,7 +312,7 @@ fn default_raze_settings_index_url() -> String {
 }
 
 fn default_raze_settings_rust_rules_workspace_name() -> String {
-  "io_bazel_rules_rust".to_owned()
+  "rules_rust".to_owned()
 }
 
 fn default_raze_settings_vendor_dir() -> String {
@@ -414,17 +412,14 @@ fn validate_settings(
   cargo_workspace_path: &Path,
 ) -> Result<(), RazeError> {
   if !settings.workspace_path.starts_with("//") {
-    return Err(
-      RazeError::Config {
-        field_path_opt: Some("raze.workspace_path".to_owned()),
-        message: concat!(
-          "Path must start with \"//\". Paths into local repositories (such as ",
-          "@local//path) are currently unsupported."
-        )
-        .to_owned(),
-      }
-      .into(),
-    );
+    return Err(RazeError::Config {
+      field_path_opt: Some("raze.workspace_path".to_owned()),
+      message: concat!(
+        "Path must start with \"//\". Paths into local repositories (such as ",
+        "@local//path) are currently unsupported."
+      )
+      .to_owned(),
+    });
   }
 
   if settings.workspace_path != "//" && settings.workspace_path.ends_with('/') {
@@ -511,15 +506,6 @@ impl RawRazeSettings {
          `[*.raze.targets]`."
       );
     }
-
-    if self.rust_rules_workspace_name.is_none() {
-      eprintln!(
-        "WARNING: The default of `[*.raze.rust_rules_workspace_name]` will soon be set to \
-         `\"rules_rust\"`. Please explicitly set this flag to prevent a change in behavior or \
-         upgrade your code to use the latest version of `rules_rust` and change references of \
-         `io_bazel_rules_rust` to `rules_rust` in your project."
-      );
-    }
   }
 }
 
@@ -596,13 +582,13 @@ fn parse_raze_settings_workspace(
   }
 
   // Check for duplication errors
-  if duplicate_binary_deps.len() > 0 {
+  if !duplicate_binary_deps.is_empty() {
     return Err(anyhow!(
       "Duplicate `raze.binary_deps` values detected accross various crates: {:?}",
       duplicate_binary_deps
     ));
   }
-  if duplicate_crate_settings.len() > 0 {
+  if !duplicate_crate_settings.is_empty() {
     return Err(anyhow!(
       "Duplicate `raze.crates.*` values detected accross various crates: {:?}",
       duplicate_crate_settings
@@ -618,12 +604,12 @@ fn parse_raze_settings_root_package(
   root_package: &Package,
 ) -> Result<RazeSettings> {
   RawRazeSettings::deserialize(metadata_value)?.print_notices_and_warnings();
-  return RazeSettings::deserialize(metadata_value).with_context(|| {
+  RazeSettings::deserialize(metadata_value).with_context(|| {
     format!(
       "Failed to load raze settings from root package: {}",
       root_package.name,
     )
-  });
+  })
 }
 
 /// Parse [RazeSettings](crate::settings::RazeSettings) from any workspace member's metadata
@@ -640,14 +626,20 @@ fn parse_raze_settings_any_package(metadata: &Metadata) -> Result<RazeSettings> 
   }
 
   // There should only be one package with raze
-  if settings_packages.len() > 1 {
-    return Err(anyhow!(
+  let settings_count = settings_packages.len();
+  if settings_count == 0 {
+    bail!(
+      "No raze settings were specified in the Cargo.toml file, see README.md for details on \
+       expected fields"
+    );
+  } else if settings_count > 1 {
+    bail!(
       "Multiple packages contain primary raze settings: {:?}",
       settings_packages
         .iter()
         .map(|pkg| &pkg.name)
         .collect::<Vec<&String>>()
-    ));
+    );
   }
 
   // UNWRAP: Safe due to checks above
@@ -712,9 +704,7 @@ pub struct SettingsMetadataFetcher {
 impl Default for SettingsMetadataFetcher {
   fn default() -> SettingsMetadataFetcher {
     SettingsMetadataFetcher {
-      cargo_bin_path: env::var("CARGO")
-        .unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string())
-        .into(),
+      cargo_bin_path: util::cargo_bin_path(),
     }
   }
 }
@@ -743,21 +733,25 @@ pub fn load_settings_from_manifest<T: AsRef<Path>>(
   cargo_toml_path: T,
   cargo_bin_path: Option<String>,
 ) -> Result<RazeSettings, RazeError> {
-  // Create a MetadataFetcher from either an optional Cargo binary path
-  // or a fallback expected to be found on the system.
-  let fetcher = SettingsMetadataFetcher {
-    cargo_bin_path: cargo_bin_path
-      .unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string())
-      .into(),
+  // Get the path to the cargo binary from either an optional Cargo binary
+  // path or a fallback expected to be found on the system.
+  let bin_path: PathBuf = if let Some(path) = cargo_bin_path {
+    path.into()
+  } else {
+    util::cargo_bin_path()
   };
 
-  let cargo_toml_dir = cargo_toml_path
-    .as_ref()
-    .parent()
-    .ok_or(RazeError::Generic(format!(
+  // Create a MetadataFetcher
+  let fetcher = SettingsMetadataFetcher {
+    cargo_bin_path: bin_path,
+  };
+
+  let cargo_toml_dir = cargo_toml_path.as_ref().parent().ok_or_else(|| {
+    RazeError::Generic(format!(
       "Failed to find parent directory for cargo toml file: {:?}",
       cargo_toml_path.as_ref().display(),
-    )))?;
+    ))
+  })?;
   let metadata = {
     let result = fetcher.fetch_metadata(cargo_toml_dir, false);
     if result.is_err() {
@@ -813,6 +807,25 @@ pub mod tests {
       vendor_dir: default_raze_settings_vendor_dir(),
       experimental_api: default_raze_settings_experimental_api(),
     }
+  }
+
+  #[test]
+  fn test_loading_without_package_settings() {
+    let toml_contents = indoc! { r#"
+    [package]
+    name = "test"
+    version = "0.0.1"
+
+    [dependencies]
+    "# };
+
+    let temp_workspace_dir = TempDir::new()
+      .ok()
+      .expect("Failed to set up temporary directory");
+    let cargo_toml_path = temp_workspace_dir.path().join("Cargo.toml");
+    std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
+
+    assert!(load_settings_from_manifest(cargo_toml_path, None).is_err());
   }
 
   #[test]

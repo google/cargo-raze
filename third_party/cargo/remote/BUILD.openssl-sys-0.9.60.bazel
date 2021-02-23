@@ -6,15 +6,15 @@ DO NOT EDIT! Replaced on runs of cargo-raze
 """
 
 # buildifier: disable=load
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+# buildifier: disable=load
 load(
-    "@io_bazel_rules_rust//rust:rust.bzl",
+    "@rules_rust//rust:rust.bzl",
     "rust_binary",
     "rust_library",
     "rust_test",
 )
-
-# buildifier: disable=load
-load("@bazel_skylib//lib:selects.bzl", "selects")
 
 package(default_visibility = [
     # Public for visibility by "@raze__crate__version//" targets.
@@ -29,9 +29,10 @@ licenses([
 ])
 
 # Generated Targets
+# buildifier: disable=out-of-order-load
 # buildifier: disable=load-on-top
 load(
-    "@io_bazel_rules_rust//cargo:cargo_build_script.bzl",
+    "@rules_rust//cargo:cargo_build_script.bzl",
     "cargo_build_script",
 )
 
@@ -39,15 +40,15 @@ cargo_build_script(
     name = "openssl_sys_build_script",
     srcs = glob(["**/*.rs"]),
     build_script_env = {
-        "OPENSSL_DIR": "$(location @openssl//:gen_dir)",
+        "OPENSSL_DIR": "$(execpath @cargo_raze__openssl//:gen_dir)",
         "OPENSSL_STATIC": "1",
     },
     crate_features = [
     ],
     crate_root = "build/main.rs",
     data = glob(["**"]) + [
-        "@openssl//:gen_dir",
-        "@openssl//:openssl",
+        "@cargo_raze__openssl//:gen_dir",
+        "@cargo_raze__openssl//:openssl",
     ],
     edition = "2015",
     rustc_flags = [
@@ -66,8 +67,8 @@ cargo_build_script(
     ] + selects.with_or({
         # cfg(target_env = "msvc")
         (
-            "@io_bazel_rules_rust//rust/platform:i686-pc-windows-msvc",
-            "@io_bazel_rules_rust//rust/platform:x86_64-pc-windows-msvc",
+            "@rules_rust//rust/platform:i686-pc-windows-msvc",
+            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
         ): [
             "@cargo_raze__vcpkg__0_2_11//:vcpkg",
         ],
@@ -84,7 +85,7 @@ rust_library(
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
-    data = [],
+    data = [] + ["@cargo_raze__openssl//:openssl"],
     edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
@@ -98,12 +99,12 @@ rust_library(
     deps = [
         ":openssl_sys_build_script",
         "@cargo_raze__libc__0_2_82//:libc",
-        "@openssl//:openssl",
+        "@cargo_raze__openssl//:openssl",
     ] + selects.with_or({
         # cfg(target_env = "msvc")
         (
-            "@io_bazel_rules_rust//rust/platform:i686-pc-windows-msvc",
-            "@io_bazel_rules_rust//rust/platform:x86_64-pc-windows-msvc",
+            "@rules_rust//rust/platform:i686-pc-windows-msvc",
+            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
         ): [
         ],
         "//conditions:default": [],

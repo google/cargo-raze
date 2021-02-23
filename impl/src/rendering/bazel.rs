@@ -209,7 +209,9 @@ impl BazelRenderer {
         .crate_contexts
         .iter()
         .filter(|ctx| {
-          ctx.is_binary_dependency || ctx.workspace_member_dependents.contains(member_path)
+          ctx.is_binary_dependency
+            || ctx.workspace_member_dependents.contains(member_path)
+            || ctx.workspace_member_dev_dependents.contains(member_path)
         })
         .cloned()
         .collect();
@@ -234,7 +236,7 @@ impl BazelRenderer {
       let is_root_workspace_member = member_path
         .to_str()
         // Root workspace paths will are represented by an exmpty string
-        .and_then(|member_path| Some(member_path.is_empty()))
+        .map(|member_path| member_path.is_empty())
         .unwrap_or(false);
       if is_root_workspace_member {
         // In remote genmode, a `crates.bzl` file will always be rendered. For
@@ -260,7 +262,7 @@ impl BazelRenderer {
   fn render_crates_bzl_package_file(
     &self,
     path_prefix: &Path,
-    file_outputs: &Vec<FileOutputs>,
+    file_outputs: &[FileOutputs],
   ) -> Result<Option<FileOutputs>> {
     let crates_bzl_pkg_file = path_prefix.join("BUILD.bazel");
     let outputs_contain_crates_bzl_build_file = file_outputs

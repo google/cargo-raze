@@ -14,7 +14,7 @@
 
 use std::{
   collections::HashMap,
-  env, fs,
+  fs,
   path::{Path, PathBuf},
   string::String,
 };
@@ -29,9 +29,8 @@ use rustc_serialize::hex::ToHex;
 use tempfile::TempDir;
 use url::Url;
 
-use crate::util::package_ident;
+use crate::util::{cargo_bin_path, package_ident};
 
-pub(crate) const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
 pub(crate) const DEFAULT_CRATE_REGISTRY_URL: &str = "https://crates.io";
 pub(crate) const DEFAULT_CRATE_INDEX_URL: &str = "https://github.com/rust-lang/crates.io-index";
 
@@ -48,9 +47,7 @@ struct CargoMetadataFetcher {
 impl Default for CargoMetadataFetcher {
   fn default() -> CargoMetadataFetcher {
     CargoMetadataFetcher {
-      cargo_bin_path: env::var("CARGO")
-        .unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string())
-        .into(),
+      cargo_bin_path: cargo_bin_path(),
     }
   }
 }
@@ -217,9 +214,9 @@ impl RazeMetadataFetcher {
         &workspace_member_directory,
         &no_deps_metadata.workspace_root,
       )
-      .ok_or(anyhow!(
-        "All workspace memebers are expected to be under the workspace root"
-      ))?;
+      .ok_or_else(|| {
+        anyhow!("All workspace memebers are expected to be under the workspace root")
+      })?;
       let new_path = temp_dir.join(diff);
       fs::create_dir_all(&new_path)?;
       fs::copy(
@@ -235,9 +232,9 @@ impl RazeMetadataFetcher {
           let path = entry?;
 
           // Determine the difference between the workspace root and the current file
-          let diff = diff_paths(&path, &no_deps_metadata.workspace_root).ok_or(anyhow!(
-            "All workspace memebers are expected to be under the workspace root"
-          ))?;
+          let diff = diff_paths(&path, &no_deps_metadata.workspace_root).ok_or_else(|| {
+            anyhow!("All workspace memebers are expected to be under the workspace root")
+          })?;
 
           // Create a matching directory tree for the current file within the temp workspace
           let new_path = temp_dir.join(diff);
@@ -299,7 +296,7 @@ impl RazeMetadataFetcher {
     log::debug!("Cloning binary dependency: {}", &name);
     let mut cloner = cargo_clone::Cloner::new();
     cloner
-      .set_registry_url(url.to_string().trim_end_matches("/"))
+      .set_registry_url(url.to_string().trim_end_matches('/'))
       .set_out_dir(dir);
 
     cloner.clone(
@@ -362,11 +359,11 @@ impl RazeMetadataFetcher {
       crates_index::BareIndex::from_url(&self.index_url.to_string())?
         .open_or_clone()?
         .crate_(name)
-        .ok_or(anyhow!("Failed to find crate '{}' in index", name))?
+        .ok_or_else(|| anyhow!("Failed to find crate '{}' in index", name))?
     } else {
       crates_index::Index::new(&self.index_url.path())
         .crate_(name)
-        .ok_or(anyhow!("Failed to find crate '{}' in index", name))?
+        .ok_or_else(|| anyhow!("Failed to find crate '{}' in index", name))?
     };
 
     let (_index, crate_version) = crate_index_path
@@ -374,11 +371,7 @@ impl RazeMetadataFetcher {
       .iter()
       .enumerate()
       .find(|(_, ver)| ver.version() == version)
-      .ok_or(anyhow!(
-        "Failed to find version {} for crate {}",
-        version,
-        name
-      ))?;
+      .ok_or_else(|| anyhow!("Failed to find version {} for crate {}", version, name))?;
 
     Ok(crate_version.checksum()[..].to_hex())
   }
@@ -478,7 +471,7 @@ impl RazeMetadataFetcher {
 impl Default for RazeMetadataFetcher {
   fn default() -> RazeMetadataFetcher {
     RazeMetadataFetcher::new(
-      env::var("CARGO").unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string()),
+      cargo_bin_path(),
       // UNWRAP: The default is covered by testing and should never return err
       Url::parse(DEFAULT_CRATE_REGISTRY_URL).unwrap(),
       Url::parse(DEFAULT_CRATE_INDEX_URL).unwrap(),
@@ -553,7 +546,7 @@ pub mod tests {
 
       // Ensure no the command is ran in `offline` mode and no dependencies are checked.
       MetadataCommand::new()
-        .cargo_path(SYSTEM_CARGO_BIN_PATH)
+        .cargo_path(cargo_bin_path())
         .no_deps()
         .current_dir(working_dir)
         .other_options(vec!["--offline".to_string()])
@@ -561,7 +554,7 @@ pub mod tests {
         .with_context(|| {
           format!(
             "Failed to run `{} metadata` with contents:\n{}",
-            env::var("CARGO").unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string()),
+            cargo_bin_path().display(),
             fs::read_to_string(working_dir.join("Cargo.toml")).unwrap()
           )
         })
@@ -588,7 +581,7 @@ pub mod tests {
     let tempdir = TempDir::new().unwrap();
     let mock_server = MockServer::start();
     let mut fetcher = RazeMetadataFetcher::new(
-      env::var("CARGO").unwrap_or(SYSTEM_CARGO_BIN_PATH.to_string()),
+      cargo_bin_path(),
       Url::parse(&mock_server.base_url()).unwrap(),
       Url::parse(&format!("file://{}", tempdir.as_ref().display())).unwrap(),
     );

@@ -25,9 +25,9 @@ alias(
 )
 
 test_suite(
-    name = "examples_launch_tests",
+    name = "examples_tests",
     tests = [
-        "@cargo_raze_examples//tests:launch_tests",
+        "@cargo_raze_examples//tests:examples_tests",
     ],
     visibility = ["//visibility:private"],
 )

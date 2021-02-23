@@ -1,6 +1,7 @@
 # cargo-raze: Bazel BUILD generation for Rust Crates
 
-[![Build Status](https://travis-ci.org/google/cargo-raze.svg?branch=master)](https://travis-ci.org/google/cargo-raze)
+[![Build
+status](https://badge.buildkite.com/bd8945700a2e0ddb094b1fefabde71cb81bad9a93bb774c384.svg)](https://buildkite.com/bazel/cargo-raze)
 
 An experimental support Cargo plugin for distilling a workspace-level
 Cargo.toml into BUILD targets that code using [rules_rust](https://github.com/bazelbuild/rules_rust)
@@ -45,16 +46,16 @@ WORKSPACE. Here is an example:
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
-    name = "io_bazel_rules_rust",
-    sha256 = "0e2e633bf0f7f25392ffb477d677c88eb34fe70ffae05e3ad92fdd9f8d6579db",
-    strip_prefix = "rules_rust-bc0578798f50d018ca4278ad5610598c400992c9",
+    name = "rules_rust",
+    sha256 = "accb5a89cbe63d55dcdae85938e56ff3aa56f21eb847ed826a28a83db8500ae6",
+    strip_prefix = "rules_rust-9aa49569b2b0dacecc51c05cee52708b7255bd98",
     urls = [
-        # Master branch as of 2020-12-05
-        "https://github.com/bazelbuild/rules_rust/archive/bc0578798f50d018ca4278ad5610598c400992c9.tar.gz",
+        # Main branch as of 2021-02-19
+        "https://github.com/bazelbuild/rules_rust/archive/9aa49569b2b0dacecc51c05cee52708b7255bd98.tar.gz",
     ],
 )
 
-load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repositories")
+load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 
 rust_repositories()
 ```

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fmt, iter::Iterator, path::Path, path::PathBuf, process::Command, str::FromStr};
+use std::{env, fmt, iter::Iterator, path::Path, path::PathBuf, process::Command, str::FromStr};
 
 use anyhow::{anyhow, Result};
 
@@ -21,9 +21,10 @@ use cargo_platform::Cfg;
 use cfg_expr::{targets::get_builtin_target_by_triple, Expression, Predicate};
 use pathdiff::diff_paths;
 
+pub(crate) const SYSTEM_CARGO_BIN_PATH: &str = "cargo";
 pub(crate) const RAZE_LOCKFILE_NAME: &str = "Cargo.raze.lock";
 
-static SUPPORTED_PLATFORM_TRIPLES: &'static [&'static str] = &[
+static SUPPORTED_PLATFORM_TRIPLES: &[&str] = &[
   // SUPPORTED_T1_PLATFORM_TRIPLES
   "i686-apple-darwin",
   "i686-pc-windows-msvc",
@@ -84,7 +85,7 @@ pub fn is_bazel_supported_platform(target: &str) -> (bool, bool) {
     .iter()
     .map(|x| get_builtin_target_by_triple(x).unwrap())
   {
-    if expression.eval(|pred| {
+    let target_matches = expression.eval(|pred| {
       match pred {
         Predicate::Target(tp) => tp.matches(target_info),
         Predicate::KeyValue {
@@ -94,7 +95,8 @@ pub fn is_bazel_supported_platform(target: &str) -> (bool, bool) {
         // For now there is no other kind of matching
         _ => false,
       }
-    }) {
+    });
+    if target_matches {
       is_supported = true;
     } else {
       matches_all = false;
@@ -140,9 +142,9 @@ pub fn get_matching_bazel_triples(target: &str) -> Result<Vec<String>> {
 }
 
 /// Produces a list of triples based on a provided whitelist
-pub fn filter_bazel_triples(triples: &mut Vec<String>, triples_whitelist: &Vec<String>) {
+pub fn filter_bazel_triples(triples: &mut Vec<String>, triples_whitelist: &[String]) {
   // Early-out if the filter list is empty
-  if triples_whitelist.len() == 0 {
+  if triples_whitelist.is_empty() {
     return;
   }
 
@@ -156,15 +158,12 @@ pub fn filter_bazel_triples(triples: &mut Vec<String>, triples_whitelist: &Vec<S
 /// given list of triples.
 pub fn generate_bazel_conditions(
   rust_rules_workspace_name: &str,
-  triples: &Vec<String>,
+  triples: &[String],
 ) -> Result<Vec<String>> {
   // Sanity check ensuring all strings represent real triples
   for triple in triples.iter() {
-    match get_builtin_target_by_triple(triple) {
-      None => {
-        return Err(anyhow!("Not a triple: '{}'", triple));
-      },
-      _ => {},
+    if get_builtin_target_by_triple(triple).is_none() {
+      return Err(anyhow!("Not a triple: '{}'", triple));
     }
   }
 
@@ -188,7 +187,7 @@ pub fn is_bazel_workspace_root(dir: &Path) -> bool {
     }
   }
 
-  return false;
+  false
 }
 
 /// Returns a path to a Bazel workspace root based on the current working
@@ -211,7 +210,7 @@ pub fn find_bazel_workspace_root(manifest_path: &Path) -> Option<PathBuf> {
     };
   }
 
-  return None;
+  None
 }
 
 pub struct PlatformDetails {
@@ -341,6 +340,11 @@ pub fn find_lockfile(cargo_workspace_root: &Path, raze_output_dir: &Path) -> Opt
 
   // No lockfile is available.
   None
+}
+
+/// Locates a cargo binary form either an evironment variable or PATH
+pub fn cargo_bin_path() -> PathBuf {
+  PathBuf::from(env::var("CARGO").unwrap_or_else(|_| SYSTEM_CARGO_BIN_PATH.to_string()))
 }
 
 #[cfg(test)]
