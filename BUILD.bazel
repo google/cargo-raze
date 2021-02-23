@@ -11,6 +11,12 @@ alias(
 )
 
 alias(
+    name = "bin",
+    actual = "//impl:cargo_raze_bin",
+    visibility = ["//visibility:public"],
+)
+
+alias(
     name = "bootstrap",
     actual = "//tools:bootstrap",
     visibility = ["//visibility:private"],
