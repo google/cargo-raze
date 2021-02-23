@@ -11,7 +11,7 @@ load("//third_party/openssl:openssl_repositories.bzl", "openssl_repositories")
 load("//third_party/pcre:pcre_repositories.bzl", "pcre_repositories")
 load("//third_party/zlib:zlib_repositories.bzl", "zlib_repositories")
 
-def third_party_repositories():
+def cargo_raze_repositories():
     """Creates repository definitions for all cargo-raze third party dependencies"""
 
     maybe(

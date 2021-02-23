@@ -5,7 +5,13 @@ alias(
 )
 
 alias(
-    name = "cargo_raze_bin",
+    name = "raze",
+    actual = "//impl:cargo_raze_bin",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "bin",
     actual = "//impl:cargo_raze_bin",
     visibility = ["//visibility:public"],
 )
