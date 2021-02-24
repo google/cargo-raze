@@ -1,4 +1,4 @@
-load("@rules_rust//rust:rust.bzl", "rust_binary", "rust_library", "rust_test")
+load("@rules_rust//rust:rust.bzl", "rust_binary", "rust_clippy", "rust_library", "rust_test")
 load("//third_party/cargo:crates.bzl", "all_crate_deps")
 
 package(default_visibility = ["//visibility:public"])
@@ -81,4 +81,13 @@ rust_test(
     env = _TEST_ENV,
     proc_macro_deps = all_crate_deps(proc_macro_dev = True),
     deps = all_crate_deps(normal_dev = True),
+)
+
+rust_clippy(
+    name = "cargo_raze_clippy",
+    testonly = True,
+    deps = [
+        ":cargo_raze",
+        ":cargo_raze_bin",
+    ],
 )
