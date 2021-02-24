@@ -28,39 +28,15 @@ rust_binary(
     deps = [":cargo_raze"] + all_crate_deps(),
 )
 
-alias(
-    name = "cargo",
-    actual = select({
-        "@rules_rust//rust/platform:aarch64-apple-darwin": "@rust_darwin_aarch64//:cargo",
-        "@rules_rust//rust/platform:aarch64-unknown-linux-gnu": "@rust_linux_aarch64//:cargo",
-        "@rules_rust//rust/platform:x86_64-apple-darwin": "@rust_darwin_x86_64//:cargo",
-        "@rules_rust//rust/platform:x86_64-pc-windows-msvc": "@rust_windows_x86_64//:cargo",
-        "@rules_rust//rust/platform:x86_64-unknown-linux-gnu": "@rust_linux_x86_64//:cargo",
-    }),
-    visibility = ["//visibility:private"],
-)
-
-alias(
-    name = "rustc",
-    actual = select({
-        "@rules_rust//rust/platform:aarch64-apple-darwin": "@rust_darwin_aarch64//:rustc",
-        "@rules_rust//rust/platform:aarch64-unknown-linux-gnu": "@rust_linux_aarch64//:rustc",
-        "@rules_rust//rust/platform:x86_64-apple-darwin": "@rust_darwin_x86_64//:rustc",
-        "@rules_rust//rust/platform:x86_64-pc-windows-msvc": "@rust_windows_x86_64//:rustc",
-        "@rules_rust//rust/platform:x86_64-unknown-linux-gnu": "@rust_linux_x86_64//:rustc",
-    }),
-    visibility = ["//visibility:private"],
-)
-
 _TEST_DATA = glob(["src/**/*.template"]) + [
-    ":cargo",
-    ":rustc",
+    "//tools:cargo",
+    "//tools:rustc",
 ]
 
 _TEST_ENV = {
-    "CARGO": "$(execpath :cargo)",
-    "CARGO_HOME": "$(execpath :cargo).home",
-    "RUSTC": "$(execpath :rustc)",
+    "CARGO": "$(execpath //tools:cargo)",
+    "CARGO_HOME": "$(execpath //tools:cargo).home",
+    "RUSTC": "$(execpath //tools:rustc)",
 }
 
 rust_test(

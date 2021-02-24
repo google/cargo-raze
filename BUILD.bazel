@@ -6,7 +6,7 @@ alias(
 
 alias(
     name = "raze",
-    actual = "//impl:cargo_raze_bin",
+    actual = "//tools:raze",
     visibility = ["//visibility:public"],
 )
 
