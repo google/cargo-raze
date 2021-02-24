@@ -882,4 +882,67 @@ mod tests {
             "# }
     }))
   }
+
+  #[test]
+  fn test_experimental_api_with_workspace_members() {
+    // Setup render detials
+    let mut render_details = dummy_render_details("BUILD.bazel");
+    render_details.experimental_api = true;
+    render_details.render_package_aliases = false;
+    render_details.bazel_root = PathBuf::from("/tmp/workspace");
+    render_details.cargo_root = PathBuf::from("/tmp/workspace");
+    render_details.path_prefix = PathBuf::from("cargo");
+
+    // Setup planned build
+    let mut lib_a = dummy_library_crate();
+    lib_a.workspace_member_dependents = vec![PathBuf::from("lib_a")];
+
+    let mut lib_b = dummy_library_crate();
+    lib_b.workspace_member_dependents = vec![PathBuf::from("lib_b")];
+
+    let mut planned_build = dummy_planned_build(vec![lib_a, lib_b]);
+
+    // Render files
+    planned_build.workspace_context = WorkspaceContext {
+      workspace_path: "//cargo".to_owned(),
+      gen_workspace_prefix: "raze".to_owned(),
+      output_buildfile_suffix: "BUILD.bazel".to_owned(),
+      workspace_members: vec![PathBuf::from("lib_a"), PathBuf::from("lib_b")],
+    };
+
+    let file_outputs = BazelRenderer::new()
+      .render_remote_planned_build(&render_details, &planned_build)
+      .unwrap();
+
+    // Assert package names do not start with `/`
+    let file_name = "/tmp/workspace/./cargo/crates.bzl".to_owned();
+    let crates_bzl_contents = extract_contents_matching_path(&file_outputs, &file_name);
+
+    // The `crates.bzl` file should contains something like the following:
+    //
+    // _DEPENDENCIES = {
+    //     "lib_a\": {
+    //       "test-library": "@raze__test_library__1_1_1//:test_library",
+    //     },
+    //     "lib_b\": {
+    //       "test-library\": "@raze__test_library__1_1_1//:test_library",
+    //     },
+    // }
+
+    expect(
+      crates_bzl_contents.contains("\"lib_a\": {"),
+      "The rendered crates.bzl file does not contain a sanitized package name in the dependencies \
+       map"
+        .to_owned(),
+    )
+    .unwrap();
+
+    expect(
+      crates_bzl_contents.contains("\"lib_b\": {"),
+      "The rendered crates.bzl file does not contain a sanitized package name in the dependencies \
+       map"
+        .to_owned(),
+    )
+    .unwrap();
+  }
 }
