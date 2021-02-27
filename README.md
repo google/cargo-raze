@@ -260,6 +260,9 @@ files. eg:
 bazel run @cargo_raze//:raze -- --manifest-path=$(pwd)/Cargo.toml
 ```
 
+Note that users using the `vendored` genmode will still have to vendor their dependencies
+somehow as `cargo-raze` does not currently do this for you.
+
 ### Handling Unconventional Crates
 
 Some crates execute a "build script", which, while technically unrestricted in
