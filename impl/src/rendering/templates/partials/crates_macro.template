@@ -2,7 +2,7 @@
 _DEPENDENCIES = {
 {%- for workspace_member in workspace.workspace_members %}
 {%- if workspace_member %}
-    "{{ bazel_package_name }}/{{ workspace_member }}": {
+    "{{ bazel_package_name ~ "/" ~ workspace_member | trim_start_matches(pat="/") }}": {
 {%- else %}
     "{{ bazel_package_name }}": {
 {%- endif %}
@@ -20,7 +20,7 @@ _DEPENDENCIES = {
 _PROC_MACRO_DEPENDENCIES = {
 {%- for workspace_member in workspace.workspace_members %}
 {%- if workspace_member %}
-    "{{ bazel_package_name }}/{{ workspace_member }}": {
+    "{{ bazel_package_name ~ "/" ~ workspace_member | trim_start_matches(pat="/") }}": {
 {%- else %}
     "{{ bazel_package_name }}": {
 {%- endif %}
@@ -38,7 +38,7 @@ _PROC_MACRO_DEPENDENCIES = {
 _DEV_DEPENDENCIES = {
 {%- for workspace_member in workspace.workspace_members %}
 {%- if workspace_member %}
-    "{{ bazel_package_name }}/{{ workspace_member }}": {
+    "{{ bazel_package_name ~ "/" ~ workspace_member | trim_start_matches(pat="/") }}": {
 {%- else %}
     "{{ bazel_package_name }}": {
 {%- endif %}
@@ -56,7 +56,7 @@ _DEV_DEPENDENCIES = {
 _DEV_PROC_MACRO_DEPENDENCIES = {
 {%- for workspace_member in workspace.workspace_members %}
 {%- if workspace_member %}
-    "{{ bazel_package_name }}/{{ workspace_member }}": {
+    "{{ bazel_package_name ~ "/" ~ workspace_member | trim_start_matches(pat="/") }}": {
 {%- else %}
     "{{ bazel_package_name }}": {
 {%- endif %}

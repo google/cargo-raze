@@ -40,3 +40,40 @@ sh_binary(
     ],
     data = ["//impl:cargo_raze_bin"],
 )
+
+alias(
+    name = "cargo",
+    actual = select({
+        "@rules_rust//rust/platform:aarch64-apple-darwin": "@rust_darwin_aarch64//:cargo",
+        "@rules_rust//rust/platform:aarch64-unknown-linux-gnu": "@rust_linux_aarch64//:cargo",
+        "@rules_rust//rust/platform:x86_64-apple-darwin": "@rust_darwin_x86_64//:cargo",
+        "@rules_rust//rust/platform:x86_64-pc-windows-msvc": "@rust_windows_x86_64//:cargo",
+        "@rules_rust//rust/platform:x86_64-unknown-linux-gnu": "@rust_linux_x86_64//:cargo",
+    }),
+)
+
+alias(
+    name = "rustc",
+    actual = select({
+        "@rules_rust//rust/platform:aarch64-apple-darwin": "@rust_darwin_aarch64//:rustc",
+        "@rules_rust//rust/platform:aarch64-unknown-linux-gnu": "@rust_linux_aarch64//:rustc",
+        "@rules_rust//rust/platform:x86_64-apple-darwin": "@rust_darwin_x86_64//:rustc",
+        "@rules_rust//rust/platform:x86_64-pc-windows-msvc": "@rust_windows_x86_64//:rustc",
+        "@rules_rust//rust/platform:x86_64-unknown-linux-gnu": "@rust_linux_x86_64//:rustc",
+    }),
+)
+
+sh_binary(
+    name = "raze",
+    srcs = ["wrapper.sh"],
+    data = [
+        ":cargo",
+        ":rustc",
+        "//impl:cargo_raze_bin",
+    ],
+    env = {
+        "CARGO": "$(execpath :cargo)",
+        "CARGO_RAZE": "$(execpath //impl:cargo_raze_bin)",
+        "RUSTC": "$(execpath :rustc)",
+    },
+)
