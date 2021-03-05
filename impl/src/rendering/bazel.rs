@@ -101,6 +101,10 @@ impl BazelRenderer {
           include_str!("templates/partials/rust_library.template"),
         ),
         (
+          "templates/partials/rust_proc_macro.template",
+          include_str!("templates/partials/rust_proc_macro.template"),
+        ),
+        (
           "templates/partials/targeted_dependencies.template",
           include_str!("templates/partials/targeted_dependencies.template"),
         ),
@@ -630,6 +634,54 @@ mod tests {
     return dummy_library_crate_with_name("BUILD");
   }
 
+  fn dummy_proc_macro_crate_with_name(buildfile_suffix: &str) -> CrateContext {
+    CrateContext {
+      pkg_name: "test-proc-macro".to_owned(),
+      pkg_version: Version::parse("1.1.1").unwrap(),
+      edition: "2015".to_owned(),
+      license: LicenseData::default(),
+      raze_settings: CrateSettings::default(),
+      canonical_additional_build_file: CrateSettings::default().additional_build_file,
+      features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
+      expected_build_path: format!("vendor/test-proc-macro-1.1.1/{}", buildfile_suffix),
+      default_deps: CrateDependencyContext {
+        dependencies: Vec::new(),
+        proc_macro_dependencies: Vec::new(),
+        data_dependencies: Vec::new(),
+        build_dependencies: Vec::new(),
+        build_proc_macro_dependencies: Vec::new(),
+        build_data_dependencies: Vec::new(),
+        dev_dependencies: Vec::new(),
+        aliased_dependencies: Vec::new(),
+      },
+      targeted_deps: Vec::new(),
+      workspace_member_dependents: Vec::new(),
+      workspace_member_dev_dependents: Vec::new(),
+      is_workspace_member_dependency: false,
+      is_binary_dependency: false,
+      is_proc_macro: true,
+      workspace_path_to_crate: "@raze__test_proc_macro__1_1_1//".to_owned(),
+      targets: vec![BuildableTarget {
+        name: "some_proc_macro".to_owned(),
+        kind: "proc-macro".to_owned(),
+        path: "path/lib.rs".to_owned(),
+        edition: "2015".to_owned(),
+      }],
+      build_script_target: None,
+      links: Some("ssh2".to_owned()),
+      source_details: SourceDetails {
+        git_data: None,
+      },
+      sha256: None,
+      registry_url: "https://crates.io/api/v1/crates/test-proc-macro/1.1.1/download".to_string(),
+      lib_target_name: Some("test_proc_macro".to_owned()),
+    }
+  }
+
+  fn dummy_proc_macro_crate() -> CrateContext {
+    return dummy_proc_macro_crate_with_name("BUILD");
+  }
+
   fn extract_contents_matching_path(file_outputs: &Vec<FileOutputs>, file_name: &str) -> String {
     println!("Known files :{:?}", file_outputs);
     let mut matching_files_contents = file_outputs
@@ -798,6 +850,24 @@ mod tests {
       crate_build_contents.contains("rust_library("),
       format!(
         "expected crate build contents to contain rust_library, but it just contained [{}]",
+        crate_build_contents
+      ),
+    )
+    .unwrap();
+  }
+
+  #[test]
+  fn libraries_get_rust_proc_macro_rules() {
+    let file_outputs = render_crates_for_test(vec![dummy_proc_macro_crate()]);
+    let crate_build_contents = extract_contents_matching_path(
+      &file_outputs,
+      "/some/bazel/root/./some_render_prefix/vendor/test-proc-macro-1.1.1/BUILD",
+    );
+
+    expect(
+      crate_build_contents.contains("rust_proc_macro("),
+      format!(
+        "expected crate build contents to contain rust_proc_macro, but it just contained [{}]",
         crate_build_contents
       ),
     )

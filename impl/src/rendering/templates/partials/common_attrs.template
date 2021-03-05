@@ -17,9 +17,6 @@
         {%- endfor %}
     ],
     crate_root = "{{ target.path }}",
-    {%- if target.kind != "bin" %}
-    crate_type = "{{ target.kind }}",
-    {%- endif %}
     data = []
     {%- if crate.raze_settings.data_attr %} + {{crate.raze_settings.data_attr}}
     {%- endif -%}
