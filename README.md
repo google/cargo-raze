@@ -1,7 +1,7 @@
 # cargo-raze: Bazel BUILD generation for Rust Crates
 
 [![Build
-status](https://badge.buildkite.com/bd8945700a2e0ddb094b1fefabde71cb81bad9a93bb774c384.svg?branch=main)](https://buildkite.com/bazel/cargo-raze)
+status](https://badge.buildkite.com/bd8945700a2e0ddb094b1fefabde71cb81bad9a93bb774c384.svg?branch=main)](https://buildkite.com/bazel/cargo-raze?branch=main)
 
 An experimental support Cargo plugin for distilling a workspace-level
 Cargo.toml into BUILD targets that code using [rules_rust](https://github.com/bazelbuild/rules_rust)
@@ -224,6 +224,44 @@ $ cargo raze
 
 You can now depend on any _explicit_ dependencies in any Rust rule by depending on
 `//cargo:your_dependency_name`.
+
+### Using cargo-raze through Bazel
+
+Cargo-raze can be built entirely in Bazel and used without needing to setup cargo
+on the host machine. To do so, simply add the following to the WORKSPACE file in
+your project:
+
+```python
+# Note: The `cargo_raze` repository expects `rules_rust` to have already been
+# specified in the WORKSPACE per the Usage section of the README.
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "cargo_raze",
+    sha256 = "c664e258ea79e7e4ec2f2b57bca8b1c37f11c8d5748e02b8224810da969eb681",
+    strip_prefix = "cargo-raze-0.11.0",
+    url = "https://github.com/google/cargo-raze/archive/v0.11.0.tar.gz",
+)
+
+load("@cargo_raze//:repositories.bzl", "cargo_raze_repositories")
+
+cargo_raze_repositories()
+
+load("@cargo_raze//:transitive_deps.bzl", "cargo_raze_transitive_deps")
+
+cargo_raze_transitive_deps()
+```
+
+With this in place, users can run the `@cargo_raze//:raze` target to generate new BUILD
+files. eg:
+
+```bash
+bazel run @cargo_raze//:raze -- --manifest-path=$(pwd)/Cargo.toml
+```
+
+Note that users using the `vendored` genmode will still have to vendor their dependencies
+somehow as `cargo-raze` does not currently do this for you.
 
 ### Handling Unconventional Crates
 
