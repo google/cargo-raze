@@ -1,7 +1,7 @@
 # cargo-raze: Bazel BUILD generation for Rust Crates
 
 [![Build
-status](https://badge.buildkite.com/bd8945700a2e0ddb094b1fefabde71cb81bad9a93bb774c384.svg)](https://buildkite.com/bazel/cargo-raze)
+status](https://badge.buildkite.com/bd8945700a2e0ddb094b1fefabde71cb81bad9a93bb774c384.svg?branch=main)](https://buildkite.com/bazel/cargo-raze)
 
 An experimental support Cargo plugin for distilling a workspace-level
 Cargo.toml into BUILD targets that code using [rules_rust](https://github.com/bazelbuild/rules_rust)
