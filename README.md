@@ -232,9 +232,6 @@ on the host machine. To do so, simply add the following to the WORKSPACE file in
 your project:
 
 ```python
-# Note: The `cargo_raze` repository expects `rules_foreign_cc` and `rules_rust` to
-# have already been specified in the WORKSPACE per the Usage section of the README.
-
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
