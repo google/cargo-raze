@@ -257,7 +257,7 @@ With this in place, users can run the `@cargo_raze//:raze` target to generate ne
 files. eg:
 
 ```bash
-bazel run @cargo_raze//:raze -- --manifest-path=$(pwd)/Cargo.toml
+bazel run @cargo_raze//:raze -- --manifest-path=$(realpath /Cargo.toml)
 ```
 
 Note that users using the `vendored` genmode will still have to vendor their dependencies
