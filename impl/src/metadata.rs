@@ -14,6 +14,7 @@
 
 use std::{
   collections::HashMap,
+  env::consts,
   fs,
   path::{Path, PathBuf},
   string::String,
@@ -180,7 +181,10 @@ impl RazeMetadataFetcher {
 
   /// Symlinks the source code of all workspace members into the temp workspace
   fn link_src_to_workspace(&self, no_deps_metadata: &Metadata, temp_dir: &Path) -> Result<()> {
-    let crate_member_id_re = Regex::new(r".+\(path\+file://(.+)\)")?;
+    let crate_member_id_re = match consts::OS {
+      "windows" => Regex::new(r".+\(path\+file:///(.+)\)")?,
+      _ => Regex::new(r".+\(path\+file://(.+)\)")?,
+    };
     for member in no_deps_metadata.workspace_members.iter() {
       // Get a path to the workspace member directory
       let workspace_member_directory = {
