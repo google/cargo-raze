@@ -1,4 +1,4 @@
-load("@rules_foreign_cc//tools/build_defs:cmake.bzl", "cmake_external")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
 
 filegroup(
     name = "all",
@@ -23,14 +23,14 @@ _LINUX_CACHE_ENTRIES = dict(_CACHE_ENTRIES.items() + {
     "REGEX_BACKEND": "pcre",
 }.items())
 
-cmake_external(
+cmake(
     name = "libgit2",
     cache_entries = select({
         "@rules_rust//rust/platform:linux": _LINUX_CACHE_ENTRIES,
         "//conditions:default": _CACHE_ENTRIES,
     }),
     lib_source = ":all",
-    static_libraries = select({
+    out_static_libs = select({
         # TODO: I'm guessing at this name. Needs to be checked on windows.
         "@rules_rust//rust/platform:windows": ["git2.lib"],
         "//conditions:default": ["libgit2.a"],
@@ -38,8 +38,8 @@ cmake_external(
     visibility = ["//visibility:public"],
     deps = [
         "@cargo_raze__libssh2//:libssh2",
-        "@cargo_raze__zlib//:zlib",
         "@cargo_raze__openssl//:openssl",
+        "@cargo_raze__zlib//:zlib",
     ] + select({
         "@rules_rust//rust/platform:darwin": ["@cargo_raze__iconv//:iconv"],
         "@rules_rust//rust/platform:linux": ["@cargo_raze__pcre//:pcre"],
