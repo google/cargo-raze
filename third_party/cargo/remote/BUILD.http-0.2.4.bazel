@@ -30,13 +30,20 @@ licenses([
 
 # Generated Targets
 
-# Unsupported target "eval" with type "example" omitted
+# Unsupported target "header_map" with type "bench" omitted
+
+# Unsupported target "header_name" with type "bench" omitted
+
+# Unsupported target "header_value" with type "bench" omitted
+
+# Unsupported target "method" with type "bench" omitted
+
+# Unsupported target "uri" with type "bench" omitted
 
 rust_library(
-    name = "cfg_expr",
+    name = "http",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "default",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -49,15 +56,17 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.6.0",
+    version = "0.2.4",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__smallvec__1_6_1//:smallvec",
+        "@cargo_raze__bytes__1_0_1//:bytes",
+        "@cargo_raze__fnv__1_0_7//:fnv",
+        "@cargo_raze__itoa__0_4_7//:itoa",
     ],
 )
 
-# Unsupported target "eval" with type "test" omitted
+# Unsupported target "header_map" with type "test" omitted
 
-# Unsupported target "lexer" with type "test" omitted
+# Unsupported target "header_map_fuzz" with type "test" omitted
 
-# Unsupported target "parser" with type "test" omitted
+# Unsupported target "status_code" with type "test" omitted

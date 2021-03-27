@@ -56,11 +56,11 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.4.41+curl-7.75.0",
+    version = "0.4.42+curl-7.76.0",
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__curl//:curl",
-        "@cargo_raze__libc__0_2_92//:libc",
+        "@cargo_raze__libc__0_2_93//:libc",
         "@cargo_raze__libnghttp2_sys__0_1_6_1_43_0//:libnghttp2_sys",
         "@cargo_raze__libz_sys__1_1_2//:libz_sys",
     ] + selects.with_or({

@@ -56,7 +56,7 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__native_tls__0_2_7//:native_tls",
-        "@cargo_raze__tokio__1_4_0//:tokio",
+        "@cargo_raze__tokio__1_5_0//:tokio",
     ] + selects.with_or({
         # cfg(all(not(target_os = "macos"), not(windows), not(target_os = "ios")))
         (

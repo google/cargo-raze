@@ -30,13 +30,10 @@ licenses([
 
 # Generated Targets
 
-# Unsupported target "sync_mpsc" with type "bench" omitted
-
 rust_library(
-    name = "futures_channel",
+    name = "futures_io",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "alloc",
         "default",
         "std",
     ],
@@ -51,17 +48,8 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.3.13",
+    version = "0.3.14",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__futures_core__0_3_13//:futures_core",
     ],
 )
-
-# Unsupported target "channel" with type "test" omitted
-
-# Unsupported target "mpsc" with type "test" omitted
-
-# Unsupported target "mpsc-close" with type "test" omitted
-
-# Unsupported target "oneshot" with type "test" omitted

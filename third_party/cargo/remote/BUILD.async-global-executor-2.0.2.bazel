@@ -53,7 +53,7 @@ rust_library(
     deps = [
         "@cargo_raze__async_channel__1_6_1//:async_channel",
         "@cargo_raze__async_executor__1_4_0//:async_executor",
-        "@cargo_raze__async_io__1_3_1//:async_io",
+        "@cargo_raze__async_io__1_4_0//:async_io",
         "@cargo_raze__async_mutex__1_4_0//:async_mutex",
         "@cargo_raze__blocking__1_0_2//:blocking",
         "@cargo_raze__futures_lite__1_11_3//:futures_lite",

@@ -41,7 +41,7 @@ rust_binary(
     data = [],
     edition = "2018",
     proc_macro_deps = [
-        "@cargo_raze__async_trait__0_1_48//:async_trait",
+        "@cargo_raze__async_trait__0_1_49//:async_trait",
     ],
     rustc_flags = [
         "--cap-lints=allow",
@@ -60,9 +60,9 @@ rust_binary(
         "@cargo_raze__basic_cookies__0_1_4//:basic_cookies",
         "@cargo_raze__crossbeam_utils__0_8_3//:crossbeam_utils",
         "@cargo_raze__difference__2_0_0//:difference",
-        "@cargo_raze__futures_util__0_3_13//:futures_util",
+        "@cargo_raze__futures_util__0_3_14//:futures_util",
         "@cargo_raze__hyper__0_14_5//:hyper",
-        "@cargo_raze__isahc__1_2_0//:isahc",
+        "@cargo_raze__isahc__1_3_1//:isahc",
         "@cargo_raze__lazy_static__1_4_0//:lazy_static",
         "@cargo_raze__levenshtein__1_0_5//:levenshtein",
         "@cargo_raze__log__0_4_14//:log",
@@ -71,7 +71,7 @@ rust_binary(
         "@cargo_raze__serde__1_0_125//:serde",
         "@cargo_raze__serde_json__1_0_64//:serde_json",
         "@cargo_raze__serde_regex__1_1_0//:serde_regex",
-        "@cargo_raze__tokio__1_4_0//:tokio",
+        "@cargo_raze__tokio__1_5_0//:tokio",
     ],
 )
 
@@ -85,7 +85,7 @@ rust_library(
     data = [],
     edition = "2018",
     proc_macro_deps = [
-        "@cargo_raze__async_trait__0_1_48//:async_trait",
+        "@cargo_raze__async_trait__0_1_49//:async_trait",
     ],
     rustc_flags = [
         "--cap-lints=allow",
@@ -103,9 +103,9 @@ rust_library(
         "@cargo_raze__basic_cookies__0_1_4//:basic_cookies",
         "@cargo_raze__crossbeam_utils__0_8_3//:crossbeam_utils",
         "@cargo_raze__difference__2_0_0//:difference",
-        "@cargo_raze__futures_util__0_3_13//:futures_util",
+        "@cargo_raze__futures_util__0_3_14//:futures_util",
         "@cargo_raze__hyper__0_14_5//:hyper",
-        "@cargo_raze__isahc__1_2_0//:isahc",
+        "@cargo_raze__isahc__1_3_1//:isahc",
         "@cargo_raze__lazy_static__1_4_0//:lazy_static",
         "@cargo_raze__levenshtein__1_0_5//:levenshtein",
         "@cargo_raze__log__0_4_14//:log",
@@ -114,7 +114,7 @@ rust_library(
         "@cargo_raze__serde__1_0_125//:serde",
         "@cargo_raze__serde_json__1_0_64//:serde_json",
         "@cargo_raze__serde_regex__1_1_0//:serde_regex",
-        "@cargo_raze__tokio__1_4_0//:tokio",
+        "@cargo_raze__tokio__1_5_0//:tokio",
     ],
 )
 

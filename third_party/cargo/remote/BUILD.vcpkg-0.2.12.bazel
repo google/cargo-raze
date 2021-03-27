@@ -31,14 +31,14 @@ licenses([
 # Generated Targets
 
 rust_library(
-    name = "spinning_top",
+    name = "vcpkg",
     srcs = glob(["**/*.rs"]),
     crate_features = [
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
     data = [],
-    edition = "2018",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -46,9 +46,8 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.2.2",
+    version = "0.2.12",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__lock_api__0_4_3//:lock_api",
     ],
 )

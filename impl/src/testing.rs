@@ -13,31 +13,39 @@
 // limitations under the License.
 
 use cargo_metadata::Metadata;
-use flate2::Compression;
-use httpmock::{Method::GET, MockRef, MockServer};
+
 use indoc::{formatdoc, indoc};
-use serde_json::json;
 use tempfile::TempDir;
 
+use std::{fs::File, io::Write};
+
+use crate::metadata::{
+  tests::{dummy_raze_metadata_fetcher, DummyCargoMetadataFetcher},
+  RazeMetadata,
+};
+
+#[cfg(feature = "binary_deps")]
 use std::{
   collections::HashMap,
-  fs::{create_dir_all, write, File},
-  io::Write,
+  fs::{create_dir_all, write},
   path::Path,
 };
 
-use crate::{
-  metadata::{
-    tests::{dummy_raze_metadata_fetcher, DummyCargoMetadataFetcher},
-    RazeMetadata,
-  },
-  util::package_ident,
-};
+#[cfg(feature = "binary_deps")]
+use serde_json::json;
+
+#[cfg(feature = "binary_deps")]
+use httpmock::{Method::GET, MockRef, MockServer};
+
+#[cfg(feature = "binary_deps")]
+use crate::util::package_ident;
+
+#[cfg(feature = "binary_deps")]
+use flate2::Compression;
 
 /// A module containing constants for each metadata template
 pub mod templates {
   pub const BASIC_METADATA: &str = "basic_metadata.json.template";
-  pub const DUMMY_BINARY_DEPENDENCY_REMOTE: &str = "dummy_binary_dependency_remote.json.template";
   pub const DUMMY_MODIFIED_METADATA: &str = "dummy_modified_metadata.json.template";
   pub const DUMMY_WORKSPACE_MEMBERS_METADATA: &str =
     "dummy_workspace_members_metadata.json.template";
@@ -50,6 +58,9 @@ pub mod templates {
   pub const SEMVER_MATCHING: &str = "semver_matching.json.template";
   pub const SUBPLAN_PRODUCES_CRATE_ROOT_WITH_FORWARD_SLASH: &str =
     "subplan_produces_crate_root_with_forward_slash.json.template";
+
+  #[cfg(feature = "binary_deps")]
+  pub const DUMMY_BINARY_DEPENDENCY_REMOTE: &str = "dummy_binary_dependency_remote.json.template";
 }
 
 pub const fn basic_toml_contents() -> &'static str {
@@ -127,6 +138,7 @@ pub fn named_toml_contents(name: &str, version: &str) -> String {
   "#, name = name, version = version }
 }
 
+#[cfg(feature = "binary_deps")]
 pub fn named_lock_contents(name: &str, version: &str) -> String {
   formatdoc! { r#"
     [[package]]
@@ -167,6 +179,7 @@ pub fn make_workspace_with_dependency() -> TempDir {
 }
 
 /// A helper stuct for mocking a crates.io remote crate endpoint
+#[cfg(feature = "binary_deps")]
 pub struct MockRemoteCrateInfo<'http_mock_server> {
   // A directory of mock data to pull via a mocked endpoint
   pub data_dir: TempDir,
@@ -176,6 +189,7 @@ pub struct MockRemoteCrateInfo<'http_mock_server> {
 
 /// Configures the given mock_server (representing a crates.io remote) to return
 /// mock responses for the given crate and version .
+#[cfg(feature = "binary_deps")]
 pub fn mock_remote_crate<'server>(
   name: &str,
   version: &str,
@@ -247,6 +261,7 @@ pub fn mock_remote_crate<'server>(
 }
 
 /// A helper macro for passing a `crates` to  `mock_crate_index`
+#[cfg(feature = "binary_deps")]
 pub fn to_index_crates_map(list: Vec<(&str, &str)>) -> HashMap<String, String> {
   list
     .iter()
@@ -255,6 +270,7 @@ pub fn to_index_crates_map(list: Vec<(&str, &str)>) -> HashMap<String, String> {
 }
 
 /// Create a mock cache in a temporary directory that contains a set of given crates
+#[cfg(feature = "binary_deps")]
 pub fn mock_crate_index(
   crates: &HashMap<String, String>,
   mock_dir: Option<&Path>,

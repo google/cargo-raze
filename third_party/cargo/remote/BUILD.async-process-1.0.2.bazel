@@ -65,7 +65,7 @@ rust_library(
             "@rules_rust//rust/platform:x86_64-apple-darwin",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
-            "@cargo_raze__async_io__1_3_1//:async_io",
+            "@cargo_raze__async_io__1_4_0//:async_io",
             "@cargo_raze__signal_hook__0_3_8//:signal_hook",
         ],
         "//conditions:default": [],

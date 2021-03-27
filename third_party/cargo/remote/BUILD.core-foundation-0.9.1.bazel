@@ -50,7 +50,7 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__core_foundation_sys__0_8_2//:core_foundation_sys",
-        "@cargo_raze__libc__0_2_92//:libc",
+        "@cargo_raze__libc__0_2_93//:libc",
     ],
 )
 

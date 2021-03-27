@@ -54,7 +54,7 @@ rust_library(
     data = [],
     edition = "2018",
     proc_macro_deps = [
-        "@cargo_raze__futures_macro__0_3_13//:futures_macro",
+        "@cargo_raze__futures_macro__0_3_14//:futures_macro",
         "@cargo_raze__proc_macro_hack__0_5_19//:proc_macro_hack",
     ],
     rustc_flags = [
@@ -64,12 +64,12 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.3.13",
+    version = "0.3.14",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__futures_core__0_3_13//:futures_core",
-        "@cargo_raze__futures_io__0_3_13//:futures_io",
-        "@cargo_raze__futures_task__0_3_13//:futures_task",
+        "@cargo_raze__futures_core__0_3_14//:futures_core",
+        "@cargo_raze__futures_io__0_3_14//:futures_io",
+        "@cargo_raze__futures_task__0_3_14//:futures_task",
         "@cargo_raze__memchr__2_3_4//:memchr",
         "@cargo_raze__pin_project_lite__0_2_6//:pin_project_lite",
         "@cargo_raze__pin_utils__0_1_0//:pin_utils",

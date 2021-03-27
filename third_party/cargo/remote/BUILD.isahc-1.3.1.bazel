@@ -59,10 +59,10 @@ cargo_build_script(
         "cargo-raze",
         "manual",
     ],
-    version = "1.2.0",
+    version = "1.3.1",
     visibility = ["//visibility:private"],
     deps = [
-        "@cargo_raze__curl_sys__0_4_41_curl_7_75_0//:curl_sys",
+        "@cargo_raze__curl_sys__0_4_42_curl_7_76_0//:curl_sys",
     ],
 )
 
@@ -116,17 +116,17 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.2.0",
+    version = "1.3.1",
     # buildifier: leave-alone
     deps = [
         ":isahc_build_script",
+        "@cargo_raze__async_channel__1_6_1//:async_channel",
         "@cargo_raze__crossbeam_utils__0_8_3//:crossbeam_utils",
         "@cargo_raze__curl__0_4_35//:curl",
-        "@cargo_raze__curl_sys__0_4_41_curl_7_75_0//:curl_sys",
+        "@cargo_raze__curl_sys__0_4_42_curl_7_76_0//:curl_sys",
         "@cargo_raze__encoding_rs__0_8_28//:encoding_rs",
-        "@cargo_raze__flume__0_10_2//:flume",
         "@cargo_raze__futures_lite__1_11_3//:futures_lite",
-        "@cargo_raze__http__0_2_3//:http",
+        "@cargo_raze__http__0_2_4//:http",
         "@cargo_raze__log__0_4_14//:log",
         "@cargo_raze__mime__0_3_16//:mime",
         "@cargo_raze__once_cell__1_7_2//:once_cell",

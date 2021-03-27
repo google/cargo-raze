@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::{
+  collections::HashMap,
   env,
   fs::{self, File},
   io::Write,
@@ -22,6 +23,7 @@ use std::{
 use anyhow::{anyhow, Context, Result};
 
 use cargo_metadata::Metadata;
+use cargo_toml::Dependency;
 use docopt::Docopt;
 
 use cargo_raze::{
@@ -170,6 +172,20 @@ fn fetch_local_metadata(options: &Options) -> Result<Metadata> {
     })
 }
 
+#[cfg(feature = "binary_deps")]
+fn get_binary_dep_info(settings: &RazeSettings) -> Option<&HashMap<String, Dependency>> {
+  if settings.genmode == GenMode::Remote {
+    Some(&settings.binary_deps)
+  } else {
+    None
+  }
+}
+
+#[cfg(not(feature = "binary_deps"))]
+fn get_binary_dep_info(_settings: &RazeSettings) -> Option<&HashMap<String, Dependency>> {
+  None
+}
+
 fn fetch_raze_metadata(
   options: &Options,
   settings: &RazeSettings,
@@ -187,11 +203,7 @@ fn fetch_raze_metadata(
   let cargo_raze_working_dir =
     find_bazel_workspace_root(&local_metadata.workspace_root).unwrap_or(env::current_dir()?);
 
-  let binary_dep_info = if settings.genmode == GenMode::Remote {
-    Some(&settings.binary_deps)
-  } else {
-    None
-  };
+  let binary_dep_info = get_binary_dep_info(&settings);
 
   let reused_lockfile = if !options.flag_generate_lockfile.unwrap_or(false) {
     find_lockfile(
@@ -204,8 +216,8 @@ fn fetch_raze_metadata(
 
   let raze_metadata = metadata_fetcher.fetch_metadata(
     &local_metadata.workspace_root,
-    binary_dep_info,
     reused_lockfile,
+    binary_dep_info,
   )?;
 
   checks::check_metadata(&raze_metadata, &settings, &cargo_raze_working_dir)?;

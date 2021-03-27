@@ -121,7 +121,7 @@ rust_library(
             "@rules_rust//rust/platform:x86_64-apple-darwin",
         ): [
             "@cargo_raze__lazy_static__1_4_0//:lazy_static",
-            "@cargo_raze__libc__0_2_92//:libc",
+            "@cargo_raze__libc__0_2_93//:libc",
             "@cargo_raze__security_framework__2_2_0//:security_framework",
             "@cargo_raze__security_framework_sys__2_2_0//:security_framework_sys",
             "@cargo_raze__tempfile__3_2_0//:tempfile",

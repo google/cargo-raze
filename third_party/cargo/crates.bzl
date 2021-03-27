@@ -18,8 +18,8 @@ _DEPENDENCIES = {
         "cargo-platform": "@cargo_raze__cargo_platform__0_1_1//:cargo_platform",
         "cargo_metadata": "@cargo_raze__cargo_metadata__0_12_3//:cargo_metadata",
         "cargo_toml": "@cargo_raze__cargo_toml__0_8_1//:cargo_toml",
-        "cfg-expr": "@cargo_raze__cfg_expr__0_6_0//:cfg_expr",
-        "crates-index": "@cargo_raze__crates_index__0_16_4//:crates_index",
+        "cfg-expr": "@cargo_raze__cfg_expr__0_7_4//:cfg_expr",
+        "crates-index": "@cargo_raze__crates_index__0_16_5//:crates_index",
         "docopt": "@cargo_raze__docopt__1_1_1//:docopt",
         "glob": "@cargo_raze__glob__0_3_0//:glob",
         "itertools": "@cargo_raze__itertools__0_10_0//:itertools",
@@ -31,9 +31,9 @@ _DEPENDENCIES = {
         "serde": "@cargo_raze__serde__1_0_125//:serde",
         "serde_json": "@cargo_raze__serde_json__1_0_64//:serde_json",
         "slug": "@cargo_raze__slug__0_1_4//:slug",
-        "spdx": "@cargo_raze__spdx__0_3_6//:spdx",
+        "spdx": "@cargo_raze__spdx__0_4_0//:spdx",
         "tempfile": "@cargo_raze__tempfile__3_2_0//:tempfile",
-        "tera": "@cargo_raze__tera__1_7_0//:tera",
+        "tera": "@cargo_raze__tera__1_7_1//:tera",
         "toml": "@cargo_raze__toml__0_5_8//:toml",
         "url": "@cargo_raze__url__2_2_1//:url",
     },
@@ -301,22 +301,22 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__async_io__1_3_1",
-        url = "https://crates.io/api/v1/crates/async-io/1.3.1/download",
+        name = "cargo_raze__async_io__1_4_0",
+        url = "https://crates.io/api/v1/crates/async-io/1.4.0/download",
         type = "tar.gz",
-        sha256 = "9315f8f07556761c3e48fec2e6b276004acf426e6dc068b2c2251854d65ee0fd",
-        strip_prefix = "async-io-1.3.1",
-        build_file = Label("//third_party/cargo/remote:BUILD.async-io-1.3.1.bazel"),
+        sha256 = "fcb9af4888a70ad78ecb5efcb0ba95d66a3cf54a88b62ae81559954c7588c7a2",
+        strip_prefix = "async-io-1.4.0",
+        build_file = Label("//third_party/cargo/remote:BUILD.async-io-1.4.0.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "cargo_raze__async_lock__2_3_0",
-        url = "https://crates.io/api/v1/crates/async-lock/2.3.0/download",
+        name = "cargo_raze__async_lock__2_4_0",
+        url = "https://crates.io/api/v1/crates/async-lock/2.4.0/download",
         type = "tar.gz",
-        sha256 = "1996609732bde4a9988bc42125f55f2af5f3c36370e27c778d5191a4a1b63bfb",
-        strip_prefix = "async-lock-2.3.0",
-        build_file = Label("//third_party/cargo/remote:BUILD.async-lock-2.3.0.bazel"),
+        sha256 = "e6a8ea61bf9947a1007c5cada31e647dbc77b103c679858150003ba697ea798b",
+        strip_prefix = "async-lock-2.4.0",
+        build_file = Label("//third_party/cargo/remote:BUILD.async-lock-2.4.0.bazel"),
     )
 
     maybe(
@@ -371,12 +371,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__async_trait__0_1_48",
-        url = "https://crates.io/api/v1/crates/async-trait/0.1.48/download",
+        name = "cargo_raze__async_trait__0_1_49",
+        url = "https://crates.io/api/v1/crates/async-trait/0.1.49/download",
         type = "tar.gz",
-        sha256 = "36ea56748e10732c49404c153638a15ec3d6211ec5ff35d9bb20e13b93576adf",
-        strip_prefix = "async-trait-0.1.48",
-        build_file = Label("//third_party/cargo/remote:BUILD.async-trait-0.1.48.bazel"),
+        sha256 = "589652ce7ccb335d1e7ecb3be145425702b290dbcb7029bbeaae263fc1d87b48",
+        strip_prefix = "async-trait-0.1.49",
+        build_file = Label("//third_party/cargo/remote:BUILD.async-trait-0.1.49.bazel"),
     )
 
     maybe(
@@ -621,12 +621,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__cfg_expr__0_6_0",
-        url = "https://crates.io/api/v1/crates/cfg-expr/0.6.0/download",
+        name = "cargo_raze__cfg_expr__0_7_4",
+        url = "https://crates.io/api/v1/crates/cfg-expr/0.7.4/download",
         type = "tar.gz",
-        sha256 = "cb4f9cf6cb58661f5cdcda0240ab42788e009bd957ba56c1367aa01c7c6fbc05",
-        strip_prefix = "cfg-expr-0.6.0",
-        build_file = Label("//third_party/cargo/remote:BUILD.cfg-expr-0.6.0.bazel"),
+        sha256 = "30aa9e2ffbb838c6b451db14f3cd8e63ed622bf859f9956bc93845a10fafc26a",
+        strip_prefix = "cfg-expr-0.7.4",
+        build_file = Label("//third_party/cargo/remote:BUILD.cfg-expr-0.7.4.bazel"),
     )
 
     maybe(
@@ -701,12 +701,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__crates_index__0_16_4",
-        url = "https://crates.io/api/v1/crates/crates-index/0.16.4/download",
+        name = "cargo_raze__crates_index__0_16_5",
+        url = "https://crates.io/api/v1/crates/crates-index/0.16.5/download",
         type = "tar.gz",
-        sha256 = "f01dd064c9e221dd92ad85fce4530969b555ee01a284983da55b46e38690028b",
-        strip_prefix = "crates-index-0.16.4",
-        build_file = Label("//third_party/cargo/remote:BUILD.crates-index-0.16.4.bazel"),
+        sha256 = "8b8921b4ef00013adbfeb803c4a23c5f311eaaaa06b38826e4f887aadbfd3f1d",
+        strip_prefix = "crates-index-0.16.5",
+        build_file = Label("//third_party/cargo/remote:BUILD.crates-index-0.16.5.bazel"),
     )
 
     maybe(
@@ -761,12 +761,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__curl_sys__0_4_41_curl_7_75_0",
-        url = "https://crates.io/api/v1/crates/curl-sys/0.4.41+curl-7.75.0/download",
+        name = "cargo_raze__curl_sys__0_4_42_curl_7_76_0",
+        url = "https://crates.io/api/v1/crates/curl-sys/0.4.42+curl-7.76.0/download",
         type = "tar.gz",
-        sha256 = "0ec466abd277c7cab2905948f3e94d10bc4963f1f5d47921c1cc4ffd2028fe65",
-        strip_prefix = "curl-sys-0.4.41+curl-7.75.0",
-        build_file = Label("//third_party/cargo/remote:BUILD.curl-sys-0.4.41+curl-7.75.0.bazel"),
+        sha256 = "4636d8d6109c842707018a104051436bffb8991ea20b2d1293db70b6e0ee4c7c",
+        strip_prefix = "curl-sys-0.4.42+curl-7.76.0",
+        build_file = Label("//third_party/cargo/remote:BUILD.curl-sys-0.4.42+curl-7.76.0.bazel"),
     )
 
     maybe(
@@ -921,16 +921,6 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__flume__0_10_2",
-        url = "https://crates.io/api/v1/crates/flume/0.10.2/download",
-        type = "tar.gz",
-        sha256 = "531a685ab99b8f60a271b44d5dd1a76e55124a8c9fa0407b7a8e9cd172d5b588",
-        strip_prefix = "flume-0.10.2",
-        build_file = Label("//third_party/cargo/remote:BUILD.flume-0.10.2.bazel"),
-    )
-
-    maybe(
-        http_archive,
         name = "cargo_raze__fnv__1_0_7",
         url = "https://crates.io/api/v1/crates/fnv/1.0.7/download",
         type = "tar.gz",
@@ -971,32 +961,32 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__futures_channel__0_3_13",
-        url = "https://crates.io/api/v1/crates/futures-channel/0.3.13/download",
+        name = "cargo_raze__futures_channel__0_3_14",
+        url = "https://crates.io/api/v1/crates/futures-channel/0.3.14/download",
         type = "tar.gz",
-        sha256 = "8c2dd2df839b57db9ab69c2c9d8f3e8c81984781937fe2807dc6dcf3b2ad2939",
-        strip_prefix = "futures-channel-0.3.13",
-        build_file = Label("//third_party/cargo/remote:BUILD.futures-channel-0.3.13.bazel"),
+        sha256 = "ce79c6a52a299137a6013061e0cf0e688fce5d7f1bc60125f520912fdb29ec25",
+        strip_prefix = "futures-channel-0.3.14",
+        build_file = Label("//third_party/cargo/remote:BUILD.futures-channel-0.3.14.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "cargo_raze__futures_core__0_3_13",
-        url = "https://crates.io/api/v1/crates/futures-core/0.3.13/download",
+        name = "cargo_raze__futures_core__0_3_14",
+        url = "https://crates.io/api/v1/crates/futures-core/0.3.14/download",
         type = "tar.gz",
-        sha256 = "15496a72fabf0e62bdc3df11a59a3787429221dd0710ba8ef163d6f7a9112c94",
-        strip_prefix = "futures-core-0.3.13",
-        build_file = Label("//third_party/cargo/remote:BUILD.futures-core-0.3.13.bazel"),
+        sha256 = "098cd1c6dda6ca01650f1a37a794245eb73181d0d4d4e955e2f3c37db7af1815",
+        strip_prefix = "futures-core-0.3.14",
+        build_file = Label("//third_party/cargo/remote:BUILD.futures-core-0.3.14.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "cargo_raze__futures_io__0_3_13",
-        url = "https://crates.io/api/v1/crates/futures-io/0.3.13/download",
+        name = "cargo_raze__futures_io__0_3_14",
+        url = "https://crates.io/api/v1/crates/futures-io/0.3.14/download",
         type = "tar.gz",
-        sha256 = "d71c2c65c57704c32f5241c1223167c2c3294fd34ac020c807ddbe6db287ba59",
-        strip_prefix = "futures-io-0.3.13",
-        build_file = Label("//third_party/cargo/remote:BUILD.futures-io-0.3.13.bazel"),
+        sha256 = "365a1a1fb30ea1c03a830fdb2158f5236833ac81fa0ad12fe35b29cddc35cb04",
+        strip_prefix = "futures-io-0.3.14",
+        build_file = Label("//third_party/cargo/remote:BUILD.futures-io-0.3.14.bazel"),
     )
 
     maybe(
@@ -1011,42 +1001,42 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__futures_macro__0_3_13",
-        url = "https://crates.io/api/v1/crates/futures-macro/0.3.13/download",
+        name = "cargo_raze__futures_macro__0_3_14",
+        url = "https://crates.io/api/v1/crates/futures-macro/0.3.14/download",
         type = "tar.gz",
-        sha256 = "ea405816a5139fb39af82c2beb921d52143f556038378d6db21183a5c37fbfb7",
-        strip_prefix = "futures-macro-0.3.13",
-        build_file = Label("//third_party/cargo/remote:BUILD.futures-macro-0.3.13.bazel"),
+        sha256 = "668c6733a182cd7deb4f1de7ba3bf2120823835b3bcfbeacf7d2c4a773c1bb8b",
+        strip_prefix = "futures-macro-0.3.14",
+        build_file = Label("//third_party/cargo/remote:BUILD.futures-macro-0.3.14.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "cargo_raze__futures_sink__0_3_13",
-        url = "https://crates.io/api/v1/crates/futures-sink/0.3.13/download",
+        name = "cargo_raze__futures_sink__0_3_14",
+        url = "https://crates.io/api/v1/crates/futures-sink/0.3.14/download",
         type = "tar.gz",
-        sha256 = "85754d98985841b7d4f5e8e6fbfa4a4ac847916893ec511a2917ccd8525b8bb3",
-        strip_prefix = "futures-sink-0.3.13",
-        build_file = Label("//third_party/cargo/remote:BUILD.futures-sink-0.3.13.bazel"),
+        sha256 = "5c5629433c555de3d82861a7a4e3794a4c40040390907cfbfd7143a92a426c23",
+        strip_prefix = "futures-sink-0.3.14",
+        build_file = Label("//third_party/cargo/remote:BUILD.futures-sink-0.3.14.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "cargo_raze__futures_task__0_3_13",
-        url = "https://crates.io/api/v1/crates/futures-task/0.3.13/download",
+        name = "cargo_raze__futures_task__0_3_14",
+        url = "https://crates.io/api/v1/crates/futures-task/0.3.14/download",
         type = "tar.gz",
-        sha256 = "fa189ef211c15ee602667a6fcfe1c1fd9e07d42250d2156382820fba33c9df80",
-        strip_prefix = "futures-task-0.3.13",
-        build_file = Label("//third_party/cargo/remote:BUILD.futures-task-0.3.13.bazel"),
+        sha256 = "ba7aa51095076f3ba6d9a1f702f74bd05ec65f555d70d2033d55ba8d69f581bc",
+        strip_prefix = "futures-task-0.3.14",
+        build_file = Label("//third_party/cargo/remote:BUILD.futures-task-0.3.14.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "cargo_raze__futures_util__0_3_13",
-        url = "https://crates.io/api/v1/crates/futures-util/0.3.13/download",
+        name = "cargo_raze__futures_util__0_3_14",
+        url = "https://crates.io/api/v1/crates/futures-util/0.3.14/download",
         type = "tar.gz",
-        sha256 = "1812c7ab8aedf8d6f2701a43e1243acdbcc2b36ab26e2ad421eb99ac963d96d1",
-        strip_prefix = "futures-util-0.3.13",
-        build_file = Label("//third_party/cargo/remote:BUILD.futures-util-0.3.13.bazel"),
+        sha256 = "3c144ad54d60f23927f0a6b6d816e4271278b64f005ad65e4e35291d2de9c025",
+        strip_prefix = "futures-util-0.3.14",
+        build_file = Label("//third_party/cargo/remote:BUILD.futures-util-0.3.14.bazel"),
     )
 
     maybe(
@@ -1191,12 +1181,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__http__0_2_3",
-        url = "https://crates.io/api/v1/crates/http/0.2.3/download",
+        name = "cargo_raze__http__0_2_4",
+        url = "https://crates.io/api/v1/crates/http/0.2.4/download",
         type = "tar.gz",
-        sha256 = "7245cd7449cc792608c3c8a9eaf69bd4eabbabf802713748fd739c98b82f0747",
-        strip_prefix = "http-0.2.3",
-        build_file = Label("//third_party/cargo/remote:BUILD.http-0.2.3.bazel"),
+        sha256 = "527e8c9ac747e28542699a951517aa9a6945af506cd1f2e1b53a576c17b6cc11",
+        strip_prefix = "http-0.2.4",
+        build_file = Label("//third_party/cargo/remote:BUILD.http-0.2.4.bazel"),
     )
 
     maybe(
@@ -1211,12 +1201,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__httparse__1_3_5",
-        url = "https://crates.io/api/v1/crates/httparse/1.3.5/download",
+        name = "cargo_raze__httparse__1_4_0",
+        url = "https://crates.io/api/v1/crates/httparse/1.4.0/download",
         type = "tar.gz",
-        sha256 = "615caabe2c3160b313d52ccc905335f4ed5f10881dd63dc5699d47e90be85691",
-        strip_prefix = "httparse-1.3.5",
-        build_file = Label("//third_party/cargo/remote:BUILD.httparse-1.3.5.bazel"),
+        sha256 = "4a1ce40d6fc9764887c2fdc7305c3dcc429ba11ff981c1509416afd5697e4437",
+        strip_prefix = "httparse-1.4.0",
+        build_file = Label("//third_party/cargo/remote:BUILD.httparse-1.4.0.bazel"),
     )
 
     maybe(
@@ -1271,12 +1261,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__idna__0_2_2",
-        url = "https://crates.io/api/v1/crates/idna/0.2.2/download",
+        name = "cargo_raze__idna__0_2_3",
+        url = "https://crates.io/api/v1/crates/idna/0.2.3/download",
         type = "tar.gz",
-        sha256 = "89829a5d69c23d348314a7ac337fe39173b61149a9864deabd260983aed48c21",
-        strip_prefix = "idna-0.2.2",
-        build_file = Label("//third_party/cargo/remote:BUILD.idna-0.2.2.bazel"),
+        sha256 = "418a0a6fab821475f634efe3ccc45c013f742efe03d853e8d3355d5cb850ecf8",
+        strip_prefix = "idna-0.2.3",
+        build_file = Label("//third_party/cargo/remote:BUILD.idna-0.2.3.bazel"),
     )
 
     maybe(
@@ -1331,12 +1321,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__isahc__1_2_0",
-        url = "https://crates.io/api/v1/crates/isahc/1.2.0/download",
+        name = "cargo_raze__isahc__1_3_1",
+        url = "https://crates.io/api/v1/crates/isahc/1.3.1/download",
         type = "tar.gz",
-        sha256 = "33b24d2aed6bbe6faeab0e164ec2e9e6193fcfcfe489b6eb59fb0d0d34947d73",
-        strip_prefix = "isahc-1.2.0",
-        build_file = Label("//third_party/cargo/remote:BUILD.isahc-1.2.0.bazel"),
+        sha256 = "3bd9294f1ecdda747b8a092b07873285e613adc14e9c9526205eacedcf3ecd2b",
+        strip_prefix = "isahc-1.3.1",
+        build_file = Label("//third_party/cargo/remote:BUILD.isahc-1.3.1.bazel"),
     )
 
     maybe(
@@ -1431,12 +1421,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__libc__0_2_92",
-        url = "https://crates.io/api/v1/crates/libc/0.2.92/download",
+        name = "cargo_raze__libc__0_2_93",
+        url = "https://crates.io/api/v1/crates/libc/0.2.93/download",
         type = "tar.gz",
-        sha256 = "56d855069fafbb9b344c0f962150cd2c1187975cb1c22c1522c240d8c4986714",
-        strip_prefix = "libc-0.2.92",
-        build_file = Label("//third_party/cargo/remote:BUILD.libc-0.2.92.bazel"),
+        sha256 = "9385f66bf6105b241aa65a61cb923ef20efc665cb9f9bb50ac2f0c4b7f378d41",
+        strip_prefix = "libc-0.2.93",
+        build_file = Label("//third_party/cargo/remote:BUILD.libc-0.2.93.bazel"),
     )
 
     maybe(
@@ -1477,16 +1467,6 @@ def cargo_raze_fetch_remote_crates():
         sha256 = "602113192b08db8f38796c4e85c39e960c145965140e918018bcde1952429655",
         strip_prefix = "libz-sys-1.1.2",
         build_file = Label("//third_party/cargo/remote:BUILD.libz-sys-1.1.2.bazel"),
-    )
-
-    maybe(
-        http_archive,
-        name = "cargo_raze__lock_api__0_4_3",
-        url = "https://crates.io/api/v1/crates/lock_api/0.4.3/download",
-        type = "tar.gz",
-        sha256 = "5a3c91c24eae6777794bb1997ad98bbb87daf92890acab859f7eaa4320333176",
-        strip_prefix = "lock_api-0.4.3",
-        build_file = Label("//third_party/cargo/remote:BUILD.lock_api-0.4.3.bazel"),
     )
 
     maybe(
@@ -1577,16 +1557,6 @@ def cargo_raze_fetch_remote_crates():
         sha256 = "b8d96b2e1c8da3957d58100b09f102c6d9cfdfced01b7ec5a8974044bb09dbd4",
         strip_prefix = "native-tls-0.2.7",
         build_file = Label("//third_party/cargo/remote:BUILD.native-tls-0.2.7.bazel"),
-    )
-
-    maybe(
-        http_archive,
-        name = "cargo_raze__nb_connect__1_1_0",
-        url = "https://crates.io/api/v1/crates/nb-connect/1.1.0/download",
-        type = "tar.gz",
-        sha256 = "a19900e7eee95eb2b3c2e26d12a874cc80aaf750e31be6fcbe743ead369fa45d",
-        strip_prefix = "nb-connect-1.1.0",
-        build_file = Label("//third_party/cargo/remote:BUILD.nb-connect-1.1.0.bazel"),
     )
 
     maybe(
@@ -1851,22 +1821,22 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__pin_project__1_0_6",
-        url = "https://crates.io/api/v1/crates/pin-project/1.0.6/download",
+        name = "cargo_raze__pin_project__1_0_7",
+        url = "https://crates.io/api/v1/crates/pin-project/1.0.7/download",
         type = "tar.gz",
-        sha256 = "bc174859768806e91ae575187ada95c91a29e96a98dc5d2cd9a1fed039501ba6",
-        strip_prefix = "pin-project-1.0.6",
-        build_file = Label("//third_party/cargo/remote:BUILD.pin-project-1.0.6.bazel"),
+        sha256 = "c7509cc106041c40a4518d2af7a61530e1eed0e6285296a3d8c5472806ccc4a4",
+        strip_prefix = "pin-project-1.0.7",
+        build_file = Label("//third_party/cargo/remote:BUILD.pin-project-1.0.7.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "cargo_raze__pin_project_internal__1_0_6",
-        url = "https://crates.io/api/v1/crates/pin-project-internal/1.0.6/download",
+        name = "cargo_raze__pin_project_internal__1_0_7",
+        url = "https://crates.io/api/v1/crates/pin-project-internal/1.0.7/download",
         type = "tar.gz",
-        sha256 = "a490329918e856ed1b083f244e3bfe2d8c4f336407e4ea9e1a9f479ff09049e5",
-        strip_prefix = "pin-project-internal-1.0.6",
-        build_file = Label("//third_party/cargo/remote:BUILD.pin-project-internal-1.0.6.bazel"),
+        sha256 = "48c950132583b500556b1efd71d45b319029f2b71518d979fcc208e16b42426f",
+        strip_prefix = "pin-project-internal-1.0.7",
+        build_file = Label("//third_party/cargo/remote:BUILD.pin-project-internal-1.0.7.bazel"),
     )
 
     maybe(
@@ -2031,12 +2001,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__redox_syscall__0_2_5",
-        url = "https://crates.io/api/v1/crates/redox_syscall/0.2.5/download",
+        name = "cargo_raze__redox_syscall__0_2_6",
+        url = "https://crates.io/api/v1/crates/redox_syscall/0.2.6/download",
         type = "tar.gz",
-        sha256 = "94341e4e44e24f6b591b59e47a8a027df12e008d73fd5672dbea9cc22f4507d9",
-        strip_prefix = "redox_syscall-0.2.5",
-        build_file = Label("//third_party/cargo/remote:BUILD.redox_syscall-0.2.5.bazel"),
+        sha256 = "8270314b5ccceb518e7e578952f0b72b88222d02e8f77f5ecf7abbb673539041",
+        strip_prefix = "redox_syscall-0.2.6",
+        build_file = Label("//third_party/cargo/remote:BUILD.redox_syscall-0.2.6.bazel"),
     )
 
     maybe(
@@ -2081,12 +2051,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__reqwest__0_11_2",
-        url = "https://crates.io/api/v1/crates/reqwest/0.11.2/download",
+        name = "cargo_raze__reqwest__0_11_3",
+        url = "https://crates.io/api/v1/crates/reqwest/0.11.3/download",
         type = "tar.gz",
-        sha256 = "bf12057f289428dbf5c591c74bf10392e4a8003f993405a902f20117019022d4",
-        strip_prefix = "reqwest-0.11.2",
-        build_file = Label("//third_party/cargo/remote:BUILD.reqwest-0.11.2.bazel"),
+        sha256 = "2296f2fac53979e8ccbc4a1136b25dcefd37be9ed7e4a1f6b05a6029c84ff124",
+        strip_prefix = "reqwest-0.11.3",
+        build_file = Label("//third_party/cargo/remote:BUILD.reqwest-0.11.3.bazel"),
     )
 
     maybe(
@@ -2137,16 +2107,6 @@ def cargo_raze_fetch_remote_crates():
         sha256 = "8f05ba609c234e60bee0d547fe94a4c7e9da733d1c962cf6e59efa4cd9c8bc75",
         strip_prefix = "schannel-0.1.19",
         build_file = Label("//third_party/cargo/remote:BUILD.schannel-0.1.19.bazel"),
-    )
-
-    maybe(
-        http_archive,
-        name = "cargo_raze__scopeguard__1_1_0",
-        url = "https://crates.io/api/v1/crates/scopeguard/1.1.0/download",
-        type = "tar.gz",
-        sha256 = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd",
-        strip_prefix = "scopeguard-1.1.0",
-        build_file = Label("//third_party/cargo/remote:BUILD.scopeguard-1.1.0.bazel"),
     )
 
     maybe(
@@ -2351,22 +2311,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__spdx__0_3_6",
-        url = "https://crates.io/api/v1/crates/spdx/0.3.6/download",
+        name = "cargo_raze__spdx__0_4_0",
+        url = "https://crates.io/api/v1/crates/spdx/0.4.0/download",
         type = "tar.gz",
-        sha256 = "4e6b6cc773b635ad64a05f00367c6f66d06a8708f7360f67c41d446dacdd0a0f",
-        strip_prefix = "spdx-0.3.6",
-        build_file = Label("//third_party/cargo/remote:BUILD.spdx-0.3.6.bazel"),
-    )
-
-    maybe(
-        http_archive,
-        name = "cargo_raze__spinning_top__0_2_2",
-        url = "https://crates.io/api/v1/crates/spinning_top/0.2.2/download",
-        type = "tar.gz",
-        sha256 = "7e529d73e80d64b5f2631f9035113347c578a1c9c7774b83a2b880788459ab36",
-        strip_prefix = "spinning_top-0.2.2",
-        build_file = Label("//third_party/cargo/remote:BUILD.spinning_top-0.2.2.bazel"),
+        sha256 = "55ebe4f76cacc83caff34a6ad8731a260d5d1213bdedc655968c62f6cbc92783",
+        strip_prefix = "spdx-0.4.0",
+        build_file = Label("//third_party/cargo/remote:BUILD.spdx-0.4.0.bazel"),
     )
 
     maybe(
@@ -2401,12 +2351,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__syn__1_0_68",
-        url = "https://crates.io/api/v1/crates/syn/1.0.68/download",
+        name = "cargo_raze__syn__1_0_69",
+        url = "https://crates.io/api/v1/crates/syn/1.0.69/download",
         type = "tar.gz",
-        sha256 = "3ce15dd3ed8aa2f8eeac4716d6ef5ab58b6b9256db41d7e1a0224c2788e8fd87",
-        strip_prefix = "syn-1.0.68",
-        build_file = Label("//third_party/cargo/remote:BUILD.syn-1.0.68.bazel"),
+        sha256 = "48fe99c6bd8b1cc636890bcc071842de909d902c81ac7dab53ba33c421ab8ffb",
+        strip_prefix = "syn-1.0.69",
+        build_file = Label("//third_party/cargo/remote:BUILD.syn-1.0.69.bazel"),
     )
 
     maybe(
@@ -2431,12 +2381,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__tera__1_7_0",
-        url = "https://crates.io/api/v1/crates/tera/1.7.0/download",
+        name = "cargo_raze__tera__1_7_1",
+        url = "https://crates.io/api/v1/crates/tera/1.7.1/download",
         type = "tar.gz",
-        sha256 = "5cb278a72e426f291faf182cb0e0cb7d20241e8e9881046724ac874a83c62346",
-        strip_prefix = "tera-1.7.0",
-        build_file = Label("//third_party/cargo/remote:BUILD.tera-1.7.0.bazel"),
+        sha256 = "2617ab2fb1de8587a988a761692e59895438bebf404725d4f2123251f60bf23e",
+        strip_prefix = "tera-1.7.1",
+        build_file = Label("//third_party/cargo/remote:BUILD.tera-1.7.1.bazel"),
     )
 
     maybe(
@@ -2501,12 +2451,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__tokio__1_4_0",
-        url = "https://crates.io/api/v1/crates/tokio/1.4.0/download",
+        name = "cargo_raze__tokio__1_5_0",
+        url = "https://crates.io/api/v1/crates/tokio/1.5.0/download",
         type = "tar.gz",
-        sha256 = "134af885d758d645f0f0505c9a8b3f9bf8a348fd822e112ab5248138348f1722",
-        strip_prefix = "tokio-1.4.0",
-        build_file = Label("//third_party/cargo/remote:BUILD.tokio-1.4.0.bazel"),
+        sha256 = "83f0c8e7c0addab50b663055baf787d0af7f413a46e6e7fb9559a4e4db7137a5",
+        strip_prefix = "tokio-1.5.0",
+        build_file = Label("//third_party/cargo/remote:BUILD.tokio-1.5.0.bazel"),
     )
 
     maybe(
@@ -2531,12 +2481,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__tokio_util__0_6_5",
-        url = "https://crates.io/api/v1/crates/tokio-util/0.6.5/download",
+        name = "cargo_raze__tokio_util__0_6_6",
+        url = "https://crates.io/api/v1/crates/tokio-util/0.6.6/download",
         type = "tar.gz",
-        sha256 = "5143d049e85af7fbc36f5454d990e62c2df705b3589f123b71f441b6b59f443f",
-        strip_prefix = "tokio-util-0.6.5",
-        build_file = Label("//third_party/cargo/remote:BUILD.tokio-util-0.6.5.bazel"),
+        sha256 = "940a12c99365c31ea8dd9ba04ec1be183ffe4920102bb7122c2f515437601e8e",
+        strip_prefix = "tokio-util-0.6.6",
+        build_file = Label("//third_party/cargo/remote:BUILD.tokio-util-0.6.6.bazel"),
     )
 
     maybe(
@@ -2691,12 +2641,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__unicode_bidi__0_3_4",
-        url = "https://crates.io/api/v1/crates/unicode-bidi/0.3.4/download",
+        name = "cargo_raze__unicode_bidi__0_3_5",
+        url = "https://crates.io/api/v1/crates/unicode-bidi/0.3.5/download",
         type = "tar.gz",
-        sha256 = "49f2bd0c6468a8230e1db229cff8029217cf623c767ea5d60bfbd42729ea54d5",
-        strip_prefix = "unicode-bidi-0.3.4",
-        build_file = Label("//third_party/cargo/remote:BUILD.unicode-bidi-0.3.4.bazel"),
+        sha256 = "eeb8be209bb1c96b7c177c7420d26e04eccacb0eeae6b980e35fcb74678107e0",
+        strip_prefix = "unicode-bidi-0.3.5",
+        build_file = Label("//third_party/cargo/remote:BUILD.unicode-bidi-0.3.5.bazel"),
     )
 
     maybe(
@@ -2751,12 +2701,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__vcpkg__0_2_11",
-        url = "https://crates.io/api/v1/crates/vcpkg/0.2.11/download",
+        name = "cargo_raze__vcpkg__0_2_12",
+        url = "https://crates.io/api/v1/crates/vcpkg/0.2.12/download",
         type = "tar.gz",
-        sha256 = "b00bca6106a5e23f3eee943593759b7fcddb00554332e856d990c893966879fb",
-        strip_prefix = "vcpkg-0.2.11",
-        build_file = Label("//third_party/cargo/remote:BUILD.vcpkg-0.2.11.bazel"),
+        sha256 = "cbdbff6266a24120518560b5dc983096efb98462e51d0d68169895b237be3e5d",
+        strip_prefix = "vcpkg-0.2.12",
+        build_file = Label("//third_party/cargo/remote:BUILD.vcpkg-0.2.12.bazel"),
     )
 
     maybe(

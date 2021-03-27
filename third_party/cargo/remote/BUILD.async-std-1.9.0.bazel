@@ -116,10 +116,10 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__async_channel__1_6_1//:async_channel",
-        "@cargo_raze__async_lock__2_3_0//:async_lock",
+        "@cargo_raze__async_lock__2_4_0//:async_lock",
         "@cargo_raze__crossbeam_utils__0_8_3//:crossbeam_utils",
-        "@cargo_raze__futures_core__0_3_13//:futures_core",
-        "@cargo_raze__futures_io__0_3_13//:futures_io",
+        "@cargo_raze__futures_core__0_3_14//:futures_core",
+        "@cargo_raze__futures_io__0_3_14//:futures_io",
         "@cargo_raze__kv_log_macro__1_0_7//:kv_log_macro",
         "@cargo_raze__log__0_4_14//:log",
         "@cargo_raze__memchr__2_3_4//:memchr",
@@ -141,7 +141,7 @@ rust_library(
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
             "@cargo_raze__async_global_executor__2_0_2//:async_global_executor",
-            "@cargo_raze__async_io__1_3_1//:async_io",
+            "@cargo_raze__async_io__1_4_0//:async_io",
             "@cargo_raze__async_process__1_0_2//:async_process",
             "@cargo_raze__futures_lite__1_11_3//:futures_lite",
         ],

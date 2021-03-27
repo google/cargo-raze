@@ -48,15 +48,15 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.6.5",
+    version = "0.6.6",
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__bytes__1_0_1//:bytes",
-        "@cargo_raze__futures_core__0_3_13//:futures_core",
-        "@cargo_raze__futures_sink__0_3_13//:futures_sink",
+        "@cargo_raze__futures_core__0_3_14//:futures_core",
+        "@cargo_raze__futures_sink__0_3_14//:futures_sink",
         "@cargo_raze__log__0_4_14//:log",
         "@cargo_raze__pin_project_lite__0_2_6//:pin_project_lite",
-        "@cargo_raze__tokio__1_4_0//:tokio",
+        "@cargo_raze__tokio__1_5_0//:tokio",
     ],
 )
 

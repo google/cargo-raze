@@ -129,7 +129,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           .find(|pkg| pkg.id == *pkg_id);
         if let Some(pkg) = workspace_member {
           // Don't include binary dependencies
-          if self.settings.binary_deps.contains_key(&pkg.name) {
+          if self.is_binary_dependency(pkg) {
             None
           } else {
             util::get_workspace_member_path(
@@ -151,6 +151,16 @@ impl<'planner> WorkspaceSubplanner<'planner> {
     }
   }
 
+  #[cfg(feature = "binary_deps")]
+  fn is_binary_dependency(&self, pkg: &Package) -> bool {
+    self.settings.binary_deps.keys().any(|key| key == &pkg.name)
+  }
+
+  #[cfg(not(feature = "binary_deps"))]
+  fn is_binary_dependency(&self, _pkg: &Package) -> bool {
+    false
+  }
+
   fn create_crate_context(
     &self,
     node: &Node,
@@ -159,11 +169,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
     let own_crate_catalog_entry = catalog.entry_for_package_id(&node.id)?;
     let own_package = own_crate_catalog_entry.package();
 
-    let is_binary_dep = self
-      .settings
-      .binary_deps
-      .keys()
-      .any(|key| key == &own_package.name);
+    let is_binary_dep = self.is_binary_dependency(own_package);
 
     // Skip workspace members unless they are binary dependencies
     if own_crate_catalog_entry.is_workspace_crate() && !is_binary_dep {
@@ -238,6 +244,16 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       .filter_map(|node| self.create_crate_context(node, &self.crate_catalog))
       .collect::<Result<Vec<CrateContext>>>()
   }
+}
+
+#[cfg(feature = "binary_deps")]
+fn is_binary_dependency(settings: &RazeSettings, package: &Package) -> bool {
+  settings.binary_deps.contains_key(&package.name)
+}
+
+#[cfg(not(feature = "binary_deps"))]
+fn is_binary_dependency(_settings: &RazeSettings, _package: &Package) -> bool {
+  false
 }
 
 impl<'planner> CrateSubplanner<'planner> {
@@ -364,7 +380,7 @@ impl<'planner> CrateSubplanner<'planner> {
     let is_workspace_member_dependency = !&workspace_member_dependents.is_empty()
       || !&workspace_member_dev_dependents.is_empty()
       || !&workspace_member_build_dependents.is_empty();
-    let is_binary_dependency = self.settings.binary_deps.contains_key(&package.name);
+    let is_binary_dependency = is_binary_dependency(self.settings, package);
 
     // Generate canonicalized paths to additional build files so they're guaranteed to exist
     // and always locatable.

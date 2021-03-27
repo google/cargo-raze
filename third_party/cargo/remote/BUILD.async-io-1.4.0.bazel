@@ -56,17 +56,17 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.3.1",
+    version = "1.4.0",
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__concurrent_queue__1_2_2//:concurrent_queue",
         "@cargo_raze__fastrand__1_4_0//:fastrand",
         "@cargo_raze__futures_lite__1_11_3//:futures_lite",
         "@cargo_raze__log__0_4_14//:log",
-        "@cargo_raze__nb_connect__1_1_0//:nb_connect",
         "@cargo_raze__once_cell__1_7_2//:once_cell",
         "@cargo_raze__parking__2_0_0//:parking",
         "@cargo_raze__polling__2_0_3//:polling",
+        "@cargo_raze__socket2__0_4_0//:socket2",
         "@cargo_raze__vec_arena__1_1_0//:vec_arena",
         "@cargo_raze__waker_fn__1_1_0//:waker_fn",
     ] + selects.with_or({
@@ -88,7 +88,7 @@ rust_library(
             "@rules_rust//rust/platform:x86_64-apple-darwin",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
-            "@cargo_raze__libc__0_2_92//:libc",
+            "@cargo_raze__libc__0_2_93//:libc",
         ],
         "//conditions:default": [],
     }) + selects.with_or({

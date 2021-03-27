@@ -65,6 +65,7 @@ pub struct RazeSettings {
   pub targets: Option<Vec<String>>,
 
   /// A list of binary dependencies.
+  #[cfg(feature = "binary_deps")]
   #[serde(default)]
   pub binary_deps: HashMap<String, cargo_toml::Dependency>,
 
@@ -456,6 +457,7 @@ struct RawRazeSettings {
   pub target: Option<String>,
   #[serde(default)]
   pub targets: Option<Vec<String>>,
+  #[cfg(feature = "binary_deps")]
   #[serde(default)]
   pub binary_deps: HashMap<String, cargo_toml::Dependency>,
   #[serde(default)]
@@ -531,22 +533,13 @@ fn extend_duplicates<K: Hash + Eq + Clone, V>(
   );
 }
 
-/// Parse [RazeSettings](crate::settings::RazeSettings) from workspace metadata
-fn parse_raze_settings_workspace(
-  metadata_value: &serde_json::value::Value,
-  metadata: &Metadata,
-) -> Result<RazeSettings> {
-  RawRazeSettings::deserialize(metadata_value)?.print_notices_and_warnings();
-  let mut settings = RazeSettings::deserialize(metadata_value)?;
-
-  let workspace_packages: Vec<&Package> = metadata
-    .packages
-    .iter()
-    .filter(|pkg| metadata.workspace_members.contains(&pkg.id))
-    .collect();
-
+/// Parse the provided settings for duplicates of any `binary_deps` fields.
+#[cfg(feature = "binary_deps")]
+fn parse_raze_binary_deps_settings(
+  settings: &mut RazeSettings,
+  workspace_packages: &[&Package],
+) -> Result<()> {
   let mut duplicate_binary_deps = Vec::new();
-  let mut duplicate_crate_settings = Vec::new();
 
   for package in workspace_packages.iter() {
     if let Some(pkg_value) = package.metadata.get("raze") {
@@ -570,13 +563,6 @@ fn parse_raze_settings_workspace(
         .binary_deps
         .extend(pkg_settings.binary_deps.into_iter());
 
-      // Log duplicate crate settings
-      extend_duplicates(
-        &mut duplicate_crate_settings,
-        &settings.crates,
-        &pkg_settings.crates,
-      );
-
       settings.crates.extend(pkg_settings.crates.into_iter());
     }
   }
@@ -588,12 +574,65 @@ fn parse_raze_settings_workspace(
       duplicate_binary_deps
     ));
   }
+
+  Ok(())
+}
+
+/// This is a no-op without the binary_deps feature
+#[cfg(not(feature = "binary_deps"))]
+fn parse_raze_binary_deps_settings(
+  _settings: &mut RazeSettings,
+  _workspace_packages: &Vec<&Package>,
+) -> Result<()> {
+  Ok(())
+}
+
+/// Parse [RazeSettings](crate::settings::RazeSettings) from workspace metadata
+fn parse_raze_settings_workspace(
+  metadata_value: &serde_json::value::Value,
+  metadata: &Metadata,
+) -> Result<RazeSettings> {
+  RawRazeSettings::deserialize(metadata_value)?.print_notices_and_warnings();
+  let mut settings = RazeSettings::deserialize(metadata_value)?;
+
+  let workspace_packages: Vec<&Package> = metadata
+    .packages
+    .iter()
+    .filter(|pkg| metadata.workspace_members.contains(&pkg.id))
+    .collect();
+
+  let mut duplicate_crate_settings = Vec::new();
+
+  for package in workspace_packages.iter() {
+    if let Some(pkg_value) = package.metadata.get("raze") {
+      let pkg_settings = RawRazeSettings::deserialize(pkg_value)?;
+      if pkg_settings.contains_primary_options() {
+        return Err(anyhow!(
+          "The package '{}' contains Primary raze settings, please move these to the \
+           `[workspace.metadata.raze]`",
+          package.name
+        ));
+      }
+
+      // Log duplicate crate settings
+      extend_duplicates(
+        &mut duplicate_crate_settings,
+        &settings.crates,
+        &pkg_settings.crates,
+      );
+
+      settings.crates.extend(pkg_settings.crates.into_iter());
+    }
+  }
+
   if !duplicate_crate_settings.is_empty() {
     return Err(anyhow!(
       "Duplicate `raze.crates.*` values detected across various crates: {:?}",
       duplicate_crate_settings
     ));
   }
+
+  parse_raze_binary_deps_settings(&mut settings, &workspace_packages)?;
 
   Ok(settings)
 }
@@ -800,6 +839,7 @@ pub mod tests {
       genmode: GenMode::Remote,
       output_buildfile_suffix: "BUILD".to_owned(),
       default_gen_buildrs: default_raze_settings_field_gen_buildrs(),
+      #[cfg(feature = "binary_deps")]
       binary_deps: HashMap::new(),
       registry: default_raze_settings_registry(),
       index_url: default_raze_settings_index_url(),
@@ -849,9 +889,6 @@ pub mod tests {
     [package.metadata.raze]
     workspace_path = "//workspace_path/raze"
     genmode = "Remote"
-
-    [package.metadata.raze.binary_deps]
-    wasm-bindgen-cli = "0.2.68"
     "# };
 
     let temp_workspace_dir = TempDir::new()
@@ -861,7 +898,8 @@ pub mod tests {
     std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
 
     let settings = load_settings_from_manifest(cargo_toml_path, None).unwrap();
-    assert!(settings.binary_deps.len() > 0);
+    assert_eq!(settings.workspace_path, "//workspace_path/raze".to_owned());
+    assert_eq!(settings.genmode, GenMode::Remote);
   }
 
   #[test]
@@ -885,9 +923,6 @@ pub mod tests {
     [raze]
     workspace_path = "//workspace_path/raze"
     genmode = "Remote"
-
-    [raze.binary_deps]
-    wasm-bindgen-cli = "0.2.68"
     "# };
 
     let temp_workspace_dir = TempDir::new()
@@ -897,7 +932,8 @@ pub mod tests {
     std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
 
     let settings = load_settings_from_manifest(cargo_toml_path, /*cargo_bin_path=*/ None).unwrap();
-    assert!(settings.binary_deps.len() > 0);
+    assert_eq!(settings.workspace_path, "//workspace_path/raze".to_owned());
+    assert_eq!(settings.genmode, GenMode::Remote);
   }
 
   #[test]

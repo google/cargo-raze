@@ -85,7 +85,7 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         ":signal_hook_build_script",
-        "@cargo_raze__libc__0_2_92//:libc",
+        "@cargo_raze__libc__0_2_93//:libc",
         "@cargo_raze__signal_hook_registry__1_3_0//:signal_hook_registry",
     ],
 )

@@ -14,21 +14,36 @@
 
 use std::{
   collections::HashMap,
-  env::consts,
   fs,
   path::{Path, PathBuf},
   string::String,
 };
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 use cargo_lock::Lockfile;
 use cargo_metadata::{Metadata, MetadataCommand};
-use glob::glob;
-use pathdiff::diff_paths;
-use regex::Regex;
-use rustc_serialize::hex::ToHex;
-use tempfile::TempDir;
 use url::Url;
+
+#[cfg(feature = "binary_deps")]
+use std::env::consts;
+
+#[cfg(feature = "binary_deps")]
+use tempfile::TempDir;
+
+#[cfg(feature = "binary_deps")]
+use rustc_serialize::hex::ToHex;
+
+#[cfg(feature = "binary_deps")]
+use regex::Regex;
+
+#[cfg(feature = "binary_deps")]
+use pathdiff::diff_paths;
+
+#[cfg(feature = "binary_deps")]
+use glob::glob;
+
+#[cfg(feature = "binary_deps")]
+use anyhow::anyhow;
 
 use crate::util::{cargo_bin_path, package_ident};
 
@@ -137,6 +152,7 @@ impl RazeMetadata {
 }
 
 /// Create a symlink file on unix systems
+#[cfg(feature = "binary_deps")]
 #[cfg(target_family = "unix")]
 fn make_symlink(src: &Path, dest: &Path) -> Result<()> {
   std::os::unix::fs::symlink(src, dest)
@@ -144,6 +160,7 @@ fn make_symlink(src: &Path, dest: &Path) -> Result<()> {
 }
 
 /// Create a symlink file on windows systems
+#[cfg(feature = "binary_deps")]
 #[cfg(target_family = "windows")]
 fn make_symlink(src: &Path, dest: &Path) -> Result<()> {
   std::os::windows::fs::symlink_file(dest, src)
@@ -153,13 +170,16 @@ fn make_symlink(src: &Path, dest: &Path) -> Result<()> {
 /// A workspace metadata fetcher that uses the Cargo commands to gather information about a Cargo
 /// project and it's transitive dependencies for planning and rendering of Bazel BUILD files.
 pub struct RazeMetadataFetcher {
-  registry_url: Url,
-  index_url: Url,
   metadata_fetcher: Box<dyn MetadataFetcher>,
   lockfile_generator: Box<dyn LockfileGenerator>,
+  #[cfg(feature = "binary_deps")]
+  registry_url: Url,
+  #[cfg(feature = "binary_deps")]
+  index_url: Url,
 }
 
 impl RazeMetadataFetcher {
+  #[cfg(feature = "binary_deps")]
   pub fn new<P: Into<PathBuf>>(
     cargo_bin_path: P,
     registry_url: Url,
@@ -167,8 +187,25 @@ impl RazeMetadataFetcher {
   ) -> RazeMetadataFetcher {
     let cargo_bin_pathbuf: PathBuf = cargo_bin_path.into();
     RazeMetadataFetcher {
+      metadata_fetcher: Box::new(CargoMetadataFetcher {
+        cargo_bin_path: cargo_bin_pathbuf.clone(),
+      }),
+      lockfile_generator: Box::new(CargoLockfileGenerator {
+        cargo_bin_path: cargo_bin_pathbuf,
+      }),
       registry_url,
       index_url,
+    }
+  }
+
+  #[cfg(not(feature = "binary_deps"))]
+  pub fn new<P: Into<PathBuf>>(
+    cargo_bin_path: P,
+    _registry_url: Url,
+    _index_url: Url,
+  ) -> RazeMetadataFetcher {
+    let cargo_bin_pathbuf: PathBuf = cargo_bin_path.into();
+    RazeMetadataFetcher {
       metadata_fetcher: Box::new(CargoMetadataFetcher {
         cargo_bin_path: cargo_bin_pathbuf.clone(),
       }),
@@ -189,6 +226,7 @@ impl RazeMetadataFetcher {
   }
 
   /// Symlinks the source code of all workspace members into the temp workspace
+  #[cfg(feature = "binary_deps")]
   fn link_src_to_workspace(&self, no_deps_metadata: &Metadata, temp_dir: &Path) -> Result<()> {
     let crate_member_id_re = match consts::OS {
       "windows" => Regex::new(r".+\(path\+file:///(.+)\)")?,
@@ -264,6 +302,7 @@ impl RazeMetadataFetcher {
   }
 
   /// Creates a copy workspace in a temporary directory for fetching the metadata of the current workspace
+  #[cfg(feature = "binary_deps")]
   fn make_temp_workspace(&self, cargo_workspace_root: &Path) -> Result<(TempDir, PathBuf)> {
     let temp_dir = TempDir::new()?;
 
@@ -293,6 +332,7 @@ impl RazeMetadataFetcher {
   }
 
   /// Download a crate's source code from the current registry url
+  #[cfg(feature = "binary_deps")]
   fn fetch_crate_src(&self, dir: &Path, name: &str, version: &str) -> Result<PathBuf> {
     // The registry url should only be the host URL with ports. No path
     let registry_url = {
@@ -328,6 +368,7 @@ impl RazeMetadataFetcher {
   }
 
   /// Add binary dependencies as workspace members to the given workspace root Cargo.toml file
+  #[cfg(feature = "binary_deps")]
   fn inject_binaries_into_workspace(
     &self,
     binary_deps: Vec<String>,
@@ -366,6 +407,7 @@ impl RazeMetadataFetcher {
   }
 
   /// Look up a crate in a specified crate index to determine it's checksum
+  #[cfg(feature = "binary_deps")]
   fn fetch_crate_checksum(&self, name: &str, version: &str) -> Result<String> {
     let index_url_is_file = self.index_url.scheme().to_lowercase() == "file";
     let crate_index_path = if !index_url_is_file {
@@ -419,11 +461,12 @@ impl RazeMetadataFetcher {
   }
 
   /// Gather all information about a Cargo project to use for planning and rendering steps
+  #[cfg(feature = "binary_deps")]
   pub fn fetch_metadata(
     &self,
     cargo_workspace_root: &Path,
-    binary_dep_info: Option<&HashMap<String, cargo_toml::Dependency>>,
     reused_lockfile: Option<PathBuf>,
+    binary_dep_info: Option<&HashMap<String, cargo_toml::Dependency>>,
   ) -> Result<RazeMetadata> {
     let (cargo_dir, cargo_workspace_root) = self.make_temp_workspace(cargo_workspace_root)?;
     let cargo_root_toml = cargo_dir.as_ref().join("Cargo.toml");
@@ -479,6 +522,43 @@ impl RazeMetadataFetcher {
       lockfile: output_lockfile,
     })
   }
+
+  /// Gather all information about a Cargo project to use for planning and rendering steps
+  #[cfg(not(feature = "binary_deps"))]
+  pub fn fetch_metadata(
+    &self,
+    cargo_workspace_root: &Path,
+    reused_lockfile: Option<PathBuf>,
+    _binary_dep_info: Option<&HashMap<String, cargo_toml::Dependency>>,
+  ) -> Result<RazeMetadata> {
+    let output_lockfile = self.cargo_generate_lockfile(&reused_lockfile, cargo_workspace_root)?;
+
+    // Load checksums from the lockfile
+    let mut checksums: HashMap<String, String> = HashMap::new();
+    let workspace_toml_lock = cargo_workspace_root.join("Cargo.lock");
+    if workspace_toml_lock.exists() {
+      let lockfile = Lockfile::load(workspace_toml_lock)?;
+      for package in &lockfile.packages {
+        if let Some(checksum) = &package.checksum {
+          checksums.insert(
+            package_ident(&package.name.to_string(), &package.version.to_string()),
+            checksum.to_string(),
+          );
+        }
+      }
+    }
+
+    let metadata = self
+      .metadata_fetcher
+      .fetch_metadata(cargo_workspace_root, /*include_deps=*/ true)?;
+
+    Ok(RazeMetadata {
+      metadata,
+      checksums,
+      cargo_workspace_root: cargo_workspace_root.to_path_buf(),
+      lockfile: output_lockfile,
+    })
+  }
 }
 
 impl Default for RazeMetadataFetcher {
@@ -503,6 +583,7 @@ pub struct BinaryDependencyInfo {
 pub mod tests {
   use anyhow::Context;
   use httpmock::MockServer;
+  use tempfile::TempDir;
   use tera::Tera;
 
   use super::*;
@@ -672,6 +753,7 @@ pub mod tests {
     assert!(fetcher.fetch_metadata(dir.as_ref(), None, None).is_err());
   }
 
+  #[cfg(feature = "binary_deps")]
   #[test]
   fn test_fetching_src() {
     let (fetcher, mock_server, _index_url) = dummy_raze_metadata_fetcher();
@@ -697,6 +779,7 @@ pub mod tests {
     assert!(path.join("test").exists());
   }
 
+  #[cfg(feature = "binary_deps")]
   #[test]
   fn test_inject_dependency_to_workspace() {
     let (fetcher, _mock_server, _index_url) = dummy_raze_metadata_fetcher();

@@ -358,6 +358,7 @@ mod tests {
     );
   }
 
+  #[cfg(feature = "binary_deps")]
   fn dummy_binary_dependency_metadata(is_remote_genmode: bool) -> (RazeMetadata, RazeSettings) {
     let (mut fetcher, server, index_dir) = dummy_raze_metadata_fetcher();
 
@@ -387,7 +388,7 @@ mod tests {
 
     let dir = make_basic_workspace();
     let raze_metadata = fetcher
-      .fetch_metadata(dir.as_ref(), Some(&settings.binary_deps), None)
+      .fetch_metadata(dir.as_ref(), None, Some(&settings.binary_deps))
       .unwrap();
 
     for mock in mock.endpoints.iter() {
@@ -398,6 +399,7 @@ mod tests {
   }
 
   #[test]
+  #[cfg(feature = "binary_deps")]
   fn test_binary_dependencies_remote_genmode() {
     let (raze_metadata, mut settings) =
       dummy_binary_dependency_metadata(/*is_remote_genmode=*/ true);
@@ -432,6 +434,7 @@ mod tests {
   }
 
   #[test]
+  #[cfg(feature = "binary_deps")]
   fn test_binary_dependencies_vendored_genmode() {
     let (raze_metadata, mut settings) =
       dummy_binary_dependency_metadata(/*is_remote_genmode=*/ false);
@@ -462,6 +465,7 @@ mod tests {
   }
 
   #[test]
+  #[cfg(feature = "binary_deps")]
   fn test_workspace_context_contains_no_binary_dependencies() {
     let (raze_metadata, mut settings) =
       dummy_binary_dependency_metadata(/*is_remote_genmode=*/ true);

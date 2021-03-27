@@ -156,7 +156,7 @@ pub fn get_license_from_str(cargo_license_str: &str) -> LicenseData {
       ExprNode::Req(requirement) => {
         // Unwrap is safe because there was no parse error so the license type must exist
         match &requirement.req.license {
-          LicenseItem::SPDX { id, .. } => {
+          LicenseItem::Spdx { id, .. } => {
             let req_name = id.name;
             // Push requirement onto stack
             license_stack.push(BazelSpdxLicense {

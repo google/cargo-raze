@@ -62,7 +62,7 @@ cargo_build_script(
     version = "0.4.35",
     visibility = ["//visibility:private"],
     deps = [
-        "@cargo_raze__curl_sys__0_4_41_curl_7_75_0//:curl_sys",
+        "@cargo_raze__curl_sys__0_4_42_curl_7_76_0//:curl_sys",
     ] + selects.with_or({
         # cfg(all(unix, not(target_os = "macos")))
         (
@@ -114,8 +114,8 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         ":curl_build_script",
-        "@cargo_raze__curl_sys__0_4_41_curl_7_75_0//:curl_sys",
-        "@cargo_raze__libc__0_2_92//:libc",
+        "@cargo_raze__curl_sys__0_4_42_curl_7_76_0//:curl_sys",
+        "@cargo_raze__libc__0_2_93//:libc",
         "@cargo_raze__socket2__0_3_19//:socket2",
     ] + selects.with_or({
         # cfg(all(unix, not(target_os = "macos")))

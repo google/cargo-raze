@@ -31,17 +31,17 @@ licenses([
 # Generated Targets
 
 rust_library(
-    name = "futures_macro",
+    name = "futures_sink",
     srcs = glob(["**/*.rs"]),
     crate_features = [
+        "alloc",
+        "default",
+        "std",
     ],
     crate_root = "src/lib.rs",
-    crate_type = "proc-macro",
+    crate_type = "lib",
     data = [],
     edition = "2018",
-    proc_macro_deps = [
-        "@cargo_raze__proc_macro_hack__0_5_19//:proc_macro_hack",
-    ],
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -49,11 +49,8 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.3.13",
+    version = "0.3.14",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__proc_macro2__1_0_26//:proc_macro2",
-        "@cargo_raze__quote__1_0_9//:quote",
-        "@cargo_raze__syn__1_0_68//:syn",
     ],
 )

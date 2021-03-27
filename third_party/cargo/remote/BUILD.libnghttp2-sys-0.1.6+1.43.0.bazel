@@ -83,6 +83,6 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         ":libnghttp2_sys_build_script",
-        "@cargo_raze__libc__0_2_92//:libc",
+        "@cargo_raze__libc__0_2_93//:libc",
     ],
 )

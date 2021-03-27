@@ -69,7 +69,7 @@ cargo_build_script(
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
         ): [
-            "@cargo_raze__vcpkg__0_2_11//:vcpkg",
+            "@cargo_raze__vcpkg__0_2_12//:vcpkg",
         ],
         "//conditions:default": [],
     }) + selects.with_or({
@@ -110,7 +110,7 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         ":libssh2_sys_build_script",
-        "@cargo_raze__libc__0_2_92//:libc",
+        "@cargo_raze__libc__0_2_93//:libc",
         "@cargo_raze__libssh2//:libssh2",
         "@cargo_raze__libz_sys__1_1_2//:libz_sys",
     ] + selects.with_or({

@@ -71,7 +71,7 @@ cargo_build_script(
         "cargo-raze",
         "manual",
     ],
-    version = "1.4.0",
+    version = "1.5.0",
     visibility = ["//visibility:private"],
     deps = [
         "@cargo_raze__autocfg__1_0_1//:autocfg",
@@ -137,7 +137,7 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.4.0",
+    version = "1.5.0",
     # buildifier: leave-alone
     deps = [
         ":tokio_build_script",
@@ -157,7 +157,7 @@ rust_library(
             "@rules_rust//rust/platform:x86_64-apple-darwin",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
-            "@cargo_raze__libc__0_2_92//:libc",
+            "@cargo_raze__libc__0_2_93//:libc",
             "@cargo_raze__signal_hook_registry__1_3_0//:signal_hook_registry",
         ],
         "//conditions:default": [],
@@ -198,6 +198,8 @@ rust_library(
 # Unsupported target "io_chain" with type "test" omitted
 
 # Unsupported target "io_copy" with type "test" omitted
+
+# Unsupported target "io_copy_bidirectional" with type "test" omitted
 
 # Unsupported target "io_driver" with type "test" omitted
 
@@ -296,6 +298,8 @@ rust_library(
 # Unsupported target "sync_mutex_owned" with type "test" omitted
 
 # Unsupported target "sync_notify" with type "test" omitted
+
+# Unsupported target "sync_once_cell" with type "test" omitted
 
 # Unsupported target "sync_oneshot" with type "test" omitted
 

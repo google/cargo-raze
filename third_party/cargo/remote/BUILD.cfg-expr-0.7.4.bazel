@@ -30,13 +30,13 @@ licenses([
 
 # Generated Targets
 
+# Unsupported target "eval" with type "example" omitted
+
 rust_library(
-    name = "futures_core",
+    name = "cfg_expr",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "alloc",
         "default",
-        "std",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -49,8 +49,15 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.3.13",
+    version = "0.7.4",
     # buildifier: leave-alone
     deps = [
+        "@cargo_raze__smallvec__1_6_1//:smallvec",
     ],
 )
+
+# Unsupported target "eval" with type "test" omitted
+
+# Unsupported target "lexer" with type "test" omitted
+
+# Unsupported target "parser" with type "test" omitted

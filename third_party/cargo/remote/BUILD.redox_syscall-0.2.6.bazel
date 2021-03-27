@@ -25,17 +25,24 @@ package(default_visibility = [
 ])
 
 licenses([
-    "notice",  # MIT from expression "MIT OR Apache-2.0"
+    "notice",  # MIT from expression "MIT"
 ])
 
 # Generated Targets
 
+alias(
+    name = "redox_syscall",
+    actual = ":syscall",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+)
+
 rust_library(
-    name = "futures_io",
+    name = "syscall",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "default",
-        "std",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
@@ -48,8 +55,9 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.3.13",
+    version = "0.2.6",
     # buildifier: leave-alone
     deps = [
+        "@cargo_raze__bitflags__1_2_1//:bitflags",
     ],
 )

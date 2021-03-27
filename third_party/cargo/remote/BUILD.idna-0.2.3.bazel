@@ -25,18 +25,20 @@ package(default_visibility = [
 ])
 
 licenses([
-    "notice",  # Apache-2.0 from expression "Apache-2.0 OR MIT"
+    "notice",  # MIT from expression "MIT OR Apache-2.0"
 ])
 
 # Generated Targets
 
+# Unsupported target "all" with type "bench" omitted
+
 rust_library(
-    name = "pin_project_internal",
+    name = "idna",
     srcs = glob(["**/*.rs"]),
     crate_features = [
     ],
     crate_root = "src/lib.rs",
-    crate_type = "proc-macro",
+    crate_type = "lib",
     data = [],
     edition = "2018",
     rustc_flags = [
@@ -46,11 +48,15 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "1.0.6",
+    version = "0.2.3",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__proc_macro2__1_0_26//:proc_macro2",
-        "@cargo_raze__quote__1_0_9//:quote",
-        "@cargo_raze__syn__1_0_68//:syn",
+        "@cargo_raze__matches__0_1_8//:matches",
+        "@cargo_raze__unicode_bidi__0_3_5//:unicode_bidi",
+        "@cargo_raze__unicode_normalization__0_1_17//:unicode_normalization",
     ],
 )
+
+# Unsupported target "tests" with type "test" omitted
+
+# Unsupported target "unit" with type "test" omitted

@@ -52,7 +52,7 @@ rust_library(
     version = "0.2.5",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__pin_project__1_0_6//:pin_project",
+        "@cargo_raze__pin_project__1_0_7//:pin_project",
         "@cargo_raze__tracing__0_1_25//:tracing",
     ],
 )
