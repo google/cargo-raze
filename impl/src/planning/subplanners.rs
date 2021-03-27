@@ -320,6 +320,7 @@ impl<'planner> CrateSubplanner<'planner> {
 
     let mut workspace_member_dependents: Vec<PathBuf> = Vec::new();
     let mut workspace_member_dev_dependents: Vec<PathBuf> = Vec::new();
+    let mut workspace_member_build_dependents: Vec<PathBuf> = Vec::new();
 
     for pkg_id in self.crate_catalog_entry.workspace_member_dependents.iter() {
       let workspace_member = self
@@ -354,15 +355,15 @@ impl<'planner> CrateSubplanner<'planner> {
             workspace_member_dev_dependents.push(workspace_member_path)
           }
           DependencyKind::Normal => workspace_member_dependents.push(workspace_member_path),
-          /* TODO: For now only Development and Normal dependencies are
-          needed but Build surely has it's use as well */
+          DependencyKind::Build => workspace_member_build_dependents.push(workspace_member_path),
           _ => {}
         }
       }
     }
 
-    let is_workspace_member_dependency =
-      !&workspace_member_dependents.is_empty() || !&workspace_member_dev_dependents.is_empty();
+    let is_workspace_member_dependency = !&workspace_member_dependents.is_empty()
+      || !&workspace_member_dev_dependents.is_empty()
+      || !&workspace_member_build_dependents.is_empty();
     let is_binary_dependency = self.settings.binary_deps.contains_key(&package.name);
 
     // Generate canonicalized paths to additional build files so they're guaranteed to exist
@@ -391,6 +392,7 @@ impl<'planner> CrateSubplanner<'planner> {
       features: self.node.features.clone(),
       workspace_member_dependents,
       workspace_member_dev_dependents,
+      workspace_member_build_dependents,
       is_workspace_member_dependency,
       is_binary_dependency,
       is_proc_macro,

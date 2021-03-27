@@ -127,6 +127,7 @@ pub struct CrateContext {
   pub workspace_path_to_crate: String,
   pub workspace_member_dependents: Vec<PathBuf>,
   pub workspace_member_dev_dependents: Vec<PathBuf>,
+  pub workspace_member_build_dependents: Vec<PathBuf>,
   pub is_workspace_member_dependency: bool,
   pub is_binary_dependency: bool,
   pub targets: Vec<BuildableTarget>,
