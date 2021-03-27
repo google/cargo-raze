@@ -291,13 +291,13 @@ fn fetch_attrs(target: &str) -> Result<Vec<Cfg>> {
   let output = Command::new("rustc").args(&args).output()?;
 
   if !output.status.success() {
-    panic!(format!(
+    panic!(
       "getting target attrs for {} failed with status: '{}' \nstdout: {}\nstderr: {}",
       target,
       output.status,
       String::from_utf8(output.stdout).unwrap_or_else(|_| "[unparseable bytes]".to_owned()),
       String::from_utf8(output.stderr).unwrap_or_else(|_| "[unparseable bytes]".to_owned())
-    ))
+    )
   }
 
   let attr_str =

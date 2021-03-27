@@ -749,7 +749,7 @@ impl<'planner> CrateSubplanner<'planner> {
   /// to find the true filesystem root of the dependency. The root cause is that git dependencies
   /// often aren't solely the crate of interest, but rather a repository that contains the crate of
   /// interest among others.
-  fn find_package_root_for_manifest(&self, manifest_path: &PathBuf) -> Result<PathBuf> {
+  fn find_package_root_for_manifest(&self, manifest_path: &Path) -> Result<PathBuf> {
     let has_git_repo_root = {
       let is_git = self.source_id.as_ref().map_or(false, SourceId::is_git);
       is_git && self.settings.genmode == GenMode::Remote
@@ -765,7 +765,7 @@ impl<'planner> CrateSubplanner<'planner> {
     // If package is git package it may be nested under a parent repository. We need to find the
     // package root.
     {
-      let mut check_path = manifest_path.as_path();
+      let mut check_path = manifest_path;
       while let Some(c) = check_path.parent() {
         let joined = c.join(".git");
         if joined.is_dir() {
