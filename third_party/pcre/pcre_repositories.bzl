@@ -8,10 +8,10 @@ def pcre_repositories():
         http_archive,
         name = "cargo_raze__pcre",
         build_file = Label("//third_party/pcre:BUILD.pcre.bazel"),
-        sha256 = "0b8e7465dc5e98c757cc3650a20a7843ee4c3edf50aaf60bb33fd879690d2c73",
-        strip_prefix = "pcre-8.43",
+        sha256 = "aecafd4af3bd0f3935721af77b889d9024b2e01d96b58471bd91a3063fb47728",
+        strip_prefix = "pcre-8.44",
         urls = [
-            "https://mirror.bazel.build/ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz",
-            "https://ftp.pcre.org/pub/pcre/pcre-8.43.tar.gz",
+            "https://mirror.bazel.build/ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz",
+            "https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz",
         ],
     )
