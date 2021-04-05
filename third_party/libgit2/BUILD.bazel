@@ -1,6 +1,6 @@
 exports_files(
     [
-        "BUILD.curl.bazel",
+        "BUILD.libgit2.bazel",
     ],
     visibility = ["//visibility:public"],
 )
