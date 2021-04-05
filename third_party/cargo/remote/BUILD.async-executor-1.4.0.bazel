@@ -59,8 +59,8 @@ rust_library(
         "@cargo_raze__concurrent_queue__1_2_2//:concurrent_queue",
         "@cargo_raze__fastrand__1_4_0//:fastrand",
         "@cargo_raze__futures_lite__1_11_3//:futures_lite",
-        "@cargo_raze__once_cell__1_5_2//:once_cell",
-        "@cargo_raze__vec_arena__1_0_0//:vec_arena",
+        "@cargo_raze__once_cell__1_7_2//:once_cell",
+        "@cargo_raze__vec_arena__1_1_0//:vec_arena",
     ],
 )
 

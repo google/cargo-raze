@@ -49,6 +49,6 @@ rust_library(
     version = "0.8.1",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__generic_array__0_12_3//:generic_array",
+        "@cargo_raze__generic_array__0_12_4//:generic_array",
     ],
 )

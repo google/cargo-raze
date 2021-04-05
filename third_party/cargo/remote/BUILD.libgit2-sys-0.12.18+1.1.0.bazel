@@ -58,9 +58,9 @@ rust_library(
     version = "0.12.18+1.1.0",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__libc__0_2_82//:libc",
+        "@cargo_raze__libc__0_2_92//:libc",
         "@cargo_raze__libgit2//:libgit2",
-        "@cargo_raze__libssh2_sys__0_2_20//:libssh2_sys",
+        "@cargo_raze__libssh2_sys__0_2_21//:libssh2_sys",
         "@cargo_raze__libz_sys__1_1_2//:libz_sys",
     ] + selects.with_or({
         # cfg(unix)
@@ -72,7 +72,7 @@ rust_library(
             "@rules_rust//rust/platform:x86_64-apple-darwin",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
-            "@cargo_raze__openssl_sys__0_9_60//:openssl_sys",
+            "@cargo_raze__openssl_sys__0_9_61//:openssl_sys",
         ],
         "//conditions:default": [],
     }),

@@ -51,14 +51,14 @@ rust_binary(
     # buildifier: leave-alone
     deps = [
         ":cargo_clone",
-        "@cargo_raze__anyhow__1_0_38//:anyhow",
-        "@cargo_raze__flate2__1_0_19//:flate2",
-        "@cargo_raze__log__0_4_13//:log",
-        "@cargo_raze__regex__1_4_3//:regex",
-        "@cargo_raze__reqwest__0_11_0//:reqwest",
+        "@cargo_raze__anyhow__1_0_40//:anyhow",
+        "@cargo_raze__flate2__1_0_20//:flate2",
+        "@cargo_raze__log__0_4_14//:log",
+        "@cargo_raze__regex__1_4_5//:regex",
+        "@cargo_raze__reqwest__0_11_2//:reqwest",
         "@cargo_raze__semver__0_11_0//:semver",
-        "@cargo_raze__serde_json__1_0_61//:serde_json",
-        "@cargo_raze__tar__0_4_30//:tar",
+        "@cargo_raze__serde_json__1_0_64//:serde_json",
+        "@cargo_raze__tar__0_4_33//:tar",
     ],
 )
 
@@ -90,13 +90,13 @@ rust_library(
     version = "0.1.6",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__anyhow__1_0_38//:anyhow",
-        "@cargo_raze__flate2__1_0_19//:flate2",
-        "@cargo_raze__log__0_4_13//:log",
-        "@cargo_raze__regex__1_4_3//:regex",
-        "@cargo_raze__reqwest__0_11_0//:reqwest",
+        "@cargo_raze__anyhow__1_0_40//:anyhow",
+        "@cargo_raze__flate2__1_0_20//:flate2",
+        "@cargo_raze__log__0_4_14//:log",
+        "@cargo_raze__regex__1_4_5//:regex",
+        "@cargo_raze__reqwest__0_11_2//:reqwest",
         "@cargo_raze__semver__0_11_0//:semver",
-        "@cargo_raze__serde_json__1_0_61//:serde_json",
-        "@cargo_raze__tar__0_4_30//:tar",
+        "@cargo_raze__serde_json__1_0_64//:serde_json",
+        "@cargo_raze__tar__0_4_33//:tar",
     ],
 )

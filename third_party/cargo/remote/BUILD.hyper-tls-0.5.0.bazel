@@ -52,9 +52,9 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__bytes__1_0_1//:bytes",
-        "@cargo_raze__hyper__0_14_2//:hyper",
+        "@cargo_raze__hyper__0_14_5//:hyper",
         "@cargo_raze__native_tls__0_2_7//:native_tls",
-        "@cargo_raze__tokio__1_1_0//:tokio",
+        "@cargo_raze__tokio__1_4_0//:tokio",
         "@cargo_raze__tokio_native_tls__0_3_0//:tokio_native_tls",
     ],
 )

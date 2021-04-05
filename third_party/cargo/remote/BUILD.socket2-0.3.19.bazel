@@ -62,7 +62,7 @@ rust_library(
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
             "@cargo_raze__cfg_if__1_0_0//:cfg_if",
-            "@cargo_raze__libc__0_2_82//:libc",
+            "@cargo_raze__libc__0_2_92//:libc",
         ],
         "//conditions:default": [],
     }) + selects.with_or({

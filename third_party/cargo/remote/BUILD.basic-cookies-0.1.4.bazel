@@ -56,7 +56,7 @@ cargo_build_script(
     version = "0.1.4",
     visibility = ["//visibility:private"],
     deps = [
-        "@cargo_raze__lalrpop__0_19_4//:lalrpop",
+        "@cargo_raze__lalrpop__0_19_5//:lalrpop",
     ],
 )
 
@@ -80,7 +80,7 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         ":basic_cookies_build_script",
-        "@cargo_raze__lalrpop_util__0_19_4//:lalrpop_util",
-        "@cargo_raze__regex__1_4_3//:regex",
+        "@cargo_raze__lalrpop_util__0_19_5//:lalrpop_util",
+        "@cargo_raze__regex__1_4_5//:regex",
     ],
 )
