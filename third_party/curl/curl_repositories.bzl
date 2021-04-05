@@ -8,11 +8,10 @@ def curl_repositories():
         http_archive,
         name = "cargo_raze__curl",
         urls = [
-            "https://curl.se/download/curl-7.74.0.tar.gz",
-            "https://github.com/curl/curl/releases/download/curl-7_74_0/curl-7.74.0.tar.gz",
+            "https://curl.se/download/curl-7.76.0.tar.gz",
         ],
         type = "tar.gz",
-        sha256 = "e56b3921eeb7a2951959c02db0912b5fcd5fdba5aca071da819e1accf338bbd7",
-        strip_prefix = "curl-7.74.0",
+        sha256 = "3b4378156ba09e224008e81dcce854b7ce4d182b1f9cfb97fe5ed9e9c18c6bd3",
+        strip_prefix = "curl-7.76.0",
         build_file = Label("//third_party/curl:BUILD.curl.bazel"),
     )
