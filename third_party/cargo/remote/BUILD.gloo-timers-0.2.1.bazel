@@ -53,11 +53,11 @@ rust_library(
     version = "0.2.1",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__futures_channel__0_3_12//:futures_channel",
-        "@cargo_raze__futures_core__0_3_12//:futures_core",
-        "@cargo_raze__js_sys__0_3_46//:js_sys",
-        "@cargo_raze__wasm_bindgen__0_2_69//:wasm_bindgen",
-        "@cargo_raze__web_sys__0_3_46//:web_sys",
+        "@cargo_raze__futures_channel__0_3_13//:futures_channel",
+        "@cargo_raze__futures_core__0_3_13//:futures_core",
+        "@cargo_raze__js_sys__0_3_50//:js_sys",
+        "@cargo_raze__wasm_bindgen__0_2_73//:wasm_bindgen",
+        "@cargo_raze__web_sys__0_3_50//:web_sys",
     ],
 )
 

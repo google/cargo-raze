@@ -62,12 +62,12 @@ rust_library(
         "@cargo_raze__concurrent_queue__1_2_2//:concurrent_queue",
         "@cargo_raze__fastrand__1_4_0//:fastrand",
         "@cargo_raze__futures_lite__1_11_3//:futures_lite",
-        "@cargo_raze__log__0_4_13//:log",
-        "@cargo_raze__nb_connect__1_0_2//:nb_connect",
-        "@cargo_raze__once_cell__1_5_2//:once_cell",
+        "@cargo_raze__log__0_4_14//:log",
+        "@cargo_raze__nb_connect__1_1_0//:nb_connect",
+        "@cargo_raze__once_cell__1_7_2//:once_cell",
         "@cargo_raze__parking__2_0_0//:parking",
-        "@cargo_raze__polling__2_0_2//:polling",
-        "@cargo_raze__vec_arena__1_0_0//:vec_arena",
+        "@cargo_raze__polling__2_0_3//:polling",
+        "@cargo_raze__vec_arena__1_1_0//:vec_arena",
         "@cargo_raze__waker_fn__1_1_0//:waker_fn",
     ] + selects.with_or({
         # cfg(target_os = "linux")
@@ -88,7 +88,7 @@ rust_library(
             "@rules_rust//rust/platform:x86_64-apple-darwin",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
-            "@cargo_raze__libc__0_2_82//:libc",
+            "@cargo_raze__libc__0_2_92//:libc",
         ],
         "//conditions:default": [],
     }) + selects.with_or({

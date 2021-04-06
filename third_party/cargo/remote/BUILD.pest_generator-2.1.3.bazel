@@ -51,8 +51,8 @@ rust_library(
     deps = [
         "@cargo_raze__pest__2_1_3//:pest",
         "@cargo_raze__pest_meta__2_1_3//:pest_meta",
-        "@cargo_raze__proc_macro2__1_0_24//:proc_macro2",
-        "@cargo_raze__quote__1_0_8//:quote",
-        "@cargo_raze__syn__1_0_58//:syn",
+        "@cargo_raze__proc_macro2__1_0_26//:proc_macro2",
+        "@cargo_raze__quote__1_0_9//:quote",
+        "@cargo_raze__syn__1_0_68//:syn",
     ],
 )

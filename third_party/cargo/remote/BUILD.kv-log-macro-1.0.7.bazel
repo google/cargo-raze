@@ -51,7 +51,7 @@ rust_library(
     version = "1.0.7",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__log__0_4_13//:log",
+        "@cargo_raze__log__0_4_14//:log",
     ],
 )
 

@@ -53,7 +53,7 @@ rust_library(
     deps = [
         "@cargo_raze__bitflags__1_2_1//:bitflags",
         "@cargo_raze__ignore__0_4_17//:ignore",
-        "@cargo_raze__walkdir__2_3_1//:walkdir",
+        "@cargo_raze__walkdir__2_3_2//:walkdir",
     ],
 )
 

@@ -52,7 +52,7 @@ rust_library(
     version = "0.5.2",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__byteorder__1_4_2//:byteorder",
+        "@cargo_raze__byteorder__1_4_3//:byteorder",
         "@cargo_raze__dirs__1_0_5//:dirs",
     ] + selects.with_or({
         # cfg(windows)

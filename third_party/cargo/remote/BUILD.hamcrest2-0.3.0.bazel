@@ -50,7 +50,7 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__num__0_2_1//:num",
-        "@cargo_raze__regex__1_4_3//:regex",
+        "@cargo_raze__regex__1_4_5//:regex",
     ],
 )
 
