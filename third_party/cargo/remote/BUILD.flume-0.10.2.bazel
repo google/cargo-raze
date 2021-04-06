@@ -66,7 +66,7 @@ rust_library(
         "@cargo_raze__futures_core__0_3_13//:futures_core",
         "@cargo_raze__futures_sink__0_3_13//:futures_sink",
         "@cargo_raze__pin_project__1_0_6//:pin_project",
-        "@cargo_raze__spinning_top__0_2_3//:spinning_top",
+        "@cargo_raze__spinning_top__0_2_2//:spinning_top",
     ],
 )
 

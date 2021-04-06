@@ -2361,12 +2361,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__spinning_top__0_2_3",
-        url = "https://crates.io/api/v1/crates/spinning_top/0.2.3/download",
+        name = "cargo_raze__spinning_top__0_2_2",
+        url = "https://crates.io/api/v1/crates/spinning_top/0.2.2/download",
         type = "tar.gz",
-        sha256 = "8bd0ab6b8c375d2d963503b90d3770010d95bc3b5f98036f948dee24bf4e8879",
-        strip_prefix = "spinning_top-0.2.3",
-        build_file = Label("//third_party/cargo/remote:BUILD.spinning_top-0.2.3.bazel"),
+        sha256 = "7e529d73e80d64b5f2631f9035113347c578a1c9c7774b83a2b880788459ab36",
+        strip_prefix = "spinning_top-0.2.2",
+        build_file = Label("//third_party/cargo/remote:BUILD.spinning_top-0.2.2.bazel"),
     )
 
     maybe(
