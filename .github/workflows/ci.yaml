@@ -51,8 +51,8 @@ jobs:
     strategy:
       matrix:
         rust:
-          # The rustfmt.toml appears to use nightly only features
-          - nightly-2021-01-31
+          - stable
+          - 1.46.0
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
