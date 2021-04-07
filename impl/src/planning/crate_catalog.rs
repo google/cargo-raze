@@ -113,7 +113,7 @@ impl CrateCatalogEntry {
             settings.workspace_path, &self.package_ident
           ))
         }
-      },
+      }
       GenMode::Unspecified => Err(anyhow!(
         "Unable to determine workspace path for GenMode::Unspecified"
       )),
@@ -143,7 +143,7 @@ impl CrateCatalogEntry {
             settings.workspace_path, &self.package_ident, &self.sanitized_name
           ))
         }
-      },
+      }
       GenMode::Unspecified => Err(anyhow!(
         "Unable to determine workspace path for GenMode::Unspecified"
       )),

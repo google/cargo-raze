@@ -245,7 +245,7 @@ fn render_files(
     GenMode::Vendored => bazel_renderer.render_planned_build(&render_details, &planned_build)?,
     GenMode::Remote => {
       bazel_renderer.render_remote_planned_build(&render_details, &planned_build)?
-    }, /* exhaustive, we control the definition */
+    } /* exhaustive, we control the definition */
     // There are no file outputs to produce if `genmode` is Unspecified
     GenMode::Unspecified => Vec::new(),
   };
