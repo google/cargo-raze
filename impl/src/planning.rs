@@ -70,10 +70,7 @@ impl BuildPlanner for BuildPlannerImpl {
 
 impl BuildPlannerImpl {
   pub fn new(metadata: RazeMetadata, settings: RazeSettings) -> Self {
-    Self {
-      metadata,
-      settings,
-    }
+    Self { metadata, settings }
   }
 }
 

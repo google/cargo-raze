@@ -134,7 +134,7 @@ pub fn get_license_from_str(cargo_license_str: &str) -> LicenseData {
         ),
         rating: BazelLicenseType::Restricted.to_bazel_rating().into(),
       };
-    },
+    }
   };
 
   let mut license_stack: Vec<BazelSpdxLicense> = Vec::new();
@@ -146,12 +146,12 @@ pub fn get_license_from_str(cargo_license_str: &str) -> LicenseData {
           let node2 = license_stack.pop().unwrap();
           let node1 = license_stack.pop().unwrap();
           license_stack.push(node1.and(node2));
-        },
+        }
         Operator::Or => {
           let node2 = license_stack.pop().unwrap();
           let node1 = license_stack.pop().unwrap();
           license_stack.push(node1.or(node2));
-        },
+        }
       },
       ExprNode::Req(requirement) => {
         // Unwrap is safe because there was no parse error so the license type must exist
@@ -162,7 +162,7 @@ pub fn get_license_from_str(cargo_license_str: &str) -> LicenseData {
           expression: req_name.into(),
           license: get_bazel_license_type(&req_name),
         });
-      },
+      }
     };
   }
 

@@ -74,7 +74,7 @@ pub fn is_bazel_supported_platform(target: &str) -> (bool, bool) {
     // If the target expression cannot be parsed it is not considered a Bazel platform
     Err(_) => {
       return (false, false);
-    },
+    }
   };
 
   let mut is_supported = false;
@@ -88,10 +88,7 @@ pub fn is_bazel_supported_platform(target: &str) -> (bool, bool) {
     let target_matches = expression.eval(|pred| {
       match pred {
         Predicate::Target(tp) => tp.matches(target_info),
-        Predicate::KeyValue {
-          key,
-          val,
-        } => (*key == "target") && (*val == target_info.triple),
+        Predicate::KeyValue { key, val } => (*key == "target") && (*val == target_info.triple),
         // For now there is no other kind of matching
         _ => false,
       }
@@ -124,10 +121,7 @@ pub fn get_matching_bazel_triples(target: &str) -> Result<Vec<String>> {
       match expression.eval(|pred| {
         match pred {
           Predicate::Target(tp) => tp.matches(target_info),
-          Predicate::KeyValue {
-            key,
-            val,
-          } => (*key == "target") && (*val == target_info.triple),
+          Predicate::KeyValue { key, val } => (*key == "target") && (*val == target_info.triple),
           // For now there is no other kind of matching
           _ => false,
         }

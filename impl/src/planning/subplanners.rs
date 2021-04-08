@@ -352,11 +352,11 @@ impl<'planner> CrateSubplanner<'planner> {
         match current_dependency.kind {
           DependencyKind::Development => {
             workspace_member_dev_dependents.push(workspace_member_path)
-          },
+          }
           DependencyKind::Normal => workspace_member_dependents.push(workspace_member_path),
           /* TODO: For now only Development and Normal dependencies are
           needed but Build surely has it's use as well */
-          _ => {},
+          _ => {}
         }
       }
     }
@@ -625,7 +625,7 @@ impl<'planner> CrateSubplanner<'planner> {
               );
               // UNWRAP: This unwrap should be safe given the insert above
               targeted_dep_names.get_mut(&target_str).unwrap()
-            },
+            }
           };
         }
       }
@@ -644,7 +644,7 @@ impl<'planner> CrateSubplanner<'planner> {
             }
             .into(),
           )
-        },
+        }
       }
 
       // Check if the dependency has been renamed
