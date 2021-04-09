@@ -1,6 +1,6 @@
 """A module defining the transitive dependencies of cargo-raze"""
 
-load("@rules_foreign_cc//:workspace_definitions.bzl", "rules_foreign_cc_dependencies")
+load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
 load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 
 def cargo_raze_transitive_deps():

@@ -2,12 +2,12 @@
 https://github.com/bazelbuild/rules_foreign_cc/issues/337
 """
 
-load("@rules_foreign_cc//tools/build_defs:configure.bzl", "configure_make")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "configure_make")
 
 # Read https://wiki.openssl.org/index.php/Compilation_and_Installation
 
 filegroup(
-    name = "all",
+    name = "all_srcs",
     srcs = glob(["**"]),
 )
 
@@ -36,14 +36,14 @@ configure_make(
             "no-shared",
         ] + CONFIGURE_OPTIONS,
     }),
-    lib_source = ":all",
-    make_commands = [
-        "make build_libs",
-        "make install_dev",
-    ],
-    static_libraries = [
+    lib_source = ":all_srcs",
+    out_static_libs = [
         "libcrypto.a",
         "libssl.a",
+    ],
+    targets = [
+        "build_libs",
+        "install_dev",
     ],
     visibility = ["//visibility:public"],
 )

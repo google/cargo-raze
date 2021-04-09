@@ -1,7 +1,7 @@
-load("@rules_foreign_cc//tools/build_defs:cmake.bzl", "cmake_external")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
 
 filegroup(
-    name = "all",
+    name = "all_srcs",
     srcs = glob(["**"]),
 )
 
@@ -22,15 +22,20 @@ _LINUX_CACHE_ENTRIES = dict(_CACHE_ENTRIES.items() + {
     "CMAKE_C_FLAGS": "-fPIC",
 }.items())
 
-cmake_external(
+cmake(
     name = "curl",
     cache_entries = select({
         "@rules_rust//rust/platform:darwin": _MACOS_CACHE_ENTRIES,
         "@rules_rust//rust/platform:linux": _LINUX_CACHE_ENTRIES,
         "//conditions:default": _CACHE_ENTRIES,
     }),
-    lib_source = ":all",
-    static_libraries = select({
+    cmake_options = select({
+        "@platforms//os:windows": ["-GNinja"],
+        "//conditions:default": [],
+    }),
+    generate_crosstool_file = False,
+    lib_source = ":all_srcs",
+    out_static_libs = select({
         # TODO: I'm guessing at this name. Needs to be checked on windows.
         "@rules_rust//rust/platform:windows": ["curl.lib"],
         "//conditions:default": ["libcurl.a"],
