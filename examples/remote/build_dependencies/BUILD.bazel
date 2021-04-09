@@ -1,0 +1,17 @@
+load("@rules_rust//cargo:cargo_build_script.bzl", "cargo_build_script")
+load("@rules_rust//rust:rust.bzl", "rust_test")
+
+cargo_build_script(
+    name = "build_script",
+    srcs = ["build.rs"],
+    deps = [
+        "@cargo_raze_examples//remote/build_dependencies/cargo:ferris_says",
+    ],
+)
+
+rust_test(
+    name = "build_dependencies_test",
+    srcs = ["src/main.rs"],
+    edition = "2018",
+    deps = ["build_script"],
+)
