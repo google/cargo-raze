@@ -91,10 +91,19 @@ impl LockfileGenerator for CargoLockfileGenerator {
     let lockfile_path = crate_root_dir.join("Cargo.lock");
 
     // Generate lockfile
-    std::process::Command::new(&self.cargo_bin_path)
+    let output = std::process::Command::new(&self.cargo_bin_path)
       .arg("generate-lockfile")
       .current_dir(&crate_root_dir)
-      .output()?;
+      .output()
+      .with_context(|| format!("Generating lockfile in {}", crate_root_dir.display()))?;
+
+    if !output.status.success() {
+      anyhow::bail!(
+        "Failed to generate lockfile in {}: {}",
+        crate_root_dir.display(),
+        String::from_utf8_lossy(&output.stderr)
+      );
+    }
 
     // Load lockfile contents
     Lockfile::load(&lockfile_path)
