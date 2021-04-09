@@ -1,6 +1,7 @@
 """This module is the single location for all dependencies for the Cargo Raze examples"""
 
 load("@cargo_raze_examples//remote/binary_dependencies/cargo:crates.bzl", "remote_binary_dependencies_fetch_remote_crates")
+load("@cargo_raze_examples//remote/build_dependencies/cargo:crates.bzl", "remote_build_dependencies_fetch_remote_crates")
 load("@cargo_raze_examples//remote/cargo_workspace/cargo:crates.bzl", "remote_cargo_workspace_fetch_remote_crates")
 load("@cargo_raze_examples//remote/complicated_cargo_library/cargo:crates.bzl", "remote_complicated_cargo_library_fetch_remote_crates")
 load("@cargo_raze_examples//remote/dev_dependencies/cargo:crates.bzl", "remote_dev_dependencies_fetch_remote_crates")
@@ -15,3 +16,4 @@ def repositories():
     remote_no_deps_fetch_remote_crates()
     remote_non_cratesio_fetch_remote_crates()
     remote_dev_dependencies_fetch_remote_crates()
+    remote_build_dependencies_fetch_remote_crates()

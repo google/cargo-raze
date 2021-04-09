@@ -1,0 +1,18 @@
+[package]
+name = "build_dependencies"
+version = "0.1.0"
+authors = ["Cargo Raze Authors <email@example.com>"]
+
+[[bin]]
+name = "build_dependencies"
+path = "src/main.rs"
+
+[build-dependencies]
+ferris-says = "0.2.0"
+
+[package.metadata.raze]
+workspace_path = "//remote/build_dependencies/cargo"
+gen_workspace_prefix = "remote_build_dependencies"
+genmode = "Remote"
+default_gen_buildrs = true
+package_aliases_dir = "cargo"

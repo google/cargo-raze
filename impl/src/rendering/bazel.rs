@@ -210,6 +210,7 @@ impl BazelRenderer {
           ctx.is_binary_dependency
             || ctx.workspace_member_dependents.contains(member_path)
             || ctx.workspace_member_dev_dependents.contains(member_path)
+            || ctx.workspace_member_build_dependents.contains(member_path)
         })
         .cloned()
         .collect();
@@ -555,6 +556,7 @@ mod tests {
       targeted_deps: Vec::new(),
       workspace_member_dependents: Vec::new(),
       workspace_member_dev_dependents: Vec::new(),
+      workspace_member_build_dependents: Vec::new(),
       is_workspace_member_dependency: false,
       is_binary_dependency: false,
       is_proc_macro: false,
@@ -601,6 +603,7 @@ mod tests {
       targeted_deps: Vec::new(),
       workspace_member_dependents: Vec::new(),
       workspace_member_dev_dependents: Vec::new(),
+      workspace_member_build_dependents: Vec::new(),
       is_workspace_member_dependency: false,
       is_binary_dependency: false,
       is_proc_macro: false,
