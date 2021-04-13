@@ -16,7 +16,7 @@ use crate::context::LicenseData;
 
 use spdx::{
   expression::{ExprNode, Operator},
-  Expression,
+  Expression, LicenseItem,
 };
 
 // KEEP ORDERED: The order dictates the preference.
@@ -155,13 +155,22 @@ pub fn get_license_from_str(cargo_license_str: &str) -> LicenseData {
       },
       ExprNode::Req(requirement) => {
         // Unwrap is safe because there was no parse error so the license type must exist
-        let req_name = requirement.req.license.id().unwrap().name;
-        // Push requirement onto stack
-        license_stack.push(BazelSpdxLicense {
-          name: req_name.into(),
-          expression: req_name.into(),
-          license: get_bazel_license_type(&req_name),
-        });
+        match &requirement.req.license {
+          LicenseItem::SPDX { id, .. } => {
+            let req_name = id.name;
+            // Push requirement onto stack
+            license_stack.push(BazelSpdxLicense {
+              name: req_name.into(),
+              expression: req_name.into(),
+              license: get_bazel_license_type(&req_name),
+            });
+          }
+          LicenseItem::Other { lic_ref, .. } => license_stack.push(BazelSpdxLicense {
+            name: lic_ref.clone(),
+            expression: lic_ref.clone(),
+            license: BazelLicenseType::Restricted,
+          }),
+        }
       }
     };
   }
