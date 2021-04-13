@@ -286,6 +286,15 @@ impl RazeMetadataFetcher {
       )?;
     }
 
+    let source_dotcargo = cargo_workspace_root.join(".cargo");
+    let source_dotcargo_config = source_dotcargo.join("config.toml");
+    if source_dotcargo_config.exists() {
+      let destination_dotcargo = temp_dir.path().join(".cargo");
+      fs::create_dir(&destination_dotcargo)?;
+      let destination_dotcargo_config = destination_dotcargo.join("config.toml");
+      fs::copy(&source_dotcargo_config, &destination_dotcargo_config)?;
+    }
+
     // Copy over the Cargo.toml files of each workspace member
     self.link_src_to_workspace(&no_deps_metadata, temp_dir.as_ref())?;
     Ok((temp_dir, no_deps_metadata.workspace_root.into()))

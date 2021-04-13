@@ -46,7 +46,7 @@ spdx = "0.3.4"
 tempfile = "3.2.0"
 tera = "1.6.1"
 toml = "0.5.8"
-url = "2.2.0"
+url = { version = "2.2.0", features = ["serde"] }
 
 [dev-dependencies]
 flate2 = "1.0.19"

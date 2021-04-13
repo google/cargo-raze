@@ -20,6 +20,7 @@ use std::{
 use crate::settings::CrateSettings;
 use semver::Version;
 use serde::Serialize;
+use url::Url;
 
 /// A struct containing information about a crate's dependency that's buildable in Bazel
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -82,6 +83,7 @@ pub struct GitRepo {
 #[derive(Debug, Clone, Serialize)]
 pub struct SourceDetails {
   pub git_data: Option<GitRepo>,
+  pub download_url: Option<Url>,
 }
 
 #[derive(Default, Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
@@ -167,7 +169,6 @@ pub struct CrateContext {
   pub links: Option<String>,
   pub source_details: SourceDetails,
   pub sha256: Option<String>,
-  pub registry_url: String,
 
   // TODO(acmcarther): This is used internally by renderer to know where to put the build file. It
   // probably should live somewhere else. Renderer params (separate from context) should live
