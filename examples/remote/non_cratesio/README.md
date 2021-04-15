@@ -10,6 +10,6 @@
 4. Run `cargo vendor --versioned-dirs` from `cargo/`
 5. Run `cargo raze` from `cargo/`
 
-At this point you will have a dependency specification that Bazel can understand. You will also have starter BUILD files that referene the specified dependencies and generate rust_library rules.
+At this point you will have a dependency specification that Bazel can understand. You will also have starter BUILD files that reference the specified dependencies and generate rust_library rules.
 
 To expose those dependencies, `alias` entries are created for the explicit Cargo dependencies. It is important to only expose explicit dependencies for the sake of hygiene.

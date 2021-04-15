@@ -121,13 +121,13 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       .workspace_members
       .iter()
       .filter_map(|pkg_id| {
-        let workspace_memeber = self
+        let workspace_member = self
           .metadata
           .metadata
           .packages
           .iter()
           .find(|pkg| pkg.id == *pkg_id);
-        if let Some(pkg) = workspace_memeber {
+        if let Some(pkg) = workspace_member {
           // Don't include binary dependencies
           if self.settings.binary_deps.contains_key(&pkg.name) {
             None

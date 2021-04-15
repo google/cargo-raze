@@ -219,7 +219,7 @@ impl RazeMetadataFetcher {
         &no_deps_metadata.workspace_root,
       )
       .ok_or_else(|| {
-        anyhow!("All workspace memebers are expected to be under the workspace root")
+        anyhow!("All workspace members are expected to be under the workspace root")
       })?;
       let new_path = temp_dir.join(diff);
       fs::create_dir_all(&new_path)?;
@@ -237,7 +237,7 @@ impl RazeMetadataFetcher {
 
           // Determine the difference between the workspace root and the current file
           let diff = diff_paths(&path, &no_deps_metadata.workspace_root).ok_or_else(|| {
-            anyhow!("All workspace memebers are expected to be under the workspace root")
+            anyhow!("All workspace members are expected to be under the workspace root")
           })?;
 
           // Create a matching directory tree for the current file within the temp workspace

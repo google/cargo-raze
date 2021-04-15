@@ -110,7 +110,7 @@ _examples_repository = repository_rule(
             allow_single_file = True,
         ),
         "_script_windows": attr.label(
-            doc = "The windows equivilant of `_script`",
+            doc = "The windows equivalent of `_script`",
             default = Label("//tools:examples_repository_tools.bat"),
             allow_single_file = True,
         ),

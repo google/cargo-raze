@@ -126,7 +126,7 @@ all of their `raze` settings into the `[workspace.metadata.raze]` field in the
 top level `Cargo.toml` file which contains the `[workspace]` definition. These
 settings should be identical to the ones seen in `[package.metadata.raze]` in
 [the previous section](#using-existing-cargotoml). However, crate settings may still
-be placed in the `Cargo.toml` files of the workspace memebers:
+be placed in the `Cargo.toml` files of the workspace members:
 
 ```toml
 # Above this line should be the contents of your package's Cargo.toml file

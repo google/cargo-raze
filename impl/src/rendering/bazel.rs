@@ -37,7 +37,7 @@ macro_rules! unwind_tera_error {
   }};
 }
 
-// A Bazel block that exposts the `crates.bz` files renderd in Remote genmode
+// A Bazel block that exposts the `crates.bz` files rendered in Remote genmode
 const EXPORTS_FILES: &str = r#"
 # Export file for Stardoc support
 exports_files(
@@ -866,7 +866,7 @@ mod tests {
       .render_remote_planned_build(&render_details, &planned_build)
       .unwrap();
 
-    // Ensure that the lockfiles for binary dependencies get written out propperly
+    // Ensure that the lockfiles for binary dependencies get written out properly
     assert!(render_result.iter().any(|file_output| {
       file_output.path == PathBuf::from("/some/bazel/root/./some_render_prefix/Cargo.raze.lock")
         && file_output.contents
@@ -882,7 +882,7 @@ mod tests {
 
   #[test]
   fn test_experimental_api_with_workspace_members() {
-    // Setup render detials
+    // Setup render details
     let mut render_details = dummy_render_details("BUILD.bazel");
     render_details.experimental_api = true;
     render_details.render_package_aliases = false;
