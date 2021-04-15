@@ -318,7 +318,7 @@ pub fn package_ident(package_name: &str, package_version: &str) -> String {
 
 /// Locates a lockfile for the associated crate. A `Cargo.raze.lock` file in the
 /// [RazeSettings::workspace_path](crate::settings::RazeSettings::workspace_path)
-/// direcotry will take precidence over a standard `Cargo.lock` file.
+/// directory will take precidence over a standard `Cargo.lock` file.
 pub fn find_lockfile(cargo_workspace_root: &Path, raze_output_dir: &Path) -> Option<PathBuf> {
   // The custom raze lockfile will always take precidence
   let raze_lockfile = raze_output_dir.join(RAZE_LOCKFILE_NAME);

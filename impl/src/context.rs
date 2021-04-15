@@ -22,7 +22,7 @@ use serde::Serialize;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 pub struct BuildableDependency {
   // Note: Buildifier-compliant BUILD file generation depends on correct sorting of collections
-  // of this struct by `buildable_target`. Do not add fields preceeding this field.
+  // of this struct by `buildable_target`. Do not add fields preceding this field.
   pub buildable_target: String,
   pub name: String,
   pub version: Version,

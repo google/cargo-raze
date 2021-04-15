@@ -254,7 +254,7 @@ pub fn to_index_crates_map(list: Vec<(&str, &str)>) -> HashMap<String, String> {
     .collect()
 }
 
-/// Create a mock cache in a temporary direcotry that contains a set of given crates
+/// Create a mock cache in a temporary directory that contains a set of given crates
 pub fn mock_crate_index(
   crates: &HashMap<String, String>,
   mock_dir: Option<&Path>,

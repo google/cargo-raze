@@ -221,7 +221,7 @@ pub struct CrateSettings {
 
   /// The `patch(1)` utility to use.
   ///
-  /// If this is specified, Bazel will use the specifed patch tool instead of the Bazel-native patch
+  /// If this is specified, Bazel will use the specified patch tool instead of the Bazel-native patch
   /// implementation.
   #[serde(default)]
   pub patch_tool: Option<String>,
@@ -584,13 +584,13 @@ fn parse_raze_settings_workspace(
   // Check for duplication errors
   if !duplicate_binary_deps.is_empty() {
     return Err(anyhow!(
-      "Duplicate `raze.binary_deps` values detected accross various crates: {:?}",
+      "Duplicate `raze.binary_deps` values detected across various crates: {:?}",
       duplicate_binary_deps
     ));
   }
   if !duplicate_crate_settings.is_empty() {
     return Err(anyhow!(
-      "Duplicate `raze.crates.*` values detected accross various crates: {:?}",
+      "Duplicate `raze.crates.*` values detected across various crates: {:?}",
       duplicate_crate_settings
     ));
   }
@@ -671,8 +671,8 @@ fn parse_raze_settings_legacy(metadata: &Metadata) -> Result<RazeSettings> {
 /// Parses raze settings from the contents of a `Cargo.toml` file
 fn parse_raze_settings(metadata: &Metadata) -> Result<RazeSettings> {
   // Workspace takes precedence
-  let workspace_level_settigns = metadata.workspace_metadata.get("raze");
-  if let Some(value) = workspace_level_settigns {
+  let workspace_level_settings = metadata.workspace_metadata.get("raze");
+  if let Some(value) = workspace_level_settings {
     return parse_raze_settings_workspace(value, &metadata);
   }
 
@@ -683,7 +683,7 @@ fn parse_raze_settings(metadata: &Metadata) -> Result<RazeSettings> {
     }
   }
 
-  // Attempt to load legacy settings but do not allow failures to propogate
+  // Attempt to load legacy settings but do not allow failures to propagate
   if let Ok(settings) = parse_raze_settings_legacy(metadata) {
     eprintln!(
       "WARNING: The top-level `[raze]` key is deprecated. Please set `[workspace.metadata.raze]` \
