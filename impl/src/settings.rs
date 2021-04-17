@@ -22,7 +22,7 @@ use cargo_metadata::{Metadata, MetadataCommand, Package};
 use semver::VersionReq;
 use serde::{Deserialize, Serialize};
 use std::{
-  collections::{HashMap, HashSet},
+  collections::{BTreeMap, HashMap, HashSet},
   hash::Hash,
   path::{Path, PathBuf},
 };
@@ -129,7 +129,7 @@ pub struct RazeSettings {
 }
 
 /// Override settings for individual crates (as part of `RazeSettings`).
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct CrateSettings {
   /// Dependencies to be added to a crate.
   ///
@@ -161,7 +161,7 @@ pub struct CrateSettings {
 
   /// Environment variables to be added to the crate compilation process.
   #[serde(default)]
-  pub additional_env: HashMap<String, String>,
+  pub additional_env: BTreeMap<String, String>,
 
   /// Whether or not to generate the build script that goes with this crate.
   ///
@@ -189,7 +189,7 @@ pub struct CrateSettings {
 
   /// Additional environment variables to add when running the build script.
   #[serde(default)]
-  pub buildrs_additional_environment_variables: HashMap<String, String>,
+  pub buildrs_additional_environment_variables: BTreeMap<String, String>,
 
   /// Additional dependencies for buildrs targets. See `additional_deps`
   #[serde(default)]
@@ -266,14 +266,14 @@ impl Default for CrateSettings {
       skipped_deps: Vec::new(),
       extra_aliased_targets: Vec::new(),
       additional_flags: Vec::new(),
-      additional_env: HashMap::new(),
+      additional_env: BTreeMap::new(),
       gen_buildrs: default_crate_settings_field_gen_buildrs(),
       data_attr: default_crate_settings_field_data_attr(),
       data_dependencies: Vec::new(),
       compile_data_attr: None,
       build_data_dependencies: Vec::new(),
       buildrs_additional_deps: Vec::new(),
-      buildrs_additional_environment_variables: HashMap::new(),
+      buildrs_additional_environment_variables: BTreeMap::new(),
       patch_args: Vec::new(),
       patch_cmds: Vec::new(),
       patch_cmds_win: Vec::new(),
