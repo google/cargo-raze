@@ -458,7 +458,8 @@ impl<'planner> CrateSubplanner<'planner> {
         continue;
       }
 
-      // TODO(GregBowyer): Reimplement what cargo does to detect bad renames
+      // TODO(https://github.com/google/cargo-raze/issues/424):
+      // Reimplement what cargo does to detect bad renames
       //
       // The problem manifests from this:
       //
