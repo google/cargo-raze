@@ -13,8 +13,7 @@
 // limitations under the License.
 
 use std::{
-  collections::BTreeSet,
-  hash::{Hash, Hasher},
+  collections::BTreeMap,
   path::PathBuf,
 };
 
@@ -33,23 +32,10 @@ pub struct BuildableDependency {
   pub is_proc_macro: bool,
 }
 
-#[derive(Debug, Clone, Eq, PartialOrd, Ord, Serialize)]
+#[derive(Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Serialize)]
 pub struct DependencyAlias {
   pub target: String,
   pub alias: String,
-}
-
-// We only want equality for the first member as it can have multiple names pointing at it.
-impl Hash for DependencyAlias {
-  fn hash<H: Hasher>(&self, state: &mut H) {
-    self.target.hash(state);
-  }
-}
-
-impl PartialEq for DependencyAlias {
-  fn eq(&self, other: &Self) -> bool {
-    self.target == other.target
-  }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
@@ -109,7 +95,7 @@ pub struct CrateDependencyContext {
   // build_data_dependencies can only be set when using cargo-raze as a library at the moment.
   pub build_data_dependencies: Vec<BuildableDependency>,
   pub dev_dependencies: Vec<BuildableDependency>,
-  pub aliased_dependencies: BTreeSet<DependencyAlias>,
+  pub aliased_dependencies: BTreeMap<String, DependencyAlias>,
 }
 
 impl CrateDependencyContext {

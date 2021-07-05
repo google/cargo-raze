@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{
-  collections::{BTreeSet, HashMap, HashSet},
+  collections::{BTreeMap, HashMap, HashSet},
   io, iter,
   path::{Path, PathBuf},
   str::FromStr,
@@ -222,7 +222,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
         false => None,
       })
       .flatten()
-      .collect::<BTreeSet<_>>();
+      .collect::<BTreeMap<_,_>>();
 
     let contexts = contexts.into_iter().map(|(ctx, _)| ctx).collect_vec();
     let aliases = self.produce_workspace_aliases(root_ctxs, &contexts);
@@ -232,12 +232,12 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
   fn produce_workspace_aliases(
     &self,
-    root_dep_aliases: BTreeSet<DependencyAlias>,
+    root_dep_aliases: BTreeMap<String, DependencyAlias>,
     all_packages: &[CrateContext],
   ) -> Vec<DependencyAlias> {
     let renames = root_dep_aliases
       .iter()
-      .map(|rename| (&rename.target, &rename.alias))
+      .map(|(_name, rename)| (&rename.target, &rename.alias))
       .collect::<HashMap<_, _>>();
 
     all_packages
@@ -546,7 +546,7 @@ impl<'planner> CrateSubplanner<'planner> {
         alias: name.replace("-", "_"),
       };
 
-      if !dep_set.aliased_dependencies.insert(dep_alias) {
+      if let Some(_dep_alias) = dep_set.aliased_dependencies.insert(dep_alias.target.clone(), dep_alias) {
         return Err(
           RazeError::Planning {
             dependency_name_opt: Some(pkg.name.to_string()),

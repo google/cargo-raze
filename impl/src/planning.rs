@@ -257,12 +257,13 @@ mod tests {
     // However, log^0.3 is aliased to old_log while log^0.4 isn't aliased. Therefore, we
     // should only see one aliased dependency (log^0.3 -> old_log) which shows that the
     // name and semver matching for aliased dependencies is working correctly
-    let dep = crate_ctx
+    let (name, dep) = crate_ctx
       .default_deps
       .aliased_dependencies
       .iter()
       .exactly_one()
       .unwrap();
+    assert_eq!(name, &dep.target);
     assert_eq!(dep.target, "@raze_test__log__0_3_9//:log");
     assert_eq!(dep.alias, "old_log");
   }
