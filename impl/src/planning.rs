@@ -809,12 +809,12 @@ mod tests {
     assert!(planned_build
       .crate_contexts
       .iter()
-      .any(|ctx| ctx.pkg_name == "unicode-xid" && ctx.pkg_version == Version::from((0, 1, 0))));
+      .any(|ctx| ctx.pkg_name == "unicode-xid" && ctx.pkg_version == Version::new(0, 1, 0)));
 
     assert!(planned_build
       .crate_contexts
       .iter()
-      .any(|ctx| ctx.pkg_name == "unicode-xid" && ctx.pkg_version == Version::from((0, 2, 1))));
+      .any(|ctx| ctx.pkg_name == "unicode-xid" && ctx.pkg_version == Version::new(0, 2, 1)));
   }
   // TODO(acmcarther): Add tests:
   // TODO(acmcarther): Extra flags work

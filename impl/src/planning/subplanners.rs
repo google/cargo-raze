@@ -106,8 +106,8 @@ impl<'planner> WorkspaceSubplanner<'planner> {
             None
           } else {
             util::get_workspace_member_path(
-              &pkg.manifest_path,
-              &self.metadata.metadata.workspace_root,
+              pkg.manifest_path.as_ref(),
+              self.metadata.metadata.workspace_root.as_ref(),
             )
           }
         } else {
@@ -347,14 +347,14 @@ impl<'planner> CrateSubplanner<'planner> {
           .unwrap();
 
         let workspace_member_path = util::get_workspace_member_path(
-          &member.manifest_path,
-          &self.crate_catalog.metadata.workspace_root,
+          member.manifest_path.as_ref(),
+          self.crate_catalog.metadata.workspace_root.as_ref(),
         )
         .ok_or_else(|| {
           anyhow!(
             "Failed to generate workspace_member_path for {} and {}",
-            &package.manifest_path.display(),
-            &self.crate_catalog.metadata.workspace_root.display()
+            &package.manifest_path,
+            &self.crate_catalog.metadata.workspace_root
           )
         })?;
 
@@ -642,7 +642,7 @@ impl<'planner> CrateSubplanner<'planner> {
         let manifest_parent = package.manifest_path.parent().unwrap();
         let path_to_crate_root = manifest_parent.strip_prefix(package_root).unwrap();
         let path_to_crate_root = if path_to_crate_root.components().next().is_some() {
-          Some(path_to_crate_root.to_string_lossy().to_string())
+          Some(path_to_crate_root.to_string())
         } else {
           None
         };

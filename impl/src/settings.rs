@@ -659,12 +659,8 @@ pub struct LegacyCargoToml {
 fn parse_raze_settings_legacy(metadata: &Metadata) -> Result<RazeSettings> {
   let root_toml = metadata.workspace_root.join("Cargo.toml");
   let toml_contents = std::fs::read_to_string(&root_toml)?;
-  let data = toml::from_str::<LegacyCargoToml>(&toml_contents).with_context(|| {
-    format!(
-      "Failed to read `[raze]` settings from {}",
-      root_toml.display()
-    )
-  })?;
+  let data = toml::from_str::<LegacyCargoToml>(&toml_contents)
+    .with_context(|| format!("Failed to read `[raze]` settings from {}", root_toml))?;
   Ok(data.raze)
 }
 
@@ -775,7 +771,7 @@ pub fn load_settings(metadata: &Metadata) -> Result<RazeSettings, RazeError> {
     result.unwrap()
   };
 
-  validate_settings(&mut settings, &metadata.workspace_root)?;
+  validate_settings(&mut settings, metadata.workspace_root.as_ref())?;
 
   Ok(settings)
 }

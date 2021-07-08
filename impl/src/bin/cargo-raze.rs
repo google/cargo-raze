@@ -184,8 +184,8 @@ fn fetch_raze_metadata(
     None => RazeMetadataFetcher::default(),
   };
 
-  let cargo_raze_working_dir =
-    find_bazel_workspace_root(&local_metadata.workspace_root).unwrap_or(env::current_dir()?);
+  let cargo_raze_working_dir = find_bazel_workspace_root(local_metadata.workspace_root.as_ref())
+    .unwrap_or(env::current_dir()?);
 
   let binary_dep_info = if settings.genmode == GenMode::Remote {
     Some(&settings.binary_deps)
@@ -195,15 +195,17 @@ fn fetch_raze_metadata(
 
   let reused_lockfile = if !options.flag_generate_lockfile.unwrap_or(false) {
     find_lockfile(
-      &local_metadata.workspace_root,
-      &cargo_raze_working_dir.join(settings.workspace_path.trim_start_matches('/')),
+      local_metadata.workspace_root.as_ref(),
+      cargo_raze_working_dir
+        .join(settings.workspace_path.trim_start_matches('/'))
+        .as_ref(),
     )
   } else {
     None
   };
 
   let raze_metadata = metadata_fetcher.fetch_metadata(
-    &local_metadata.workspace_root,
+    local_metadata.workspace_root.as_ref(),
     binary_dep_info,
     reused_lockfile,
   )?;
@@ -227,12 +229,12 @@ fn render_files(
   planned_build: &PlannedBuild,
   local_metadata: &Metadata,
 ) -> Result<(RenderDetails, Vec<FileOutputs>)> {
-  let cargo_raze_working_dir =
-    find_bazel_workspace_root(&local_metadata.workspace_root).unwrap_or(env::current_dir()?);
+  let cargo_raze_working_dir = find_bazel_workspace_root(local_metadata.workspace_root.as_ref())
+    .unwrap_or(env::current_dir()?);
 
   let mut bazel_renderer = BazelRenderer::new();
   let render_details = RenderDetails {
-    cargo_root: metadata.cargo_workspace_root.clone(),
+    cargo_root: metadata.cargo_workspace_root.clone().into(),
     path_prefix: PathBuf::from(&settings.workspace_path.trim_start_matches('/')),
     package_aliases_dir: settings.package_aliases_dir.clone(),
     vendored_buildfile_name: settings.output_buildfile_suffix.clone(),

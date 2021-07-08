@@ -288,8 +288,7 @@ impl RazeMetadataFetcher {
 
     // Copy over the Cargo.toml files of each workspace member
     self.link_src_to_workspace(&no_deps_metadata, temp_dir.as_ref())?;
-
-    Ok((temp_dir, no_deps_metadata.workspace_root))
+    Ok((temp_dir, no_deps_metadata.workspace_root.into()))
   }
 
   /// Download a crate's source code from the current registry url
