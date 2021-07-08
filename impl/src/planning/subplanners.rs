@@ -257,7 +257,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           .get(&target)
           .map(|x| x.to_string())
           .unwrap_or(pkg_name);
-        let dep_alias = DependencyAlias { alias, target };
+        let dep_alias = DependencyAlias { target, alias };
 
         to_alias
           .raze_settings
@@ -313,8 +313,8 @@ impl<'planner> CrateSubplanner<'planner> {
           .collect();
 
         Ok(CrateTargetedDepContext {
-          deps,
           target,
+          deps,
           platform_targets,
         })
       })
