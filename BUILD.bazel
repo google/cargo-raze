@@ -42,6 +42,6 @@ rust_analyzer(
     name = "rust_analyzer",
     targets = [
         "//impl:cargo_raze_bin",
-        "//impl:cargo_raze"
+        "//impl:cargo_raze",
     ],
 )
