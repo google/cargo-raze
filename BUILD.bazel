@@ -1,3 +1,5 @@
+load("@rules_rust//rust:defs.bzl", "rust_analyzer")
+
 alias(
     name = "cargo_raze",
     actual = "//impl:cargo_raze",
@@ -35,8 +37,6 @@ test_suite(
     ],
     visibility = ["//visibility:private"],
 )
-
-load("@rules_rust//rust:defs.bzl", "rust_analyzer")
 
 rust_analyzer(
     name = "rust_analyzer",
