@@ -47,6 +47,7 @@ static SUPPORTED_PLATFORM_TRIPLES: &[&str] = &[
   "x86_64-apple-ios",
   "x86_64-linux-android",
   "x86_64-unknown-freebsd",
+  "x86_64-unknown-linux-musl",
 ];
 
 /// Determines if the target matches those supported by and defined in rules_rust
