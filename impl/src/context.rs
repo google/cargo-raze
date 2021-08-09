@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::path::PathBuf;
+use std::{
+  collections::BTreeMap,
+  path::PathBuf,
+};
 
 use crate::settings::CrateSettings;
 use semver::Version;
@@ -29,7 +32,7 @@ pub struct BuildableDependency {
   pub is_proc_macro: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize)]
+#[derive(Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Serialize)]
 pub struct DependencyAlias {
   pub target: String,
   pub alias: String,
@@ -81,7 +84,7 @@ pub struct SourceDetails {
   pub git_data: Option<GitRepo>,
 }
 
-#[derive(Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Default, Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CrateDependencyContext {
   pub dependencies: Vec<BuildableDependency>,
   pub proc_macro_dependencies: Vec<BuildableDependency>,
@@ -92,7 +95,7 @@ pub struct CrateDependencyContext {
   // build_data_dependencies can only be set when using cargo-raze as a library at the moment.
   pub build_data_dependencies: Vec<BuildableDependency>,
   pub dev_dependencies: Vec<BuildableDependency>,
-  pub aliased_dependencies: Vec<DependencyAlias>,
+  pub aliased_dependencies: BTreeMap<String, DependencyAlias>,
 }
 
 impl CrateDependencyContext {
@@ -110,7 +113,7 @@ impl CrateDependencyContext {
 pub struct CrateTargetedDepContext {
   pub target: String,
   pub deps: CrateDependencyContext,
-  pub conditions: Vec<String>,
+  pub platform_targets: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
