@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-  collections::BTreeMap,
-  path::PathBuf,
-};
+use std::{collections::BTreeMap, path::PathBuf};
 
 use crate::settings::CrateSettings;
 use semver::Version;
@@ -95,6 +92,7 @@ pub struct CrateDependencyContext {
   // build_data_dependencies can only be set when using cargo-raze as a library at the moment.
   pub build_data_dependencies: Vec<BuildableDependency>,
   pub dev_dependencies: Vec<BuildableDependency>,
+  /// Aliased dependencies, sorted/keyed by their `target` name in the `DependencyAlias` struct.
   pub aliased_dependencies: BTreeMap<String, DependencyAlias>,
 }
 
