@@ -292,6 +292,11 @@ impl<'planner> CrateSubplanner<'planner> {
     // Take the default deps that are not bound to platform targets
     let default_deps = deps.remove(&None).unwrap_or_default();
 
+    // Remove anything in default_deps
+    for ctx in deps.values_mut() {
+      ctx.subtract(&default_deps);
+    }
+
     // Build a list of dependencies while addression a potential allowlist of target triples
     let mut targeted_deps = deps
       .into_iter()

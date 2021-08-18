@@ -105,6 +105,20 @@ impl CrateDependencyContext {
       || self.build_proc_macro_dependencies.iter().any(condition)
       || self.dev_dependencies.iter().any(condition)
   }
+
+  pub fn subtract(&mut self, other: &CrateDependencyContext) {
+    self.dependencies = subtract_deps(&self.dependencies, &other.dependencies);
+    self.proc_macro_dependencies = subtract_deps(&self.proc_macro_dependencies, &other.proc_macro_dependencies);
+    self.build_dependencies = subtract_deps(&self.build_dependencies, &other.build_dependencies);
+    self.build_proc_macro_dependencies = subtract_deps(&self.build_proc_macro_dependencies, &other.build_proc_macro_dependencies);
+    self.dev_dependencies = subtract_deps(&self.dev_dependencies, &other.dev_dependencies);
+  }
+}
+
+fn subtract_deps(own: &Vec<BuildableDependency>, other: &Vec<BuildableDependency>) -> Vec<BuildableDependency> {
+  own.iter().filter(|dep| {
+    !other.contains(dep)
+  }).cloned().collect()
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
