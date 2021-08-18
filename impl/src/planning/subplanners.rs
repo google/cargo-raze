@@ -222,7 +222,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
         false => None,
       })
       .flatten()
-      .collect::<BTreeMap<_,_>>();
+      .collect::<BTreeMap<_, _>>();
 
     let contexts = contexts.into_iter().map(|(ctx, _)| ctx).collect_vec();
     let aliases = self.produce_workspace_aliases(root_ctxs, &contexts);
@@ -552,7 +552,10 @@ impl<'planner> CrateSubplanner<'planner> {
         alias: name.replace("-", "_"),
       };
 
-      if let Some(_dep_alias) = dep_set.aliased_dependencies.insert(dep_alias.target.clone(), dep_alias) {
+      if let Some(_dep_alias) = dep_set
+        .aliased_dependencies
+        .insert(dep_alias.target.clone(), dep_alias)
+      {
         return Err(
           RazeError::Planning {
             dependency_name_opt: Some(pkg.name.to_string()),
