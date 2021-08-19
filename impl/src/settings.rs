@@ -673,7 +673,7 @@ fn parse_raze_settings(metadata: &Metadata) -> Result<RazeSettings> {
   // Workspace takes precedence
   let workspace_level_settings = metadata.workspace_metadata.get("raze");
   if let Some(value) = workspace_level_settings {
-    return parse_raze_settings_workspace(value, &metadata);
+    return parse_raze_settings_workspace(value, metadata);
   }
 
   // Root packages are the next priority
@@ -693,7 +693,7 @@ fn parse_raze_settings(metadata: &Metadata) -> Result<RazeSettings> {
   }
 
   // Finally check any package for settings
-  parse_raze_settings_any_package(&metadata)
+  parse_raze_settings_any_package(metadata)
 }
 
 /// A cargo command wrapper for gathering cargo metadata used to parse [RazeSettings](crate::settings::RazeSettings)
@@ -861,7 +861,7 @@ pub mod tests {
     std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
 
     let settings = load_settings_from_manifest(cargo_toml_path, None).unwrap();
-    assert!(settings.binary_deps.len() > 0);
+    assert!(!settings.binary_deps.is_empty());
   }
 
   #[test]
@@ -897,7 +897,7 @@ pub mod tests {
     std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
 
     let settings = load_settings_from_manifest(cargo_toml_path, /*cargo_bin_path=*/ None).unwrap();
-    assert!(settings.binary_deps.len() > 0);
+    assert!(!settings.binary_deps.is_empty());
   }
 
   #[test]

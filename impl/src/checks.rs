@@ -266,7 +266,7 @@ mod tests {
 
   #[test]
   fn test_check_resolve_matches_packages_fails_correctly() {
-    let mut metadata = dummy_raze_metadata().metadata.clone();
+    let mut metadata = dummy_raze_metadata().metadata;
 
     // Invalidate the metadata, expect an error.
     metadata.packages = Vec::new();
@@ -275,7 +275,7 @@ mod tests {
 
   #[test]
   fn test_check_resolve_matches_packages_works_correctly() {
-    let metadata = dummy_raze_metadata().metadata.clone();
+    let metadata = dummy_raze_metadata().metadata;
 
     // Should not panic with valid metadata.
     check_resolve_matches_packages(&metadata).unwrap();

@@ -149,19 +149,19 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       .as_ref()
       .map(|s| SourceId::from_url(&s.to_string()).unwrap());
 
-    let crate_settings = self.crate_settings(&own_package).ok()?;
+    let crate_settings = self.crate_settings(own_package).ok()?;
 
     let checksum_opt = self
       .metadata
       .checksum_for(&own_package.name, &own_package.version.to_string());
 
     let crate_subplanner = CrateSubplanner {
-      crate_catalog: &catalog,
+      crate_catalog: catalog,
       settings: self.settings,
       platform_details: self.platform_details,
-      crate_catalog_entry: &own_crate_catalog_entry,
+      crate_catalog_entry: own_crate_catalog_entry,
       source_id: &own_source_id,
-      node: &node,
+      node,
       crate_settings,
       sha256: &checksum_opt.map(|c| c.to_owned()),
     };
@@ -212,7 +212,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       .nodes
       .iter()
       .sorted_by_key(|n| &n.id)
-      .filter_map(|node| self.create_crate_context(node, &self.crate_catalog))
+      .filter_map(|node| self.create_crate_context(node, self.crate_catalog))
       .collect::<Result<Vec<_>>>()?;
 
     let root_ctxs = contexts
@@ -395,13 +395,13 @@ impl<'planner> CrateSubplanner<'planner> {
       is_proc_macro,
       default_deps,
       targeted_deps,
-      workspace_path_to_crate: self.crate_catalog_entry.workspace_path(&self.settings)?,
+      workspace_path_to_crate: self.crate_catalog_entry.workspace_path(self.settings)?,
       build_script_target: build_script_target_opt,
       links: package.links.clone(),
       raze_settings,
       canonical_additional_build_file,
-      source_details: self.produce_source_details(&package, &package_root),
-      expected_build_path: self.crate_catalog_entry.local_build_path(&self.settings)?,
+      source_details: self.produce_source_details(package, &package_root),
+      expected_build_path: self.crate_catalog_entry.local_build_path(self.settings)?,
       sha256: self.sha256.clone(),
       registry_url: format_registry_url(
         &self.settings.registry,
@@ -482,7 +482,7 @@ impl<'planner> CrateSubplanner<'planner> {
         }
 
         let mut dep_set = dep_production.entry(platform_target).or_default();
-        self.process_dep(&mut dep_set, &dep.name, dep_kind, &dep_package)?
+        self.process_dep(&mut dep_set, &dep.name, dep_kind, dep_package)?
       }
     }
 
@@ -626,7 +626,7 @@ impl<'planner> CrateSubplanner<'planner> {
       .crate_catalog
       .entry_for_package_id(&dep_package.id)
       .unwrap()
-      .workspace_path_and_default_target(&self.settings)
+      .workspace_path_and_default_target(self.settings)
   }
 
   /// Generates source details for internal crate.

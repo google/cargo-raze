@@ -412,7 +412,7 @@ impl RazeMetadataFetcher {
       return Ok(None);
     }
 
-    let lockfile = self.lockfile_generator.generate_lockfile(&cargo_dir)?;
+    let lockfile = self.lockfile_generator.generate_lockfile(cargo_dir)?;
 
     // Returning the lockfile here signifies that a new lockfile has been created.
     Ok(Some(lockfile))
@@ -436,9 +436,9 @@ impl RazeMetadataFetcher {
 
         for (name, info) in binary_dep_info.iter() {
           let version = info.req();
-          let src_dir = self.fetch_crate_src(cargo_dir.as_ref(), &name, version)?;
+          let src_dir = self.fetch_crate_src(cargo_dir.as_ref(), name, version)?;
           checksums.insert(
-            package_ident(name, &version),
+            package_ident(name, version),
             self.fetch_crate_checksum(name, version)?,
           );
           if let Some(dirname) = src_dir.file_name() {
@@ -516,9 +516,7 @@ pub mod tests {
 
   impl DummyCargoMetadataFetcher {
     fn render_metadata(&self, mock_workspace_path: &Path) -> Option<Metadata> {
-      if self.metadata_template.is_none() {
-        return None;
-      }
+      self.metadata_template.as_ref()?;
 
       let dir = TempDir::new().unwrap();
       let mut renderer = Tera::new(&format!("{}/*", dir.as_ref().display())).unwrap();

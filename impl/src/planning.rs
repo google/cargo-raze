@@ -99,7 +99,7 @@ mod tests {
 
   fn dummy_resolve_dropping_metadata() -> RazeMetadata {
     let raze_metadata = dummy_raze_metadata();
-    let mut metadata = raze_metadata.metadata.clone();
+    let mut metadata = raze_metadata.metadata;
     assert!(metadata.resolve.is_some());
     metadata.resolve = None;
     RazeMetadata {
@@ -148,12 +148,12 @@ mod tests {
     assert_eq!(dep.pkg_name, "test_dep");
     assert!(!dep.workspace_member_dependents.is_empty());
     assert!(
-      !dep.workspace_path_to_crate.contains("."),
+      !dep.workspace_path_to_crate.contains('.'),
       "{} should be sanitized",
       dep.workspace_path_to_crate
     );
     assert!(
-      !dep.workspace_path_to_crate.contains("-"),
+      !dep.workspace_path_to_crate.contains('-'),
       "{} should be sanitized",
       dep.workspace_path_to_crate
     );
@@ -234,7 +234,7 @@ mod tests {
       .unwrap()
       .crate_contexts
       .into_iter()
-      .filter(|krate| krate.default_deps.aliased_dependencies.len() != 0)
+      .filter(|krate| !krate.default_deps.aliased_dependencies.is_empty())
       .collect();
 
     // Vec length should be 1 as only cargo-raze-alias-test should have aliased dependencies
@@ -290,21 +290,25 @@ mod tests {
       .find(|ctx| ctx.pkg_name == "serde")
       .unwrap();
 
-    let serde_derive_proc_macro_deps: Vec<_> = serde
-      .default_deps
-      .proc_macro_dependencies
-      .iter()
-      .filter(|dep| dep.name == "serde_derive")
-      .collect();
-    assert_eq!(serde_derive_proc_macro_deps.len(), 1);
+    assert_eq!(
+      serde
+        .default_deps
+        .proc_macro_dependencies
+        .iter()
+        .filter(|dep| dep.name == "serde_derive")
+        .count(),
+      1
+    );
 
-    let serde_derive_normal_deps: Vec<_> = serde
-      .default_deps
-      .dependencies
-      .iter()
-      .filter(|dep| dep.name == "serde_derive")
-      .collect();
-    assert_eq!(serde_derive_normal_deps.len(), 0);
+    assert_eq!(
+      serde
+        .default_deps
+        .dependencies
+        .iter()
+        .filter(|dep| dep.name == "serde_derive")
+        .count(),
+      0
+    );
   }
 
   #[test]
@@ -329,21 +333,25 @@ mod tests {
       .find(|ctx| ctx.pkg_name == "markup5ever")
       .unwrap();
 
-    let markup_proc_macro_deps: Vec<_> = markup
-      .default_deps
-      .proc_macro_dependencies
-      .iter()
-      .filter(|dep| dep.name == "serde_derive")
-      .collect();
-    assert_eq!(markup_proc_macro_deps.len(), 0);
+    assert_eq!(
+      markup
+        .default_deps
+        .proc_macro_dependencies
+        .iter()
+        .filter(|dep| dep.name == "serde_derive")
+        .count(),
+      0
+    );
 
-    let markup_build_proc_macro_deps: Vec<_> = markup
-      .default_deps
-      .build_proc_macro_dependencies
-      .iter()
-      .filter(|dep| dep.name == "serde_derive")
-      .collect();
-    assert_eq!(markup_build_proc_macro_deps.len(), 1);
+    assert_eq!(
+      markup
+        .default_deps
+        .build_proc_macro_dependencies
+        .iter()
+        .filter(|dep| dep.name == "serde_derive")
+        .count(),
+      1
+    );
   }
 
   #[test]
@@ -460,11 +468,10 @@ mod tests {
       .unwrap();
 
     // Vendored builds do not use binary dependencies and should not alter the outputs
-    assert!(planned_build
+    assert!(!planned_build
       .crate_contexts
       .iter()
-      .find(|ctx| ctx.pkg_name == "some-binary-crate")
-      .is_none());
+      .any(|ctx| ctx.pkg_name == "some-binary-crate"));
   }
 
   #[test]
@@ -625,7 +632,7 @@ mod tests {
       &crates
         .iter()
         .find(|dep| dep.pkg_name == name && ver_req.matches(&dep.pkg_version))
-        .expect(&format!("{} not found", name))
+        .unwrap_or_else(|| panic!("{} not found", name))
         .raze_settings
     };
 
@@ -732,7 +739,7 @@ mod tests {
       ]
     "# };
 
-    let crate_dir = make_workspace(&workspace_toml, Some(&workspace_lock));
+    let crate_dir = make_workspace(workspace_toml, Some(workspace_lock));
 
     for (member, dep_version) in vec![("lib_a", "0.2.1"), ("lib_b", "0.1.0")].iter() {
       let member_dir = crate_dir.as_ref().join(&member);
@@ -768,14 +775,12 @@ mod tests {
     assert!(planned_build
       .crate_contexts
       .iter()
-      .find(|ctx| ctx.pkg_name == "unicode-xid" && ctx.pkg_version == Version::from((0, 1, 0)))
-      .is_some());
+      .any(|ctx| ctx.pkg_name == "unicode-xid" && ctx.pkg_version == Version::from((0, 1, 0))));
 
     assert!(planned_build
       .crate_contexts
       .iter()
-      .find(|ctx| ctx.pkg_name == "unicode-xid" && ctx.pkg_version == Version::from((0, 2, 1)))
-      .is_some());
+      .any(|ctx| ctx.pkg_name == "unicode-xid" && ctx.pkg_version == Version::from((0, 2, 1))));
   }
   // TODO(acmcarther): Add tests:
   // TODO(acmcarther): Extra flags work

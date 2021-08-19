@@ -100,7 +100,7 @@ impl BazelSpdxLicense {
   /// restrictive license. If both licenses are equally restrictive, self's license is used. The
   /// new BazelSpdxLicense's expression will represent the "OR" of the two expressions.
   pub fn or(&self, other_license: Self) -> Self {
-    let combined_expr = Self::combine_license_expr(&self, &other_license, "OR");
+    let combined_expr = Self::combine_license_expr(self, &other_license, "OR");
     if self.license <= other_license.license {
       Self {
         name: self.name.clone(),
@@ -124,7 +124,7 @@ pub fn get_license_from_str(cargo_license_str: &str) -> LicenseData {
   }
 
   // Many crates have forward-slashes in their licenses. This requires Lax parsing mode
-  let license_expression = match Expression::parse_mode(&cargo_license_str, spdx::ParseMode::Lax) {
+  let license_expression = match Expression::parse_mode(cargo_license_str, spdx::ParseMode::Lax) {
     Ok(expression) => expression,
     Err(_) => {
       return LicenseData {
@@ -162,7 +162,7 @@ pub fn get_license_from_str(cargo_license_str: &str) -> LicenseData {
             license_stack.push(BazelSpdxLicense {
               name: req_name.into(),
               expression: req_name.into(),
-              license: get_bazel_license_type(&req_name),
+              license: get_bazel_license_type(req_name),
             });
           }
           LicenseItem::Other { lic_ref, .. } => license_stack.push(BazelSpdxLicense {
