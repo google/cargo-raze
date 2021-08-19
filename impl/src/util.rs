@@ -181,10 +181,7 @@ pub fn find_bazel_workspace_root(manifest_path: &Path) -> Option<PathBuf> {
       return Some(PathBuf::from(current_dir));
     }
 
-    dir = match current_dir.parent() {
-      Some(parent) => Some(parent),
-      None => None,
-    };
+    dir = current_dir.parent();
   }
 
   None

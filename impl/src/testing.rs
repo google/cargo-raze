@@ -225,7 +225,7 @@ pub fn mock_remote_crate<'server>(
     let enc = flate2::write::GzEncoder::new(tar_gz, Compression::default());
     let mut tar = tar::Builder::new(enc);
     tar
-      .append_dir_all(package_ident(name, &version), dir.as_ref().join("archive"))
+      .append_dir_all(package_ident(name, version), dir.as_ref().join("archive"))
       .unwrap();
   }
 

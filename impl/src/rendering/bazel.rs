@@ -314,8 +314,8 @@ impl BuildRenderer for BazelRenderer {
       let crates_bzl_file_path = path_prefix.as_path().join("crates.bzl");
       let rendered_crates_bzl_file = self
         .render_crates_bzl(
-          &workspace_context,
-          &crate_contexts,
+          workspace_context,
+          crate_contexts,
           &bazel_package_name(render_details),
           /*is_remote_genmode=*/ false,
           render_details.experimental_api,
@@ -346,8 +346,8 @@ impl BuildRenderer for BazelRenderer {
     for package in crate_contexts {
       let rendered_crate_build_file = self
         .render_crate(
-          &workspace_context,
-          &package,
+          workspace_context,
+          package,
           &render_details.rust_rules_workspace_name,
         )
         .map_err(|e| RazeError::Rendering {
@@ -395,8 +395,8 @@ impl BuildRenderer for BazelRenderer {
     for package in crate_contexts {
       let rendered_crate_build_file = self
         .render_remote_crate(
-          &workspace_context,
-          &package,
+          workspace_context,
+          package,
           &render_details.rust_rules_workspace_name,
         )
         .map_err(|e| RazeError::Rendering {
@@ -420,8 +420,8 @@ impl BuildRenderer for BazelRenderer {
     let crates_bzl_file_path = path_prefix.as_path().join("crates.bzl");
     let rendered_bzl_fetch_file = self
       .render_crates_bzl(
-        &workspace_context,
-        &crate_contexts,
+        workspace_context,
+        crate_contexts,
         &bazel_package_name(render_details),
         /*is_remote_genmode=*/ true,
         render_details.experimental_api,
@@ -513,7 +513,7 @@ mod tests {
       pkg_name: "test-binary".to_owned(),
       pkg_version: Version::parse("1.1.1").unwrap(),
       edition: "2015".to_owned(),
-      features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
+      features: vec!["feature1".to_owned(), "feature2".to_owned()],
       expected_build_path: format!("vendor/test-binary-1.1.1/{}", buildfile_suffix),
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
@@ -543,7 +543,7 @@ mod tests {
   }
 
   fn dummy_binary_crate() -> CrateContext {
-    return dummy_binary_crate_with_name("BUILD");
+    dummy_binary_crate_with_name("BUILD")
   }
 
   fn dummy_library_crate_with_name(buildfile_suffix: &str) -> CrateContext {
@@ -554,7 +554,7 @@ mod tests {
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
       canonical_additional_build_file: CrateSettings::default().additional_build_file,
-      features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
+      features: vec!["feature1".to_owned(), "feature2".to_owned()],
       expected_build_path: format!("vendor/test-library-1.1.1/{}", buildfile_suffix),
       default_deps: CrateDependencyContext::default(),
       targeted_deps: Vec::new(),
@@ -581,7 +581,7 @@ mod tests {
   }
 
   fn dummy_library_crate() -> CrateContext {
-    return dummy_library_crate_with_name("BUILD");
+    dummy_library_crate_with_name("BUILD")
   }
 
   fn extract_contents_matching_path(file_outputs: &Vec<FileOutputs>, file_name: &str) -> String {
@@ -613,7 +613,7 @@ mod tests {
     crate_contexts: Vec<CrateContext>,
     aliases: Vec<DependencyAlias>,
   ) -> Vec<FileOutputs> {
-    return render_crates_for_test_with_name("BUILD", crate_contexts, aliases);
+    render_crates_for_test_with_name("BUILD", crate_contexts, aliases)
   }
 
   #[test]

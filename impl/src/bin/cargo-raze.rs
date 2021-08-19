@@ -208,7 +208,7 @@ fn fetch_raze_metadata(
     reused_lockfile,
   )?;
 
-  checks::check_metadata(&raze_metadata, &settings, &cargo_raze_working_dir)?;
+  checks::check_metadata(&raze_metadata, settings, &cargo_raze_working_dir)?;
   Ok(raze_metadata)
 }
 
@@ -242,9 +242,9 @@ fn render_files(
     render_package_aliases: settings.render_package_aliases,
   };
   let bazel_file_outputs = match &settings.genmode {
-    GenMode::Vendored => bazel_renderer.render_planned_build(&render_details, &planned_build)?,
+    GenMode::Vendored => bazel_renderer.render_planned_build(&render_details, planned_build)?,
     GenMode::Remote => {
-      bazel_renderer.render_remote_planned_build(&render_details, &planned_build)?
+      bazel_renderer.render_remote_planned_build(&render_details, planned_build)?
     } /* exhaustive, we control the definition */
     // There are no file outputs to produce if `genmode` is Unspecified
     GenMode::Unspecified => Vec::new(),
@@ -268,9 +268,7 @@ fn write_files(
     if remote_dir.exists() {
       let build_glob = format!("{}/BUILD*.bazel", remote_dir.display());
       for entry in glob::glob(&build_glob)? {
-        if let Ok(path) = entry {
-          fs::remove_file(path)?;
-        }
+        fs::remove_file(entry?)?;
       }
     }
   }
