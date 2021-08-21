@@ -390,7 +390,6 @@ mod tests {
       .find(|ctx| ctx.pkg_name == "flate2")
       .unwrap();
 
-    //eprintln!("flate2 {:#?}", &flate2);
     let miniz_oxide = flate2
       .default_deps
       .dependencies
