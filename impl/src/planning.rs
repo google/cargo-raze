@@ -81,7 +81,7 @@ impl BuildPlannerImpl {
 
 #[cfg(test)]
 mod tests {
-  use std::{collections::HashMap, path::PathBuf};
+  use std::{collections::HashMap, collections::HashSet, path::PathBuf};
 
   use crate::{
     metadata::tests::{
@@ -363,6 +363,41 @@ mod tests {
       planned_build.crate_contexts[0].targets[0].path,
       "src/lib.rs"
     );
+  }
+
+  #[test]
+  // Tests the fix for https://github.com/google/cargo-raze/issues/389
+  // as implemented in https://github.com/google/cargo-raze/pull/437
+  fn test_plan_build_deduplicates_target_dependencies() {
+    let mut settings = dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+    let mut triples = HashSet::new();
+    triples.insert("wasm32-unknown-unknown".to_string());
+    triples.insert("x86_64-unknown-linux-gnu".to_string());
+    settings.targets = Some(triples);
+
+    let planner = BuildPlannerImpl::new(
+      dummy_workspace_crate_metadata(
+        templates::SUBPLAN_OMITS_PLATFORM_DEPS_ALREADY_IN_DEFAULT_DEPS,
+      ),
+      settings,
+    );
+    let planned_build = planner.plan_build(None).unwrap();
+
+    let flate2 = planned_build
+      .crate_contexts
+      .iter()
+      .find(|ctx| ctx.pkg_name == "flate2")
+      .unwrap();
+
+    //eprintln!("flate2 {:#?}", &flate2);
+    let miniz_oxide = flate2
+      .default_deps
+      .dependencies
+      .iter()
+      .find(|dep| dep.name == "miniz_oxide");
+    assert!(miniz_oxide.is_some());
+    assert_eq!(flate2.targeted_deps[0].deps.dependencies.len(), 0);
   }
 
   fn dummy_binary_dependency_metadata(is_remote_genmode: bool) -> (RazeMetadata, RazeSettings) {

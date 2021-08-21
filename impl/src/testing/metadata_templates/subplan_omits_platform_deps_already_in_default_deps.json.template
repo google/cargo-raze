@@ -1,0 +1,1619 @@
+{# Cargo.toml
+[package]
+name = "flate_project"
+version = "0.1.0"
+edition = "2018"
+
+[lib]
+path = "not_a_file.rs"
+
+[dependencies]
+flate2 = "1.0.20"
+
+#}
+{
+  "packages": [
+    {
+      "name": "adler",
+      "version": "1.0.2",
+      "id": "adler 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "0BSD OR MIT OR Apache-2.0",
+      "license_file": null,
+      "description": "A simple clean-room implementation of the Adler-32 checksum",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "compiler_builtins",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1.2",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rustc-std-workspace-core",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0.0",
+          "kind": null,
+          "rename": "core",
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "criterion",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.3.2",
+          "kind": "dev",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "adler",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/adler-1.0.2/src/lib.rs",
+          "edition": "2015",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "bench",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/adler-1.0.2/benches/bench.rs",
+          "edition": "2015",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        }
+      ],
+      "features": {
+        "default": [
+          "std"
+        ],
+        "rustc-dep-of-std": [
+          "core",
+          "compiler_builtins"
+        ],
+        "std": []
+      },
+      "manifest_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/adler-1.0.2/Cargo.toml",
+      "metadata": {
+        "docs": {
+          "rs": {
+            "rustdoc-args": [
+              "--cfg=docsrs"
+            ]
+          }
+        },
+        "release": {
+          "no-dev-version": true,
+          "pre-release-commit-message": "Release {{ '{{version}}' }}",
+          "tag-message": "{{ '{{version}}' }}",
+          "pre-release-replacements": [
+            {
+              "file": "CHANGELOG.md",
+              "replace": "## Unreleased\n\nNo changes.\n\n## [{{ '{{version}}' }}](https://github.com/jonas-schievink/adler/releases/tag/v{{ '{{version}}' }})\n",
+              "search": "## Unreleased\n"
+            },
+            {
+              "file": "README.md",
+              "replace": "adler = \"{{ '{{version}}' }}\"",
+              "search": "adler = \"[a-z0-9\\\\.-]+\""
+            },
+            {
+              "file": "src/lib.rs",
+              "replace": "https://docs.rs/adler/{{ '{{version}}' }}",
+              "search": "https://docs.rs/adler/[a-z0-9\\.-]+"
+            }
+          ]
+        }
+      },
+      "publish": null,
+      "authors": [
+        "Jonas Schievink <jonasschievink@gmail.com>"
+      ],
+      "categories": [
+        "algorithms"
+      ],
+      "keywords": [
+        "checksum",
+        "integrity",
+        "hash",
+        "adler32",
+        "zlib"
+      ],
+      "readme": "README.md",
+      "repository": "https://github.com/jonas-schievink/adler.git",
+      "homepage": null,
+      "documentation": "https://docs.rs/adler/",
+      "edition": "2015",
+      "links": null
+    },
+    {
+      "name": "autocfg",
+      "version": "1.0.1",
+      "id": "autocfg 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "Apache-2.0 OR MIT",
+      "license_file": null,
+      "description": "Automatic cfg for Rust compiler features",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "autocfg",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.0.1/src/lib.rs",
+          "edition": "2015",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "integers",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.0.1/examples/integers.rs",
+          "edition": "2015",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "paths",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.0.1/examples/paths.rs",
+          "edition": "2015",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "versions",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.0.1/examples/versions.rs",
+          "edition": "2015",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "traits",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.0.1/examples/traits.rs",
+          "edition": "2015",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "rustflags",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.0.1/tests/rustflags.rs",
+          "edition": "2015",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        }
+      ],
+      "features": {},
+      "manifest_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/autocfg-1.0.1/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "Josh Stone <cuviper@gmail.com>"
+      ],
+      "categories": [
+        "development-tools::build-utils"
+      ],
+      "keywords": [
+        "rustc",
+        "build",
+        "autoconf"
+      ],
+      "readme": "README.md",
+      "repository": "https://github.com/cuviper/autocfg",
+      "homepage": null,
+      "documentation": null,
+      "edition": "2015",
+      "links": null
+    },
+    {
+      "name": "cfg-if",
+      "version": "1.0.0",
+      "id": "cfg-if 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT/Apache-2.0",
+      "license_file": null,
+      "description": "A macro to ergonomically define an item depending on a large number of #[cfg]\nparameters. Structured like an if-else chain, the first matching branch is the\nitem that gets emitted.\n",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "compiler_builtins",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1.2",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rustc-std-workspace-core",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0.0",
+          "kind": null,
+          "rename": "core",
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "cfg-if",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/cfg-if-1.0.0/src/lib.rs",
+          "edition": "2018",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "xcrate",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/cfg-if-1.0.0/tests/xcrate.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        }
+      ],
+      "features": {
+        "rustc-dep-of-std": [
+          "core",
+          "compiler_builtins"
+        ]
+      },
+      "manifest_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/cfg-if-1.0.0/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "Alex Crichton <alex@alexcrichton.com>"
+      ],
+      "categories": [],
+      "keywords": [],
+      "readme": "README.md",
+      "repository": "https://github.com/alexcrichton/cfg-if",
+      "homepage": "https://github.com/alexcrichton/cfg-if",
+      "documentation": "https://docs.rs/cfg-if",
+      "edition": "2018",
+      "links": null
+    },
+    {
+      "name": "crc32fast",
+      "version": "1.2.1",
+      "id": "crc32fast 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT OR Apache-2.0",
+      "license_file": null,
+      "description": "Fast, SIMD-accelerated CRC32 (IEEE) checksum computation",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "cfg-if",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "bencher",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1",
+          "kind": "dev",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "quickcheck",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.9",
+          "kind": "dev",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rand",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.7",
+          "kind": "dev",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "crc32fast",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/crc32fast-1.2.1/src/lib.rs",
+          "edition": "2015",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        {
+          "kind": [
+            "bench"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "bench",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/crc32fast-1.2.1/benches/bench.rs",
+          "edition": "2015",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "custom-build"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "build-script-build",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/crc32fast-1.2.1/build.rs",
+          "edition": "2015",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        }
+      ],
+      "features": {
+        "default": [
+          "std"
+        ],
+        "nightly": [],
+        "std": []
+      },
+      "manifest_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/crc32fast-1.2.1/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "Sam Rijs <srijs@airpost.net>",
+        "Alex Crichton <alex@alexcrichton.com>"
+      ],
+      "categories": [],
+      "keywords": [
+        "checksum",
+        "crc",
+        "crc32",
+        "simd",
+        "fast"
+      ],
+      "readme": "README.md",
+      "repository": "https://github.com/srijs/rust-crc32fast",
+      "homepage": null,
+      "documentation": null,
+      "edition": "2015",
+      "links": null
+    },
+    {
+      "name": "flate2",
+      "version": "1.0.20",
+      "id": "flate2 1.0.20 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT/Apache-2.0",
+      "license_file": null,
+      "description": "DEFLATE compression and decompression exposed as Read/BufRead/Write streams.\nSupports miniz_oxide, miniz.c, and multiple zlib implementations. Supports\nzlib, gzip, and raw deflate streams.\n",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "cfg-if",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0.0",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "cloudflare-zlib-sys",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.2.0",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "crc32fast",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.2.0",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "futures",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1.25",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "libc",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.2.65",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "libz-sys",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.1.0",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": false,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "miniz-sys",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1.11",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "miniz_oxide",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.4.0",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": false,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "tokio-io",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1.11",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "futures",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1",
+          "kind": "dev",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "quickcheck",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.9",
+          "kind": "dev",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rand",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.7",
+          "kind": "dev",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "tokio-io",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1.11",
+          "kind": "dev",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "tokio-tcp",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1.3",
+          "kind": "dev",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "tokio-threadpool",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1.10",
+          "kind": "dev",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "miniz_oxide",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.4.0",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [],
+          "target": "cfg(all(target_arch = \"wasm32\", not(target_os = \"emscripten\")))",
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "flate2",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/src/lib.rs",
+          "edition": "2018",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "deflatedecoder-read",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/deflatedecoder-read.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "deflateencoder-write",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/deflateencoder-write.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "deflateencoder-bufread",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/deflateencoder-bufread.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "gzmultidecoder-read",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/gzmultidecoder-read.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "zlibdecoder-read",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/zlibdecoder-read.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "gzdecoder-bufread",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/gzdecoder-bufread.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "gzdecoder-read",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/gzdecoder-read.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "gzencoder-write",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/gzencoder-write.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "zlibencoder-bufread",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/zlibencoder-bufread.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "gzbuilder",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/gzbuilder.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "zlibencoder-write",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/zlibencoder-write.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "deflatedecoder-bufread",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/deflatedecoder-bufread.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "compress_file",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/compress_file.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "gzmultidecoder-bufread",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/gzmultidecoder-bufread.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "gzencoder-bufread",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/gzencoder-bufread.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "deflateencoder-read",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/deflateencoder-read.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "zlibdecoder-bufread",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/zlibdecoder-bufread.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "gzdecoder-write",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/gzdecoder-write.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "zlibdecoder-write",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/zlibdecoder-write.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "gzencoder-read",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/gzencoder-read.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "zlibencoder-read",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/zlibencoder-read.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "deflatedecoder-write",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/examples/deflatedecoder-write.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "zero-write",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/tests/zero-write.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "early-flush",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/tests/early-flush.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "async-reader",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/tests/async-reader.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "gunzip",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/tests/gunzip.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "tokio",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/tests/tokio.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "empty-read",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/tests/empty-read.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        }
+      ],
+      "features": {
+        "any_zlib": [],
+        "cloudflare_zlib": [
+          "any_zlib",
+          "cloudflare-zlib-sys"
+        ],
+        "default": [
+          "rust_backend"
+        ],
+        "rust_backend": [
+          "miniz_oxide"
+        ],
+        "tokio": [
+          "tokio-io",
+          "futures"
+        ],
+        "zlib": [
+          "any_zlib",
+          "libz-sys"
+        ],
+        "zlib-ng-compat": [
+          "zlib",
+          "libz-sys/zlib-ng"
+        ]
+      },
+      "manifest_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/flate2-1.0.20/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "Alex Crichton <alex@alexcrichton.com>",
+        "Josh Triplett <josh@joshtriplett.org>"
+      ],
+      "categories": [
+        "compression",
+        "api-bindings"
+      ],
+      "keywords": [
+        "gzip",
+        "deflate",
+        "zlib",
+        "zlib-ng",
+        "encoding"
+      ],
+      "readme": "README.md",
+      "repository": "https://github.com/rust-lang/flate2-rs",
+      "homepage": "https://github.com/rust-lang/flate2-rs",
+      "documentation": "https://docs.rs/flate2",
+      "edition": "2018",
+      "links": null
+    },
+    {
+      "name": "flate_project",
+      "version": "0.1.0",
+      "id": "flate_project 0.1.0 (path+file://{{ mock_workspace }})",
+      "license": null,
+      "license_file": null,
+      "description": null,
+      "source": null,
+      "dependencies": [
+        {
+          "name": "flate2",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0.20",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "flate_project",
+          "src_path": "{{ mock_workspace }}/not_a_file.rs",
+          "edition": "2018",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        }
+      ],
+      "features": {},
+      "manifest_path": "{{ mock_workspace }}/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [],
+      "categories": [],
+      "keywords": [],
+      "readme": null,
+      "repository": null,
+      "homepage": null,
+      "documentation": null,
+      "edition": "2018",
+      "links": null
+    },
+    {
+      "name": "libc",
+      "version": "0.2.100",
+      "id": "libc 0.2.100 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT OR Apache-2.0",
+      "license_file": null,
+      "description": "Raw FFI bindings to platform libraries like libc.\n",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "rustc-std-workspace-core",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0.0",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "libc",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/libc-0.2.100/src/lib.rs",
+          "edition": "2015",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "const_fn",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/libc-0.2.100/tests/const_fn.rs",
+          "edition": "2015",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        {
+          "kind": [
+            "custom-build"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "build-script-build",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/libc-0.2.100/build.rs",
+          "edition": "2015",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        }
+      ],
+      "features": {
+        "align": [],
+        "const-extern-fn": [],
+        "default": [
+          "std"
+        ],
+        "extra_traits": [],
+        "rustc-dep-of-std": [
+          "align",
+          "rustc-std-workspace-core"
+        ],
+        "std": [],
+        "use_std": [
+          "std"
+        ]
+      },
+      "manifest_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/libc-0.2.100/Cargo.toml",
+      "metadata": {
+        "docs": {
+          "rs": {
+            "features": [
+              "const-extern-fn",
+              "extra_traits"
+            ]
+          }
+        }
+      },
+      "publish": null,
+      "authors": [
+        "The Rust Project Developers"
+      ],
+      "categories": [
+        "external-ffi-bindings",
+        "no-std",
+        "os"
+      ],
+      "keywords": [
+        "libc",
+        "ffi",
+        "bindings",
+        "operating",
+        "system"
+      ],
+      "readme": "README.md",
+      "repository": "https://github.com/rust-lang/libc",
+      "homepage": "https://github.com/rust-lang/libc",
+      "documentation": "https://docs.rs/libc/",
+      "edition": "2015",
+      "links": null
+    },
+    {
+      "name": "miniz_oxide",
+      "version": "0.4.4",
+      "id": "miniz_oxide 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)",
+      "license": "MIT OR Zlib OR Apache-2.0",
+      "license_file": null,
+      "description": "DEFLATE compression and decompression library rewritten in Rust based on miniz",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "dependencies": [
+        {
+          "name": "adler",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0",
+          "kind": null,
+          "rename": null,
+          "optional": false,
+          "uses_default_features": false,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rustc-std-workspace-alloc",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0.0",
+          "kind": null,
+          "rename": "alloc",
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "compiler_builtins",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^0.1.2",
+          "kind": null,
+          "rename": null,
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "rustc-std-workspace-core",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0.0",
+          "kind": null,
+          "rename": "core",
+          "optional": true,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        },
+        {
+          "name": "autocfg",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "req": "^1.0",
+          "kind": "build",
+          "rename": null,
+          "optional": false,
+          "uses_default_features": true,
+          "features": [],
+          "target": null,
+          "registry": null
+        }
+      ],
+      "targets": [
+        {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "miniz_oxide",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/miniz_oxide-0.4.4/src/lib.rs",
+          "edition": "2018",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        {
+          "kind": [
+            "custom-build"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "build-script-build",
+          "src_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/miniz_oxide-0.4.4/build.rs",
+          "edition": "2018",
+          "doc": false,
+          "doctest": false,
+          "test": false
+        }
+      ],
+      "features": {
+        "no_extern_crate_alloc": [],
+        "rustc-dep-of-std": [
+          "core",
+          "alloc",
+          "compiler_builtins",
+          "adler/rustc-dep-of-std"
+        ]
+      },
+      "manifest_path": "/Users/sayrer/.cargo/registry/src/github.com-1ecc6299db9ec823/miniz_oxide-0.4.4/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+      "authors": [
+        "Frommi <daniil.liferenko@gmail.com>",
+        "oyvindln <oyvindln@users.noreply.github.com>"
+      ],
+      "categories": [
+        "compression"
+      ],
+      "keywords": [
+        "zlib",
+        "miniz",
+        "deflate",
+        "encoding"
+      ],
+      "readme": "Readme.md",
+      "repository": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide",
+      "homepage": "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide",
+      "documentation": "https://docs.rs/miniz_oxide",
+      "edition": "2018",
+      "links": null
+    }
+  ],
+  "workspace_members": [
+    "flate_project 0.1.0 (path+file://{{ mock_workspace }})"
+  ],
+  "resolve": {
+    "nodes": [
+      {
+        "id": "adler 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [],
+        "deps": [],
+        "features": []
+      },
+      {
+        "id": "autocfg 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [],
+        "deps": [],
+        "features": []
+      },
+      {
+        "id": "cfg-if 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [],
+        "deps": [],
+        "features": []
+      },
+      {
+        "id": "crc32fast 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [
+          "cfg-if 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)"
+        ],
+        "deps": [
+          {
+            "name": "cfg_if",
+            "pkg": "cfg-if 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          }
+        ],
+        "features": [
+          "default",
+          "std"
+        ]
+      },
+      {
+        "id": "flate2 1.0.20 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [
+          "cfg-if 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+          "crc32fast 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+          "libc 0.2.100 (registry+https://github.com/rust-lang/crates.io-index)",
+          "miniz_oxide 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)"
+        ],
+        "deps": [
+          {
+            "name": "cfg_if",
+            "pkg": "cfg-if 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          },
+          {
+            "name": "crc32fast",
+            "pkg": "crc32fast 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          },
+          {
+            "name": "libc",
+            "pkg": "libc 0.2.100 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          },
+          {
+            "name": "miniz_oxide",
+            "pkg": "miniz_oxide 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              },
+              {
+                "kind": null,
+                "target": "cfg(all(target_arch = \"wasm32\", not(target_os = \"emscripten\")))"
+              }
+            ]
+          }
+        ],
+        "features": [
+          "default",
+          "miniz_oxide",
+          "rust_backend"
+        ]
+      },
+      {
+        "id": "flate_project 0.1.0 (path+file://{{ mock_workspace }})",
+        "dependencies": [
+          "flate2 1.0.20 (registry+https://github.com/rust-lang/crates.io-index)"
+        ],
+        "deps": [
+          {
+            "name": "flate2",
+            "pkg": "flate2 1.0.20 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          }
+        ],
+        "features": []
+      },
+      {
+        "id": "libc 0.2.100 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [],
+        "deps": [],
+        "features": [
+          "default",
+          "std"
+        ]
+      },
+      {
+        "id": "miniz_oxide 0.4.4 (registry+https://github.com/rust-lang/crates.io-index)",
+        "dependencies": [
+          "adler 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
+          "autocfg 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)"
+        ],
+        "deps": [
+          {
+            "name": "adler",
+            "pkg": "adler 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": null,
+                "target": null
+              }
+            ]
+          },
+          {
+            "name": "autocfg",
+            "pkg": "autocfg 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+            "dep_kinds": [
+              {
+                "kind": "build",
+                "target": null
+              }
+            ]
+          }
+        ],
+        "features": []
+      }
+    ],
+    "root": "flate_project 0.1.0 (path+file://{{ mock_workspace }})"
+  },
+  "target_directory": "{{ mock_workspace }}/target",
+  "version": 1,
+  "workspace_root": "{{ mock_workspace }}",
+  "metadata": null
+}
