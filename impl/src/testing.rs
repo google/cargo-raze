@@ -50,6 +50,8 @@ pub mod templates {
   pub const SEMVER_MATCHING: &str = "semver_matching.json.template";
   pub const SUBPLAN_PRODUCES_CRATE_ROOT_WITH_FORWARD_SLASH: &str =
     "subplan_produces_crate_root_with_forward_slash.json.template";
+  pub const SUBPLAN_OMITS_PLATFORM_DEPS_ALREADY_IN_DEFAULT_DEPS: &str =
+    "subplan_omits_platform_deps_already_in_default_deps.json.template";
 }
 
 pub const fn basic_toml_contents() -> &'static str {

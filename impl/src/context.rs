@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::BTreeMap, path::PathBuf};
+use std::{
+  collections::{BTreeMap, BTreeSet},
+  path::PathBuf,
+};
 
 use crate::settings::CrateSettings;
 use semver::Version;
@@ -83,15 +86,15 @@ pub struct SourceDetails {
 
 #[derive(Default, Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CrateDependencyContext {
-  pub dependencies: Vec<BuildableDependency>,
-  pub proc_macro_dependencies: Vec<BuildableDependency>,
+  pub dependencies: BTreeSet<BuildableDependency>,
+  pub proc_macro_dependencies: BTreeSet<BuildableDependency>,
   // data_dependencies can only be set when using cargo-raze as a library at the moment.
-  pub data_dependencies: Vec<BuildableDependency>,
-  pub build_dependencies: Vec<BuildableDependency>,
-  pub build_proc_macro_dependencies: Vec<BuildableDependency>,
+  pub data_dependencies: BTreeSet<BuildableDependency>,
+  pub build_dependencies: BTreeSet<BuildableDependency>,
+  pub build_proc_macro_dependencies: BTreeSet<BuildableDependency>,
   // build_data_dependencies can only be set when using cargo-raze as a library at the moment.
-  pub build_data_dependencies: Vec<BuildableDependency>,
-  pub dev_dependencies: Vec<BuildableDependency>,
+  pub build_data_dependencies: BTreeSet<BuildableDependency>,
+  pub dev_dependencies: BTreeSet<BuildableDependency>,
   /// Aliased dependencies, sorted/keyed by their `target` name in the `DependencyAlias` struct.
   pub aliased_dependencies: BTreeMap<String, DependencyAlias>,
 }
@@ -104,6 +107,34 @@ impl CrateDependencyContext {
       || self.build_dependencies.iter().any(condition)
       || self.build_proc_macro_dependencies.iter().any(condition)
       || self.dev_dependencies.iter().any(condition)
+  }
+
+  pub fn subtract(&mut self, other: &CrateDependencyContext) {
+    self.dependencies = self
+      .dependencies
+      .difference(&other.dependencies)
+      .cloned()
+      .collect();
+    self.proc_macro_dependencies = self
+      .proc_macro_dependencies
+      .difference(&other.proc_macro_dependencies)
+      .cloned()
+      .collect();
+    self.build_dependencies = self
+      .build_dependencies
+      .difference(&other.build_dependencies)
+      .cloned()
+      .collect();
+    self.build_proc_macro_dependencies = self
+      .build_proc_macro_dependencies
+      .difference(&other.build_proc_macro_dependencies)
+      .cloned()
+      .collect();
+    self.dev_dependencies = self
+      .dev_dependencies
+      .difference(&other.dev_dependencies)
+      .cloned()
+      .collect();
   }
 }
 

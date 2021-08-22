@@ -292,6 +292,11 @@ impl<'planner> CrateSubplanner<'planner> {
     // Take the default deps that are not bound to platform targets
     let default_deps = deps.remove(&None).unwrap_or_default();
 
+    // Remove anything in default_deps
+    for ctx in deps.values_mut() {
+      ctx.subtract(&default_deps);
+    }
+
     // Build a list of dependencies while addression a potential allowlist of target triples
     let mut targeted_deps = deps
       .into_iter()
@@ -486,14 +491,6 @@ impl<'planner> CrateSubplanner<'planner> {
       }
     }
 
-    for set in dep_production.values_mut() {
-      set.build_proc_macro_dependencies.sort();
-      set.build_dependencies.sort();
-      set.dev_dependencies.sort();
-      set.proc_macro_dependencies.sort();
-      set.dependencies.sort();
-    }
-
     Ok(dep_production)
   }
 
@@ -516,16 +513,16 @@ impl<'planner> CrateSubplanner<'planner> {
 
     use DependencyKind::*;
     match dep.kind {
-      Build if is_proc_macro => dep_set.build_proc_macro_dependencies.push(build_dep),
-      Build => dep_set.build_dependencies.push(build_dep),
-      Development => dep_set.dev_dependencies.push(build_dep),
-      Normal if is_proc_macro => dep_set.proc_macro_dependencies.push(build_dep),
+      Build if is_proc_macro => dep_set.build_proc_macro_dependencies.insert(build_dep),
+      Build => dep_set.build_dependencies.insert(build_dep),
+      Development => dep_set.dev_dependencies.insert(build_dep),
+      Normal if is_proc_macro => dep_set.proc_macro_dependencies.insert(build_dep),
       Normal => {
         // sys crates may generate DEP_* env vars that must be visible to direct dep builds
         if is_sys_crate {
-          dep_set.build_dependencies.push(build_dep.clone());
+          dep_set.build_dependencies.insert(build_dep.clone());
         }
-        dep_set.dependencies.push(build_dep)
+        dep_set.dependencies.insert(build_dep)
       }
       kind => {
         return Err(
