@@ -242,8 +242,14 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
     all_packages
       .iter()
-      .filter(|to_alias| to_alias.lib_target_name.is_some())
-      .filter(|to_alias| to_alias.is_workspace_member_dependency)
+      .filter(|to_alias| {
+        to_alias.lib_target_name.is_some()
+          || !to_alias.raze_settings.extra_aliased_targets.is_empty()
+      })
+      .filter(|to_alias| {
+        to_alias.is_workspace_member_dependency
+          || !to_alias.raze_settings.extra_aliased_targets.is_empty()
+      })
       .flat_map(|to_alias| {
         let pkg_name = to_alias.pkg_name.replace("-", "_");
         let target = format!("{}:{}", &to_alias.workspace_path_to_crate, &pkg_name);

@@ -478,7 +478,12 @@ mod tests {
 
   use super::*;
 
-  use std::{collections::{BTreeMap, BTreeSet}, fs, path::PathBuf, str::FromStr};
+  use std::{
+    collections::{BTreeMap, BTreeSet},
+    fs,
+    path::PathBuf,
+    str::FromStr,
+  };
 
   fn dummy_render_details(buildfile_suffix: &str) -> RenderDetails {
     RenderDetails {
