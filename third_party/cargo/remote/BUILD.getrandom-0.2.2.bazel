@@ -60,17 +60,18 @@ cargo_build_script(
     ] + selects.with_or({
         # cfg(unix)
         (
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
-            "@rules_rust//rust/platform:i686-apple-darwin",
-            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-            "@rules_rust//rust/platform:x86_64-apple-darwin",
-            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+          "@rules_rust//rust/platform:i686-apple-darwin",
+          "@rules_rust//rust/platform:i686-unknown-linux-gnu",
+          "@rules_rust//rust/platform:x86_64-apple-darwin",
+          "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+          "@rules_rust//rust/platform:aarch64-apple-darwin",
+          "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
         ): [
         ],
         "//conditions:default": [],
     }),
 )
+
 
 # Unsupported target "mod" with type "bench" omitted
 
@@ -101,12 +102,12 @@ rust_library(
     ] + selects.with_or({
         # cfg(unix)
         (
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
-            "@rules_rust//rust/platform:i686-apple-darwin",
-            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-            "@rules_rust//rust/platform:x86_64-apple-darwin",
-            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+          "@rules_rust//rust/platform:i686-apple-darwin",
+          "@rules_rust//rust/platform:i686-unknown-linux-gnu",
+          "@rules_rust//rust/platform:x86_64-apple-darwin",
+          "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+          "@rules_rust//rust/platform:aarch64-apple-darwin",
+          "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
         ): [
             "@cargo_raze__libc__0_2_92//:libc",
         ],

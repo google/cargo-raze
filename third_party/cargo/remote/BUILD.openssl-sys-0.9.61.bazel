@@ -68,14 +68,15 @@ cargo_build_script(
     ] + selects.with_or({
         # cfg(target_env = "msvc")
         (
-            "@rules_rust//rust/platform:i686-pc-windows-msvc",
-            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+          "@rules_rust//rust/platform:i686-pc-windows-msvc",
+          "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
         ): [
             "@cargo_raze__vcpkg__0_2_11//:vcpkg",
         ],
         "//conditions:default": [],
     }),
 )
+
 
 rust_library(
     name = "openssl_sys",
@@ -104,8 +105,8 @@ rust_library(
     ] + selects.with_or({
         # cfg(target_env = "msvc")
         (
-            "@rules_rust//rust/platform:i686-pc-windows-msvc",
-            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+          "@rules_rust//rust/platform:i686-pc-windows-msvc",
+          "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
         ): [
         ],
         "//conditions:default": [],

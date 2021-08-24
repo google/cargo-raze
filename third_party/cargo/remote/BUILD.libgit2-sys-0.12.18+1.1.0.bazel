@@ -65,12 +65,12 @@ rust_library(
     ] + selects.with_or({
         # cfg(unix)
         (
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
-            "@rules_rust//rust/platform:i686-apple-darwin",
-            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-            "@rules_rust//rust/platform:x86_64-apple-darwin",
-            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+          "@rules_rust//rust/platform:i686-apple-darwin",
+          "@rules_rust//rust/platform:i686-unknown-linux-gnu",
+          "@rules_rust//rust/platform:x86_64-apple-darwin",
+          "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+          "@rules_rust//rust/platform:aarch64-apple-darwin",
+          "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
         ): [
             "@cargo_raze__openssl_sys__0_9_61//:openssl_sys",
         ],

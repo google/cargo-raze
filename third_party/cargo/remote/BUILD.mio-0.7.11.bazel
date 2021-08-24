@@ -67,12 +67,12 @@ rust_library(
     ] + selects.with_or({
         # cfg(unix)
         (
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
-            "@rules_rust//rust/platform:i686-apple-darwin",
-            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-            "@rules_rust//rust/platform:x86_64-apple-darwin",
-            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+          "@rules_rust//rust/platform:i686-apple-darwin",
+          "@rules_rust//rust/platform:i686-unknown-linux-gnu",
+          "@rules_rust//rust/platform:x86_64-apple-darwin",
+          "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+          "@rules_rust//rust/platform:aarch64-apple-darwin",
+          "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
         ): [
             "@cargo_raze__libc__0_2_92//:libc",
         ],
@@ -80,8 +80,8 @@ rust_library(
     }) + selects.with_or({
         # cfg(windows)
         (
-            "@rules_rust//rust/platform:i686-pc-windows-msvc",
-            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+          "@rules_rust//rust/platform:i686-pc-windows-msvc",
+          "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
         ): [
             "@cargo_raze__miow__0_3_7//:miow",
             "@cargo_raze__ntapi__0_3_6//:ntapi",

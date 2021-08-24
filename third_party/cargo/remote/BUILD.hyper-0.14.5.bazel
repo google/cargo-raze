@@ -77,8 +77,6 @@ licenses([
 rust_library(
     name = "hyper",
     srcs = glob(["**/*.rs"]),
-    aliases = {
-    },
     crate_features = [
         "client",
         "default",
@@ -120,19 +118,7 @@ rust_library(
         "@cargo_raze__tower_service__0_3_1//:tower_service",
         "@cargo_raze__tracing__0_1_25//:tracing",
         "@cargo_raze__want__0_3_0//:want",
-    ] + selects.with_or({
-        # cfg(any(target_os = "linux", target_os = "macos"))
-        (
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
-            "@rules_rust//rust/platform:i686-apple-darwin",
-            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-            "@rules_rust//rust/platform:x86_64-apple-darwin",
-            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
-        ): [
-        ],
-        "//conditions:default": [],
-    }),
+    ],
 )
 
 # Unsupported target "hyper" with type "staticlib" omitted

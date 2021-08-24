@@ -59,6 +59,7 @@ cargo_build_script(
     ],
 )
 
+
 rust_library(
     name = "winapi_i686_pc_windows_gnu",
     srcs = glob(["**/*.rs"]),

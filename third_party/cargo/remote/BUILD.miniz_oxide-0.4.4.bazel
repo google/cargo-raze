@@ -60,6 +60,7 @@ cargo_build_script(
     ],
 )
 
+
 rust_library(
     name = "miniz_oxide",
     srcs = glob(["**/*.rs"]),

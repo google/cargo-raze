@@ -65,8 +65,8 @@ rust_library(
     ] + selects.with_or({
         # cfg(windows)
         (
-            "@rules_rust//rust/platform:i686-pc-windows-msvc",
-            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+          "@rules_rust//rust/platform:i686-pc-windows-msvc",
+          "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
         ): [
             "@cargo_raze__winapi_util__0_1_5//:winapi_util",
         ],

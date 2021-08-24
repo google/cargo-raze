@@ -58,12 +58,12 @@ rust_library(
     ] + selects.with_or({
         # cfg(unix)
         (
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
-            "@rules_rust//rust/platform:i686-apple-darwin",
-            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-            "@rules_rust//rust/platform:x86_64-apple-darwin",
-            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+          "@rules_rust//rust/platform:i686-apple-darwin",
+          "@rules_rust//rust/platform:i686-unknown-linux-gnu",
+          "@rules_rust//rust/platform:x86_64-apple-darwin",
+          "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+          "@rules_rust//rust/platform:aarch64-apple-darwin",
+          "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
         ): [
             "@cargo_raze__async_io__1_3_1//:async_io",
             "@cargo_raze__signal_hook__0_3_8//:signal_hook",
@@ -72,8 +72,8 @@ rust_library(
     }) + selects.with_or({
         # cfg(windows)
         (
-            "@rules_rust//rust/platform:i686-pc-windows-msvc",
-            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+          "@rules_rust//rust/platform:i686-pc-windows-msvc",
+          "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
         ): [
             "@cargo_raze__blocking__1_0_2//:blocking",
             "@cargo_raze__winapi__0_3_9//:winapi",

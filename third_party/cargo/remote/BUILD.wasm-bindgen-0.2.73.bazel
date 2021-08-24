@@ -65,6 +65,7 @@ cargo_build_script(
     ],
 )
 
+
 rust_library(
     name = "wasm_bindgen",
     srcs = glob(["**/*.rs"]),
