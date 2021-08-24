@@ -74,7 +74,7 @@ cargo_build_script(
         # {{ targeted_dep.target }}
         (
     {%- for platform_target in targeted_dep.platform_targets %}
-          "@rules_rust//rust/platform:{{platform_target}}",
+            "@{{ rust_rules_workspace_name }}//rust/platform:{{platform_target}}",
     {%- endfor %}
         ): [
     {%- for dependency in targeted_dep.deps.build_dependencies %}

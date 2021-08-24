@@ -10,9 +10,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # buildifier: disable=load
 load(
-    "@{{ rust_rules_workspace_name }}//rust:rust.bzl",
+    "@{{ rust_rules_workspace_name }}//rust:defs.bzl",
     "rust_binary",
     "rust_library",
+    "rust_proc_macro",
     "rust_test",
 )
 
@@ -38,7 +39,10 @@ licenses([
 {%-     if target.kind == "bin" %}
 
 {%          include "templates/partials/rust_binary.template" %}
-{%-     elif target.kind == "dylib" or target.kind == "lib" or target.kind == "proc-macro" or target.kind == "rlib" %}
+{%-     elif target.kind == "proc-macro" %}
+
+{%          include "templates/partials/rust_proc_macro.template" %}
+{%-     elif target.kind == "dylib" or target.kind == "lib" or target.kind == "rlib" %}
 
 {%          include "templates/partials/rust_library.template" %}
 {%-     else %}
