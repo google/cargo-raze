@@ -285,7 +285,7 @@ impl<'planner> CrateSubplanner<'planner> {
       .find(|target| target.kind == "lib" || target.kind == "proc-macro")
       .map(|target| target.name.clone());
 
-    let is_proc_macro = targets.iter().any(|target| target.kind == "proc_macro");
+    let is_proc_macro = targets.iter().any(|target| target.kind == "proc-macro");
 
     let mut deps = self.produce_deps()?;
 
