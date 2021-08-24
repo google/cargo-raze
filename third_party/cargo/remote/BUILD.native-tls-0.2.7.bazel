@@ -10,9 +10,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # buildifier: disable=load
 load(
-    "@rules_rust//rust:rust.bzl",
+    "@rules_rust//rust:defs.bzl",
     "rust_binary",
     "rust_library",
+    "rust_proc_macro",
     "rust_test",
 )
 
@@ -59,9 +60,9 @@ cargo_build_script(
     ] + selects.with_or({
         # cfg(any(target_os = "macos", target_os = "ios"))
         (
-          "@rules_rust//rust/platform:i686-apple-darwin",
-          "@rules_rust//rust/platform:x86_64-apple-darwin",
-          "@rules_rust//rust/platform:aarch64-apple-darwin",
+            "@rules_rust//rust/platform:i686-apple-darwin",
+            "@rules_rust//rust/platform:x86_64-apple-darwin",
+            "@rules_rust//rust/platform:aarch64-apple-darwin",
         ): [
             "@cargo_raze__security_framework_sys__2_2_0//:security_framework_sys",
         ],
@@ -69,9 +70,9 @@ cargo_build_script(
     }) + selects.with_or({
         # cfg(not(any(target_os = "windows", target_os = "macos", target_os = "ios")))
         (
-          "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-          "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
-          "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
+            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
         ): [
             "@cargo_raze__openssl_sys__0_9_61//:openssl_sys",
         ],
@@ -79,8 +80,8 @@ cargo_build_script(
     }) + selects.with_or({
         # cfg(target_os = "windows")
         (
-          "@rules_rust//rust/platform:i686-pc-windows-msvc",
-          "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+            "@rules_rust//rust/platform:i686-pc-windows-msvc",
+            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
         ): [
         ],
         "//conditions:default": [],
@@ -100,7 +101,6 @@ rust_library(
     crate_features = [
     ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
     data = [],
     edition = "2015",
     rustc_flags = [
@@ -117,9 +117,9 @@ rust_library(
     ] + selects.with_or({
         # cfg(any(target_os = "macos", target_os = "ios"))
         (
-          "@rules_rust//rust/platform:i686-apple-darwin",
-          "@rules_rust//rust/platform:x86_64-apple-darwin",
-          "@rules_rust//rust/platform:aarch64-apple-darwin",
+            "@rules_rust//rust/platform:i686-apple-darwin",
+            "@rules_rust//rust/platform:x86_64-apple-darwin",
+            "@rules_rust//rust/platform:aarch64-apple-darwin",
         ): [
             "@cargo_raze__lazy_static__1_4_0//:lazy_static",
             "@cargo_raze__libc__0_2_92//:libc",
@@ -131,9 +131,9 @@ rust_library(
     }) + selects.with_or({
         # cfg(not(any(target_os = "windows", target_os = "macos", target_os = "ios")))
         (
-          "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-          "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
-          "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
+            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
         ): [
             "@cargo_raze__log__0_4_14//:log",
             "@cargo_raze__openssl__0_10_33//:openssl",
@@ -144,8 +144,8 @@ rust_library(
     }) + selects.with_or({
         # cfg(target_os = "windows")
         (
-          "@rules_rust//rust/platform:i686-pc-windows-msvc",
-          "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+            "@rules_rust//rust/platform:i686-pc-windows-msvc",
+            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
         ): [
             "@cargo_raze__schannel__0_1_19//:schannel",
         ],

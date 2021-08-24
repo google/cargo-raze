@@ -10,9 +10,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # buildifier: disable=load
 load(
-    "@rules_rust//rust:rust.bzl",
+    "@rules_rust//rust:defs.bzl",
     "rust_binary",
     "rust_library",
+    "rust_proc_macro",
     "rust_test",
 )
 
@@ -102,7 +103,6 @@ rust_library(
         "wasm-bindgen-futures",
     ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
     data = [],
     edition = "2018",
     rustc_flags = [
@@ -131,14 +131,14 @@ rust_library(
     ] + selects.with_or({
         # cfg(not(target_os = "unknown"))
         (
-          "@rules_rust//rust/platform:i686-apple-darwin",
-          "@rules_rust//rust/platform:i686-pc-windows-msvc",
-          "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-          "@rules_rust//rust/platform:x86_64-apple-darwin",
-          "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
-          "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
-          "@rules_rust//rust/platform:aarch64-apple-darwin",
-          "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:i686-apple-darwin",
+            "@rules_rust//rust/platform:i686-pc-windows-msvc",
+            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
+            "@rules_rust//rust/platform:x86_64-apple-darwin",
+            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:aarch64-apple-darwin",
+            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
         ): [
             "@cargo_raze__async_global_executor__2_0_2//:async_global_executor",
             "@cargo_raze__async_io__1_3_1//:async_io",
