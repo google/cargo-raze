@@ -56,4 +56,3 @@ rust_proc_macro(
         "@remote_binary_dependencies__syn__1_0_48//:syn",
     ],
 )
-

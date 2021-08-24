@@ -61,7 +61,6 @@ cargo_build_script(
     ],
 )
 
-
 # Unsupported target "cpu_monitor" with type "example" omitted
 
 rust_library(

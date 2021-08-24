@@ -62,7 +62,6 @@ cargo_build_script(
     ],
 )
 
-
 # Unsupported target "average" with type "bench" omitted
 
 # Unsupported target "gcd" with type "bench" omitted

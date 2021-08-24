@@ -53,4 +53,3 @@ rust_proc_macro(
         "//vendored/complicated_cargo_library/cargo/vendor/syn-0.11.11:syn",
     ],
 )
-

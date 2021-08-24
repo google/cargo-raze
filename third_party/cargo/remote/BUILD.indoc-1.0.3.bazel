@@ -53,7 +53,6 @@ rust_proc_macro(
     ],
 )
 
-
 # Unsupported target "compiletest" with type "test" omitted
 
 # Unsupported target "test_formatdoc" with type "test" omitted

@@ -55,7 +55,6 @@ rust_proc_macro(
     ],
 )
 
-
 # Unsupported target "compile-test" with type "test" omitted
 
 # Unsupported target "derive-clone" with type "test" omitted

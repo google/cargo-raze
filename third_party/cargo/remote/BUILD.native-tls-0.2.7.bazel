@@ -88,7 +88,6 @@ cargo_build_script(
     }),
 )
 
-
 # Unsupported target "google-connect" with type "example" omitted
 
 # Unsupported target "simple-server" with type "example" omitted

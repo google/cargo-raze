@@ -90,7 +90,6 @@ cargo_build_script(
     }),
 )
 
-
 # Unsupported target "mod" with type "bench" omitted
 
 rust_library(

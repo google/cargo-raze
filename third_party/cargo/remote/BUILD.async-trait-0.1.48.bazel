@@ -60,7 +60,6 @@ cargo_build_script(
     ],
 )
 
-
 rust_proc_macro(
     name = "async_trait",
     srcs = glob(["**/*.rs"]),
@@ -85,7 +84,6 @@ rust_proc_macro(
         "@cargo_raze__syn__1_0_68//:syn",
     ],
 )
-
 
 # Unsupported target "compiletest" with type "test" omitted
 

@@ -61,7 +61,6 @@ cargo_build_script(
     ],
 )
 
-
 rust_library(
     name = "basic_cookies",
     srcs = glob(["**/*.rs"]),

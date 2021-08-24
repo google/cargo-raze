@@ -63,7 +63,6 @@ cargo_build_script(
     ],
 )
 
-
 # Unsupported target "atomic_cell" with type "bench" omitted
 
 rust_library(

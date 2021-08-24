@@ -55,5 +55,4 @@ rust_proc_macro(
     ],
 )
 
-
 # Unsupported target "ui" with type "test" omitted

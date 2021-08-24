@@ -89,7 +89,6 @@ cargo_build_script(
     }),
 )
 
-
 rust_library(
     name = "libssh2_sys",
     srcs = glob(["**/*.rs"]),

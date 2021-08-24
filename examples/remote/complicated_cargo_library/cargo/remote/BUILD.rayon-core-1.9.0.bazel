@@ -61,7 +61,6 @@ cargo_build_script(
     ],
 )
 
-
 rust_library(
     name = "rayon_core",
     srcs = glob(["**/*.rs"]),

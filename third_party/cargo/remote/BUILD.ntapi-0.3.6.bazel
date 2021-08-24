@@ -62,7 +62,6 @@ cargo_build_script(
     ],
 )
 
-
 rust_library(
     name = "ntapi",
     srcs = glob(["**/*.rs"]),

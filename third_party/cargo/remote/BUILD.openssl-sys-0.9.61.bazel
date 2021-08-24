@@ -78,7 +78,6 @@ cargo_build_script(
     }),
 )
 
-
 rust_library(
     name = "openssl_sys",
     srcs = glob(["**/*.rs"]),

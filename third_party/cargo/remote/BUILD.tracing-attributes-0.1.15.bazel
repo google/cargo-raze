@@ -55,7 +55,6 @@ rust_proc_macro(
     ],
 )
 
-
 # Unsupported target "async_fn" with type "test" omitted
 
 # Unsupported target "destructuring" with type "test" omitted

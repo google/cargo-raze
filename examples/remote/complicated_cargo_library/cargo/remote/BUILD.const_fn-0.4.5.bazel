@@ -60,7 +60,6 @@ cargo_build_script(
     ],
 )
 
-
 rust_proc_macro(
     name = "const_fn",
     srcs = glob(["**/*.rs"]),
@@ -82,4 +81,3 @@ rust_proc_macro(
         ":const_fn_build_script",
     ],
 )
-

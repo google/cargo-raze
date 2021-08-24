@@ -61,7 +61,6 @@ cargo_build_script(
     ],
 )
 
-
 rust_proc_macro(
     name = "proc_macro_error_attr",
     srcs = glob(["**/*.rs"]),
@@ -85,4 +84,3 @@ rust_proc_macro(
         "@remote_binary_dependencies__quote__1_0_7//:quote",
     ],
 )
-

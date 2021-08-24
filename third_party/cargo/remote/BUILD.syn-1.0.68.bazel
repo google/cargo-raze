@@ -71,7 +71,6 @@ cargo_build_script(
     ],
 )
 
-
 # Unsupported target "file" with type "bench" omitted
 
 # Unsupported target "rust" with type "bench" omitted

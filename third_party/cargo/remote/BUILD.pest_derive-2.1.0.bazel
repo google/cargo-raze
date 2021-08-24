@@ -54,7 +54,6 @@ rust_proc_macro(
     ],
 )
 
-
 # Unsupported target "grammar" with type "test" omitted
 
 # Unsupported target "grammar_inline" with type "test" omitted

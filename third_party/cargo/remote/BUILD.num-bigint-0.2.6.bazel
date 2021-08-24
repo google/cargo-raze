@@ -62,7 +62,6 @@ cargo_build_script(
     ],
 )
 
-
 # Unsupported target "bigint" with type "bench" omitted
 
 # Unsupported target "factorial" with type "bench" omitted

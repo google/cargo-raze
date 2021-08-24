@@ -60,7 +60,6 @@ cargo_build_script(
     ],
 )
 
-
 rust_library(
     name = "encoding_rs",
     srcs = glob(["**/*.rs"]),
