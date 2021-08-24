@@ -10,9 +10,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # buildifier: disable=load
 load(
-    "@rules_rust//rust:rust.bzl",
+    "@rules_rust//rust:defs.bzl",
     "rust_binary",
     "rust_library",
+    "rust_proc_macro",
     "rust_test",
 )
 
@@ -50,7 +51,6 @@ rust_library(
     crate_features = [
     ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
     data = [],
     edition = "2018",
     rustc_flags = [
@@ -63,28 +63,32 @@ rust_library(
     version = "0.7.3",
     # buildifier: leave-alone
     deps = [
-        "@remote_binary_dependencies__rand_chacha__0_2_2//:rand_chacha",
         "@remote_binary_dependencies__rand_core__0_5_1//:rand_core",
     ] + selects.with_or({
-        # cfg(unix)
+        # cfg(not(target_os = "emscripten"))
         (
+            "@rules_rust//rust/platform:i686-apple-darwin",
+            "@rules_rust//rust/platform:i686-pc-windows-msvc",
+            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
+            "@rules_rust//rust/platform:x86_64-apple-darwin",
+            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
             "@rules_rust//rust/platform:aarch64-apple-darwin",
             "@rules_rust//rust/platform:aarch64-apple-ios",
             "@rules_rust//rust/platform:aarch64-linux-android",
             "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
             "@rules_rust//rust/platform:arm-unknown-linux-gnueabi",
-            "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-linux-android",
             "@rules_rust//rust/platform:i686-unknown-freebsd",
-            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
             "@rules_rust//rust/platform:powerpc-unknown-linux-gnu",
             "@rules_rust//rust/platform:s390x-unknown-linux-gnu",
-            "@rules_rust//rust/platform:x86_64-apple-darwin",
+            "@rules_rust//rust/platform:wasm32-unknown-unknown",
+            "@rules_rust//rust/platform:wasm32-wasi",
             "@rules_rust//rust/platform:x86_64-apple-ios",
             "@rules_rust//rust/platform:x86_64-linux-android",
             "@rules_rust//rust/platform:x86_64-unknown-freebsd",
-            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
+            "@remote_binary_dependencies__rand_chacha__0_2_2//:rand_chacha",
         ],
         "//conditions:default": [],
     }),

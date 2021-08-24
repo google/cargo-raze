@@ -10,9 +10,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # buildifier: disable=load
 load(
-    "@rules_rust//rust:rust.bzl",
+    "@rules_rust//rust:defs.bzl",
     "rust_binary",
     "rust_library",
+    "rust_proc_macro",
     "rust_test",
 )
 
@@ -35,14 +36,11 @@ licenses([
 rust_library(
     name = "adler32",
     srcs = glob(["**/*.rs"]),
-    aliases = {
-    },
     crate_features = [
         "default",
         "std",
     ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
     data = [],
     edition = "2018",
     rustc_flags = [
@@ -55,13 +53,5 @@ rust_library(
     version = "1.2.0",
     # buildifier: leave-alone
     deps = [
-    ] + selects.with_or({
-        # cfg(target_arch = "wasm32")
-        (
-            "@rules_rust//rust/platform:wasm32-unknown-unknown",
-            "@rules_rust//rust/platform:wasm32-wasi",
-        ): [
-        ],
-        "//conditions:default": [],
-    }),
+    ],
 )
