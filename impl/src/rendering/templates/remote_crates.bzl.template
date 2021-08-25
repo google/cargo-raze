@@ -24,7 +24,7 @@ def {{workspace.gen_workspace_prefix}}_fetch_remote_crates():
     maybe(
         http_archive,
         name = "{{workspace.gen_workspace_prefix}}__{{crate.pkg_name | replace(from="-", to="_")}}__{{crate.pkg_version | slugify | replace(from="-", to="_")}}",
-        url = "{{ crate.registry_url }}",
+        url = "{{ crate.source_details.download_url }}",
         type = "tar.gz",
 {%- if crate.sha256 %}
         sha256 = "{{crate.sha256}}",
