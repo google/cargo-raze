@@ -122,7 +122,7 @@ rust_library(
         "@cargo_raze__futures_io__0_3_13//:futures_io",
         "@cargo_raze__kv_log_macro__1_0_7//:kv_log_macro",
         "@cargo_raze__log__0_4_14//:log",
-        "@cargo_raze__memchr__2_3_4//:memchr",
+        "@cargo_raze__memchr__2_4_0//:memchr",
         "@cargo_raze__num_cpus__1_13_0//:num_cpus",
         "@cargo_raze__once_cell__1_7_2//:once_cell",
         "@cargo_raze__pin_project_lite__0_2_6//:pin_project_lite",

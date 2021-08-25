@@ -142,7 +142,7 @@ rust_library(
     deps = [
         ":tokio_build_script",
         "@cargo_raze__bytes__1_0_1//:bytes",
-        "@cargo_raze__memchr__2_3_4//:memchr",
+        "@cargo_raze__memchr__2_4_0//:memchr",
         "@cargo_raze__mio__0_7_11//:mio",
         "@cargo_raze__num_cpus__1_13_0//:num_cpus",
         "@cargo_raze__once_cell__1_7_2//:once_cell",
