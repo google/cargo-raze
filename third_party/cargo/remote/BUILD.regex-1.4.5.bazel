@@ -79,7 +79,7 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__aho_corasick__0_7_15//:aho_corasick",
-        "@cargo_raze__memchr__2_3_4//:memchr",
+        "@cargo_raze__memchr__2_4_0//:memchr",
         "@cargo_raze__regex_syntax__0_6_23//:regex_syntax",
     ],
 )

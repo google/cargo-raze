@@ -47,13 +47,13 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.12.3",
+    version = "0.14.0",
     # buildifier: leave-alone
     deps = [
+        "@cargo_raze__camino__1_0_4//:camino",
         "@cargo_raze__cargo_platform__0_1_1//:cargo_platform",
-        "@cargo_raze__semver__0_11_0//:semver",
-        "@cargo_raze__semver_parser__0_10_2//:semver_parser",
-        "@cargo_raze__serde__1_0_125//:serde",
+        "@cargo_raze__semver__1_0_3//:semver",
+        "@cargo_raze__serde__1_0_126//:serde",
         "@cargo_raze__serde_json__1_0_64//:serde_json",
     ],
 )

@@ -50,6 +50,6 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__regex__1_4_5//:regex",
-        "@cargo_raze__serde__1_0_125//:serde",
+        "@cargo_raze__serde__1_0_126//:serde",
     ],
 )
