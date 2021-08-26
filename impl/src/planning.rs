@@ -477,6 +477,15 @@ mod tests {
 
     // It's also expected to have a checksum
     assert!(context.sha256.is_some());
+
+    assert_eq!(
+      context.source_details.download_url,
+      Some(
+        "https://crates.io/api/v1/crates/some-binary-crate/3.3.3/download"
+          .parse()
+          .unwrap()
+      )
+    );
   }
 
   #[test]
