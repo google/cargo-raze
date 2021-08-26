@@ -21,7 +21,7 @@ use std::{
 
 use anyhow::{anyhow, bail, Context, Result};
 use cargo_lock::SourceId;
-use cargo_metadata::{DepKindInfo, DependencyKind, Node, Package};
+use cargo_metadata::{DepKindInfo, DependencyKind, Node, Package, Source};
 use cargo_platform::Platform;
 use itertools::Itertools;
 
@@ -42,6 +42,7 @@ use super::{
   crate_catalog::{CrateCatalog, CrateCatalogEntry},
   PlannedBuild,
 };
+use cargo_toml::Dependency;
 use url::Url;
 
 /// Named type to reduce declaration noise for deducing the crate contexts
@@ -416,6 +417,7 @@ impl<'planner> CrateSubplanner<'planner> {
         &self.settings.registry,
         package,
         &package_root,
+        self.settings.binary_deps.get(&package.name),
       )?,
       expected_build_path: self.crate_catalog_entry.local_build_path(self.settings)?,
       sha256: self.sha256.clone(),
@@ -641,6 +643,7 @@ impl<'planner> CrateSubplanner<'planner> {
     crates_io_template: &str,
     package: &Package,
     package_root: &Path,
+    binary_dep_spec: Option<&cargo_toml::Dependency>,
   ) -> Result<SourceDetails> {
     let mut git_data = None;
     let mut download_url = None;
@@ -681,15 +684,37 @@ impl<'planner> CrateSubplanner<'planner> {
         });
       }
       if source_id.is_remote_registry() {
-        download_url = Some(
-          Self::produce_download_url(crates_io_template, package).with_context(|| {
-            format!(
-              "Producing download URL for crate {} version {}",
-              &package.name, &package.version
-            )
-          })?,
-        );
+        if let Some(source) = package.source.as_ref() {
+          download_url = Some(
+            Self::produce_download_url(crates_io_template, source, &package.name, &package.version)
+              .with_context(|| {
+                format!(
+                  "Producing download URL for crate {} version {}",
+                  &package.name, &package.version
+                )
+              })?,
+          );
+        } else {
+          bail!(
+            "Expected source to be present for package {} version {}",
+            package.name,
+            package.version.to_string()
+          );
+        }
       }
+    } else if let Some(binary_dep_spec) = binary_dep_spec {
+      if let Dependency::Detailed(detailed) = binary_dep_spec {
+        if detailed.registry.is_some() || detailed.registry_index.is_some() {
+          bail!("Binary deps do not support registries other than crates.io, but {} attempted to use a custom registry", package.name);
+        }
+      }
+      let source = Source {
+        repr: "registry+https://github.com/rust-lang/crates.io-index".to_owned(),
+      };
+      download_url = Some(
+        Self::produce_download_url(crates_io_template, &source, &package.name, &package.version)
+          .with_context(|| format!("Producing download URL for binary dep {}", package.name))?,
+      );
     }
     Ok(SourceDetails {
       git_data,
@@ -697,35 +722,38 @@ impl<'planner> CrateSubplanner<'planner> {
     })
   }
 
-  fn produce_download_url(crates_io_template: &str, package: &Package) -> Result<Url> {
-    if let Some(source) = &package.source {
-      if source.is_crates_io() {
-        return Ok(
-          crates_io_template
-            .replace("{crate}", &package.name)
-            .replace("{version}", &package.version.to_string())
-            .parse()?,
+  fn produce_download_url(
+    crates_io_template: &str,
+    source: &Source,
+    package_name: &str,
+    package_version: &semver::Version,
+  ) -> Result<Url> {
+    if source.is_crates_io() {
+      return Ok(
+        crates_io_template
+          .replace("{crate}", package_name)
+          .replace("{version}", &package_version.to_string())
+          .parse()?,
+      );
+    }
+    if let Some(index_url) = source.repr.strip_prefix("registry+") {
+      let index = crates_index::BareIndex::from_url(index_url)?;
+      let index = index.open_or_clone()?;
+      let config = index.index_config()?;
+      let url = config.download_url(package_name, &package_version.to_string());
+      if let Some(url) = url {
+        return url.parse().context("Failed to parse index URL");
+      } else {
+        bail!(
+          "Could not derive URL for crate {} version {}",
+          package_name,
+          package_version
         );
-      }
-      if let Some(index_url) = source.repr.strip_prefix("registry+") {
-        let index = crates_index::BareIndex::from_url(index_url)?;
-        let index = index.open_or_clone()?;
-        let config = index.index_config()?;
-        let url = config.download_url(&package.name, &package.version.to_string());
-        if let Some(url) = url {
-          return url.parse().context("Failed to parse index URL");
-        } else {
-          bail!(
-            "Could not derive URL for crate {} version {}",
-            package.name,
-            package.version
-          );
-        }
       }
     }
     bail!(
-      "Expected source to be present and start with registry+ but was {:?}",
-      package.source
+      "Expected source to be start with registry+ but was {:?}",
+      source
     );
   }
 
