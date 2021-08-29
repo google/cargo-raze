@@ -7,4 +7,3 @@ def cargo_raze_transitive_deps():
     """Loads all dependnecies from repositories required for cargo-raze"""
     rules_foreign_cc_dependencies()
     rust_repositories(include_rustc_srcs = True)
-
