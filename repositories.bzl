@@ -17,10 +17,10 @@ def cargo_raze_repositories():
     maybe(
         http_archive,
         name = "rules_rust",
-        sha256 = "cdc853460de2245b3b49a0a9b178d20d7768c94da4d78d0b2c6d7048df2d4f11",
-        strip_prefix = "rules_rust-a667ff9bdc3a800e3005e8f19b89283a6a1be5a4",
-        # Main branch as of 2021-04-02
-        url = "https://github.com/bazelbuild/rules_rust/archive/a667ff9bdc3a800e3005e8f19b89283a6a1be5a4.tar.gz",
+        sha256 = "ef016d07f019911e5b43d054241d96e173b7c89be79a9b5f90207bef79ea87b4",
+        strip_prefix = "rules_rust-e2f1ab9156e0ebff7f3bae64407efe3d320487e8",
+        # Main branch as of 2021-08-29
+        url = "https://github.com/bazelbuild/rules_rust/archive/e2f1ab9156e0ebff7f3bae64407efe3d320487e8.tar.gz",
     )
 
     maybe(
