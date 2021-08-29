@@ -35,3 +35,13 @@ test_suite(
     ],
     visibility = ["//visibility:private"],
 )
+
+load("@rules_rust//rust:defs.bzl", "rust_analyzer")
+
+rust_analyzer(
+    name = "rust_analyzer",
+    targets = [
+        "//impl:cargo_raze_bin",
+        "//impl:cargo_raze"
+    ],
+)
