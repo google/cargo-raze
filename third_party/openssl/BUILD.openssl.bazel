@@ -38,8 +38,8 @@ configure_make(
     }),
     lib_source = ":all_srcs",
     out_static_libs = [
-        "libcrypto.a",
         "libssl.a",
+        "libcrypto.a",
     ],
     targets = [
         "build_libs",
