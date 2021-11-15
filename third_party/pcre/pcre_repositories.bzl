@@ -12,6 +12,6 @@ def pcre_repositories():
         strip_prefix = "pcre-8.44",
         urls = [
             "https://mirror.bazel.build/ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz",
-            "https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz",
+            "https://downloads.sourceforge.net/project/pcre/pcre/8.44/pcre-8.44.tar.gz",
         ],
     )
