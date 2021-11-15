@@ -9,16 +9,16 @@ filegroup(
 
 configure_make(
     name = "iconv",
-    env = select({
-        "@rules_rust//rust/platform:darwin": {"AR": ""},
-        "//conditions:default": {},
-    }),
     configure_in_place = True,
     configure_options = [
         "--enable-relocatable",
         "--enable-shared=no",
         "--enable-static=yes",
     ],
+    env = select({
+        "@rules_rust//rust/platform:darwin": {"AR": ""},
+        "//conditions:default": {},
+    }),
     lib_source = ":all",
     out_static_libs = ["libiconv.a"],
     targets = ["install-lib"],
