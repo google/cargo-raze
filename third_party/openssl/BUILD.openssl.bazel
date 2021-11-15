@@ -20,7 +20,7 @@ CONFIGURE_OPTIONS = [
 configure_make(
     name = "openssl",
     configure_command = "config",
-    configure_env_vars = select({
+    env = select({
         "@rules_rust//rust/platform:darwin": {"AR": ""},
         "//conditions:default": {},
     }),
@@ -38,8 +38,8 @@ configure_make(
     }),
     lib_source = ":all_srcs",
     out_static_libs = [
-        "libcrypto.a",
         "libssl.a",
+        "libcrypto.a",
     ],
     targets = [
         "build_libs",

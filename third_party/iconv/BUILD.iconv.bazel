@@ -9,7 +9,7 @@ filegroup(
 
 configure_make(
     name = "iconv",
-    configure_env_vars = select({
+    env = select({
         "@rules_rust//rust/platform:darwin": {"AR": ""},
         "//conditions:default": {},
     }),
