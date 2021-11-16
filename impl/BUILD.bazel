@@ -1,4 +1,4 @@
-load("@rules_rust//rust:rust.bzl", "rust_binary", "rust_library", "rust_test")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
 load("//third_party/cargo:crates.bzl", "all_crate_deps")
 
 package(default_visibility = ["//visibility:public"])

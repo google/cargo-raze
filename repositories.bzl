@@ -17,18 +17,18 @@ def cargo_raze_repositories():
     maybe(
         http_archive,
         name = "rules_rust",
-        sha256 = "cdc853460de2245b3b49a0a9b178d20d7768c94da4d78d0b2c6d7048df2d4f11",
-        strip_prefix = "rules_rust-a667ff9bdc3a800e3005e8f19b89283a6a1be5a4",
-        # Main branch as of 2021-04-02
-        url = "https://github.com/bazelbuild/rules_rust/archive/a667ff9bdc3a800e3005e8f19b89283a6a1be5a4.tar.gz",
+        sha256 = "69934a7953e5267ac18b751d6b109bc9e906d4a5d887f68cdd1940f172b64254",
+        strip_prefix = "rules_rust-e7b1e5ab9afcccc8d301c2b8922cae815d20c714",
+        # Main branch as of 2021-11-15
+        url = "https://github.com/bazelbuild/rules_rust/archive/e7b1e5ab9afcccc8d301c2b8922cae815d20c714.tar.gz",
     )
 
     maybe(
         http_archive,
         name = "rules_foreign_cc",
-        sha256 = "d54742ffbdc6924f222d2179f0e10e911c5c659c4ae74158e9fe827aad862ac6",
-        strip_prefix = "rules_foreign_cc-0.2.0",
-        url = "https://github.com/bazelbuild/rules_foreign_cc/archive/0.2.0.tar.gz",
+        sha256 = "69023642d5781c68911beda769f91fcbc8ca48711db935a75da7f6536b65047f",
+        strip_prefix = "rules_foreign_cc-0.6.0",
+        url = "https://github.com/bazelbuild/rules_foreign_cc/archive/0.6.0.tar.gz",
     )
 
     maybe(
