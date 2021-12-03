@@ -121,7 +121,7 @@ genmode = "Remote"
 
 #### Cargo workspace projects
 
-In projects that use [cargo workspaces](cargo_workspaces) uses should organize
+In projects that use [cargo workspaces](cargo_workspaces) users should organize
 all of their `raze` settings into the `[workspace.metadata.raze]` field in the
 top level `Cargo.toml` file which contains the `[workspace]` definition. These
 settings should be identical to the ones seen in `[package.metadata.raze]` in
