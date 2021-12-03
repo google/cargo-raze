@@ -53,5 +53,6 @@
     tags = [
         "cargo-raze",
         "manual",
+        "crate-name={{ target_name_original }}"
     ],
     version = "{{ crate.pkg_version }}",
