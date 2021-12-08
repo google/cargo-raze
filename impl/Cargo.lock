@@ -397,7 +397,7 @@ dependencies = [
 
 [[package]]
 name = "cargo-raze"
-version = "0.13.1"
+version = "0.14.0"
 dependencies = [
  "anyhow",
  "cargo-clone-crate",
