@@ -35,6 +35,7 @@ licenses([
 {%      include "templates/partials/build_script.template" %}
 {%- endif -%}
 {%- for target in crate.targets -%}
+{%-     set target_name_original = target.name %}
 {%-     set target_name_sanitized = target.name | replace(from="-", to="_") %}
 {%-     if target.kind == "bin" %}
 
