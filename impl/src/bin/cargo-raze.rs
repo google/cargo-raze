@@ -38,15 +38,22 @@ use cargo_raze::{
 use serde::Deserialize;
 use url::Url;
 
+// TODO(#458): Figure out a plan for the flags below that are no longer used.  They should eitehr be
+// deprecated or connected to something, rather than being dead code.
 #[derive(Debug, Deserialize)]
 struct Options {
   flag_verbose: Option<bool>,
+  #[allow(dead_code)]
   flag_quiet: Option<bool>,
+  #[allow(dead_code)]
   flag_host: Option<String>,
+  #[allow(dead_code)]
   flag_color: Option<String>,
+  #[allow(dead_code)]
   flag_target: Option<String>,
   flag_dryrun: Option<bool>,
   flag_cargo_bin_path: Option<String>,
+  #[allow(dead_code)]
   flag_output: Option<String>,
   flag_manifest_path: Option<String>,
   flag_generate_lockfile: Option<bool>,
