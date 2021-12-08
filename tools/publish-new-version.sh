@@ -10,17 +10,25 @@
 #
 # The script performs some types of sanity checking, but in general you should
 # read and understand this script before running it.
-#
-# This script assumes that your git upstream is called "origin".
 
 set -eu
+
+declare -r MAIN_BRANCH="main"
+if [[ -z "${BUILD_WORKSPACE_DIRECTORY+x}" ]]; then
+  SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  REPO_ROOT="$(dirname $SCRIPT_DIR)"
+else
+  REPO_ROOT="${BUILD_WORKSPACE_DIRECTORY}"
+fi
+readonly REPO_ROOT
+
 
 command_exists() {
     command -v "$1" >/dev/null 2>&1 || ( echo "Command \`$1\` isn't available. Please install before continuing."; exit 1 )
 }
 
 update_cargo_toml_version() {
-  crate_version=$1
+  local -r crate_version=$1
   sed -i "s/^version =.*/version = \"${crate_version}\"/g" Cargo.toml
 }
 
@@ -30,7 +38,7 @@ cargo_build_crate() {
 }
 
 git_commit_changes() {
-  crate_version=$1
+  local -r crate_version=$1
   git add . && git commit -m "Up to ${crate_version} [via publish-new-version.sh]"
 }
 
@@ -39,8 +47,8 @@ git_last_commit() {
 }
 
 git_tag_commit_with_version() {
-  last_commit_hash=$1
-  crate_version=$2
+  local -r last_commit_hash=$1
+  local -r crate_version=$2
   git tag "v${crate_version}" "${last_commit_hash}"
 }
 
@@ -49,43 +57,40 @@ cargo_publish_crate() {
 }
 
 git_push_changes_and_tags() {
-  git push origin master && git push origin --tags
+  local -r remote_name=$1
+  git push "${remote_name}" "${MAIN_BRANCH}" && git push "${remote_name}" --tags
 }
 
-publish_crate_version() {
-  crate_version=$1
+usage() {
+  echo "A version argument must be provided, of the form X.Y.Z."
+  echo "A remote name can optionally be provided (origin is default)"
+  echo "Example Usage: ./publish-new-version.sh 0.1.1 upstream"
+}
+
+main() {
+  if [[ "$#" -lt 1 ]] || [[ "$#" -gt 2 ]]; then
+    usage
+    return
+  fi
+  local -r crate_version=$1
+  local -r remote_name="${2:-origin}"
+
+  if ! [[ -z "$(git status --porcelain)" ]]; then
+    echo "Working directory is not clean. Commit pending changes before running command."
+    exit 1
+  fi
+
+  command_exists "cargo"
   update_cargo_toml_version "${crate_version}"
   cargo_build_crate
   git_commit_changes "${crate_version}"
   last_commit_hash=$(git_last_commit)
   git_tag_commit_with_version "${last_commit_hash}" "${crate_version}"
   cargo_publish_crate
-  git_push_changes_and_tags
+  git_push_changes_and_tags "${remote_name}"
 }
-
-command_exists "cargo"
-
-NEXT_CRATE_VERSION=$1
-if [[ -z "${NEXT_CRATE_VERSION+x}" ]]
-then
-  echo "A version argument must be provided, of the form X.Y.Z."
-  echo "Example Usage: ./publish-new-version.sh 0.1.1"
-  exit 1
-fi
-
-if ! [[ -z "$(git status --porcelain)" ]]; then
-  echo "Working directory is not clean. Commit pending changes before running command."
-  exit 1
-fi
-
-if [[ -z "${BUILD_WORKSPACE_DIRECTORY+x}" ]]; then
-  SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-  REPO_ROOT="$(dirname $SCRIPT_DIR)"
-else
-  REPO_ROOT="${BUILD_WORKSPACE_DIRECTORY}"
-fi
 
 pushd "${REPO_ROOT}/impl"
 set -x
-publish_crate_version "${NEXT_CRATE_VERSION}"
+main "$@"
 popd
