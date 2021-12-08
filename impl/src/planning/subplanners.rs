@@ -494,8 +494,12 @@ impl<'planner> CrateSubplanner<'planner> {
           continue;
         }
 
-        let mut dep_set = dep_production.entry(platform_target).or_default();
-        self.process_dep(&mut dep_set, &dep.name, dep_kind, dep_package)?
+        self.process_dep(
+          dep_production.entry(platform_target).or_default(),
+          &dep.name,
+          dep_kind,
+          dep_package,
+        )?
       }
     }
 
