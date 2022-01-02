@@ -44,6 +44,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=ena",
         "manual",
     ],
     version = "0.14.0",

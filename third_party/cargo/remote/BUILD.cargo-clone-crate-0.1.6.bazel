@@ -46,6 +46,7 @@ rust_binary(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=cargo-clone",
         "manual",
     ],
     version = "0.1.6",
@@ -85,6 +86,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=cargo_clone",
         "manual",
     ],
     version = "0.1.6",

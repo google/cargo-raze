@@ -44,6 +44,7 @@ rust_proc_macro(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=pest_derive",
         "manual",
     ],
     version = "2.1.0",

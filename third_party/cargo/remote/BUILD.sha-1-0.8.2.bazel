@@ -57,6 +57,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=sha1",
         "manual",
     ],
     version = "0.8.2",

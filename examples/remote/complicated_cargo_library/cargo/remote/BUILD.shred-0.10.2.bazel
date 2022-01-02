@@ -72,6 +72,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=shred",
         "manual",
     ],
     version = "0.10.2",

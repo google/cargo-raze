@@ -53,6 +53,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=png",
         "manual",
     ],
     version = "0.16.7",

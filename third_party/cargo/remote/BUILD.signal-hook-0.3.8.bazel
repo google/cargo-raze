@@ -79,6 +79,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=signal-hook",
         "manual",
     ],
     version = "0.3.8",

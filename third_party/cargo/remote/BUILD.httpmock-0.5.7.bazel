@@ -49,6 +49,7 @@ rust_binary(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=httpmock",
         "manual",
     ],
     version = "0.5.7",
@@ -92,6 +93,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=httpmock",
         "manual",
     ],
     version = "0.5.7",

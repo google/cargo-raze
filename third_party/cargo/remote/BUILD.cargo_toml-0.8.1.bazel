@@ -47,6 +47,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=cargo_toml",
         "manual",
     ],
     version = "0.8.1",

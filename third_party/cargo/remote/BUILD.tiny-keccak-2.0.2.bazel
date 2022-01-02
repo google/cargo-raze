@@ -83,6 +83,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=tiny-keccak",
         "manual",
     ],
     version = "2.0.2",

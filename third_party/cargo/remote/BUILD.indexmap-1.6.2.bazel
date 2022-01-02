@@ -80,6 +80,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=indexmap",
         "manual",
     ],
     version = "1.6.2",

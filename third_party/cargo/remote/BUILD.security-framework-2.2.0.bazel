@@ -52,6 +52,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=security-framework",
         "manual",
     ],
     version = "2.2.0",

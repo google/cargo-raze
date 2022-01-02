@@ -52,7 +52,7 @@
     ],
     tags = [
         "cargo-raze",
+        "crate-name={{ target_name_original }}",
         "manual",
-        "crate-name={{ target_name_original }}"
     ],
     version = "{{ crate.pkg_version }}",

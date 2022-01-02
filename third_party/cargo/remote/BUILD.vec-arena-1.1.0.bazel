@@ -48,6 +48,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=vec-arena",
         "manual",
     ],
     version = "1.1.0",

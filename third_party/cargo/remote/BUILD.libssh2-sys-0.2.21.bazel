@@ -104,6 +104,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=libssh2_sys",
         "manual",
     ],
     version = "0.2.21",

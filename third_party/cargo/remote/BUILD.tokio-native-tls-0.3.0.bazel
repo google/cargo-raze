@@ -48,6 +48,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=tokio-native-tls",
         "manual",
     ],
     version = "0.3.0",

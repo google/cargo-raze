@@ -91,6 +91,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=flate2",
         "manual",
     ],
     version = "1.0.20",

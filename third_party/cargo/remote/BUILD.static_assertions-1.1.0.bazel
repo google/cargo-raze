@@ -44,6 +44,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=static_assertions",
         "manual",
     ],
     version = "1.1.0",

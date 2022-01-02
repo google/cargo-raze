@@ -59,6 +59,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=web-sys",
         "manual",
     ],
     version = "0.3.50",

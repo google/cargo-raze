@@ -46,6 +46,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=event-listener",
         "manual",
     ],
     version = "2.5.1",

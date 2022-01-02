@@ -46,6 +46,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=addr2line",
         "manual",
     ],
     version = "0.13.0",

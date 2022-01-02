@@ -48,6 +48,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=adler32",
         "manual",
     ],
     version = "1.2.0",

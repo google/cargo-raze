@@ -45,6 +45,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=nodrop",
         "manual",
     ],
     version = "0.1.14",

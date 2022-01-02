@@ -73,6 +73,7 @@ rust_proc_macro(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=const_fn",
         "manual",
     ],
     version = "0.4.5",

@@ -73,6 +73,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=core-foundation-sys",
         "manual",
     ],
     version = "0.8.2",

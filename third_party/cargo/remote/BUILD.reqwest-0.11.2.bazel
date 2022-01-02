@@ -68,6 +68,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=reqwest",
         "manual",
     ],
     version = "0.11.2",

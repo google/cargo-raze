@@ -114,6 +114,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=isahc",
         "manual",
     ],
     version = "1.2.0",
