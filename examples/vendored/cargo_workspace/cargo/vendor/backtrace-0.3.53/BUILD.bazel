@@ -56,6 +56,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=backtrace",
         "manual",
     ],
     version = "0.3.53",

@@ -44,6 +44,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=async-object-pool",
         "manual",
     ],
     version = "0.1.4",

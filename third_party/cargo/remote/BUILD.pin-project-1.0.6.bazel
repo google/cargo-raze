@@ -71,6 +71,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=pin-project",
         "manual",
     ],
     version = "1.0.6",

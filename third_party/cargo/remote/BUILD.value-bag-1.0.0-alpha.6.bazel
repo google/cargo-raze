@@ -76,6 +76,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=value-bag",
         "manual",
     ],
     version = "1.0.0-alpha.6",

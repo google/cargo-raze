@@ -50,6 +50,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=async-executor",
         "manual",
     ],
     version = "1.4.0",

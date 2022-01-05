@@ -46,6 +46,7 @@ rust_binary(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=fsays",
         "manual",
     ],
     version = "0.2.0",
@@ -73,6 +74,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=ferris_says",
         "manual",
     ],
     version = "0.2.0",

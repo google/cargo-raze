@@ -54,6 +54,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=curl_sys",
         "manual",
     ],
     version = "0.4.41+curl-7.75.0",

@@ -44,6 +44,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=spinning_top",
         "manual",
     ],
     version = "0.2.2",

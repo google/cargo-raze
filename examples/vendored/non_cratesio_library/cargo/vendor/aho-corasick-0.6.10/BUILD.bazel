@@ -48,6 +48,7 @@ rust_binary(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=aho-corasick-dot",
         "manual",
     ],
     version = "0.6.10",
@@ -73,6 +74,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=aho_corasick",
         "manual",
     ],
     version = "0.6.10",

@@ -46,6 +46,7 @@ rust_binary(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=semver-parser",
         "manual",
     ],
     version = "0.10.2",
@@ -69,6 +70,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=semver-parser",
         "manual",
     ],
     version = "0.10.2",

@@ -78,6 +78,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=chrono-tz",
         "manual",
     ],
     version = "0.5.3",

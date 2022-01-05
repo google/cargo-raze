@@ -76,6 +76,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=num-iter",
         "manual",
     ],
     version = "0.1.42",

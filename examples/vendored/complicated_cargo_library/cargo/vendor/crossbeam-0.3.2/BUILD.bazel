@@ -46,6 +46,7 @@ rust_binary(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=bench",
         "manual",
     ],
     version = "0.3.2",
@@ -70,6 +71,7 @@ rust_binary(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=stress-msq",
         "manual",
     ],
     version = "0.3.2",
@@ -92,6 +94,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=crossbeam",
         "manual",
     ],
     version = "0.3.2",

@@ -46,6 +46,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=blocking",
         "manual",
     ],
     version = "1.0.2",

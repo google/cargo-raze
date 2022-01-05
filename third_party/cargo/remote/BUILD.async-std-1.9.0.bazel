@@ -110,6 +110,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=async-std",
         "manual",
     ],
     version = "1.9.0",

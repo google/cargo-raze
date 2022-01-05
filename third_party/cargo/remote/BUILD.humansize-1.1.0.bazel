@@ -48,6 +48,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=humansize",
         "manual",
     ],
     version = "1.1.0",

@@ -66,6 +66,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=texture-synthesis",
         "manual",
     ],
     version = "0.8.0",
