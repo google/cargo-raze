@@ -146,7 +146,7 @@ fn make_symlink(src: &Path, dest: &Path) -> Result<()> {
 /// Create a symlink file on windows systems
 #[cfg(target_family = "windows")]
 fn make_symlink(src: &Path, dest: &Path) -> Result<()> {
-  std::os::windows::fs::symlink_file(dest, src)
+  std::os::windows::fs::symlink_file(src, dest)
     .with_context(|| "Failed to create symlink for generating metadata")
 }
 
