@@ -386,8 +386,7 @@ fn validate_crate_settings(
         errors.push(RazeError::Config {
           field_path_opt: Some(format!(
             "raze.crates.{}.{}.additional_build_file",
-            crate_name,
-            version.to_string()
+            crate_name, version
           )),
           message: err.to_string(),
         });
