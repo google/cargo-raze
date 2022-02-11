@@ -497,14 +497,14 @@ See these examples of providing crate configuration:
 
 **Using vendored mode**:
 
-- [hello-cargo-library](https://github.com/google/cargo-raze/tree/master/examples/vendored/hello_cargo_library)
-- [complicated-cargo-library](https://github.com/google/cargo-raze/tree/master/examples/vendored/complicated_cargo_library)
-- [non-cratesio](https://github.com/google/cargo-raze/tree/master/examples/vendored/non_cratesio_library)
+- [hello-cargo-library](https://github.com/google/cargo-raze/tree/main/examples/vendored/hello_cargo_library)
+- [complicated-cargo-library](https://github.com/google/cargo-raze/tree/main/examples/vendored/complicated_cargo_library)
+- [non-cratesio](https://github.com/google/cargo-raze/tree/main/examples/vendored/non_cratesio_library)
 
 **Using remote mode**:
 
-- [complicated-example](https://github.com/google/cargo-raze/tree/master/examples/remote/complicated_cargo_library)
-- [non-cratesio](https://github.com/google/cargo-raze/tree/master/examples/remote/non_cratesio)
+- [complicated-example](https://github.com/google/cargo-raze/tree/main/examples/remote/complicated_cargo_library)
+- [non-cratesio](https://github.com/google/cargo-raze/tree/main/examples/remote/non_cratesio)
 
 **Compiling OpenSSL**:
 
