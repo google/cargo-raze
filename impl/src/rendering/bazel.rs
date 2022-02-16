@@ -38,12 +38,21 @@ macro_rules! unwind_tera_error {
 }
 
 // A Bazel block that exports the `crates.bzl` files rendered in Remote genmode
-const EXPORTS_FILES: &str = r#"
-# Export file for Stardoc support
+const EXPORTS_FILES: &str = r#"# Export file for Stardoc support
 exports_files(
-    [
-        "crates.bzl",
-    ],
+    glob([
+        "**/*.bazel",
+        "**/*.bzl",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "srcs",
+    srcs = glob([
+        "**/*.bazel",
+        "**/*.bzl",
+    ]),
     visibility = ["//visibility:public"],
 )
 "#;
@@ -217,6 +226,7 @@ impl BazelRenderer {
         // vendored genmode, one is only rendered when using the experimental
         // api so it would otherwise be incorrect to export a nonexistent file.
         if is_remote_mode || render_details.experimental_api {
+          rendered_alias_build_file += "\n";
           rendered_alias_build_file += EXPORTS_FILES;
         }
       }
@@ -250,6 +260,7 @@ impl BazelRenderer {
       .internal_renderer
       .render("templates/partials/header.template", &tera::Context::new())?;
 
+    contents += "\n";
     contents += EXPORTS_FILES;
 
     Ok(Some(FileOutputs {
@@ -393,7 +404,7 @@ impl BuildRenderer for BazelRenderer {
     // N.B. File needs to exist so that contained xyz-1.2.3.BUILD can be referenced
     file_outputs.push(FileOutputs {
       path: path_prefix.as_path().join("remote").join(buildfile_suffix),
-      contents: String::new(),
+      contents: EXPORTS_FILES.to_string(),
     });
 
     for package in crate_contexts {
