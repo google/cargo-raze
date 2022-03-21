@@ -8,6 +8,18 @@ load(
 cargo_build_script(
     name = "{{ crate_name_sanitized }}_build_script",
     srcs = glob(["**/*.rs"]),
+    {%- if crate.default_deps.aliased_dependencies | length != 0 or crate.targeted_deps | length != 0 %}
+    aliases = {
+        {%- for k, alias in crate.default_deps.aliased_dependencies %}
+        "{{alias.target}}": "{{alias.alias}}",
+        {%- endfor %}
+        {%- for dep in crate.targeted_deps %}
+        {%- for k, alias in dep.deps.aliased_dependencies %}
+        "{{alias.target}}": "{{alias.alias}}",
+        {%- endfor %}
+        {%- endfor %}
+    },
+    {%- endif %}
     build_script_env = {
         {%- for key, value in crate.raze_settings.buildrs_additional_environment_variables %}
         "{{key}}": "{{value}}",
