@@ -255,7 +255,7 @@ pub fn collect_up_to<T, U: Iterator<Item = T>>(max: usize, iter: U) -> LimitedRe
 }
 
 pub fn sanitize_ident(ident: &str) -> String {
-  slug::slugify(&ident).replace("-", "_")
+  slug::slugify(&ident).replace('-', "_")
 }
 
 /// Gets the proper system attributes for the provided platform triple using rustc.

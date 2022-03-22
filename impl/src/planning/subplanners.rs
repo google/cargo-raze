@@ -553,7 +553,7 @@ impl<'planner> CrateSubplanner<'planner> {
     if self.is_renamed(pkg) {
       let dep_alias = DependencyAlias {
         target: self.buildable_target_for_dep(pkg)?,
-        alias: name.replace("-", "_"),
+        alias: name.replace('-', "_"),
       };
 
       if let Some(_dep_alias) = dep_set
