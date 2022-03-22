@@ -49,7 +49,7 @@ impl CrateCatalogEntry {
     is_workspace_crate: bool,
     workspace_member_dependents: Vec<PackageId>,
   ) -> Self {
-    let sanitized_name = package.name.replace("-", "_");
+    let sanitized_name = package.name.replace('-', "_");
     let sanitized_version = util::sanitize_ident(&package.version.clone().to_string());
 
     Self {

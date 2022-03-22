@@ -253,7 +253,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           || !to_alias.raze_settings.extra_aliased_targets.is_empty()
       })
       .flat_map(|to_alias| {
-        let pkg_name = to_alias.pkg_name.replace("-", "_");
+        let pkg_name = to_alias.pkg_name.replace('-', "_");
         let target = format!("{}:{}", &to_alias.workspace_path_to_crate, &pkg_name);
         let alias = renames
           .get(&target)
