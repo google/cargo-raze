@@ -187,9 +187,7 @@ fn find_package_id(name: String, version: Version, packages: &[Package]) -> Resu
     .iter()
     .find(|package| package.name == name && package.version == version)
     .map(|package| package.id.clone())
-    .ok_or_else(|| Error::new(RazeError::Generic(
-      "Failed to find package.".into(),
-    )))
+    .ok_or_else(|| Error::new(RazeError::Generic("Failed to find package.".into())))
 }
 
 fn transpose_keys(
