@@ -65,7 +65,6 @@ cargo_build_script(
         "@cargo_raze__libz_sys__1_1_2//:libz_sys",
         "@cargo_raze__pkg_config__0_3_19//:pkg_config",
     ] + selects.with_or({
-        # cfg(target_env = "msvc")
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
@@ -74,7 +73,6 @@ cargo_build_script(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(unix)
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",

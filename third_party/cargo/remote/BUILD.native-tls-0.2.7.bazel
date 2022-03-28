@@ -58,7 +58,6 @@ cargo_build_script(
     visibility = ["//visibility:private"],
     deps = [
     ] + selects.with_or({
-        # cfg(any(target_os = "macos", target_os = "ios"))
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:x86_64-apple-darwin",
@@ -68,7 +67,6 @@ cargo_build_script(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(not(any(target_os = "windows", target_os = "macos", target_os = "ios")))
         (
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
@@ -80,7 +78,6 @@ cargo_build_script(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(target_os = "windows")
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
