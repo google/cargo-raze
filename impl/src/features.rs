@@ -193,7 +193,7 @@ fn find_package_id(name: String, version: Version, packages: &[Package]) -> Resu
 fn transpose_keys(
   triples: BTreeMap<String, BTreeMap<PackageId, BTreeSet<String>>>,
 ) -> UnconsolidatedFeatures {
-  let mut package_map: BTreeMap<PackageId, BTreeMap<String, BTreeSet<String>>> = BTreeMap::new();
+  let mut package_map: UnconsolidatedFeatures = BTreeMap::new();
   for (triple, packages) in triples {
     for (pkg, features) in packages {
       match package_map.get_mut(&pkg) {
