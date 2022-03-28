@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{
-  collections::HashMap,
+  collections::{BTreeMap, HashMap},
   env::consts,
   fs,
   path::{Path, PathBuf},
@@ -22,7 +22,7 @@ use std::{
 
 use anyhow::{anyhow, Context, Result};
 use cargo_lock::Lockfile;
-use cargo_metadata::{Metadata, MetadataCommand};
+use cargo_metadata::{Metadata, MetadataCommand, PackageId};
 use glob::glob;
 use pathdiff::diff_paths;
 use regex::Regex;
@@ -161,6 +161,7 @@ pub struct RazeMetadataFetcher {
   index_url: Url,
   metadata_fetcher: Box<dyn MetadataFetcher>,
   lockfile_generator: Box<dyn LockfileGenerator>,
+  settings: Option<RazeSettings>,
 }
 
 impl RazeMetadataFetcher {
@@ -168,6 +169,7 @@ impl RazeMetadataFetcher {
     cargo_bin_path: P,
     registry_url: Url,
     index_url: Url,
+    settings: Option<RazeSettings>,
   ) -> RazeMetadataFetcher {
     let cargo_bin_pathbuf: PathBuf = cargo_bin_path.into();
     RazeMetadataFetcher {
@@ -179,7 +181,18 @@ impl RazeMetadataFetcher {
       lockfile_generator: Box::new(CargoLockfileGenerator {
         cargo_bin_path: cargo_bin_pathbuf,
       }),
+      settings,
     }
+  }
+
+  pub fn new_with_settings(settings: Option<RazeSettings>) -> RazeMetadataFetcher {
+    RazeMetadataFetcher::new(
+      cargo_bin_path(),
+      // UNWRAP: The default is covered by testing and should never return err
+      Url::parse(DEFAULT_CRATE_REGISTRY_URL).unwrap(),
+      Url::parse(DEFAULT_CRATE_INDEX_URL).unwrap(),
+      settings,
+    )
   }
 
   /// Reassign the [`crate::metadata::MetadataFetcher`] associated with the Raze Metadata Fetcher
@@ -509,6 +522,7 @@ impl Default for RazeMetadataFetcher {
       // UNWRAP: The default is covered by testing and should never return err
       Url::parse(DEFAULT_CRATE_REGISTRY_URL).unwrap(),
       Url::parse(DEFAULT_CRATE_INDEX_URL).unwrap(),
+      None,
     )
   }
 }
@@ -616,6 +630,7 @@ pub mod tests {
       cargo_bin_path(),
       Url::parse(&mock_server.base_url()).unwrap(),
       Url::parse(&format!("file://{}", tempdir.as_ref().display())).unwrap(),
+      None,
     );
     fetcher.set_metadata_fetcher(Box::new(DummyCargoMetadataFetcher {
       metadata_template: None,
@@ -646,7 +661,7 @@ pub mod tests {
     let mut toml = File::create(&toml_path).unwrap();
     toml.write_all(basic_toml_contents().as_bytes()).unwrap();
 
-    let mut fetcher = RazeMetadataFetcher::default();
+    let mut fetcher = RazeMetadataFetcher::new_with_settings(None);
     fetcher.set_lockfile_generator(Box::new(DummyLockfileGenerator {
       lockfile_contents: None,
     }));

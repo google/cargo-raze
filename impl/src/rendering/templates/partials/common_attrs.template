@@ -11,11 +11,7 @@
         {%- endfor %}
     },
     {%- endif %}
-    crate_features = [
-        {%- for feature in crate.features %}
-        "{{feature}}",
-        {%- endfor %}
-    ],
+    {%- include "templates/partials/features.template" -%},
     crate_root = "{{ target.path }}",
     data = []
     {%- if crate.raze_settings.data_attr %} + {{crate.raze_settings.data_attr}}

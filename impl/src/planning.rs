@@ -81,7 +81,7 @@ impl BuildPlannerImpl {
 
 #[cfg(test)]
 mod tests {
-  use std::{collections::HashMap, collections::HashSet, path::PathBuf};
+  use std::{collections::BTreeMap, collections::HashMap, collections::HashSet, path::PathBuf};
 
   use crate::{
     metadata::tests::{
@@ -107,7 +107,7 @@ mod tests {
       cargo_workspace_root: PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
-      features: HashMap::new(),
+      features: BTreeMap::new(),
     }
   }
 
@@ -195,7 +195,7 @@ mod tests {
       cargo_workspace_root: PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
-      features: HashMap::new(),
+      features: BTreeMap::new(),
     }
   }
 

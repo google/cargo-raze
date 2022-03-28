@@ -17,7 +17,7 @@ use std::{
   path::PathBuf,
 };
 
-use crate::settings::CrateSettings;
+use crate::{features::Features, settings::CrateSettings};
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -158,7 +158,7 @@ pub struct CrateContext {
   pub default_deps: CrateDependencyContext,
   pub targeted_deps: Vec<CrateTargetedDepContext>,
   pub license: LicenseData,
-  pub features: Vec<String>,
+  pub features: Features,
   pub workspace_path_to_crate: String,
   pub workspace_member_dependents: Vec<PathBuf>,
   pub workspace_member_dev_dependents: Vec<PathBuf>,

@@ -32,6 +32,7 @@ use crate::{
     WorkspaceContext,
   },
   error::{RazeError, PLEASE_FILE_A_BUG},
+  features::Features,
   metadata::RazeMetadata,
   planning::license,
   settings::{CrateSettings, GenMode, RazeSettings},
@@ -63,6 +64,7 @@ struct CrateSubplanner<'planner> {
   node: &'planner Node,
   crate_settings: Option<&'planner CrateSettings>,
   sha256: &'planner Option<String>,
+  features: &'planner Option<&'planner Features>,
 }
 
 /// An internal working planner for generating context for a whole workspace.
@@ -400,7 +402,7 @@ impl<'planner> CrateSubplanner<'planner> {
       pkg_version: package.version.clone(),
       edition: package.edition.clone(),
       license: self.produce_license(),
-      features: self.node.features.clone(),
+      features: self.features.unwrap_or(&Features::empty()).clone(),
       workspace_member_dependents,
       workspace_member_dev_dependents,
       workspace_member_build_dependents,

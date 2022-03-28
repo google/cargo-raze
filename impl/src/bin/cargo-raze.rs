@@ -187,8 +187,9 @@ fn fetch_raze_metadata(
       cargo_bin_path,
       Url::parse(&settings.registry)?,
       Url::parse(&settings.index_url)?,
+      Some(settings.clone()),
     ),
-    None => RazeMetadataFetcher::default(),
+    None => RazeMetadataFetcher::new_with_settings(Some(settings.clone())),
   };
 
   let cargo_raze_working_dir = find_bazel_workspace_root(local_metadata.workspace_root.as_ref())

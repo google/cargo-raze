@@ -13,11 +13,7 @@ cargo_build_script(
         "{{key}}": "{{value}}",
         {%- endfor %}
     },
-    crate_features = [
-      {%- for feature in crate.features %}
-        "{{feature}}",
-      {%- endfor %}
-    ],
+    {%- include "templates/partials/features.template" -%},
     {%- if crate.build_script_target.path %}
     crate_root = "{{ crate.build_script_target.path }}",
     {%- else %}

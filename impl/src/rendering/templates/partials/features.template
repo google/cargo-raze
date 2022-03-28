@@ -1,0 +1,17 @@
+    crate_features = [
+    {%- for feature in crate.features.features %}
+        "{{feature}}",
+    {%- endfor %}
+    ]{% for targeted_feature in crate.features.targeted_features %} + selects.with_or({
+        (
+    {%- for platform in targeted_feature.platforms %}
+            "@rules_rust//rust/platform:{{platform}}",
+    {%- endfor %}
+        ): [
+    {%- for feature in targeted_feature.features %}
+            "{{ feature }}",
+    {%- endfor %}
+        ],
+        "//conditions:default": [],
+    })
+    {%- endfor -%}

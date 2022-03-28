@@ -125,6 +125,10 @@ impl BazelRenderer {
           "templates/workspace.BUILD.template",
           include_str!("templates/workspace.BUILD.template"),
         ),
+        (
+          "templates/partials/features.template",
+          include_str!("templates/partials/features.template"),
+        ),
       ])
       .unwrap();
 
@@ -481,6 +485,7 @@ mod tests {
 
   use crate::{
     context::*,
+    features::Features,
     planning::PlannedBuild,
     rendering::{FileOutputs, RenderDetails},
     settings::CrateSettings,
@@ -533,7 +538,10 @@ mod tests {
       pkg_name: "test-binary".to_owned(),
       pkg_version: Version::parse("1.1.1").unwrap(),
       edition: "2015".to_owned(),
-      features: vec!["feature1".to_owned(), "feature2".to_owned()],
+      features: Features {
+        features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
+        targeted_features: vec![],
+      },
       expected_build_path: format!("vendor/test-binary-1.1.1/{}", buildfile_suffix),
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
@@ -580,7 +588,10 @@ mod tests {
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
       canonical_additional_build_file: CrateSettings::default().additional_build_file,
-      features: vec!["feature1".to_owned(), "feature2".to_owned()],
+      features: Features {
+        features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
+        targeted_features: vec![],
+      },
       expected_build_path: format!("vendor/test-library-1.1.1/{}", buildfile_suffix),
       default_deps: CrateDependencyContext::default(),
       targeted_deps: Vec::new(),
@@ -624,7 +635,10 @@ mod tests {
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
       canonical_additional_build_file: CrateSettings::default().additional_build_file,
-      features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
+      features: Features {
+        features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
+        targeted_features: vec![],
+      },
       expected_build_path: format!("vendor/test-proc-macro-1.1.1/{}", buildfile_suffix),
       default_deps: CrateDependencyContext {
         dependencies: BTreeSet::new(),
