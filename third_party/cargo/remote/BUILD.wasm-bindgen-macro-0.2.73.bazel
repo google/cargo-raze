@@ -35,6 +35,7 @@ rust_proc_macro(
     name = "wasm_bindgen_macro",
     srcs = glob(["**/*.rs"]),
     crate_features = [
+        "spans",
     ],
     crate_root = "src/lib.rs",
     data = [],

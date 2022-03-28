@@ -115,7 +115,6 @@ rust_library(
         "@cargo_raze__libssh2//:libssh2",
         "@cargo_raze__libz_sys__1_1_2//:libz_sys",
     ] + selects.with_or({
-        # cfg(target_env = "msvc")
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
@@ -123,7 +122,6 @@ rust_library(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(unix)
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",

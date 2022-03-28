@@ -54,7 +54,6 @@ rust_library(
     deps = [
         "@cargo_raze__socket2__0_4_0//:socket2",
     ] + selects.with_or({
-        # cfg(unix)
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",

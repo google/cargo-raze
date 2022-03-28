@@ -64,7 +64,6 @@ rust_library(
         "@cargo_raze__thread_local__1_1_3//:thread_local",
         "@cargo_raze__walkdir__2_3_2//:walkdir",
     ] + selects.with_or({
-        # cfg(windows)
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",

@@ -71,7 +71,6 @@ rust_library(
         "@cargo_raze__vec_arena__1_1_0//:vec_arena",
         "@cargo_raze__waker_fn__1_1_0//:waker_fn",
     ] + selects.with_or({
-        # cfg(unix)
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
@@ -84,7 +83,6 @@ rust_library(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(windows)
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",

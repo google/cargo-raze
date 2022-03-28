@@ -64,7 +64,6 @@ rust_library(
         "@cargo_raze__libssh2_sys__0_2_21//:libssh2_sys",
         "@cargo_raze__libz_sys__1_1_2//:libz_sys",
     ] + selects.with_or({
-        # cfg(unix)
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",

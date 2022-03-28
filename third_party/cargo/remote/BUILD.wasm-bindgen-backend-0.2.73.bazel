@@ -35,6 +35,7 @@ rust_library(
     name = "wasm_bindgen_backend",
     srcs = glob(["**/*.rs"]),
     crate_features = [
+        "spans",
     ],
     crate_root = "src/lib.rs",
     data = [],

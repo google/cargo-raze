@@ -81,7 +81,6 @@ rust_library(
         "@cargo_raze__serde_urlencoded__0_7_0//:serde_urlencoded",
         "@cargo_raze__url__2_2_1//:url",
     ] + selects.with_or({
-        # cfg(not(target_arch = "wasm32"))
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
@@ -111,7 +110,17 @@ rust_library(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(windows)
+        (
+            "@rules_rust//rust/platform:wasm32-unknown-unknown",
+            "@rules_rust//rust/platform:wasm32-wasi",
+        ): [
+            "@cargo_raze__js_sys__0_3_50//:js_sys",
+            "@cargo_raze__wasm_bindgen__0_2_73//:wasm_bindgen",
+            "@cargo_raze__wasm_bindgen_futures__0_4_23//:wasm_bindgen_futures",
+            "@cargo_raze__web_sys__0_3_50//:web_sys",
+        ],
+        "//conditions:default": [],
+    }) + selects.with_or({
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",

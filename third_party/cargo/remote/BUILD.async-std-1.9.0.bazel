@@ -130,7 +130,6 @@ rust_library(
         "@cargo_raze__pin_utils__0_1_0//:pin_utils",
         "@cargo_raze__slab__0_4_2//:slab",
     ] + selects.with_or({
-        # cfg(not(target_os = "unknown"))
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
@@ -140,11 +139,22 @@ rust_library(
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
             "@rules_rust//rust/platform:aarch64-apple-darwin",
             "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:wasm32-wasi",
         ): [
             "@cargo_raze__async_global_executor__2_0_2//:async_global_executor",
             "@cargo_raze__async_io__1_3_1//:async_io",
             "@cargo_raze__async_process__1_0_2//:async_process",
             "@cargo_raze__futures_lite__1_11_3//:futures_lite",
+        ],
+        "//conditions:default": [],
+    }) + selects.with_or({
+        (
+            "@rules_rust//rust/platform:wasm32-unknown-unknown",
+            "@rules_rust//rust/platform:wasm32-wasi",
+        ): [
+            "@cargo_raze__futures_channel__0_3_13//:futures_channel",
+            "@cargo_raze__gloo_timers__0_2_1//:gloo_timers",
+            "@cargo_raze__wasm_bindgen_futures__0_4_23//:wasm_bindgen_futures",
         ],
         "//conditions:default": [],
     }),

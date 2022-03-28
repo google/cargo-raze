@@ -119,7 +119,6 @@ rust_library(
         "@cargo_raze__libc__0_2_92//:libc",
         "@cargo_raze__socket2__0_3_19//:socket2",
     ] + selects.with_or({
-        # cfg(all(unix, not(target_os = "macos")))
         (
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
@@ -130,7 +129,6 @@ rust_library(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(target_env = "msvc")
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",

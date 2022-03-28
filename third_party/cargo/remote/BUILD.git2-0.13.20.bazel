@@ -92,7 +92,6 @@ rust_library(
         "@cargo_raze__log__0_4_14//:log",
         "@cargo_raze__url__2_2_1//:url",
     ] + selects.with_or({
-        # cfg(all(unix, not(target_os = "macos")))
         (
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",

@@ -73,6 +73,8 @@ cargo_build_script(
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
             "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:wasm32-unknown-unknown",
+            "@rules_rust//rust/platform:wasm32-wasi",
         ): [
             "@cargo_raze__openssl_sys__0_9_73//:openssl_sys",
         ],
@@ -115,7 +117,6 @@ rust_library(
     deps = [
         ":native_tls_build_script",
     ] + selects.with_or({
-        # cfg(any(target_os = "macos", target_os = "ios"))
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:x86_64-apple-darwin",
@@ -129,11 +130,12 @@ rust_library(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(not(any(target_os = "windows", target_os = "macos", target_os = "ios")))
         (
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
             "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:wasm32-unknown-unknown",
+            "@rules_rust//rust/platform:wasm32-wasi",
         ): [
             "@cargo_raze__log__0_4_14//:log",
             "@cargo_raze__openssl__0_10_40//:openssl",
@@ -142,7 +144,6 @@ rust_library(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(target_os = "windows")
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",

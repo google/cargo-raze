@@ -59,6 +59,13 @@ cargo_build_script(
     visibility = ["//visibility:private"],
     deps = [
     ] + selects.with_or({
+        # cfg(target_os = "wasi")
+        (
+            "@rules_rust//rust/platform:wasm32-wasi",
+        ): [
+        ],
+        "//conditions:default": [],
+    }) + selects.with_or({
         # cfg(unix)
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
@@ -100,7 +107,13 @@ rust_library(
         ":getrandom_build_script",
         "@cargo_raze__cfg_if__1_0_0//:cfg_if",
     ] + selects.with_or({
-        # cfg(unix)
+        (
+            "@rules_rust//rust/platform:wasm32-wasi",
+        ): [
+            "@cargo_raze__wasi__0_10_2_wasi_snapshot_preview1//:wasi",
+        ],
+        "//conditions:default": [],
+    }) + selects.with_or({
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",

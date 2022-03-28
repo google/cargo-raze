@@ -149,7 +149,6 @@ rust_library(
         "@cargo_raze__once_cell__1_7_2//:once_cell",
         "@cargo_raze__pin_project_lite__0_2_6//:pin_project_lite",
     ] + selects.with_or({
-        # cfg(unix)
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
@@ -163,7 +162,6 @@ rust_library(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(windows)
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",

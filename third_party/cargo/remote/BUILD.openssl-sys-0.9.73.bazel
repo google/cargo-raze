@@ -103,7 +103,6 @@ rust_library(
         "@cargo_raze__libc__0_2_92//:libc",
         "@cargo_raze__openssl//:openssl",
     ] + selects.with_or({
-        # cfg(target_env = "msvc")
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",

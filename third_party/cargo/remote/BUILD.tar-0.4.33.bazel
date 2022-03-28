@@ -64,7 +64,6 @@ rust_library(
     deps = [
         "@cargo_raze__filetime__0_2_14//:filetime",
     ] + selects.with_or({
-        # cfg(unix)
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
