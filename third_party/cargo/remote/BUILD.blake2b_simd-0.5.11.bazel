@@ -35,8 +35,6 @@ rust_library(
     name = "blake2b_simd",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "default",
-        "std",
     ],
     crate_root = "src/lib.rs",
     data = [],

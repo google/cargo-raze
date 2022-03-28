@@ -44,8 +44,6 @@ rust_library(
     name = "argon2",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "crossbeam-utils",
-        "default",
     ],
     crate_root = "src/lib.rs",
     data = [],

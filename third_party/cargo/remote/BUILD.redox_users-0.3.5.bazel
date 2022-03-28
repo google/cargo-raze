@@ -35,9 +35,6 @@ rust_library(
     name = "redox_users",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "auth",
-        "default",
-        "rust-argon2",
     ],
     crate_root = "src/lib.rs",
     data = [],

@@ -37,7 +37,6 @@ rust_library(
     name = "bumpalo",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "default",
     ],
     crate_root = "src/lib.rs",
     data = [],

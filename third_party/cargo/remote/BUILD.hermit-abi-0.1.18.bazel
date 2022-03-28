@@ -35,7 +35,6 @@ rust_library(
     name = "hermit_abi",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "default",
     ],
     crate_root = "src/lib.rs",
     data = [],

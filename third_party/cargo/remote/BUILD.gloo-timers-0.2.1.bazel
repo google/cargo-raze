@@ -35,10 +35,6 @@ rust_library(
     name = "gloo_timers",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "default",
-        "futures",
-        "futures-channel",
-        "futures-core",
     ],
     crate_root = "src/lib.rs",
     data = [],
