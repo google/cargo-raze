@@ -30,6 +30,7 @@ use rustc_serialize::hex::ToHex;
 use tempfile::TempDir;
 use url::Url;
 
+use crate::{features::{Features, get_per_platform_features}, settings::RazeSettings};
 use crate::util::{cargo_bin_path, package_ident};
 
 pub(crate) const DEFAULT_CRATE_REGISTRY_URL: &str = "https://crates.io";
@@ -127,6 +128,9 @@ pub struct RazeMetadata {
 
   // A map of all known crates with checksums. Use `checksums_for` to access data from this map.
   pub checksums: HashMap<String, String>,
+
+  // A map of crates to their enabled general and per-platform features.
+  pub features: BTreeMap<PackageId, Features>,
 }
 
 impl RazeMetadata {
@@ -480,11 +484,20 @@ impl RazeMetadataFetcher {
       .metadata_fetcher
       .fetch_metadata(cargo_dir.as_ref(), /*include_deps=*/ true)?;
 
+    // In this function because it's metadata, even though it's not returned by `cargo-metadata`
+    let platform_features = match self.settings.as_ref() {
+      Some(settings) => {
+        get_per_platform_features(cargo_dir.path(), settings, &metadata.packages)?
+      },
+      None => BTreeMap::new(),
+    };
+
     Ok(RazeMetadata {
       metadata,
       checksums,
       cargo_workspace_root,
       lockfile: output_lockfile,
+      features: platform_features,
     })
   }
 }

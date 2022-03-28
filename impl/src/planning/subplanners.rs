@@ -166,6 +166,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       node,
       crate_settings,
       sha256: &checksum_opt.map(|c| c.to_owned()),
+      features: &self.metadata.features.get(&node.id),
     };
 
     let res = crate_subplanner

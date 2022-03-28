@@ -107,6 +107,7 @@ mod tests {
       cargo_workspace_root: PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
+      features: HashMap::new(),
     }
   }
 
@@ -194,6 +195,7 @@ mod tests {
       cargo_workspace_root: PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
+      features: HashMap::new(),
     }
   }
 
