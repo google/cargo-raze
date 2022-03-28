@@ -30,8 +30,11 @@ use rustc_serialize::hex::ToHex;
 use tempfile::TempDir;
 use url::Url;
 
-use crate::{features::{Features, get_per_platform_features}, settings::RazeSettings};
 use crate::util::{cargo_bin_path, package_ident};
+use crate::{
+  features::{get_per_platform_features, Features},
+  settings::RazeSettings,
+};
 
 pub(crate) const DEFAULT_CRATE_REGISTRY_URL: &str = "https://crates.io";
 pub(crate) const DEFAULT_CRATE_INDEX_URL: &str = "https://github.com/rust-lang/crates.io-index";
@@ -499,9 +502,7 @@ impl RazeMetadataFetcher {
 
     // In this function because it's metadata, even though it's not returned by `cargo-metadata`
     let platform_features = match self.settings.as_ref() {
-      Some(settings) => {
-        get_per_platform_features(cargo_dir.path(), settings, &metadata.packages)?
-      },
+      Some(settings) => get_per_platform_features(cargo_dir.path(), settings, &metadata.packages)?,
       None => BTreeMap::new(),
     };
 

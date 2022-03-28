@@ -47,7 +47,7 @@ pub struct TargetedFeatures {
 }
 
 // A function that runs `cargo-tree` to analyze per-platform features.
-// This step should not need to be separate from cargo-metadata, but cargo-metadata's 
+// This step should not need to be separate from cargo-metadata, but cargo-metadata's
 // output is incomplete in this respect.
 //
 // See: https://github.com/rust-lang/cargo/issues/9863
@@ -63,7 +63,7 @@ pub struct TargetedFeatures {
 pub fn get_per_platform_features(
   cargo_dir: &Path,
   settings: &RazeSettings,
-  packages: &Vec<Package>,
+  packages: &[Package],
 ) -> Result<BTreeMap<PackageId, Features>> {
   let mut triples: BTreeSet<String> = BTreeSet::new();
   if let Some(target) = settings.target.clone() {
@@ -99,7 +99,7 @@ pub fn get_per_platform_features(
 fn run_cargo_tree(
   cargo_dir: &Path,
   triple: &str,
-  packages: &Vec<Package>,
+  packages: &[Package],
 ) -> Result<BTreeMap<PackageId, BTreeSet<String>>> {
   // TODO: remove this
   eprintln!("Run cargo-tree for {}.", triple);
@@ -129,10 +129,13 @@ fn run_cargo_tree(
   make_package_map(crate_vec, packages)
 }
 
-fn make_package_map(crates: Vec<String>, packages: &Vec<Package>) -> Result<BTreeMap<PackageId, BTreeSet<String>>> {
+fn make_package_map(
+  crates: Vec<String>,
+  packages: &[Package],
+) -> Result<BTreeMap<PackageId, BTreeSet<String>>> {
   let mut package_map: BTreeMap<PackageId, BTreeSet<String>> = BTreeMap::new();
   for c in &crates {
-    let (name, version, features) = process_line(&c)?;
+    let (name, version, features) = process_line(c)?;
     let id = find_package_id(name, version, packages)?;
 
     // TODO: this should not be necessary
@@ -154,19 +157,19 @@ fn make_package_map(crates: Vec<String>, packages: &Vec<Package>) -> Result<BTre
 //
 // This function does some basic text processing, and ignores
 // bogus and/or repetitive lines that cargo-tree inserts.
-fn process_line(s: &String) -> Result<(String, Version, BTreeSet<String>)> {
-  match (s.find(" "), s.find("|")) {
+fn process_line(s: &str) -> Result<(String, Version, BTreeSet<String>)> {
+  match (s.find(' '), s.find('|')) {
     (Some(space), Some(pipe)) => {
       let (package, features) = s.split_at(pipe);
       let features_trimmed = features.replace("|", "");
       let feature_set: BTreeSet<String> = features_trimmed
-        .split(",")
+        .split(',')
         .filter(|s| !s.is_empty())
         .map(|s| s.to_string())
         .collect();
       let (name, mut version_str) = package.split_at(space);
       version_str = version_str.trim_start_matches(|c| c == ' ' || c == 'v');
-      let version_end = match version_str.find(" ") {
+      let version_end = match version_str.find(' ') {
         Some(index) => index,
         None => version_str.chars().count(),
       };
@@ -179,12 +182,12 @@ fn process_line(s: &String) -> Result<(String, Version, BTreeSet<String>)> {
   }
 }
 
-fn find_package_id(name: String, version: Version, packages: &Vec<Package>) -> Result<PackageId> {
+fn find_package_id(name: String, version: Version, packages: &[Package]) -> Result<PackageId> {
   packages
     .iter()
     .find(|package| package.name == name && package.version == version)
     .map(|package| package.id.clone())
-    .ok_or(Error::new(RazeError::Generic(
+    .ok_or_else(|| Error::new(RazeError::Generic(
       "Failed to find package.".into(),
     )))
 }
@@ -198,7 +201,7 @@ fn transpose_keys(
       match package_map.get_mut(&pkg) {
         Some(triple_map) => {
           triple_map.insert(triple.clone(), features);
-        },
+        }
         None => {
           let mut m = BTreeMap::new();
           m.insert(triple.clone(), features);
@@ -210,7 +213,9 @@ fn transpose_keys(
   package_map
 }
 
-fn consolidate_features(pkg: (PackageId, BTreeMap<String, BTreeSet<String>>)) -> (PackageId, Features) {
+fn consolidate_features(
+  pkg: (PackageId, BTreeMap<String, BTreeSet<String>>),
+) -> (PackageId, Features) {
   let (id, features) = pkg;
 
   // Find the features common to all targets
@@ -249,25 +254,25 @@ fn consolidate_features(pkg: (PackageId, BTreeMap<String, BTreeSet<String>>)) ->
     }
   }
 
-  let mut common_vec: Vec<String> = common_features.iter().map(|s| s.clone()).collect();
+  let mut common_vec: Vec<String> = common_features.iter().cloned().collect();
   common_vec.sort();
 
   let targeted_features: Vec<TargetedFeatures> = platforms_to_features
-  .iter()
-  .map(|ptf| {
-    let (platforms, features) = ptf;
-    TargetedFeatures {
-      platforms: platforms.to_vec(),
-      features: features.to_vec(),
-    }
-  })
-  .collect();
+    .iter()
+    .map(|ptf| {
+      let (platforms, features) = ptf;
+      TargetedFeatures {
+        platforms: platforms.to_vec(),
+        features: features.to_vec(),
+      }
+    })
+    .collect();
 
   (
     id,
     Features {
       features: common_vec,
       targeted_features,
-    }
+    },
   )
 }
