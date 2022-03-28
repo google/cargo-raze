@@ -161,7 +161,7 @@ fn process_line(s: &str) -> Result<(String, Version, BTreeSet<String>)> {
   match (s.find(' '), s.find('|')) {
     (Some(space), Some(pipe)) => {
       let (package, features) = s.split_at(pipe);
-      let features_trimmed = features.replace("|", "");
+      let features_trimmed = features.replace('|', "");
       let feature_set: BTreeSet<String> = features_trimmed
         .split(',')
         .filter(|s| !s.is_empty())
