@@ -78,20 +78,15 @@ pub fn get_per_platform_features(
     triple_map.insert(
       triple.clone(),
       // TODO: This part is slow, since it runs cargo-tree per-platform.
-      run_cargo_tree(cargo_dir, triple.as_str(), packages)?,
+      make_package_map(run_cargo_tree(cargo_dir, triple.as_str())?, packages)?,
     );
   }
 
-  let features: Vec<(PackageId, Features)> = transpose_keys(triple_map)
+  let features: BTreeMap<PackageId, Features> = transpose_keys(triple_map)
     .into_iter()
     .map(consolidate_features)
     .collect();
-  let mut m = BTreeMap::new();
-  for f in features {
-    let (id, features) = f;
-    m.insert(id, features);
-  }
-  Ok(m)
+  Ok(features)
 }
 
 // Runs `cargo-tree` with a very specific format argument that makes it easier
@@ -99,11 +94,7 @@ pub fn get_per_platform_features(
 fn run_cargo_tree(
   cargo_dir: &Path,
   triple: &str,
-  packages: &[Package],
-) -> Result<BTreeMap<PackageId, BTreeSet<String>>> {
-  // TODO: remove this
-  eprintln!("Run cargo-tree for {}.", triple);
-
+) -> Result<Vec<String>> {
   let cargo_bin: PathBuf = cargo_bin_path();
   let mut cargo_tree = Command::new(cargo_bin);
   cargo_tree.current_dir(cargo_dir);
@@ -125,8 +116,7 @@ fn run_cargo_tree(
   }) {
     crates.insert(line.to_string());
   }
-  let crate_vec: Vec<String> = crates.iter().map(|s| s.to_string()).collect();
-  make_package_map(crate_vec, packages)
+  Ok(crates.iter().map(|s| s.to_string()).collect())
 }
 
 fn make_package_map(
