@@ -82,11 +82,12 @@ pub fn get_per_platform_features(
     );
   }
 
-  let features: BTreeMap<PackageId, Features> = transpose_keys(triple_map)
-    .into_iter()
-    .map(consolidate_features)
-    .collect();
-  Ok(features)
+  Ok(
+    transpose_keys(triple_map)
+      .into_iter()
+      .map(consolidate_features)
+      .collect(),
+  )
 }
 
 // Runs `cargo-tree` with a very specific format argument that makes it easier
@@ -106,14 +107,14 @@ fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<Vec<String>> {
   assert!(tree_output.status.success());
 
   let text = String::from_utf8(tree_output.stdout)?;
-  let mut crates: BTreeSet<String> = BTreeSet::new();
+  let mut crates: Vec<String> = vec![];
   for line in text.lines().filter(|line| {
     // remove dedupe lines     // remove lines with no features
     !(line.ends_with("(*)") || line.ends_with("||") || line.is_empty())
   }) {
-    crates.insert(line.to_string());
+    crates.push(line.to_string());
   }
-  Ok(crates.iter().map(|s| s.to_string()).collect())
+  Ok(crates)
 }
 
 fn make_package_map(
