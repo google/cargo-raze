@@ -91,10 +91,7 @@ pub fn get_per_platform_features(
 
 // Runs `cargo-tree` with a very specific format argument that makes it easier
 // to extract per-platform targets.
-fn run_cargo_tree(
-  cargo_dir: &Path,
-  triple: &str,
-) -> Result<Vec<String>> {
+fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<Vec<String>> {
   let cargo_bin: PathBuf = cargo_bin_path();
   let mut cargo_tree = Command::new(cargo_bin);
   cargo_tree.current_dir(cargo_dir);
