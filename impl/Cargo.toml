@@ -10,6 +10,7 @@ edition = "2018"
 description = """
 A Cargo subcommand to generate Bazel BUILD files
 """
+resolver = "2"
 
 [badges]
 travis-ci = { repository = "google/cargo-raze", branch = "master" }
