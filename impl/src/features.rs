@@ -133,7 +133,7 @@ fn packages_by_platform(
     let (name, version, features) = process_line(c)?;
     let id = packages
       .get(&(name, version))
-      .ok_or(Error::new(RazeError::Generic("No PackageId found.".into())))?
+      .ok_or_else(|| Error::new(RazeError::Generic("No PackageId found.".into())))?
       .clone();
 
     // TODO: this should not be necessary
