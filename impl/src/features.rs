@@ -65,6 +65,15 @@ pub fn get_per_platform_features(
   settings: &RazeSettings,
   packages: &[Package],
 ) -> Result<BTreeMap<PackageId, Features>> {
+  get_per_platform_features_with_command(cargo_dir, settings, packages, run_cargo_tree)
+}
+
+pub fn get_per_platform_features_with_command(
+  cargo_dir: &Path,
+  settings: &RazeSettings,
+  packages: &[Package],
+  command: fn(&Path, &str) -> Result<String>,
+) -> Result<BTreeMap<PackageId, Features>> {
   let mut triples: BTreeSet<String> = BTreeSet::new();
   if let Some(target) = settings.target.clone() {
     triples.insert(target);
@@ -86,7 +95,10 @@ pub fn get_per_platform_features(
     triple_map.insert(
       triple.clone(),
       // TODO: This part is slow, since it runs cargo-tree per-platform.
-      packages_by_platform(run_cargo_tree(cargo_dir, triple.as_str())?, &package_map)?,
+      packages_by_platform(
+        clean_cargo_tree_output(&command(cargo_dir, triple.as_str())?),
+        &package_map,
+      )?,
     );
   }
 
@@ -98,9 +110,20 @@ pub fn get_per_platform_features(
   )
 }
 
+fn clean_cargo_tree_output(cargo_tree_output: &str) -> Vec<String> {
+  let mut crates: Vec<String> = vec![];
+  for line in cargo_tree_output.lines().filter(|line| {
+    // remove dedupe lines     // remove lines with no features
+    !(line.ends_with("(*)") || line.ends_with("||") || line.is_empty())
+  }) {
+    crates.push(line.to_string());
+  }
+  crates
+}
+
 // Runs `cargo-tree` with a very specific format argument that makes it easier
 // to extract per-platform targets.
-fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<Vec<String>> {
+fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<String> {
   let cargo_bin: PathBuf = cargo_bin_path();
   let mut cargo_tree = Command::new(cargo_bin);
   cargo_tree.current_dir(cargo_dir);
@@ -114,15 +137,7 @@ fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<Vec<String>> {
   let tree_output = cargo_tree.output()?;
   assert!(tree_output.status.success());
 
-  let text = String::from_utf8(tree_output.stdout)?;
-  let mut crates: Vec<String> = vec![];
-  for line in text.lines().filter(|line| {
-    // remove dedupe lines     // remove lines with no features
-    !(line.ends_with("(*)") || line.ends_with("||") || line.is_empty())
-  }) {
-    crates.push(line.to_string());
-  }
-  Ok(crates)
+  Ok(String::from_utf8(tree_output.stdout)?)
 }
 
 fn packages_by_platform(
