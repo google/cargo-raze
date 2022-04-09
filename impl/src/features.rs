@@ -76,8 +76,9 @@ pub fn get_per_platform_features(
   // Map of PackageIds using the keys that cargo-tree provides
   let mut package_map: HashMap<(String, Version), PackageId> = HashMap::new();
   for package in packages.iter().cloned() {
-    let key = (package.name, package.version);
-    package_map.entry(key).or_insert(package.id);
+    package_map
+      .entry((package.name, package.version))
+      .or_insert(package.id);
   }
 
   let mut triple_map = BTreeMap::new();
