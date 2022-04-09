@@ -269,3 +269,52 @@ fn consolidate_features(
     },
   )
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use cargo_metadata::Version;
+  use semver::{BuildMetadata, Prerelease};
+  use std::collections::BTreeSet;
+
+  #[test]
+  fn test_process_line() {
+    let process_line_tests: Vec<(&str, (&str, (u64,u64,u64), Vec<&str>, Option<BuildMetadata>))> = vec![
+          ("lalrpop v0.19.5|default,lexer,pico-args|", ("lalrpop", (0,19,5), vec!["default", "lexer", "pico-args"], None)),
+          ("lalrpop-util v0.19.5|default,std|", ("lalrpop-util", (0,19,5), vec!["default", "std"], None)),
+          ("hashbrown v0.9.1|raw|", ("hashbrown", (0,9,1), vec!["raw"], None)),
+          ("regex-syntax v0.6.23|default,unicode,unicode-age,unicode-bool,unicode-case,unicode-gencat,unicode-perl,unicode-script,unicode-segment|", ("regex-syntax", (0,6,23), vec!["default", "unicode", "unicode-age", "unicode-bool", "unicode-case", "unicode-gencat", "unicode-perl", "unicode-script", "unicode-segment"], None)),
+          ("crunchy v0.2.2|default,limit_128|", ("crunchy", (0,2,2), vec!["default", "limit_128"], None)),
+          ("isahc v1.2.0|default,encoding_rs,http2,mime,static-curl,text-decoding|", ("isahc", (1,2,0), vec!["default", "encoding_rs", "http2", "mime", "static-curl", "text-decoding"], None)),
+          ("curl v0.4.35|default,http2,openssl-probe,openssl-sys,ssl,static-curl|", ("curl", (0,4,35), vec!["default", "http2", "openssl-probe", "openssl-sys", "ssl", "static-curl"], None)),
+          ("curl-sys v0.4.41+curl-7.75.0|default,http2,libnghttp2-sys,openssl-sys,ssl,static-curl|", ("curl-sys", (0,4,41), vec!["default", "http2", "libnghttp2-sys", "openssl-sys", "ssl", "static-curl"], Some(BuildMetadata::new("curl-7.75.0").unwrap()))),
+        ];
+
+    for line_test in process_line_tests {
+      let (input, (name, version_tuple, features, build_metadata)) = line_test;
+
+      let bm = if let Some(b) = build_metadata {
+        b
+      } else {
+        BuildMetadata::EMPTY
+      };
+
+      let version = Version {
+        major: version_tuple.0,
+        minor: version_tuple.1,
+        patch: version_tuple.2,
+        pre: Prerelease::EMPTY,
+        build: bm,
+      };
+      let mut feature_set = BTreeSet::new();
+      for feature in features {
+        feature_set.insert(feature.to_string());
+      }
+
+      let result = process_line(input).unwrap();
+      assert_eq!(name, result.0);
+      assert_eq!(version, result.1);
+      assert_eq!(feature_set, result.2);
+    }
+  }
+}
