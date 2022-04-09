@@ -136,17 +136,14 @@ fn packages_by_platform(
       .ok_or_else(|| Error::new(RazeError::Generic("No PackageId found.".into())))?
       .clone();
 
-    // TODO: this should not be necessary
-    match package_map.get_mut(&id) {
-      Some(existing_features) => {
-        let f = existing_features.union(&features).cloned().collect();
-        package_map.insert(id, f);
-      }
-      None => {
-        package_map.insert(id, features);
-      }
-    }
+    package_map
+      .entry(id)
+      .and_modify(|e| {
+        *e = e.union(&features).cloned().collect();
+      })
+      .or_insert(features);
   }
+
   Ok(package_map)
 }
 
@@ -186,16 +183,16 @@ fn transpose_keys(
   let mut package_map: UnconsolidatedFeatures = BTreeMap::new();
   for (triple, packages) in triples {
     for (pkg, features) in packages {
-      match package_map.get_mut(&pkg) {
-        Some(triple_map) => {
-          triple_map.insert(triple.clone(), features);
-        }
-        None => {
+      package_map
+        .entry(pkg)
+        .and_modify(|e| {
+          e.insert(triple.clone(), features.clone());
+        })
+        .or_insert_with(|| {
           let mut m = BTreeMap::new();
           m.insert(triple.clone(), features);
-          package_map.insert(pkg.clone(), m);
-        }
-      }
+          m
+        });
     }
   }
   package_map
@@ -217,14 +214,10 @@ fn consolidate_features(
   for (platform, pfs) in features {
     for feature in pfs {
       if !common_features.contains(&feature) {
-        match platform_map.get_mut(&feature) {
-          Some(platforms) => {
-            platforms.push(platform.clone());
-          }
-          None => {
-            platform_map.insert(feature, vec![platform.clone()]);
-          }
-        }
+        platform_map
+          .entry(feature)
+          .and_modify(|e| e.push(platform.clone()))
+          .or_insert_with(|| vec![platform.clone()]);
       }
     }
   }
@@ -232,14 +225,10 @@ fn consolidate_features(
   let mut platforms_to_features: BTreeMap<Vec<String>, Vec<String>> = BTreeMap::new();
   for (feature, platforms) in platform_map {
     let key = platforms.clone();
-    match platforms_to_features.get_mut(&key) {
-      Some(features) => {
-        features.push(feature);
-      }
-      None => {
-        platforms_to_features.insert(key, vec![feature]);
-      }
-    }
+    platforms_to_features
+      .entry(key)
+      .and_modify(|e| e.push(feature.clone()))
+      .or_insert_with(|| vec![feature]);
   }
 
   let mut common_vec: Vec<String> = common_features.iter().cloned().collect();
