@@ -131,9 +131,10 @@ fn packages_by_platform(
   let mut package_map: BTreeMap<PackageId, BTreeSet<String>> = BTreeMap::new();
   for c in &crates {
     let (name, version, features) = process_line(c)?;
-    let id = packages.get(&(name, version)).ok_or(Error::new(RazeError::Generic(
-      "No PackageId found.".into(),
-    )))?.clone();
+    let id = packages
+      .get(&(name, version))
+      .ok_or(Error::new(RazeError::Generic("No PackageId found.".into())))?
+      .clone();
 
     // TODO: this should not be necessary
     match package_map.get_mut(&id) {
