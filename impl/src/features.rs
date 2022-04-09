@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -73,12 +73,19 @@ pub fn get_per_platform_features(
     triples.extend(targets);
   }
 
+  // Map of PackageIds using the keys that cargo-tree provides
+  let mut package_map: HashMap<(String, Version), PackageId> = HashMap::new();
+  for package in packages.iter().cloned() {
+    let key = (package.name, package.version);
+    package_map.entry(key).or_insert(package.id);
+  }
+
   let mut triple_map = BTreeMap::new();
   for triple in triples {
     triple_map.insert(
       triple.clone(),
       // TODO: This part is slow, since it runs cargo-tree per-platform.
-      make_package_map(run_cargo_tree(cargo_dir, triple.as_str())?, packages)?,
+      packages_by_platform(run_cargo_tree(cargo_dir, triple.as_str())?, &package_map)?,
     );
   }
 
@@ -117,14 +124,16 @@ fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<Vec<String>> {
   Ok(crates)
 }
 
-fn make_package_map(
+fn packages_by_platform(
   crates: Vec<String>,
-  packages: &[Package],
+  packages: &HashMap<(String, Version), PackageId>,
 ) -> Result<BTreeMap<PackageId, BTreeSet<String>>> {
   let mut package_map: BTreeMap<PackageId, BTreeSet<String>> = BTreeMap::new();
   for c in &crates {
     let (name, version, features) = process_line(c)?;
-    let id = find_package_id(name, version, packages)?;
+    let id = packages.get(&(name, version)).ok_or(Error::new(RazeError::Generic(
+      "No PackageId found.".into(),
+    )))?.clone();
 
     // TODO: this should not be necessary
     match package_map.get_mut(&id) {
@@ -168,14 +177,6 @@ fn process_line(s: &str) -> Result<(String, Version, BTreeSet<String>)> {
       "Failed to process cargo tree line.".into(),
     ))),
   }
-}
-
-fn find_package_id(name: String, version: Version, packages: &[Package]) -> Result<PackageId> {
-  packages
-    .iter()
-    .find(|package| package.name == name && package.version == version)
-    .map(|package| package.id.clone())
-    .ok_or_else(|| Error::new(RazeError::Generic("Failed to find package.".into())))
 }
 
 fn transpose_keys(
