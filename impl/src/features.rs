@@ -317,4 +317,41 @@ mod tests {
       assert_eq!(feature_set, result.2);
     }
   }
+
+  #[test]
+  fn test_clean_cargo() {
+    let input = r###"
+cargo-raze v0.15.0 (/tmp/.tmpyVIlry)||
+anyhow v1.0.40|default,std|
+cargo-clone-crate v0.1.6||
+anyhow v1.0.40|default,std|
+flate2 v1.0.20|default,miniz_oxide,rust_backend|
+cfg-if v1.0.0||
+crc32fast v1.2.1|default,std|
+cfg-if v1.0.0||
+cfg-if v1.0.0||
+value-bag v1.0.0-alpha.6||
+ctor v0.1.20 (proc-macro)||
+
+quote v1.0.9|default,proc-macro|
+proc-macro2 v1.0.26|default,proc-macro|
+unicode-xid v0.2.1|default|
+syn v1.0.68|clone-impls,default,derive,extra-traits,full,parsing,printing,proc-macro,quote,visit,visit-mut|
+proc-macro2 v1.0.26|default,proc-macro| (*)
+"###;
+
+    let result = clean_cargo_tree_output(input);
+    assert_eq!(8, result.len());
+    assert_eq!(result[0], "anyhow v1.0.40|default,std|");
+    assert_eq!(result[1], "anyhow v1.0.40|default,std|");
+    assert_eq!(
+      result[2],
+      "flate2 v1.0.20|default,miniz_oxide,rust_backend|"
+    );
+    assert_eq!(result[3], "crc32fast v1.2.1|default,std|");
+    assert_eq!(result[4], "quote v1.0.9|default,proc-macro|");
+    assert_eq!(result[5], "proc-macro2 v1.0.26|default,proc-macro|");
+    assert_eq!(result[6], "unicode-xid v0.2.1|default|");
+    assert_eq!(result[7], "syn v1.0.68|clone-impls,default,derive,extra-traits,full,parsing,printing,proc-macro,quote,visit,visit-mut|");
+  }
 }
