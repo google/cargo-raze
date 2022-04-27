@@ -13,9 +13,14 @@ _CACHE_ENTRIES = {
     "BUILD_EXAMPLES": "off",
     "BUILD_FUZZERS": "off",
     "BUILD_SHARED_LIBS": "off",
-    "CMAKE_PREFIX_PATH": "$EXT_BUILD_DEPS/pcre;$EXT_BUILD_DEPS/openssl;$EXT_BUILD_DEPS/libssh2;$EXT_BUILD_DEPS/zlib",
+    "CMAKE_PREFIX_PATH": "$EXT_BUILD_DEPS/pcre;$EXT_BUILD_DEPS/openssl;$EXT_BUILD_DEPS/zlib",
     "EMBED_SSH_PATH": "$(execpath @cargo_raze__libssh2//:libssh2)",
+    "LIBSSH2_FOUND": "true",
+    "LIBSSH2_INCLUDE_DIRS": "$EXT_BUILD_DEPS/libssh2/include",
+    "LIBSSH2_LIBRARY_DIRS": "$EXT_BUILD_DEPS/libssh2/lib",
     "USE_HTTPS": "on",
+    # Manually configure libssh2 as cmake gets confused about what pkgconfig reports.
+    "USE_SSH": "off",
 }
 
 _LINUX_CACHE_ENTRIES = dict(_CACHE_ENTRIES.items() + {
