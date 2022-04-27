@@ -2,6 +2,7 @@
 actual vendored sources"""
 
 load("@rules_rust//rust:repositories.bzl", "load_arbitrary_tool")
+load("@rules_rust//rust/platform:triple.bzl", "get_host_triple")
 
 def _examples_dir(repository_ctx):
     """Returns the path to the cargo-raze workspace root
@@ -34,12 +35,8 @@ def _examples_repository_impl(repository_ctx):
 
     if repository_ctx.attr.target_triple:
         target_triple = repository_ctx.attr.target_triple
-    elif "mac" in repository_ctx.os.name:
-        target_triple = "x86_64-apple-darwin"
-    elif "windows" in repository_ctx.os.name:
-        target_triple = "x86_64-pc-windows-msvc"
     else:
-        target_triple = "x86_64-unknown-linux-gnu"
+        target_triple = get_host_triple(repository_ctx).str
 
     # Download cargo
     load_arbitrary_tool(
