@@ -32,3 +32,27 @@ cmake(
     visibility = ["//visibility:public"],
     deps = ["@cargo_raze__openssl//:openssl"],
 )
+
+filegroup(
+    name = "gen_dir",
+    srcs = [":libssh2"],
+    output_group = "gen_dir",
+    visibility = ["//visibility:public"],
+)
+
+genrule(
+    name = "fix_pkgconfig",
+    srcs = [":gen_dir"],
+    outs = ["pkgconfig/libssh2.pc"],
+    # Get rid of ${EXT_BUILD_ROOT}/ in the pkgconfig file so it references
+    # libssh2 resources from the root of the project rather than expanding
+    # EXT_BUILD_ROOT to "" and resulting in a pkgconfig that claims to start
+    # at the filesystem root (/).
+    cmd = """
+        mkdir -p pkgconfig
+        DIR=($(execpath :gen_dir))
+        SRC="$${DIR}/lib/pkgconfig/libssh2.pc"
+        sed -e "s|.{EXT_BUILD_ROOT}/||g" -e "s|-lssh2|libssh2.a|g" < $$SRC > $@
+    """,
+    visibility = ["//visibility:public"],
+)

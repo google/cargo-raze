@@ -104,10 +104,16 @@ additional_deps = ["@cargo_raze__libgit2//:libgit2"]
 [package.metadata.raze.crates.libssh2-sys.'*']
 # build.rs file: https://github.com/alexcrichton/ssh2-rs/blob/master/libssh2-sys/build.rs
 build_data_dependencies = [
+    "@cargo_raze__libssh2//:fix_pkgconfig",
+    "@cargo_raze__libssh2//:gen_dir",
     "@cargo_raze__libssh2//:libssh2",
     "@cargo_raze__openssl//:openssl",
 ]
 additional_deps = ["@cargo_raze__libssh2//:libssh2"]
+[package.metadata.raze.crates.libssh2-sys.'*'.buildrs_additional_environment_variables]
+    # Is there a better way to get the dirname of "fix_pkgconfig"?
+    PKG_CONFIG_PATH = "$(execpath @cargo_raze__libssh2//:gen_dir)../../pkgconfig"
+    LIBSSH2_SYS_USE_PKG_CONFIG = "true"
 
 [package.metadata.raze.crates.libz-sys.'*']
 # build.rs file: https://github.com/rust-lang/libz-sys/blob/main/build.rs
@@ -125,7 +131,7 @@ build_data_dependencies = [
 ]
 data_attr = "[\"@cargo_raze__openssl//:openssl\"]"
 additional_deps = ["@cargo_raze__openssl//:openssl"]
-    [package.metadata.raze.crates.openssl-sys.'*'.buildrs_additional_environment_variables]
+[package.metadata.raze.crates.openssl-sys.'*'.buildrs_additional_environment_variables]
         OPENSSL_DIR="$(execpath @cargo_raze__openssl//:gen_dir)"
         OPENSSL_STATIC="1"
 
