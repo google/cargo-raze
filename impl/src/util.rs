@@ -37,6 +37,7 @@ static SUPPORTED_PLATFORM_TRIPLES: &[&str] = &[
   // SUPPORTED_T2_PLATFORM_TRIPLES
   "aarch64-apple-darwin",
   "aarch64-apple-ios",
+  "aarch64-apple-ios-sim",
   "aarch64-linux-android",
   "aarch64-unknown-linux-gnu",
   "arm-unknown-linux-gnueabi",
@@ -101,7 +102,9 @@ pub fn is_bazel_supported_platform(target: &str) -> BazelTargetSupport {
     let target_matches = expression.eval(|pred| {
       match pred {
         Predicate::Target(tp) => tp.matches(target_info),
-        Predicate::KeyValue { key, val } => (*key == "target") && (*val == target_info.triple),
+        Predicate::KeyValue { key, val } => {
+          (*key == "target") && (*val == target_info.triple.as_str())
+        }
         // For now there is no other kind of matching
         _ => false,
       }
@@ -138,7 +141,7 @@ pub fn get_matching_bazel_triples<'a>(
     .iter()
     .filter_map(move |triple| {
       let target_info = get_builtin_target_by_triple(triple).unwrap();
-      let triple = target_info.triple;
+      let triple = target_info.triple.as_str();
       let res = expression.eval(|pred| match pred {
         Predicate::Target(tp) => tp.matches(target_info),
         Predicate::KeyValue { key, val } => *key == "target" && *val == triple,

@@ -18,7 +18,7 @@ _DEPENDENCIES = {
         "cargo-platform": "@cargo_raze__cargo_platform__0_1_1//:cargo_platform",
         "cargo_metadata": "@cargo_raze__cargo_metadata__0_14_0//:cargo_metadata",
         "cargo_toml": "@cargo_raze__cargo_toml__0_8_1//:cargo_toml",
-        "cfg-expr": "@cargo_raze__cfg_expr__0_6_0//:cfg_expr",
+        "cfg-expr": "@cargo_raze__cfg_expr__0_10_2//:cfg_expr",
         "crates-index": "@cargo_raze__crates_index__0_17_0//:crates_index",
         "docopt": "@cargo_raze__docopt__1_1_1//:docopt",
         "glob": "@cargo_raze__glob__0_3_0//:glob",
@@ -631,12 +631,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__cfg_expr__0_6_0",
-        url = "https://crates.io/api/v1/crates/cfg-expr/0.6.0/download",
+        name = "cargo_raze__cfg_expr__0_10_2",
+        url = "https://crates.io/api/v1/crates/cfg-expr/0.10.2/download",
         type = "tar.gz",
-        sha256 = "cb4f9cf6cb58661f5cdcda0240ab42788e009bd957ba56c1367aa01c7c6fbc05",
-        strip_prefix = "cfg-expr-0.6.0",
-        build_file = Label("//third_party/cargo/remote:BUILD.cfg-expr-0.6.0.bazel"),
+        sha256 = "5e068cb2806bbc15b439846dc16c5f89f8599f2c3e4d73d4449d38f9b2f0b6c5",
+        strip_prefix = "cfg-expr-0.10.2",
+        build_file = Label("//third_party/cargo/remote:BUILD.cfg-expr-0.10.2.bazel"),
     )
 
     maybe(
@@ -2331,12 +2331,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__smallvec__1_6_1",
-        url = "https://crates.io/api/v1/crates/smallvec/1.6.1/download",
+        name = "cargo_raze__smallvec__1_8_0",
+        url = "https://crates.io/api/v1/crates/smallvec/1.8.0/download",
         type = "tar.gz",
-        sha256 = "fe0f37c9e8f3c5a4a66ad655a93c74daac4ad00c441533bf5c6e7990bb42604e",
-        strip_prefix = "smallvec-1.6.1",
-        build_file = Label("//third_party/cargo/remote:BUILD.smallvec-1.6.1.bazel"),
+        sha256 = "f2dd574626839106c320a323308629dcb1acfc96e32a8cba364ddc61ac23ee83",
+        strip_prefix = "smallvec-1.8.0",
+        build_file = Label("//third_party/cargo/remote:BUILD.smallvec-1.8.0.bazel"),
     )
 
     maybe(
