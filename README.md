@@ -22,6 +22,8 @@ onerous, even for code with few dependencies.
 
 ## Usage
 
+insignificant change to test CI.
+
 cargo-raze can generate buildable targets in one of two modes: Vendoring, or
 Non-Vendoring. In the vendoring mode, developers use the common `cargo vendor`
 subcommand to retrieve the dependencies indicated by their workspace Cargo.toml into
