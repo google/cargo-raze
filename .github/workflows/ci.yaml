@@ -10,7 +10,7 @@ jobs:
       matrix:
         rust:
           - stable
-          - 1.46.0
+          - 1.54.0
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -30,9 +30,7 @@ jobs:
       matrix:
         rust:
           - stable
-          # 1.45 triggers bug in parse_raze_settings_any_package
-          # with settings_packages.len() == 0
-          - 1.46.0
+          - 1.54.0
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -52,7 +50,7 @@ jobs:
       matrix:
         rust:
           - stable
-          - 1.46.0
+          - 1.54.0
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -73,7 +71,7 @@ jobs:
       matrix:
         rust:
           - stable
-          - 1.46.0
+          - 1.54.0
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
