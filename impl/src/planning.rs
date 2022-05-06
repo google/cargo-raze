@@ -57,6 +57,7 @@ pub struct BuildPlannerImpl {
 
 impl BuildPlanner for BuildPlannerImpl {
   /// Retrieves metadata for local workspace and produces a build plan.
+  /// Insignificant change to ruin cache.
   fn plan_build(&self, platform_details: Option<PlatformDetails>) -> Result<PlannedBuild> {
     // Create one combined metadata object which includes all dependencies and binaries
     let crate_catalog = CrateCatalog::new(&self.metadata.metadata)?;
