@@ -52,6 +52,6 @@ rust_library(
     deps = [
         "@cargo_raze__lazy_static__1_4_0//:lazy_static",
         "@cargo_raze__regex__1_4_5//:regex",
-        "@cargo_raze__smallvec__1_6_1//:smallvec",
+        "@cargo_raze__smallvec__1_8_0//:smallvec",
     ],
 )
