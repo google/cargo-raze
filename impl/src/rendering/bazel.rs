@@ -633,6 +633,7 @@ mod tests {
         build_dependencies: BTreeSet::new(),
         build_proc_macro_dependencies: BTreeSet::new(),
         build_data_dependencies: BTreeSet::new(),
+        build_tools_dependencies: BTreeSet::new(),
         dev_dependencies: BTreeSet::new(),
         aliased_dependencies: BTreeMap::new(),
       },

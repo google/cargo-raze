@@ -96,6 +96,7 @@ pub struct CrateDependencyContext {
   pub build_proc_macro_dependencies: BTreeSet<BuildableDependency>,
   // build_data_dependencies can only be set when using cargo-raze as a library at the moment.
   pub build_data_dependencies: BTreeSet<BuildableDependency>,
+  pub build_tools_dependencies: BTreeSet<BuildableDependency>,
   pub dev_dependencies: BTreeSet<BuildableDependency>,
   /// Aliased dependencies, sorted/keyed by their `target` name in the `DependencyAlias` struct.
   pub aliased_dependencies: BTreeMap<String, DependencyAlias>,
