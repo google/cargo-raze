@@ -34,7 +34,7 @@ configure_make(
     }),
     env = select({
         "@rules_rust//rust/platform:darwin": {"AR": ""},
-        "//conditions:default": {},
+        "//conditions:default": {"CFLAGS": "-Dasm=__asm__ -D_GNU_SOURCE=1"},
     }),
     lib_source = ":all_srcs",
     out_static_libs = [
