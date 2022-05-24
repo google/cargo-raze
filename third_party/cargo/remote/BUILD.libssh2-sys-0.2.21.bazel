@@ -41,11 +41,15 @@ cargo_build_script(
     name = "libssh2_sys_build_script",
     srcs = glob(["**/*.rs"]),
     build_script_env = {
+        "LIBSSH2_SYS_USE_PKG_CONFIG": "true",
+        "PKG_CONFIG_PATH": "$(execpath @cargo_raze__libssh2//:gen_dir)../../pkgconfig",
     },
     crate_features = [
     ],
     crate_root = "build.rs",
     data = glob(["**"]) + [
+        "@cargo_raze__libssh2//:fix_pkgconfig",
+        "@cargo_raze__libssh2//:gen_dir",
         "@cargo_raze__libssh2//:libssh2",
         "@cargo_raze__openssl//:openssl",
     ],
