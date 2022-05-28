@@ -54,6 +54,13 @@ cargo_build_script(
         "{{flag}}",
         {%- endfor %}
     ],
+    {%- if crate.raze_settings.build_tools_dependencies %}
+    tools = [
+    {%- for tools in crate.raze_settings.build_tools_dependencies %}
+        "{{tools}}",
+    {%- endfor %}
+    ],
+    {%- endif %}
     tags = [
         "cargo-raze",
         "manual",

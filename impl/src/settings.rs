@@ -187,6 +187,10 @@ pub struct CrateSettings {
   #[serde(default)]
   pub build_data_dependencies: Vec<String>,
 
+  /// The `tools` attribute for buildrs targets
+  #[serde(default)]
+  pub build_tools_dependencies: Vec<String>,
+
   /// Additional environment variables to add when running the build script.
   #[serde(default)]
   pub buildrs_additional_environment_variables: BTreeMap<String, String>,
@@ -272,6 +276,7 @@ impl Default for CrateSettings {
       data_dependencies: Vec::new(),
       compile_data_attr: None,
       build_data_dependencies: Vec::new(),
+      build_tools_dependencies: Vec::new(),
       buildrs_additional_deps: Vec::new(),
       buildrs_additional_environment_variables: BTreeMap::new(),
       patch_args: Vec::new(),
