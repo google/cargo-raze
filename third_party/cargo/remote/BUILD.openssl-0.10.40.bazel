@@ -54,10 +54,10 @@ cargo_build_script(
         "cargo-raze",
         "manual",
     ],
-    version = "0.10.33",
+    version = "0.10.40",
     visibility = ["//visibility:private"],
     deps = [
-        "@cargo_raze__openssl_sys__0_9_61//:openssl_sys",
+        "@cargo_raze__openssl_sys__0_9_73//:openssl_sys",
     ],
 )
 
@@ -67,13 +67,16 @@ rust_library(
     name = "openssl",
     srcs = glob(["**/*.rs"]),
     aliases = {
-        "@cargo_raze__openssl_sys__0_9_61//:openssl_sys": "ffi",
+        "@cargo_raze__openssl_sys__0_9_73//:openssl_sys": "ffi",
     },
     crate_features = [
     ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
+    proc_macro_deps = [
+        "@cargo_raze__openssl_macros__0_1_0//:openssl_macros",
+    ],
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -82,7 +85,7 @@ rust_library(
         "crate-name=openssl",
         "manual",
     ],
-    version = "0.10.33",
+    version = "0.10.40",
     # buildifier: leave-alone
     deps = [
         ":openssl_build_script",
@@ -92,6 +95,6 @@ rust_library(
         "@cargo_raze__libc__0_2_92//:libc",
         "@cargo_raze__once_cell__1_7_2//:once_cell",
         "@cargo_raze__openssl//:openssl",
-        "@cargo_raze__openssl_sys__0_9_61//:openssl_sys",
+        "@cargo_raze__openssl_sys__0_9_73//:openssl_sys",
     ],
 )
