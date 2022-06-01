@@ -248,6 +248,12 @@ pub struct CrateSettings {
   /// context, see https://doc.rust-lang.org/cargo/reference/workspaces.html#root-package
   #[serde(default)]
   pub additional_build_file: Option<PathBuf>,
+
+  /// Skip initializing submodules in the target repository.
+  ///
+  /// Some crates may not need their submodules initialized in order to build.
+  #[serde(default)]
+  pub skip_submodules: bool,
 }
 
 /// Describes how dependencies should be managed in tree.
@@ -285,6 +291,7 @@ impl Default for CrateSettings {
       patch_tool: None,
       patches: Vec::new(),
       additional_build_file: None,
+      skip_submodules: false,
     }
   }
 }
