@@ -1721,12 +1721,22 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__openssl__0_10_33",
-        url = "https://crates.io/api/v1/crates/openssl/0.10.33/download",
+        name = "cargo_raze__openssl__0_10_40",
+        url = "https://crates.io/api/v1/crates/openssl/0.10.40/download",
         type = "tar.gz",
-        sha256 = "a61075b62a23fef5a29815de7536d940aa35ce96d18ce0cc5076272db678a577",
-        strip_prefix = "openssl-0.10.33",
-        build_file = Label("//third_party/cargo/remote:BUILD.openssl-0.10.33.bazel"),
+        sha256 = "fb81a6430ac911acb25fe5ac8f1d2af1b4ea8a4fdfda0f1ee4292af2e2d8eb0e",
+        strip_prefix = "openssl-0.10.40",
+        build_file = Label("//third_party/cargo/remote:BUILD.openssl-0.10.40.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "cargo_raze__openssl_macros__0_1_0",
+        url = "https://crates.io/api/v1/crates/openssl-macros/0.1.0/download",
+        type = "tar.gz",
+        sha256 = "b501e44f11665960c7e7fcf062c7d96a14ade4aa98116c004b2e37b5be7d736c",
+        strip_prefix = "openssl-macros-0.1.0",
+        build_file = Label("//third_party/cargo/remote:BUILD.openssl-macros-0.1.0.bazel"),
     )
 
     maybe(
@@ -1741,12 +1751,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__openssl_sys__0_9_61",
-        url = "https://crates.io/api/v1/crates/openssl-sys/0.9.61/download",
+        name = "cargo_raze__openssl_sys__0_9_73",
+        url = "https://crates.io/api/v1/crates/openssl-sys/0.9.73/download",
         type = "tar.gz",
-        sha256 = "313752393519e876837e09e1fa183ddef0be7735868dced3196f4472d536277f",
-        strip_prefix = "openssl-sys-0.9.61",
-        build_file = Label("//third_party/cargo/remote:BUILD.openssl-sys-0.9.61.bazel"),
+        sha256 = "9d5fd19fb3e0a8191c1e34935718976a3e70c112ab9a24af6d7cadccd9d90bc0",
+        strip_prefix = "openssl-sys-0.9.73",
+        build_file = Label("//third_party/cargo/remote:BUILD.openssl-sys-0.9.73.bazel"),
     )
 
     maybe(
