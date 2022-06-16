@@ -148,11 +148,11 @@ fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<String> {
     .map_err(|_err| Error::new(RazeError::Generic("Failed to run cargo-tree.".into())))?;
   assert!(tree_output.status.success());
 
-  Ok(String::from_utf8(tree_output.stdout).map_err(|_err| {
+  String::from_utf8(tree_output.stdout).map_err(|_err| {
     Error::new(RazeError::Generic(
       "Failed to convert cargo-tree output to UTF-8.".into(),
     ))
-  })?)
+  })
 }
 
 fn packages_by_platform(
