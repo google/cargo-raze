@@ -274,12 +274,8 @@ fn consolidate_features(
 mod tests {
   use super::*;
   use crate::{
-    context::CrateContext,
-    metadata::tests::{
-      dummy_raze_metadata, dummy_raze_metadata_fetcher, DummyCargoMetadataFetcher,
-    },
     planning::{tests::dummy_workspace_crate_metadata, BuildPlanner},
-    planning::{BuildPlannerImpl, PlannedBuild},
+    planning::{BuildPlannerImpl},
     settings::{tests::*, GenMode},
     testing::*,
   };
