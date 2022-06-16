@@ -96,9 +96,18 @@ pub fn get_per_platform_features_with_command(
       triple.clone(),
       // TODO: This part is slow, since it runs cargo-tree per-platform.
       packages_by_platform(
-        clean_cargo_tree_output(&command(cargo_dir, triple.as_str())?),
+        clean_cargo_tree_output(&command(cargo_dir, triple.as_str()).map_err(|_err| {
+          Error::new(RazeError::Generic(
+            "Failed to process cargo-tree output.".into(),
+          ))
+        })?),
         &package_map,
-      )?,
+      )
+      .map_err(|_err| {
+        Error::new(RazeError::Generic(
+          "Failed to segment packages by platform.".into(),
+        ))
+      })?,
     );
   }
 
@@ -134,10 +143,16 @@ fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<String> {
     .arg(format!("--target={}", triple))
     .arg("--format={p}|{f}|"); // The format to print output with
 
-  let tree_output = cargo_tree.output()?;
+  let tree_output = cargo_tree
+    .output()
+    .map_err(|_err| Error::new(RazeError::Generic("Failed to run cargo-tree.".into())))?;
   assert!(tree_output.status.success());
 
-  Ok(String::from_utf8(tree_output.stdout)?)
+  Ok(String::from_utf8(tree_output.stdout).map_err(|_err| {
+    Error::new(RazeError::Generic(
+      "Failed to convert cargo-tree output to UTF-8.".into(),
+    ))
+  })?)
 }
 
 fn packages_by_platform(
@@ -146,7 +161,11 @@ fn packages_by_platform(
 ) -> Result<BTreeMap<PackageId, BTreeSet<String>>> {
   let mut package_map: BTreeMap<PackageId, BTreeSet<String>> = BTreeMap::new();
   for c in &crates {
-    let (name, version, features) = process_line(c)?;
+    let (name, version, features) = process_line(c).map_err(|_err| {
+      Error::new(RazeError::Generic(
+        "Failed to parse cargo-tree line.".into(),
+      ))
+    })?;
     let id = packages
       .get(&(name, version))
       .ok_or_else(|| Error::new(RazeError::Generic("No PackageId found.".into())))?
@@ -184,7 +203,11 @@ fn process_line(s: &str) -> Result<(String, Version, BTreeSet<String>)> {
         Some(index) => index,
         None => version_str.chars().count(),
       };
-      let version = Version::parse(&version_str[..version_end])?;
+      let version = Version::parse(&version_str[..version_end]).map_err(|_err| {
+        Error::new(RazeError::Generic(
+          "Failed to parse cargo-tree version.".into(),
+        ))
+      })?;
       Ok((name.trim().to_string(), version, feature_set))
     }
     _ => Err(Error::new(RazeError::Generic(
