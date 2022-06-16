@@ -80,7 +80,7 @@ impl BuildPlannerImpl {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
   use std::{collections::BTreeMap, collections::HashMap, collections::HashSet, path::PathBuf};
 
   use crate::{
@@ -160,7 +160,7 @@ mod tests {
     );
   }
 
-  fn dummy_workspace_crate_metadata(metadata_template: &str) -> RazeMetadata {
+  pub fn dummy_workspace_crate_metadata(metadata_template: &str) -> RazeMetadata {
     let dir = make_basic_workspace();
     let (mut fetcher, _server, _index_dir) = dummy_raze_metadata_fetcher();
 

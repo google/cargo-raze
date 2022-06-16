@@ -37,6 +37,7 @@ use crate::{
 /// A module containing constants for each metadata template
 pub mod templates {
   pub const BASIC_METADATA: &str = "basic_metadata.json.template";
+  pub const CARGO_TREE: &str = "cargo_tree.json.template";
   pub const DUMMY_BINARY_DEPENDENCY_REMOTE: &str = "dummy_binary_dependency_remote.json.template";
   pub const DUMMY_MODIFIED_METADATA: &str = "dummy_modified_metadata.json.template";
   pub const DUMMY_WORKSPACE_MEMBERS_METADATA: &str =

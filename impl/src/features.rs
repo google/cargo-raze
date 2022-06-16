@@ -273,9 +273,20 @@ fn consolidate_features(
 #[cfg(test)]
 mod tests {
   use super::*;
+  use crate::{
+    context::CrateContext,
+    metadata::tests::{
+      dummy_raze_metadata, dummy_raze_metadata_fetcher, DummyCargoMetadataFetcher,
+    },
+    planning::{tests::dummy_workspace_crate_metadata, BuildPlanner},
+    planning::{BuildPlannerImpl, PlannedBuild},
+    settings::{tests::*, GenMode},
+    testing::*,
+  };
   use cargo_metadata::Version;
   use semver::{BuildMetadata, Prerelease};
-  use std::collections::BTreeSet;
+  use std::collections::{BTreeSet, HashSet};
+  use std::fs::read_to_string;
 
   #[test]
   fn test_process_line() {
@@ -353,5 +364,100 @@ proc-macro2 v1.0.26|default,proc-macro| (*)
     assert_eq!(result[5], "proc-macro2 v1.0.26|default,proc-macro|");
     assert_eq!(result[6], "unicode-xid v0.2.1|default|");
     assert_eq!(result[7], "syn v1.0.68|clone-impls,default,derive,extra-traits,full,parsing,printing,proc-macro,quote,visit,visit-mut|");
+  }
+
+  fn mock_cargo_tree_command(_cargo_dir: &Path, triple: &str) -> Result<String> {
+    let cargo_tree_template_dir = PathBuf::from(std::file!())
+      .parent()
+      .unwrap()
+      .join("testing/cargo_tree")
+      .canonicalize()
+      .unwrap();
+
+    let cargo_tree_content = cargo_tree_template_dir.join(format!("{}{}", triple, ".txt"));
+    Ok(read_to_string(cargo_tree_content).unwrap())
+  }
+
+  #[test]
+  fn test_per_platform_plan() {
+    let platforms = vec![
+      "aarch64-apple-darwin",
+      "aarch64-unknown-linux-gnu",
+      "x86_64-apple-darwin",
+      "x86_64-pc-windows-msvc",
+      "x86_64-unknown-linux-gnu",
+      "wasm32-unknown-unknown",
+      "wasm-wasi",
+    ];
+
+    let temp_dir = make_basic_workspace();
+    let mut settings = dummy_raze_settings();
+    settings.genmode = GenMode::Vendored;
+    settings.target = None;
+    let mut targets: HashSet<String> = HashSet::new();
+    for target in platforms {
+      targets.insert(target.to_string());
+    }
+    settings.targets = Some(targets);
+
+    let mut metadata = dummy_workspace_crate_metadata(templates::CARGO_TREE);
+    metadata.features = get_per_platform_features_with_command(
+      temp_dir.path(),
+      &settings,
+      &metadata.metadata.packages,
+      mock_cargo_tree_command,
+    )
+    .unwrap();
+
+    let planner = BuildPlannerImpl::new(metadata, settings);
+
+    let planned_build = planner.plan_build(None).unwrap();
+    let tokio = planned_build
+      .crate_contexts
+      .iter()
+      .find(|ctx| ctx.pkg_name == "tokio")
+      .unwrap();
+
+    let targeted_features = &tokio.features.targeted_features;
+    assert_eq!(targeted_features.len(), 5);
+    assert_eq!(
+      targeted_features[0].platforms,
+      vec!["aarch64-apple-darwin", "aarch64-unknown-linux-gnu"]
+    );
+    assert_eq!(targeted_features[0].features, vec!["time"]);
+    assert_eq!(
+      targeted_features[1].platforms,
+      vec![
+        "aarch64-apple-darwin",
+        "aarch64-unknown-linux-gnu",
+        "wasm-wasi",
+        "wasm32-unknown-unknown",
+        "x86_64-apple-darwin",
+      ]
+    );
+    assert_eq!(
+      targeted_features[1].features,
+      vec!["libc", "mio", "net", "socket2",]
+    );
+    assert_eq!(
+      targeted_features[2].platforms,
+      vec![
+        "aarch64-apple-darwin",
+        "aarch64-unknown-linux-gnu",
+        "x86_64-apple-darwin",
+        "x86_64-unknown-linux-gnu",
+      ]
+    );
+    assert_eq!(targeted_features[2].features, vec!["fs",]);
+    assert_eq!(
+      targeted_features[3].platforms,
+      vec!["aarch64-apple-darwin", "x86_64-apple-darwin",]
+    );
+    assert_eq!(targeted_features[3].features, vec!["stats",]);
+    assert_eq!(
+      targeted_features[4].platforms,
+      vec!["x86_64-pc-windows-msvc"]
+    );
+    assert_eq!(targeted_features[4].features, vec!["winapi",]);
   }
 }
