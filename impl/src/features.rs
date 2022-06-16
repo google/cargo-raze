@@ -274,8 +274,8 @@ fn consolidate_features(
 mod tests {
   use super::*;
   use crate::{
+    planning::BuildPlannerImpl,
     planning::{tests::dummy_workspace_crate_metadata, BuildPlanner},
-    planning::{BuildPlannerImpl},
     settings::{tests::*, GenMode},
     testing::*,
   };
