@@ -43,9 +43,8 @@ fn init() {
   let current_dir = current_dir().unwrap();
   let env_vars_to_fix = ["CARGO", "CARGO_HOME", "RUSTC"];
   for var_name in env_vars_to_fix {
-    match env::var(var_name) {
-      Ok(var_value) => set_var(var_name, current_dir.join(var_value)),
-      _ => {}
+    if let Ok(var_value) = env::var(var_name) {
+      set_var(var_name, current_dir.join(var_value));
     }
   }
 }
