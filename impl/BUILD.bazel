@@ -34,9 +34,9 @@ _TEST_DATA = glob(["src/**/*.template"]) + [
 ]
 
 _TEST_ENV = {
-    "CARGO": "$(execpath //tools:cargo)",
-    "CARGO_HOME": "$(execpath //tools:cargo).home",
-    "RUSTC": "$(execpath //tools:rustc)",
+    "CARGO": "cargo_raze/$(BINDIR)/$(rootpath //tools:cargo)",
+    "CARGO_HOME": "cargo_raze/$(BINDIR)/$(rootpath //tools:cargo).home",
+    "RUSTC": "cargo_raze/$(BINDIR)/$(rootpath //tools:rustc)",
 }
 
 rust_test(
