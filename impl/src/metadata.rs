@@ -61,8 +61,6 @@ impl MetadataFetcher for CargoMetadataFetcher {
       command.no_deps();
     }
 
-    eprintln!("cargo bin path: {:?}", &self.cargo_bin_path);
-
     command
       .cargo_path(&self.cargo_bin_path)
       .current_dir(working_dir)

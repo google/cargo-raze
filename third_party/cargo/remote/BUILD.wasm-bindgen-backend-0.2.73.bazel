@@ -56,7 +56,7 @@ rust_library(
         "@cargo_raze__log__0_4_14//:log",
         "@cargo_raze__proc_macro2__1_0_26//:proc_macro2",
         "@cargo_raze__quote__1_0_9//:quote",
-        "@cargo_raze__syn__1_0_68//:syn",
+        "@cargo_raze__syn__1_0_80//:syn",
         "@cargo_raze__wasm_bindgen_shared__0_2_73//:wasm_bindgen_shared",
     ],
 )
