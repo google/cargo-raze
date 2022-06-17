@@ -21,6 +21,8 @@ use tempfile::TempDir;
 
 use std::{
   collections::HashMap,
+  env,
+  env::{current_dir, set_var},
   fs::{create_dir_all, write, File},
   io::Write,
   path::Path,
@@ -38,13 +40,11 @@ use crate::{
 #[cfg(test)]
 #[ctor::ctor]
 fn init() {
-  let current_dir = std::env::current_dir().unwrap();
-  std::env::set_var("CARGO", current_dir.join(std::env::var("CARGO").unwrap()));
-  std::env::set_var(
-    "CARGO_HOME",
-    current_dir.join(std::env::var("CARGO_HOME").unwrap()),
-  );
-  std::env::set_var("RUSTC", current_dir.join(std::env::var("RUSTC").unwrap()));
+  let current_dir = current_dir().unwrap();
+  let env_vars_to_fix = ["CARGO", "CARGO_HOME", "RUSTC"];
+  for var_name in env_vars_to_fix {
+    set_var(var_name, current_dir.join(env::var(var_name).unwrap()));
+  }
 }
 
 /// A module containing constants for each metadata template
