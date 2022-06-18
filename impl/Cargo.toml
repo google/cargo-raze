@@ -54,7 +54,7 @@ hamcrest2 = "0.3.0"
 httpmock = "0.5.4"
 indoc = "1.0.3"
 lazy_static = "1.4.0"
-tar = "0.4.30"
+tar = "0.4.36"
 
 [package.metadata.raze]
 workspace_path = "//third_party/cargo"
