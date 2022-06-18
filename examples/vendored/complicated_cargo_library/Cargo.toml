@@ -4,7 +4,7 @@ version = "0.1.0"
 
 [dependencies]
 conduit-mime-types = "0.7.3"
-regex = "0.2.5"
+regex = "1.5.5"
 security-framework-sys = "0.2.2"
 specs = "0.10.0"
 
