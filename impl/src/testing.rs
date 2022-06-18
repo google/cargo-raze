@@ -21,8 +21,6 @@ use tempfile::TempDir;
 
 use std::{
   collections::HashMap,
-  env,
-  env::{current_dir, set_var},
   fs::{create_dir_all, write, File},
   io::Write,
   path::Path,
@@ -40,11 +38,11 @@ use crate::{
 #[cfg(test)]
 #[ctor::ctor]
 fn init() {
-  let current_dir = current_dir().unwrap();
+  let current_dir = std::env::current_dir().unwrap();
   let env_vars_to_fix = ["CARGO", "CARGO_HOME", "RUSTC"];
   for var_name in env_vars_to_fix {
-    if let Ok(var_value) = env::var(var_name) {
-      set_var(var_name, current_dir.join(var_value));
+    if let Ok(var_value) = std::env::var(var_name) {
+      std::env::set_var(var_name, current_dir.join(var_value));
     }
   }
 }
