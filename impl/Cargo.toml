@@ -49,6 +49,7 @@ toml = "0.5.8"
 url = { version = "2.2.0", features = ["serde"] }
 
 [dev-dependencies]
+ctor = "0.1.22"
 flate2 = "1.0.19"
 hamcrest2 = "0.3.0"
 httpmock = "0.5.4"

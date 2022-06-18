@@ -34,6 +34,19 @@ use crate::{
   util::package_ident,
 };
 
+// Make these env variables absolute for testing.
+#[cfg(test)]
+#[ctor::ctor]
+fn init() {
+  let current_dir = std::env::current_dir().unwrap();
+  let env_vars_to_fix = ["CARGO", "CARGO_HOME", "RUSTC"];
+  for var_name in env_vars_to_fix {
+    if let Ok(var_value) = std::env::var(var_name) {
+      std::env::set_var(var_name, current_dir.join(var_value));
+    }
+  }
+}
+
 /// A module containing constants for each metadata template
 pub mod templates {
   pub const BASIC_METADATA: &str = "basic_metadata.json.template";
