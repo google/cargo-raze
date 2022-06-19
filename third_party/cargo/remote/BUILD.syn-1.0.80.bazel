@@ -55,7 +55,6 @@ cargo_build_script(
         "visit",
         "visit-mut",
     ],
-    
     crate_root = "build.rs",
     data = glob(["**"]),
     edition = "2018",

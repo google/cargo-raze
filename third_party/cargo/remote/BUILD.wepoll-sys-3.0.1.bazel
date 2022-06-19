@@ -45,7 +45,6 @@ cargo_build_script(
     crate_features = [
         "default",
     ],
-    
     crate_root = "build.rs",
     data = glob(["**"]),
     edition = "2018",

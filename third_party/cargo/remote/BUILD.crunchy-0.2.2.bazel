@@ -46,7 +46,6 @@ cargo_build_script(
         "default",
         "limit_128",
     ],
-    
     crate_root = "build.rs",
     data = glob(["**"]),
     edition = "2015",

@@ -50,7 +50,6 @@ cargo_build_script(
         "static-curl",
         "text-decoding",
     ],
-    
     crate_root = "build.rs",
     data = glob(["**"]),
     edition = "2018",

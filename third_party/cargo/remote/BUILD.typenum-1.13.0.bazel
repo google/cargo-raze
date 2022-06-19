@@ -42,7 +42,6 @@ cargo_build_script(
     srcs = glob(["**/*.rs"]),
     build_script_env = {
     },
-    
     crate_root = "build/main.rs",
     data = glob(["**"]),
     edition = "2018",

@@ -46,7 +46,6 @@ cargo_build_script(
         "default",
         "sha3",
     ],
-    
     crate_root = "build.rs",
     data = glob(["**"]),
     edition = "2018",
