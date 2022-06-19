@@ -15,6 +15,7 @@
     {%- endfor %}
         ],
         "//conditions:default": [],
-    })
+    }),
     {%- endfor -%}
     {%- endif %}
+    
