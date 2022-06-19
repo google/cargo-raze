@@ -46,7 +46,7 @@ cargo_build_script(
         "bigint",
         "num-bigint",
         "std",
-    ]
+    ],
     
     crate_root = "build.rs",
     data = glob(["**"]),
@@ -72,7 +72,7 @@ rust_library(
         "bigint",
         "num-bigint",
         "std",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

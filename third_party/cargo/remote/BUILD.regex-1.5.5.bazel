@@ -64,7 +64,7 @@ rust_library(
         "unicode-perl",
         "unicode-script",
         "unicode-segment",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

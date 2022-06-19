@@ -36,7 +36,7 @@ rust_proc_macro(
     srcs = glob(["**/*.rs"]),
     crate_features = [
         "spans",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

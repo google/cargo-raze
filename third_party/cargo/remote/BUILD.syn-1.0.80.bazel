@@ -54,7 +54,7 @@ cargo_build_script(
         "quote",
         "visit",
         "visit-mut",
-    ]
+    ],
     
     crate_root = "build.rs",
     data = glob(["**"]),
@@ -91,7 +91,7 @@ rust_library(
         "quote",
         "visit",
         "visit-mut",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

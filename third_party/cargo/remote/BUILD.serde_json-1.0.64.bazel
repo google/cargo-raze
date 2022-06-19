@@ -46,7 +46,7 @@ cargo_build_script(
         "default",
         "std",
         "unbounded_depth",
-    ]
+    ],
     
     crate_root = "build.rs",
     data = glob(["**"]),
@@ -71,7 +71,7 @@ rust_library(
         "default",
         "std",
         "unbounded_depth",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

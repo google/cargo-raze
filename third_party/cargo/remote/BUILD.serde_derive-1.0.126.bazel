@@ -44,7 +44,7 @@ cargo_build_script(
     },
     crate_features = [
         "default",
-    ]
+    ],
     
     crate_root = "build.rs",
     data = glob(["**"]),
@@ -67,7 +67,7 @@ rust_proc_macro(
     srcs = glob(["**/*.rs"]),
     crate_features = [
         "default",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

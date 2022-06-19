@@ -49,7 +49,7 @@ rust_library(
         "futures-core",
         "futures-sink",
         "pin-project",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

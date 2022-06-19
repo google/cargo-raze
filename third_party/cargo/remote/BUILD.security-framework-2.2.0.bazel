@@ -43,7 +43,7 @@ rust_library(
     crate_features = [
         "OSX_10_9",
         "default",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

@@ -44,7 +44,7 @@ rust_library(
         "rand",
         "slug",
         "unic-segment",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [] + glob(["**/*.pest"]),
     edition = "2018",

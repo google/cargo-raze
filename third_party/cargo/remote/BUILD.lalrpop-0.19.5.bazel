@@ -40,7 +40,7 @@ rust_binary(
         "default",
         "lexer",
         "pico-args",
-    ]
+    ],
     crate_root = "src/main.rs",
     data = [],
     edition = "2015",
@@ -81,7 +81,7 @@ rust_library(
         "default",
         "lexer",
         "pico-args",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

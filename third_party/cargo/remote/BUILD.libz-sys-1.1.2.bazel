@@ -40,7 +40,7 @@ rust_library(
     },
     crate_features = [
         "libc",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

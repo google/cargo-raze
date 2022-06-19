@@ -39,7 +39,7 @@ rust_library(
         "lexer",
         "regex",
         "std",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

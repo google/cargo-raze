@@ -39,7 +39,7 @@ rust_binary(
     crate_features = [
         "jobserver",
         "parallel",
-    ]
+    ],
     crate_root = "src/bin/gcc-shim.rs",
     data = [],
     edition = "2018",
@@ -65,7 +65,7 @@ rust_library(
     crate_features = [
         "jobserver",
         "parallel",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

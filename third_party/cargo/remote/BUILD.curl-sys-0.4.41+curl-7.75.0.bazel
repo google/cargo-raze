@@ -45,7 +45,7 @@ rust_library(
         "openssl-sys",
         "ssl",
         "static-curl",
-    ]
+    ],
     crate_root = "lib.rs",
     data = [],
     edition = "2015",

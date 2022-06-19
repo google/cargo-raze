@@ -37,7 +37,7 @@ rust_library(
     crate_features = [
         "lazy_static",
         "std",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

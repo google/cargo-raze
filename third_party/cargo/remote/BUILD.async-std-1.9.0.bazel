@@ -101,7 +101,7 @@ rust_library(
         "std",
         "unstable",
         "wasm-bindgen-futures",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

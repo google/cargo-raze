@@ -59,7 +59,7 @@ rust_library(
         "native-tls-crate",
         "serde_json",
         "tokio-native-tls",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

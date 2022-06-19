@@ -49,7 +49,7 @@ cargo_build_script(
         "mime",
         "static-curl",
         "text-decoding",
-    ]
+    ],
     
     crate_root = "build.rs",
     data = glob(["**"]),
@@ -106,7 +106,7 @@ rust_library(
         "mime",
         "static-curl",
         "text-decoding",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

@@ -45,7 +45,7 @@ rust_library(
         "rand_hc",
         "std",
         "std_rng",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

@@ -44,7 +44,7 @@ rust_library(
         "log",
         "std",
         "tracing-attributes",
-    ]
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
