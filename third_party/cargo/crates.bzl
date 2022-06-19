@@ -60,6 +60,7 @@ _DEV_DEPENDENCIES = {
 # EXPERIMENTAL -- MAY CHANGE AT ANY TIME: A mapping of package names to a set of proc_macro dev dependencies for the Rust targets of that package.
 _DEV_PROC_MACRO_DEPENDENCIES = {
     "impl": {
+        "ctor": "@cargo_raze__ctor__0_1_22//:ctor",
         "indoc": "@cargo_raze__indoc__1_0_3//:indoc",
     },
 }
@@ -751,12 +752,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__ctor__0_1_20",
-        url = "https://crates.io/api/v1/crates/ctor/0.1.20/download",
+        name = "cargo_raze__ctor__0_1_22",
+        url = "https://crates.io/api/v1/crates/ctor/0.1.22/download",
         type = "tar.gz",
-        sha256 = "5e98e2ad1a782e33928b96fc3948e7c355e5af34ba4de7670fe8bac2a3b2006d",
-        strip_prefix = "ctor-0.1.20",
-        build_file = Label("//third_party/cargo/remote:BUILD.ctor-0.1.20.bazel"),
+        sha256 = "f877be4f7c9f246b183111634f75baa039715e3f46ce860677d3b19a69fb229c",
+        strip_prefix = "ctor-0.1.22",
+        build_file = Label("//third_party/cargo/remote:BUILD.ctor-0.1.22.bazel"),
     )
 
     maybe(
@@ -2431,12 +2432,12 @@ def cargo_raze_fetch_remote_crates():
 
     maybe(
         http_archive,
-        name = "cargo_raze__syn__1_0_68",
-        url = "https://crates.io/api/v1/crates/syn/1.0.68/download",
+        name = "cargo_raze__syn__1_0_80",
+        url = "https://crates.io/api/v1/crates/syn/1.0.80/download",
         type = "tar.gz",
-        sha256 = "3ce15dd3ed8aa2f8eeac4716d6ef5ab58b6b9256db41d7e1a0224c2788e8fd87",
-        strip_prefix = "syn-1.0.68",
-        build_file = Label("//third_party/cargo/remote:BUILD.syn-1.0.68.bazel"),
+        sha256 = "d010a1623fbd906d51d650a9916aaefc05ffa0e4053ff7fe601167f3e715d194",
+        strip_prefix = "syn-1.0.80",
+        build_file = Label("//third_party/cargo/remote:BUILD.syn-1.0.80.bazel"),
     )
 
     maybe(
