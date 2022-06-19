@@ -44,7 +44,6 @@ cargo_build_script(
         "OPENSSL_DIR": "$(execpath @cargo_raze__openssl//:gen_dir)",
         "OPENSSL_STATIC": "1",
     },
-    
     crate_root = "build/main.rs",
     data = glob(["**"]) + [
         "@cargo_raze__openssl//:gen_dir",

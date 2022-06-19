@@ -32,6 +32,15 @@ licenses([
 # Generated Targets
 
 rust_library(
+    +selects.with_or({
+        (
+            "@rules_rust//rust/platform:i686-pc-windows-msvc",
+            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+        ): [
+            "winapi",
+        ],
+        "//conditions:default": [],
+    }),
     name = "tokio",
     srcs = glob(["**/*.rs"]),
     aliases = {
@@ -65,14 +74,6 @@ rust_library(
             "bytes",
             "io-util",
             "memchr",
-        ],
-        "//conditions:default": [],
-    }), + selects.with_or({
-        (
-            "@rules_rust//rust/platform:i686-pc-windows-msvc",
-            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
-        ): [
-            "winapi",
         ],
         "//conditions:default": [],
     }),
