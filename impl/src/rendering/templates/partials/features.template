@@ -1,4 +1,5 @@
 
+    {%- if crate.features.features | length != 0 or crate.features.targeted_features | length != 0 %}
     crate_features = [
     {%- for feature in crate.features.features %}
         "{{feature}}",
@@ -16,3 +17,4 @@
         "//conditions:default": [],
     })
     {%- endfor -%}
+    {%- endif %}

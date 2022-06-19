@@ -35,7 +35,7 @@ impl Features {
   pub fn empty() -> Features {
     Features {
       features: Vec::new(),
-      targeted_features: vec![],
+      targeted_features: Vec::new(),
     }
   }
 }
@@ -120,7 +120,7 @@ pub fn get_per_platform_features_with_command(
 }
 
 fn clean_cargo_tree_output(cargo_tree_output: &str) -> Vec<String> {
-  let mut crates: Vec<String> = vec![];
+  let mut crates = Vec::new();
   for line in cargo_tree_output.lines().filter(|line| {
     // remove dedupe lines     // remove lines with no features
     !(line.ends_with("(*)") || line.ends_with("||") || line.is_empty())

@@ -539,7 +539,7 @@ mod tests {
       pkg_version: Version::parse("1.1.1").unwrap(),
       edition: "2015".to_owned(),
       features: Features {
-        features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
+        features: vec!["feature1".to_owned(), "feature2".to_owned()],
         targeted_features: vec![],
       },
       expected_build_path: format!("vendor/test-binary-1.1.1/{}", buildfile_suffix),
@@ -589,7 +589,7 @@ mod tests {
       raze_settings: CrateSettings::default(),
       canonical_additional_build_file: CrateSettings::default().additional_build_file,
       features: Features {
-        features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
+        features: vec!["feature1".to_owned(), "feature2".to_owned()],
         targeted_features: vec![],
       },
       expected_build_path: format!("vendor/test-library-1.1.1/{}", buildfile_suffix),
@@ -636,7 +636,7 @@ mod tests {
       raze_settings: CrateSettings::default(),
       canonical_additional_build_file: CrateSettings::default().additional_build_file,
       features: Features {
-        features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
+        features: vec!["feature1".to_owned(), "feature2".to_owned()],
         targeted_features: vec![],
       },
       expected_build_path: format!("vendor/test-proc-macro-1.1.1/{}", buildfile_suffix),
