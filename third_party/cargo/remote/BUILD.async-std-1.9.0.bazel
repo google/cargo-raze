@@ -101,7 +101,7 @@ rust_library(
         "std",
         "unstable",
         "wasm-bindgen-futures",
-    ],
+    ]
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
@@ -118,7 +118,7 @@ rust_library(
     deps = [
         "@cargo_raze__async_channel__1_6_1//:async_channel",
         "@cargo_raze__async_lock__2_3_0//:async_lock",
-        "@cargo_raze__crossbeam_utils__0_8_3//:crossbeam_utils",
+        "@cargo_raze__crossbeam_utils__0_8_8//:crossbeam_utils",
         "@cargo_raze__futures_core__0_3_13//:futures_core",
         "@cargo_raze__futures_io__0_3_13//:futures_io",
         "@cargo_raze__kv_log_macro__1_0_7//:kv_log_macro",

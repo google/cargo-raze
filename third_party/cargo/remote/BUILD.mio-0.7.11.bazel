@@ -49,7 +49,7 @@ rust_library(
         "tcp",
         "udp",
         "uds",
-    ],
+    ]
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

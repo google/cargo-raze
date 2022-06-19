@@ -46,7 +46,8 @@ cargo_build_script(
         "default",
         "serde",
         "std",
-    ],
+    ]
+    
     crate_root = "build.rs",
     data = glob(["**"]),
     edition = "2018",
@@ -72,7 +73,7 @@ rust_library(
         "default",
         "serde",
         "std",
-    ],
+    ]
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

@@ -31,49 +31,24 @@ licenses([
 
 # Generated Targets
 
-# Unsupported target "atomic_cell" with type "bench" omitted
-
-# Unsupported target "build-script-build" with type "custom-build" omitted
+# Unsupported target "benchmarks" with type "bench" omitted
 
 rust_library(
-    name = "crossbeam_utils",
+    name = "httpdate",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "default",
-        "lazy_static",
-        "std",
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
-        "--cfg=has_atomic_u8",
-        "--cfg=has_atomic_u16",
-        "--cfg=has_atomic_u32",
-        "--cfg=has_atomic_u64",
     ],
     tags = [
         "cargo-raze",
-        "crate-name=crossbeam-utils",
+        "crate-name=httpdate",
         "manual",
     ],
-    version = "0.8.3",
+    version = "1.0.2",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__cfg_if__1_0_0//:cfg_if",
-        "@cargo_raze__lazy_static__1_4_0//:lazy_static",
     ],
 )
-
-# Unsupported target "atomic_cell" with type "test" omitted
-
-# Unsupported target "cache_padded" with type "test" omitted
-
-# Unsupported target "parker" with type "test" omitted
-
-# Unsupported target "sharded_lock" with type "test" omitted
-
-# Unsupported target "thread" with type "test" omitted
-
-# Unsupported target "wait_group" with type "test" omitted

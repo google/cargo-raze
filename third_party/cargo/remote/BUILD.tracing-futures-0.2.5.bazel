@@ -38,7 +38,7 @@ rust_library(
         "pin-project",
         "std",
         "std-future",
-    ],
+    ]
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

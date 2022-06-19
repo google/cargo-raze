@@ -40,7 +40,7 @@ rust_library(
         "alloc",
         "default",
         "tinyvec_macros",
-    ],
+    ]
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

@@ -44,7 +44,7 @@ rust_library(
         "openssl-sys",
         "ssh",
         "ssh_key_from_memory",
-    ],
+    ]
     crate_root = "lib.rs",
     data = [],
     edition = "2018",

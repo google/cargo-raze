@@ -39,7 +39,7 @@ rust_library(
         "futures",
         "futures-channel",
         "futures-core",
-    ],
+    ]
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

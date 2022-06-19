@@ -49,7 +49,8 @@ cargo_build_script(
         "openssl-sys",
         "ssl",
         "static-curl",
-    ],
+    ]
+    
     crate_root = "build.rs",
     data = glob(["**"]),
     edition = "2015",
@@ -97,7 +98,7 @@ rust_library(
         "openssl-sys",
         "ssl",
         "static-curl",
-    ],
+    ]
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

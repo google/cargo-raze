@@ -34,8 +34,6 @@ licenses([
 rust_proc_macro(
     name = "tokio_macros",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
@@ -47,7 +45,7 @@ rust_proc_macro(
         "crate-name=tokio-macros",
         "manual",
     ],
-    version = "1.1.0",
+    version = "1.8.0",
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__proc_macro2__1_0_26//:proc_macro2",

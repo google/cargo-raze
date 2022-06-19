@@ -34,8 +34,6 @@ licenses([
 rust_library(
     name = "cargo_toml",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/cargo_toml.rs",
     data = [],
     edition = "2018",

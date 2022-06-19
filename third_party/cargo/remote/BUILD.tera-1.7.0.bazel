@@ -44,7 +44,7 @@ rust_library(
         "rand",
         "slug",
         "unic-segment",
-    ],
+    ]
     crate_root = "src/lib.rs",
     data = [] + glob(["**/*.pest"]),
     edition = "2018",
@@ -70,7 +70,7 @@ rust_library(
         "@cargo_raze__percent_encoding__2_1_0//:percent_encoding",
         "@cargo_raze__pest__2_1_3//:pest",
         "@cargo_raze__rand__0_8_3//:rand",
-        "@cargo_raze__regex__1_4_5//:regex",
+        "@cargo_raze__regex__1_5_5//:regex",
         "@cargo_raze__serde__1_0_126//:serde",
         "@cargo_raze__serde_json__1_0_64//:serde_json",
         "@cargo_raze__slug__0_1_4//:slug",

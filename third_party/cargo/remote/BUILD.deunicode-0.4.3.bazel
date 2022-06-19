@@ -34,8 +34,6 @@ licenses([
 rust_library(
     name = "deunicode",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [] + glob(
         ["**"],

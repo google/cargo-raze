@@ -42,7 +42,7 @@ rust_library(
         "parking",
         "std",
         "waker-fn",
-    ],
+    ]
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

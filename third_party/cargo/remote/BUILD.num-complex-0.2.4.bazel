@@ -44,7 +44,8 @@ cargo_build_script(
     },
     crate_features = [
         "std",
-    ],
+    ]
+    
     crate_root = "build.rs",
     data = glob(["**"]),
     edition = "2015",
@@ -67,7 +68,7 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     crate_features = [
         "std",
-    ],
+    ]
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

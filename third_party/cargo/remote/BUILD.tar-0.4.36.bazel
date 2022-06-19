@@ -47,7 +47,7 @@ rust_library(
     crate_features = [
         "default",
         "xattr",
-    ],
+    ]
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
@@ -59,7 +59,7 @@ rust_library(
         "crate-name=tar",
         "manual",
     ],
-    version = "0.4.33",
+    version = "0.4.36",
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__filetime__0_2_14//:filetime",
