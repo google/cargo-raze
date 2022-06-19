@@ -36,7 +36,7 @@ glob = "0.3.0"
 itertools = "0.10.0"
 log = "0.4.13"
 pathdiff = "0.2.0"
-regex = "1.4.3"
+regex = "1.5.5"
 rustc-serialize = "0.3.24"
 semver = { version = "1", features = ["serde"] }
 serde = "1.0.120"
@@ -50,12 +50,13 @@ toml = "0.5.8"
 url = { version = "2.2.0", features = ["serde"] }
 
 [dev-dependencies]
+ctor = "0.1.22"
 flate2 = "1.0.19"
 hamcrest2 = "0.3.0"
 httpmock = "0.5.4"
 indoc = "1.0.3"
 lazy_static = "1.4.0"
-tar = "0.4.30"
+tar = "0.4.36"
 
 [package.metadata.raze]
 workspace_path = "//third_party/cargo"
