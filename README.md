@@ -180,13 +180,13 @@ Finally, invoke the remote library fetching function within your WORKSPACE:
 ```python
 load("//cargo:crates.bzl", "raze_fetch_remote_crates")
 
+# Note that this method's name depends on your gen_workspace_prefix setting.
+# `raze` is the default prefix.
 raze_fetch_remote_crates()
 ```
 
 This tells Bazel where to get the dependencies from, and how to build them:
 using the files generated into `//cargo`.
-
-_Note that this method's name depends on your `gen_workspace_prefix` setting_.
 
 You can depend on any _explicit_ dependencies in any Rust rule by depending on
 `//cargo:your_dependency_name`.
