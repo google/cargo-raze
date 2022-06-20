@@ -1,5 +1,20 @@
 # Change Log
 
+## v0.16.0
+* Bumped the MSRV to v1.54 [[#484](
+  https://github.com/google/cargo-raze/pull/484)]
+* Bumped to rules_rust v0.6.0 [[#506](
+  https://github.com/google/cargo-raze/pull/506)]
+* Started using rules_rust's get_host_triple [[#482](
+  https://github.com/google/cargo-raze/pull/482)]
+* Add tools attribute for CrateSettings [[#487](
+  https://github.com/google/cargo-raze/pull/487)]
+* Added support for OpenSSL v3.0 [[#490](
+  https://github.com/google/cargo-raze/pull/490)]
+* Added support for armv7-linux-androideabi and aarch64-apple-ios-sim [[#489](
+  https://github.com/google/cargo-raze/pull/489), [#489](
+  https://github.com/google/cargo-raze/pull/489)]
+
 ## v0.15.0
 * Added all generated bazel files to an exported filegroup
 
