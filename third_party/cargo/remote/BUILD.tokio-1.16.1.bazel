@@ -30,74 +30,6 @@ licenses([
 ])
 
 # Generated Targets
-# buildifier: disable=out-of-order-load
-# buildifier: disable=load-on-top
-load(
-    "@rules_rust//cargo:cargo_build_script.bzl",
-    "cargo_build_script",
-)
-
-cargo_build_script(
-    name = "tokio_build_script",
-    srcs = glob(["**/*.rs"]),
-    build_script_env = {
-    },
-    crate_features = [
-        "bytes",
-        "default",
-        "io-util",
-        "libc",
-        "macros",
-        "memchr",
-        "mio",
-        "net",
-        "num_cpus",
-        "once_cell",
-        "rt",
-        "rt-multi-thread",
-        "signal",
-        "signal-hook-registry",
-        "sync",
-        "time",
-        "tokio-macros",
-        "winapi",
-    ],
-    crate_root = "build.rs",
-    data = glob(["**"]),
-    edition = "2018",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    tags = [
-        "cargo-raze",
-        "manual",
-    ],
-    version = "1.4.0",
-    visibility = ["//visibility:private"],
-    deps = [
-        "@cargo_raze__autocfg__1_0_1//:autocfg",
-    ] + selects.with_or({
-        # cfg(unix)
-        (
-            "@rules_rust//rust/platform:i686-apple-darwin",
-            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-            "@rules_rust//rust/platform:x86_64-apple-darwin",
-            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
-        ): [
-        ],
-        "//conditions:default": [],
-    }) + selects.with_or({
-        # cfg(windows)
-        (
-            "@rules_rust//rust/platform:i686-pc-windows-msvc",
-            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
-        ): [
-        ],
-        "//conditions:default": [],
-    }),
-)
 
 rust_library(
     name = "tokio",
@@ -105,12 +37,9 @@ rust_library(
     aliases = {
     },
     crate_features = [
-        "bytes",
         "default",
-        "io-util",
         "libc",
         "macros",
-        "memchr",
         "mio",
         "net",
         "num_cpus",
@@ -122,13 +51,36 @@ rust_library(
         "sync",
         "time",
         "tokio-macros",
-        "winapi",
-    ],
+    ] + selects.with_or({
+        (
+            "@rules_rust//rust/platform:aarch64-apple-darwin",
+            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:i686-apple-darwin",
+            "@rules_rust//rust/platform:i686-pc-windows-msvc",
+            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
+            "@rules_rust//rust/platform:x86_64-apple-darwin",
+            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+        ): [
+            "bytes",
+            "io-util",
+            "memchr",
+        ],
+        "//conditions:default": [],
+    }) + selects.with_or({
+        (
+            "@rules_rust//rust/platform:i686-pc-windows-msvc",
+            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+        ): [
+            "winapi",
+        ],
+        "//conditions:default": [],
+    }),
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
     proc_macro_deps = [
-        "@cargo_raze__tokio_macros__1_1_0//:tokio_macros",
+        "@cargo_raze__tokio_macros__1_8_0//:tokio_macros",
     ],
     rustc_flags = [
         "--cap-lints=allow",
@@ -138,10 +90,9 @@ rust_library(
         "crate-name=tokio",
         "manual",
     ],
-    version = "1.4.0",
+    version = "1.16.1",
     # buildifier: leave-alone
     deps = [
-        ":tokio_build_script",
         "@cargo_raze__bytes__1_0_1//:bytes",
         "@cargo_raze__memchr__2_4_0//:memchr",
         "@cargo_raze__mio__0_7_11//:mio",
@@ -149,7 +100,6 @@ rust_library(
         "@cargo_raze__once_cell__1_7_2//:once_cell",
         "@cargo_raze__pin_project_lite__0_2_6//:pin_project_lite",
     ] + selects.with_or({
-        # cfg(unix)
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
@@ -163,7 +113,6 @@ rust_library(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(windows)
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
@@ -188,25 +137,33 @@ rust_library(
 
 # Unsupported target "fs_file" with type "test" omitted
 
-# Unsupported target "fs_file_mocked" with type "test" omitted
-
 # Unsupported target "fs_link" with type "test" omitted
 
 # Unsupported target "io_async_fd" with type "test" omitted
 
 # Unsupported target "io_async_read" with type "test" omitted
 
+# Unsupported target "io_buf_reader" with type "test" omitted
+
+# Unsupported target "io_buf_writer" with type "test" omitted
+
 # Unsupported target "io_chain" with type "test" omitted
 
 # Unsupported target "io_copy" with type "test" omitted
+
+# Unsupported target "io_copy_bidirectional" with type "test" omitted
 
 # Unsupported target "io_driver" with type "test" omitted
 
 # Unsupported target "io_driver_drop" with type "test" omitted
 
+# Unsupported target "io_fill_buf" with type "test" omitted
+
 # Unsupported target "io_lines" with type "test" omitted
 
 # Unsupported target "io_mem_stream" with type "test" omitted
+
+# Unsupported target "io_poll_aio" with type "test" omitted
 
 # Unsupported target "io_read" with type "test" omitted
 
@@ -226,9 +183,13 @@ rust_library(
 
 # Unsupported target "io_take" with type "test" omitted
 
+# Unsupported target "io_util_empty" with type "test" omitted
+
 # Unsupported target "io_write" with type "test" omitted
 
 # Unsupported target "io_write_all" with type "test" omitted
+
+# Unsupported target "io_write_all_buf" with type "test" omitted
 
 # Unsupported target "io_write_buf" with type "test" omitted
 
@@ -244,17 +205,23 @@ rust_library(
 
 # Unsupported target "macros_try_join" with type "test" omitted
 
+# Unsupported target "named_pipe" with type "test" omitted
+
 # Unsupported target "net_bind_resource" with type "test" omitted
 
 # Unsupported target "net_lookup_host" with type "test" omitted
 
 # Unsupported target "no_rt" with type "test" omitted
 
+# Unsupported target "process_arg0" with type "test" omitted
+
 # Unsupported target "process_issue_2174" with type "test" omitted
 
 # Unsupported target "process_issue_42" with type "test" omitted
 
 # Unsupported target "process_kill_on_drop" with type "test" omitted
+
+# Unsupported target "process_raw_handle" with type "test" omitted
 
 # Unsupported target "process_smoke" with type "test" omitted
 
@@ -263,6 +230,8 @@ rust_library(
 # Unsupported target "rt_common" with type "test" omitted
 
 # Unsupported target "rt_handle_block_on" with type "test" omitted
+
+# Unsupported target "rt_metrics" with type "test" omitted
 
 # Unsupported target "rt_threaded" with type "test" omitted
 
@@ -298,6 +267,8 @@ rust_library(
 
 # Unsupported target "sync_notify" with type "test" omitted
 
+# Unsupported target "sync_once_cell" with type "test" omitted
+
 # Unsupported target "sync_oneshot" with type "test" omitted
 
 # Unsupported target "sync_rwlock" with type "test" omitted
@@ -311,6 +282,8 @@ rust_library(
 # Unsupported target "task_abort" with type "test" omitted
 
 # Unsupported target "task_blocking" with type "test" omitted
+
+# Unsupported target "task_builder" with type "test" omitted
 
 # Unsupported target "task_local" with type "test" omitted
 
@@ -357,3 +330,5 @@ rust_library(
 # Unsupported target "uds_split" with type "test" omitted
 
 # Unsupported target "uds_stream" with type "test" omitted
+
+# Unsupported target "unwindsafe" with type "test" omitted

@@ -42,8 +42,6 @@ cargo_build_script(
     srcs = glob(["**/*.rs"]),
     build_script_env = {
     },
-    crate_features = [
-    ],
     crate_root = "build.rs",
     data = glob(["**"]),
     edition = "2018",
@@ -64,8 +62,6 @@ cargo_build_script(
 rust_library(
     name = "basic_cookies",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
@@ -82,6 +78,6 @@ rust_library(
     deps = [
         ":basic_cookies_build_script",
         "@cargo_raze__lalrpop_util__0_19_5//:lalrpop_util",
-        "@cargo_raze__regex__1_4_5//:regex",
+        "@cargo_raze__regex__1_5_5//:regex",
     ],
 )

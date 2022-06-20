@@ -36,8 +36,6 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     aliases = {
     },
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",
@@ -54,7 +52,6 @@ rust_library(
     deps = [
         "@cargo_raze__libc__0_2_92//:libc",
     ] + selects.with_or({
-        # cfg(windows)
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",

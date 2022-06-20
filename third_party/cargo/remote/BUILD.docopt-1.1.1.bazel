@@ -36,8 +36,6 @@ rust_binary(
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_docopt_wordlist",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/wordlist.rs",
     data = [],
     edition = "2018",
@@ -54,7 +52,7 @@ rust_binary(
     deps = [
         ":docopt",
         "@cargo_raze__lazy_static__1_4_0//:lazy_static",
-        "@cargo_raze__regex__1_4_5//:regex",
+        "@cargo_raze__regex__1_5_5//:regex",
         "@cargo_raze__serde__1_0_126//:serde",
         "@cargo_raze__strsim__0_10_0//:strsim",
     ],
@@ -75,8 +73,6 @@ rust_binary(
 rust_library(
     name = "docopt",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
@@ -92,7 +88,7 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__lazy_static__1_4_0//:lazy_static",
-        "@cargo_raze__regex__1_4_5//:regex",
+        "@cargo_raze__regex__1_5_5//:regex",
         "@cargo_raze__serde__1_0_126//:serde",
         "@cargo_raze__strsim__0_10_0//:strsim",
     ],

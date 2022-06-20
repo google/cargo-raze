@@ -13,11 +13,7 @@ cargo_build_script(
         "{{key}}": "{{value}}",
         {%- endfor %}
     },
-    crate_features = [
-      {%- for feature in crate.features %}
-        "{{feature}}",
-      {%- endfor %}
-    ],
+    {%- include "templates/partials/features.template" %}
     {%- if crate.build_script_target.path %}
     crate_root = "{{ crate.build_script_target.path }}",
     {%- else %}
@@ -81,7 +77,6 @@ cargo_build_script(
     ]
     {%- if crate.targeted_deps -%}
     {% for targeted_dep in crate.targeted_deps %} + selects.with_or({
-        # {{ targeted_dep.target }}
         (
     {%- for platform_target in targeted_dep.platform_targets %}
             "@{{ rust_rules_workspace_name }}//rust/platform:{{platform_target}}",

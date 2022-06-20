@@ -37,6 +37,7 @@ rust_library(
     crate_features = [
         "codec",
         "default",
+        "tracing",
     ],
     crate_root = "src/lib.rs",
     data = [],
@@ -49,17 +50,19 @@ rust_library(
         "crate-name=tokio-util",
         "manual",
     ],
-    version = "0.6.5",
+    version = "0.7.2",
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__bytes__1_0_1//:bytes",
         "@cargo_raze__futures_core__0_3_13//:futures_core",
         "@cargo_raze__futures_sink__0_3_13//:futures_sink",
-        "@cargo_raze__log__0_4_14//:log",
         "@cargo_raze__pin_project_lite__0_2_6//:pin_project_lite",
-        "@cargo_raze__tokio__1_4_0//:tokio",
+        "@cargo_raze__tokio__1_16_1//:tokio",
+        "@cargo_raze__tracing__0_1_25//:tracing",
     ],
 )
+
+# Unsupported target "_require_full" with type "test" omitted
 
 # Unsupported target "codecs" with type "test" omitted
 
@@ -69,11 +72,15 @@ rust_library(
 
 # Unsupported target "framed_read" with type "test" omitted
 
+# Unsupported target "framed_stream" with type "test" omitted
+
 # Unsupported target "framed_write" with type "test" omitted
 
 # Unsupported target "io_reader_stream" with type "test" omitted
 
 # Unsupported target "io_stream_reader" with type "test" omitted
+
+# Unsupported target "io_sync_bridge" with type "test" omitted
 
 # Unsupported target "length_delimited" with type "test" omitted
 
@@ -82,6 +89,8 @@ rust_library(
 # Unsupported target "poll_semaphore" with type "test" omitted
 
 # Unsupported target "reusable_box" with type "test" omitted
+
+# Unsupported target "spawn_pinned" with type "test" omitted
 
 # Unsupported target "sync_cancellation_token" with type "test" omitted
 

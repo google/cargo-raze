@@ -68,7 +68,6 @@ rust_library(
         "@cargo_raze__num_traits__0_2_14//:num_traits",
         "@cargo_raze__time__0_1_43//:time",
     ] + selects.with_or({
-        # cfg(windows)
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",

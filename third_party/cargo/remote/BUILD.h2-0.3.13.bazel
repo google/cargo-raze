@@ -26,32 +26,44 @@ package(default_visibility = [
 ])
 
 licenses([
-    "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
+    "notice",  # MIT from expression "MIT"
 ])
 
 # Generated Targets
 
+# Unsupported target "akamai" with type "example" omitted
+
+# Unsupported target "client" with type "example" omitted
+
+# Unsupported target "server" with type "example" omitted
+
 rust_library(
-    name = "aho_corasick",
+    name = "h2",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "default",
-        "std",
-    ],
     crate_root = "src/lib.rs",
     data = [],
-    edition = "2015",
+    edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     tags = [
         "cargo-raze",
-        "crate-name=aho_corasick",
+        "crate-name=h2",
         "manual",
     ],
-    version = "0.7.15",
+    version = "0.3.13",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__memchr__2_4_0//:memchr",
+        "@cargo_raze__bytes__1_0_1//:bytes",
+        "@cargo_raze__fnv__1_0_7//:fnv",
+        "@cargo_raze__futures_core__0_3_13//:futures_core",
+        "@cargo_raze__futures_sink__0_3_13//:futures_sink",
+        "@cargo_raze__futures_util__0_3_13//:futures_util",
+        "@cargo_raze__http__0_2_3//:http",
+        "@cargo_raze__indexmap__1_6_2//:indexmap",
+        "@cargo_raze__slab__0_4_2//:slab",
+        "@cargo_raze__tokio__1_16_1//:tokio",
+        "@cargo_raze__tokio_util__0_7_2//:tokio_util",
+        "@cargo_raze__tracing__0_1_25//:tracing",
     ],
 )

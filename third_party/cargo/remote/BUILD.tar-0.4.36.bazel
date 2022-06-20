@@ -59,12 +59,11 @@ rust_library(
         "crate-name=tar",
         "manual",
     ],
-    version = "0.4.33",
+    version = "0.4.36",
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__filetime__0_2_14//:filetime",
     ] + selects.with_or({
-        # cfg(unix)
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",

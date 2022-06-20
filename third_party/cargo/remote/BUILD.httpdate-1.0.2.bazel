@@ -31,14 +31,14 @@ licenses([
 
 # Generated Targets
 
+# Unsupported target "benchmarks" with type "bench" omitted
+
 rust_library(
     name = "httpdate",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
-    edition = "2015",
+    edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -47,7 +47,7 @@ rust_library(
         "crate-name=httpdate",
         "manual",
     ],
-    version = "0.3.2",
+    version = "1.0.2",
     # buildifier: leave-alone
     deps = [
     ],

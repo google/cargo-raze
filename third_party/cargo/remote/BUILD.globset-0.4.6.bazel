@@ -36,8 +36,6 @@ licenses([
 rust_library(
     name = "globset",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",
@@ -52,10 +50,10 @@ rust_library(
     version = "0.4.6",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__aho_corasick__0_7_15//:aho_corasick",
+        "@cargo_raze__aho_corasick__0_7_18//:aho_corasick",
         "@cargo_raze__bstr__0_2_15//:bstr",
         "@cargo_raze__fnv__1_0_7//:fnv",
         "@cargo_raze__log__0_4_14//:log",
-        "@cargo_raze__regex__1_4_5//:regex",
+        "@cargo_raze__regex__1_5_5//:regex",
     ],
 )

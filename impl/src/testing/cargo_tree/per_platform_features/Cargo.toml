@@ -1,0 +1,45 @@
+[package]
+name = "per-platform-features"
+version = "0.1.0"
+edition = "2021"
+resolver = "2"
+
+[dependencies]
+tokio = {version = "1.17.0", default-features = false}
+
+[target.'cfg(windows)'.dependencies.tokio]
+features = ["winapi"]
+
+[target.'cfg(unix)'.dependencies.tokio]
+features = ["fs"]
+
+[target.'cfg(target_os = "macos")'.dependencies.tokio]
+features = ["fs", "net", "stats"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies.tokio]
+features = ["net"]
+
+[target.'cfg(target_arch = "wasi")'.dependencies.tokio]
+features = ["net"]
+
+[target.'cfg(target_arch = "aarch64")'.dependencies.tokio]
+features = ["net", "time"]
+
+resolver = "2"
+
+[package.metadata.raze]
+targets = [
+    "aarch64-apple-darwin",
+    "aarch64-unknown-linux-gnu",
+    "x86_64-apple-darwin",
+    "x86_64-pc-windows-msvc",
+    "x86_64-unknown-linux-gnu",
+    "wasm32-unknown-unknown",
+    "wasm-wasi",
+]
+workspace_path = "//remote/per_platform_features/cargo"
+gen_workspace_prefix = "per_platform_features"
+genmode = "Remote"
+default_gen_buildrs = true
+experimental_api = true
+render_package_aliases = true

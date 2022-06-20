@@ -80,8 +80,8 @@ impl BuildPlannerImpl {
 }
 
 #[cfg(test)]
-mod tests {
-  use std::{collections::HashMap, collections::HashSet, path::PathBuf};
+pub mod tests {
+  use std::{collections::BTreeMap, collections::HashMap, collections::HashSet, path::PathBuf};
 
   use crate::{
     metadata::tests::{
@@ -107,6 +107,7 @@ mod tests {
       cargo_workspace_root: PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
+      features: BTreeMap::new(),
     }
   }
 
@@ -159,7 +160,7 @@ mod tests {
     );
   }
 
-  fn dummy_workspace_crate_metadata(metadata_template: &str) -> RazeMetadata {
+  pub fn dummy_workspace_crate_metadata(metadata_template: &str) -> RazeMetadata {
     let dir = make_basic_workspace();
     let (mut fetcher, _server, _index_dir) = dummy_raze_metadata_fetcher();
 
@@ -194,6 +195,7 @@ mod tests {
       cargo_workspace_root: PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
+      features: BTreeMap::new(),
     }
   }
 

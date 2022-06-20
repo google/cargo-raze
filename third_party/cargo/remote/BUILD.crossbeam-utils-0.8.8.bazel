@@ -58,7 +58,7 @@ rust_library(
         "crate-name=crossbeam-utils",
         "manual",
     ],
-    version = "0.8.3",
+    version = "0.8.8",
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__cfg_if__1_0_0//:cfg_if",

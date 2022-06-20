@@ -1,0 +1,4 @@
+per-platform-features v0.1.0 (/home/sayrer/github/grafica/cargo-raze-new-features/impl/src/testing/cargo_tree/per_platform_features)||
+tokio v1.17.0|default,winapi|
+pin-project-lite v0.2.8||
+winapi v0.3.9||

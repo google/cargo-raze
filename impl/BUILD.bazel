@@ -28,7 +28,10 @@ rust_binary(
     deps = [":cargo_raze"] + all_crate_deps(),
 )
 
-_TEST_DATA = glob(["src/**/*.template"]) + [
+_TEST_DATA = glob([
+    "src/**/*.template",
+    "src/testing/cargo_tree/*.txt",
+]) + [
     "//tools:cargo",
     "//tools:rustc",
 ]
