@@ -24,6 +24,7 @@ path = "src/bin/cargo-raze.rs"
 
 [dependencies]
 anyhow = "1.0.38"
+camino = "1.0.9"
 cargo_metadata = "0.14"
 cargo_toml = "0.8.1"
 cargo-clone-crate = { version = "0.1.6", default-features = false }

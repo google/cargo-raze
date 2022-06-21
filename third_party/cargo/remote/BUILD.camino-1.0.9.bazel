@@ -56,15 +56,11 @@ cargo_build_script(
         "cargo-raze",
         "manual",
     ],
-    version = "1.0.4",
+    version = "1.0.9",
     visibility = ["//visibility:private"],
     deps = [
     ],
 )
-
-# Unsupported target "serde" with type "example" omitted
-
-# Unsupported target "structopt" with type "example" omitted
 
 rust_library(
     name = "camino",
@@ -84,7 +80,7 @@ rust_library(
         "crate-name=camino",
         "manual",
     ],
-    version = "1.0.4",
+    version = "1.0.9",
     # buildifier: leave-alone
     deps = [
         ":camino_build_script",
