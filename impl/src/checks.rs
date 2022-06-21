@@ -15,11 +15,10 @@
 use std::{
   collections::{HashMap, HashSet},
   fs,
-  path::Path,
-  path::PathBuf,
 };
 
 use anyhow::{anyhow, Result};
+use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::{
   error::RazeError,
@@ -39,7 +38,7 @@ const MAX_DISPLAYED_MISSING_RESOLVE_PACKAGES: usize = 5;
 pub fn check_metadata(
   raze_metadata: &RazeMetadata,
   settings: &RazeSettings,
-  bazel_workspace_root: &Path,
+  bazel_workspace_root: &Utf8Path,
 ) -> Result<()> {
   // Check for errors
   check_resolve_matches_packages(&raze_metadata.metadata)?;
@@ -106,7 +105,7 @@ fn check_lockfile_for_missing_checksums(
 fn check_all_vendored(
   metadata: &Metadata,
   settings: &RazeSettings,
-  bazel_workspace_root: &Path,
+  bazel_workspace_root: &Utf8Path,
 ) -> Result<()> {
   let non_workspace_packages: Vec<&Package> = metadata
     .packages
@@ -149,15 +148,18 @@ fn check_all_vendored(
       message: format!(
         "Failed to find expected vendored crates in {:?}: {:?}. Did you forget to run cargo \
          vendor?",
-        expected_full_path.display(),
-        limited_missing_crates
+        expected_full_path, limited_missing_crates
       ),
     }
     .into(),
   )
 }
 
-fn vendor_path(bazel_workspace_root: &Path, workspace_path: &str, vendor_dir: &str) -> PathBuf {
+fn vendor_path(
+  bazel_workspace_root: &Utf8Path,
+  workspace_path: &str,
+  vendor_dir: &str,
+) -> Utf8PathBuf {
   bazel_workspace_root
     // Trim the absolute label identifier from the start of the workspace path
     .join(workspace_path.trim_start_matches('/'))
@@ -167,13 +169,12 @@ fn vendor_path(bazel_workspace_root: &Path, workspace_path: &str, vendor_dir: &s
 /// Returns the packages expected path during current execution.
 fn expected_vendored_path(
   package: &Package,
-  bazel_workspace_root: &Path,
+  bazel_workspace_root: &Utf8Path,
   workspace_path: &str,
   vendor_dir: &str,
 ) -> String {
   vendor_path(bazel_workspace_root, workspace_path, vendor_dir)
     .join(package_ident(&package.name, &package.version.to_string()))
-    .display()
     .to_string()
 }
 
@@ -289,7 +290,7 @@ mod tests {
     let result = check_all_vendored(
       &template_metadata(templates::DUMMY_MODIFIED_METADATA),
       &settings,
-      &PathBuf::from("/tmp/some/path"),
+      &Utf8PathBuf::from("/tmp/some/path"),
     );
 
     // Vendored crates will not have been rendered at that path

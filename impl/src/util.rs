@@ -13,11 +13,9 @@
 // limitations under the License.
 
 use anyhow::Result;
-use std::{
-  collections::HashSet, env, fmt, iter::Iterator, path::Path, path::PathBuf, process::Command,
-  str::FromStr,
-};
+use std::{collections::HashSet, env, fmt, iter::Iterator, process::Command, str::FromStr};
 
+use camino::{Utf8Path, Utf8PathBuf};
 use cargo_platform::Cfg;
 
 use cfg_expr::{targets::get_builtin_target_by_triple, Expression, Predicate};
@@ -166,14 +164,14 @@ pub fn get_matching_bazel_triples<'a>(
 }
 
 /// Returns whether or not the given path is a Bazel workspace root
-pub fn is_bazel_workspace_root(dir: &Path) -> bool {
+pub fn is_bazel_workspace_root(dir: &Utf8Path) -> bool {
   let workspace_files = [dir.join("WORKSPACE.bazel"), dir.join("WORKSPACE")];
   workspace_files.iter().any(|x| x.exists())
 }
 
 /// Returns a path to a Bazel workspace root based on the current working
 /// directory, otherwise None if not workspace is detected.
-pub fn find_bazel_workspace_root(manifest_path: &Path) -> Option<PathBuf> {
+pub fn find_bazel_workspace_root(manifest_path: &Utf8Path) -> Option<Utf8PathBuf> {
   let mut dir = if manifest_path.is_dir() {
     Some(manifest_path)
   } else {
@@ -182,7 +180,7 @@ pub fn find_bazel_workspace_root(manifest_path: &Path) -> Option<PathBuf> {
 
   while let Some(current_dir) = dir {
     if is_bazel_workspace_root(current_dir) {
-      return Some(PathBuf::from(current_dir));
+      return Some(Utf8PathBuf::from(current_dir));
     }
 
     dir = current_dir.parent();
@@ -290,10 +288,12 @@ fn fetch_attrs(target: &str) -> Result<Vec<Cfg>> {
   )
 }
 
-pub fn get_workspace_member_path(manifest_path: &Path, workspace_root: &Path) -> Option<PathBuf> {
+pub fn get_workspace_member_path(
+  manifest_path: &Utf8Path,
+  workspace_root: &Utf8Path,
+) -> Option<Utf8PathBuf> {
   assert!(manifest_path.ends_with("Cargo.toml"));
-  // UNWRAP: A manifest path should always be a path to a 'Cargo.toml' file which should always have a parent directory
-  diff_paths(manifest_path.parent().unwrap(), workspace_root)
+  Utf8PathBuf::from_path_buf(diff_paths(manifest_path.parent().unwrap(), workspace_root)?).ok()
 }
 
 pub fn package_ident(package_name: &str, package_version: &str) -> String {
@@ -303,7 +303,10 @@ pub fn package_ident(package_name: &str, package_version: &str) -> String {
 /// Locates a lockfile for the associated crate. A `Cargo.raze.lock` file in the
 /// [RazeSettings::workspace_path](crate::settings::RazeSettings::workspace_path)
 /// directory will take precidence over a standard `Cargo.lock` file.
-pub fn find_lockfile(cargo_workspace_root: &Path, raze_output_dir: &Path) -> Option<PathBuf> {
+pub fn find_lockfile(
+  cargo_workspace_root: &Utf8Path,
+  raze_output_dir: &Utf8Path,
+) -> Option<Utf8PathBuf> {
   // The custom raze lockfile will always take precidence
   let raze_lockfile = raze_output_dir.join(RAZE_LOCKFILE_NAME);
   if raze_lockfile.exists() {
@@ -321,8 +324,8 @@ pub fn find_lockfile(cargo_workspace_root: &Path, raze_output_dir: &Path) -> Opt
 }
 
 /// Locates a cargo binary form either an evironment variable or PATH
-pub fn cargo_bin_path() -> PathBuf {
-  PathBuf::from(env::var("CARGO").unwrap_or_else(|_| SYSTEM_CARGO_BIN_PATH.to_string()))
+pub fn cargo_bin_path() -> Utf8PathBuf {
+  Utf8PathBuf::from(env::var("CARGO").unwrap_or_else(|_| SYSTEM_CARGO_BIN_PATH.to_string()))
 }
 
 #[cfg(test)]
@@ -360,7 +363,7 @@ mod tests {
   #[test]
   fn detecting_workspace_root() {
     let bazel_root = TempDir::new().unwrap();
-    let manifest = bazel_root.as_ref().join("Cargo.toml");
+    let manifest = Utf8PathBuf::from_path_buf(bazel_root.as_ref().join("Cargo.toml")).unwrap();
 
     // Starting within the temp directory, we'll find that there are no WORKSPACE.bazel files
     // and thus return None to indicate a Bazel workspace root could not be found.

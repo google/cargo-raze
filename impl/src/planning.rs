@@ -81,7 +81,7 @@ impl BuildPlannerImpl {
 
 #[cfg(test)]
 pub mod tests {
-  use std::{collections::BTreeMap, collections::HashMap, collections::HashSet, path::PathBuf};
+  use std::{collections::BTreeMap, collections::HashMap, collections::HashSet};
 
   use crate::{
     metadata::tests::{
@@ -92,6 +92,7 @@ pub mod tests {
   };
 
   use super::*;
+  use camino::{Utf8Path, Utf8PathBuf};
   use cargo_metadata::PackageId;
   use indoc::indoc;
   use itertools::Itertools;
@@ -104,7 +105,7 @@ pub mod tests {
     metadata.resolve = None;
     RazeMetadata {
       metadata,
-      cargo_workspace_root: PathBuf::from("/some/crate"),
+      cargo_workspace_root: Utf8PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
       features: BTreeMap::new(),
@@ -169,7 +170,9 @@ pub mod tests {
       metadata_template: Some(metadata_template.to_string()),
     }));
 
-    let raze_metadata = fetcher.fetch_metadata(dir.as_ref(), None, None).unwrap();
+    let raze_metadata = fetcher
+      .fetch_metadata(Utf8Path::from_path(dir.as_ref()).unwrap(), None, None)
+      .unwrap();
     let mut metadata = raze_metadata.metadata;
 
     // Phase 1: Create a workspace package, add it to the packages list.
@@ -192,7 +195,7 @@ pub mod tests {
 
     RazeMetadata {
       metadata,
-      cargo_workspace_root: PathBuf::from("/some/crate"),
+      cargo_workspace_root: Utf8PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
       features: BTreeMap::new(),
@@ -426,7 +429,7 @@ pub mod tests {
     let mock = mock_remote_crate("some-binary-crate", "3.3.3", &server);
     let dir = mock_crate_index(
       &to_index_crates_map(vec![("some-binary-crate", "3.3.3")]),
-      Some(index_dir.as_ref()),
+      Some(Utf8Path::from_path(index_dir.path()).unwrap()),
     );
     assert!(dir.is_none());
 
@@ -438,7 +441,11 @@ pub mod tests {
 
     let dir = make_basic_workspace();
     let raze_metadata = fetcher
-      .fetch_metadata(dir.as_ref(), Some(&settings.binary_deps), None)
+      .fetch_metadata(
+        Utf8Path::from_path(dir.as_ref()).unwrap(),
+        Some(&settings.binary_deps),
+        None,
+      )
       .unwrap();
 
     for mock in mock.endpoints.iter() {
@@ -651,7 +658,7 @@ pub mod tests {
 
     let settings = {
       let temp_dir = make_workspace(toml_file, None);
-      let manifest_path = temp_dir.as_ref().join("Cargo.toml");
+      let manifest_path = Utf8PathBuf::from_path_buf(temp_dir.as_ref().join("Cargo.toml")).unwrap();
       crate::settings::load_settings_from_manifest(&manifest_path, None).unwrap()
     };
 
@@ -797,7 +804,7 @@ pub mod tests {
     }
 
     fetcher
-      .fetch_metadata(crate_dir.as_ref(), None, None)
+      .fetch_metadata(Utf8Path::from_path(crate_dir.as_ref()).unwrap(), None, None)
       .unwrap()
   }
 
