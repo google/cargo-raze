@@ -280,7 +280,7 @@ pub fn mock_crate_index(
   // If an existing directory is provided, use that instead
   let index_dir = match mock_dir {
     Some(dir) => dir,
-    None => &Utf8Path::from_path(index_url_mock_dir.path()).unwrap(),
+    None => utf8_path(index_url_mock_dir.path()),
   };
 
   for (name, version) in crates {
@@ -329,11 +329,16 @@ pub fn template_raze_metadata(template_path: &str) -> RazeMetadata {
   }));
 
   fetcher
-    .fetch_metadata(Utf8Path::from_path(dir.as_ref()).unwrap(), None, None)
+    .fetch_metadata(utf8_path(dir.as_ref()), None, None)
     .unwrap()
 }
 
 /// Load a cargo metadata template
 pub fn template_metadata(template_path: &str) -> Metadata {
   template_raze_metadata(template_path).metadata
+}
+
+/// Coerce a path to UTF-*
+pub fn utf8_path(path: &std::path::Path) -> &Utf8Path {
+  Utf8Path::from_path(path.as_ref()).unwrap()
 }

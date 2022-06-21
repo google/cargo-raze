@@ -485,7 +485,7 @@ mod tests {
     planning::PlannedBuild,
     rendering::{FileOutputs, RenderDetails},
     settings::CrateSettings,
-    testing::basic_lock_contents,
+    testing::{basic_lock_contents, utf8_path},
   };
 
   use super::*;
@@ -910,9 +910,7 @@ mod tests {
     )
     .unwrap();
 
-    let additional_build_file = Utf8Path::from_path(tmp_dir.as_ref())
-      .unwrap()
-      .join("some_additional_build_file");
+    let additional_build_file = utf8_path(tmp_dir.as_ref()).join("some_additional_build_file");
 
     let file_outputs = render_crates_for_test(
       vec![CrateContext {

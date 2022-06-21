@@ -171,7 +171,7 @@ pub mod tests {
     }));
 
     let raze_metadata = fetcher
-      .fetch_metadata(Utf8Path::from_path(dir.as_ref()).unwrap(), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
       .unwrap();
     let mut metadata = raze_metadata.metadata;
 
@@ -441,11 +441,7 @@ pub mod tests {
 
     let dir = make_basic_workspace();
     let raze_metadata = fetcher
-      .fetch_metadata(
-        Utf8Path::from_path(dir.as_ref()).unwrap(),
-        Some(&settings.binary_deps),
-        None,
-      )
+      .fetch_metadata(utf8_path(dir.as_ref()), Some(&settings.binary_deps), None)
       .unwrap();
 
     for mock in mock.endpoints.iter() {
@@ -804,7 +800,7 @@ pub mod tests {
     }
 
     fetcher
-      .fetch_metadata(Utf8Path::from_path(crate_dir.as_ref()).unwrap(), None, None)
+      .fetch_metadata(utf8_path(crate_dir.as_ref()), None, None)
       .unwrap()
   }
 

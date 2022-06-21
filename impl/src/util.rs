@@ -293,6 +293,7 @@ pub fn get_workspace_member_path(
   workspace_root: &Utf8Path,
 ) -> Option<Utf8PathBuf> {
   assert!(manifest_path.ends_with("Cargo.toml"));
+  // UNWRAP: A manifest path should always be a path to a 'Cargo.toml' file which should always have a parent directory
   Utf8PathBuf::from_path_buf(diff_paths(manifest_path.parent().unwrap(), workspace_root)?).ok()
 }
 
