@@ -429,7 +429,7 @@ pub mod tests {
     let mock = mock_remote_crate("some-binary-crate", "3.3.3", &server);
     let dir = mock_crate_index(
       &to_index_crates_map(vec![("some-binary-crate", "3.3.3")]),
-      Some(Utf8Path::from_path(index_dir.path()).unwrap()),
+      Some(utf8_path(index_dir.path())),
     );
     assert!(dir.is_none());
 

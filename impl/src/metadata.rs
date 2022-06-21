@@ -656,7 +656,7 @@ pub mod tests {
     }));
 
     fetcher
-      .fetch_metadata(Utf8Path::from_path(dir.as_ref()).unwrap(), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
       .unwrap()
   }
 
@@ -672,7 +672,7 @@ pub mod tests {
       lockfile_contents: None,
     }));
     fetcher
-      .fetch_metadata(Utf8Path::from_path(dir.as_ref()).unwrap(), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
       .unwrap();
   }
 
@@ -698,7 +698,7 @@ pub mod tests {
       lockfile_contents: None,
     }));
     fetcher
-      .fetch_metadata(Utf8Path::from_path(dir.as_ref()).unwrap(), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
       .unwrap();
   }
 
@@ -714,7 +714,7 @@ pub mod tests {
 
     let fetcher = RazeMetadataFetcher::default();
     assert!(fetcher
-      .fetch_metadata(Utf8Path::from_path(dir.as_ref()).unwrap(), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
       .is_err());
   }
 
@@ -725,7 +725,7 @@ pub mod tests {
 
     let path = fetcher
       .fetch_crate_src(
-        Utf8Path::from_path(mock.data_dir.as_ref()).unwrap(),
+        utf8_path(mock.data_dir.as_ref()),
         "fake-crate",
         "3.3.3",
       )
@@ -752,7 +752,7 @@ pub mod tests {
     let (fetcher, _mock_server, _index_url) = dummy_raze_metadata_fetcher();
 
     let crate_dir = make_workspace_with_dependency();
-    let utf8_crate_dir = Utf8Path::from_path(crate_dir.as_ref()).unwrap();
+    let utf8_crate_dir = utf8_path(crate_dir.as_ref());
     let cargo_toml_path = utf8_crate_dir.join("Cargo.toml");
     let mut manifest =
       cargo_toml::Manifest::from_str(fs::read_to_string(&cargo_toml_path).unwrap().as_str())
@@ -804,7 +804,7 @@ pub mod tests {
     assert!(fetcher
       .cargo_generate_lockfile(
         &Some(reused_lockfile.clone()),
-        Utf8Path::from_path(crate_dir.as_ref()).unwrap()
+        utf8_path(crate_dir.as_ref())
       )
       .unwrap()
       .is_none());
@@ -852,7 +852,7 @@ pub mod tests {
     assert!(fetcher
       .cargo_generate_lockfile(
         &Some(expected_lockfile.clone()),
-        Utf8Path::from_path(crate_dir.as_ref()).unwrap()
+        utf8_path(crate_dir.as_ref())
       )
       .unwrap()
       .is_none());
