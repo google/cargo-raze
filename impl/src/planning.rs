@@ -92,7 +92,7 @@ pub mod tests {
   };
 
   use super::*;
-  use camino::{Utf8Path, Utf8PathBuf};
+  use camino::Utf8PathBuf;
   use cargo_metadata::PackageId;
   use indoc::indoc;
   use itertools::Itertools;

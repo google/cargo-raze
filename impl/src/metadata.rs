@@ -724,11 +724,7 @@ pub mod tests {
     let mock = mock_remote_crate("fake-crate", "3.3.3", &mock_server);
 
     let path = fetcher
-      .fetch_crate_src(
-        utf8_path(mock.data_dir.as_ref()),
-        "fake-crate",
-        "3.3.3",
-      )
+      .fetch_crate_src(utf8_path(mock.data_dir.as_ref()), "fake-crate", "3.3.3")
       .unwrap();
 
     for mock in mock.endpoints.iter() {
