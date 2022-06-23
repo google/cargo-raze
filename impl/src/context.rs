@@ -141,7 +141,6 @@ impl CrateDependencyContext {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CrateTargetedDepContext {
-  pub target: String,
   pub deps: CrateDependencyContext,
   pub platform_targets: Vec<String>,
 }

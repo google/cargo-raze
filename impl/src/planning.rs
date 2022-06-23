@@ -412,6 +412,39 @@ pub mod tests {
     assert_eq!(flate2.targeted_deps[0].deps.dependencies.len(), 0);
   }
 
+  #[test]
+  // Tests the fix for https://github.com/google/cargo-raze/issues/451.
+  // Bazel errors out if mutually exclusive select branches contain the
+  // same dependency. rust-errno is a real world example of this problem,
+  // where libc is listed under 'cfg(unix)' and 'cfg(target_os="wasi")'.
+  fn test_plan_build_consolidates_targets_across_platforms() {
+    let mut settings = dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+    let mut triples = HashSet::new();
+    triples.insert("wasm32-wasi".to_string());
+    triples.insert("x86_64-unknown-linux-gnu".to_string());
+    settings.target = None;
+    settings.targets = Some(triples);
+
+    let planner = BuildPlannerImpl::new(
+      dummy_workspace_crate_metadata(templates::SUBPLAN_CONSOLIDATES_TARGETED_DEPS),
+      settings,
+    );
+    let planned_build = planner.plan_build(None).unwrap();
+
+    let errno = planned_build
+      .crate_contexts
+      .iter()
+      .find(|ctx| ctx.pkg_name == "errno")
+      .unwrap();
+
+    assert_eq!(errno.targeted_deps.len(), 1);
+    assert_eq!(
+      errno.targeted_deps[0].platform_targets,
+      vec!["wasm32-wasi", "x86_64-unknown-linux-gnu",]
+    );
+  }
+
   fn dummy_binary_dependency_metadata(is_remote_genmode: bool) -> (RazeMetadata, RazeSettings) {
     let (mut fetcher, server, index_dir) = dummy_raze_metadata_fetcher();
 

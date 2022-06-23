@@ -308,8 +308,8 @@ impl<'planner> CrateSubplanner<'planner> {
       ctx.subtract(&default_deps);
     }
 
-    // Build a list of dependencies while addression a potential allowlist of target triples
-    let mut targeted_deps = deps
+    // Build a list of dependencies while addressing a potential allowlist of target triples
+    let targeted_deps = deps
       .into_iter()
       .map(|(target, deps)| {
         let target = target.unwrap();
@@ -318,7 +318,6 @@ impl<'planner> CrateSubplanner<'planner> {
           .collect();
 
         Ok(CrateTargetedDepContext {
-          target,
           deps,
           platform_targets,
         })
@@ -329,7 +328,25 @@ impl<'planner> CrateSubplanner<'planner> {
       })
       .collect::<Result<Vec<_>>>()?;
 
-    targeted_deps.sort();
+    // Consolidate any dependencies duplicated across platforms
+    let mut platform_map: BTreeMap<CrateDependencyContext, Vec<String>> = BTreeMap::new();
+    for targeted_dep in &targeted_deps {
+      platform_map
+        .entry(targeted_dep.deps.clone())
+        .and_modify(|e| e.append(&mut targeted_dep.platform_targets.clone()))
+        .or_insert_with(|| targeted_dep.platform_targets.clone());
+    }
+    let grouped_targeted_deps: Vec<CrateTargetedDepContext> = platform_map
+      .iter()
+      .map(|dep| {
+        let mut targets = dep.1.clone();
+        targets.sort();
+        CrateTargetedDepContext {
+          deps: dep.0.clone(),
+          platform_targets: targets,
+        }
+      })
+      .collect();
 
     let mut workspace_member_dependents: Vec<Utf8PathBuf> = Vec::new();
     let mut workspace_member_dev_dependents: Vec<Utf8PathBuf> = Vec::new();
@@ -405,7 +422,7 @@ impl<'planner> CrateSubplanner<'planner> {
       is_binary_dependency,
       is_proc_macro,
       default_deps,
-      targeted_deps,
+      targeted_deps: grouped_targeted_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(self.settings)?,
       build_script_target: build_script_target_opt,
       links: package.links.clone(),
