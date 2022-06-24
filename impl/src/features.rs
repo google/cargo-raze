@@ -13,13 +13,14 @@
 // limitations under the License.
 
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::Command;
 
 use crate::error::RazeError;
 use crate::settings::RazeSettings;
 use crate::util::cargo_bin_path;
 use anyhow::{Error, Result};
+use camino::Utf8PathBuf;
 use cargo_metadata::{Package, PackageId, Version};
 use serde::{Deserialize, Serialize};
 
@@ -133,7 +134,7 @@ fn clean_cargo_tree_output(cargo_tree_output: &str) -> Vec<String> {
 // Runs `cargo-tree` with a very specific format argument that makes it easier
 // to extract per-platform targets.
 fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<String> {
-  let cargo_bin: PathBuf = cargo_bin_path();
+  let cargo_bin: Utf8PathBuf = cargo_bin_path();
   let mut cargo_tree = Command::new(cargo_bin);
   cargo_tree.current_dir(cargo_dir);
   cargo_tree
@@ -386,7 +387,7 @@ proc-macro2 v1.0.26|default,proc-macro| (*)
   }
 
   fn mock_cargo_tree_command(_cargo_dir: &Path, triple: &str) -> Result<String> {
-    let cargo_tree_template_dir = PathBuf::from(std::file!())
+    let cargo_tree_template_dir = Utf8PathBuf::from(std::file!())
       .parent()
       .unwrap()
       .join("testing/cargo_tree")

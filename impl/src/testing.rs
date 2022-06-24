@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use camino::Utf8Path;
 use cargo_metadata::Metadata;
 use flate2::Compression;
 use httpmock::{Method::GET, MockRef, MockServer};
@@ -23,7 +24,6 @@ use std::{
   collections::HashMap,
   fs::{create_dir_all, write, File},
   io::Write,
-  path::Path,
 };
 
 use crate::{
@@ -273,14 +273,14 @@ pub fn to_index_crates_map(list: Vec<(&str, &str)>) -> HashMap<String, String> {
 /// Create a mock cache in a temporary directory that contains a set of given crates
 pub fn mock_crate_index(
   crates: &HashMap<String, String>,
-  mock_dir: Option<&Path>,
+  mock_dir: Option<&Utf8Path>,
 ) -> Option<TempDir> {
   let index_url_mock_dir = TempDir::new().unwrap();
 
   // If an existing directory is provided, use that instead
   let index_dir = match mock_dir {
     Some(dir) => dir,
-    None => index_url_mock_dir.as_ref(),
+    None => utf8_path(index_url_mock_dir.path()),
   };
 
   for (name, version) in crates {
@@ -328,10 +328,17 @@ pub fn template_raze_metadata(template_path: &str) -> RazeMetadata {
     metadata_template: Some(template_path.to_string()),
   }));
 
-  fetcher.fetch_metadata(dir.as_ref(), None, None).unwrap()
+  fetcher
+    .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+    .unwrap()
 }
 
 /// Load a cargo metadata template
 pub fn template_metadata(template_path: &str) -> Metadata {
   template_raze_metadata(template_path).metadata
+}
+
+/// Coerce a path to UTF-*
+pub fn utf8_path(path: &std::path::Path) -> &Utf8Path {
+  Utf8Path::from_path(path.as_ref()).unwrap()
 }
