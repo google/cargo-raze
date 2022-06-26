@@ -16,6 +16,8 @@ mod crate_catalog;
 mod license;
 mod subplanners;
 
+use std::collections::{BTreeMap, BTreeSet};
+
 use anyhow::Result;
 use cargo_lock::Lockfile;
 
@@ -77,6 +79,42 @@ impl BuildPlannerImpl {
   pub fn new(metadata: RazeMetadata, settings: RazeSettings) -> Self {
     Self { metadata, settings }
   }
+}
+
+/// Items that need to be rendered with platform select blocks.
+pub trait PlatformCrateAttribute<T> {
+  fn new(platforms: Vec<String>, attrs: Vec<T>) -> Self;
+}
+
+/// Group PlatformCrateAttribute items into concise select blocks, with no duplicates.
+pub fn consolidate_platform_attributes<
+  AttrType: Ord + Clone,
+  T: PlatformCrateAttribute<AttrType>,
+>(
+  platform_attributes: BTreeMap<String, BTreeSet<AttrType>>,
+) -> Vec<T> {
+  let mut platform_map: BTreeMap<AttrType, Vec<String>> = BTreeMap::new();
+  for (platform, pfs) in platform_attributes {
+    for feature in pfs {
+      platform_map
+        .entry(feature)
+        .and_modify(|e| e.push(platform.clone()))
+        .or_insert_with(|| vec![platform.clone()]);
+    }
+  }
+
+  let mut platforms_to_features: BTreeMap<Vec<String>, Vec<AttrType>> = BTreeMap::new();
+  for (feature, platforms) in platform_map {
+    platforms_to_features
+      .entry(platforms.clone())
+      .and_modify(|e| e.push(feature.clone()))
+      .or_insert_with(|| vec![feature.clone()]);
+  }
+
+  platforms_to_features
+    .iter()
+    .map(|(platforms, features)| T::new(platforms.to_vec(), features.to_vec()))
+    .collect()
 }
 
 #[cfg(test)]

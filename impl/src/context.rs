@@ -14,7 +14,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::{features::Features, settings::CrateSettings};
+use crate::{features::Features, planning::PlatformCrateAttribute, settings::CrateSettings};
 use camino::Utf8PathBuf;
 use semver::Version;
 use serde::{Deserialize, Serialize};
@@ -141,8 +141,17 @@ impl CrateDependencyContext {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CrateTargetedDepContext {
-  pub deps: CrateDependencyContext,
   pub platform_targets: Vec<String>,
+  pub deps: CrateDependencyContext,
+}
+
+impl PlatformCrateAttribute<CrateDependencyContext> for CrateTargetedDepContext {
+  fn new(platforms: Vec<String>, attrs: Vec<CrateDependencyContext>) -> Self {
+    CrateTargetedDepContext {
+      platform_targets: platforms,
+      deps: attrs[0].clone(),
+    }
+  }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]

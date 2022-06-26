@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{
-  collections::{BTreeMap, HashMap, HashSet},
+  collections::{BTreeMap, BTreeSet, HashMap, HashSet},
   io, iter,
   str::FromStr,
 };
@@ -34,7 +34,7 @@ use crate::{
   error::{RazeError, PLEASE_FILE_A_BUG},
   features::Features,
   metadata::RazeMetadata,
-  planning::license,
+  planning::{consolidate_platform_attributes, license},
   settings::{CrateSettings, GenMode, RazeSettings},
   util,
 };
@@ -308,45 +308,23 @@ impl<'planner> CrateSubplanner<'planner> {
       ctx.subtract(&default_deps);
     }
 
-    // Build a list of dependencies while addressing a potential allowlist of target triples
-    let targeted_deps = deps
-      .into_iter()
-      .map(|(target, deps)| {
-        let target = target.unwrap();
-        let platform_targets = util::get_matching_bazel_triples(&target, &self.settings.targets)?
-          .map(|x| x.to_string())
-          .collect();
-
-        Ok(CrateTargetedDepContext {
-          deps,
-          platform_targets,
-        })
-      })
-      .filter(|res| match res {
-        Ok(ctx) => !ctx.platform_targets.is_empty(),
-        Err(_) => true,
-      })
-      .collect::<Result<Vec<_>>>()?;
-
-    // Consolidate any dependencies duplicated across platforms
-    let mut platform_map: BTreeMap<CrateDependencyContext, Vec<String>> = BTreeMap::new();
-    for targeted_dep in &targeted_deps {
-      platform_map
-        .entry(targeted_dep.deps.clone())
-        .and_modify(|e| e.append(&mut targeted_dep.platform_targets.clone()))
-        .or_insert_with(|| targeted_dep.platform_targets.clone());
-    }
-    let grouped_targeted_deps: Vec<CrateTargetedDepContext> = platform_map
-      .iter()
-      .map(|dep| {
-        let mut targets = dep.1.clone();
-        targets.sort();
-        CrateTargetedDepContext {
-          deps: dep.0.clone(),
-          platform_targets: targets,
-        }
-      })
-      .collect();
+    // Build a list of dependencies while addressing a potential allowlist of target triples and consolidate any dependencies duplicated across platforms.
+    let targeted_deps =
+      consolidate_platform_attributes::<CrateDependencyContext, CrateTargetedDepContext>(
+        deps
+          .into_iter()
+          .flat_map(|(target, dep_context)| {
+            let target = target.unwrap();
+            if let Ok(triples) = util::get_matching_bazel_triples(&target, &self.settings.targets) {
+              triples
+                .map(|i| (i.to_string(), BTreeSet::from([dep_context.clone()])))
+                .collect()
+            } else {
+              vec![]
+            }
+          })
+          .collect(),
+      );
 
     let mut workspace_member_dependents: Vec<Utf8PathBuf> = Vec::new();
     let mut workspace_member_dev_dependents: Vec<Utf8PathBuf> = Vec::new();
@@ -422,7 +400,7 @@ impl<'planner> CrateSubplanner<'planner> {
       is_binary_dependency,
       is_proc_macro,
       default_deps,
-      targeted_deps: grouped_targeted_deps,
+      targeted_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(self.settings)?,
       build_script_target: build_script_target_opt,
       links: package.links.clone(),
