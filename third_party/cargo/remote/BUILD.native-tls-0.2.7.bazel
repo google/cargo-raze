@@ -57,20 +57,20 @@ cargo_build_script(
     deps = [
     ] + selects.with_or({
         (
+            "@rules_rust//rust/platform:aarch64-apple-darwin",
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:x86_64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
         ): [
             "@cargo_raze__security_framework_sys__2_2_0//:security_framework_sys",
         ],
         "//conditions:default": [],
     }) + selects.with_or({
         (
-            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
             "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
             "@rules_rust//rust/platform:wasm32-unknown-unknown",
             "@rules_rust//rust/platform:wasm32-wasi",
+            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
             "@cargo_raze__openssl_sys__0_9_73//:openssl_sys",
         ],
@@ -111,9 +111,9 @@ rust_library(
         ":native_tls_build_script",
     ] + selects.with_or({
         (
+            "@rules_rust//rust/platform:aarch64-apple-darwin",
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:x86_64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
         ): [
             "@cargo_raze__lazy_static__1_4_0//:lazy_static",
             "@cargo_raze__libc__0_2_92//:libc",
@@ -124,11 +124,11 @@ rust_library(
         "//conditions:default": [],
     }) + selects.with_or({
         (
-            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
             "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
             "@rules_rust//rust/platform:wasm32-unknown-unknown",
             "@rules_rust//rust/platform:wasm32-wasi",
+            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
             "@cargo_raze__log__0_4_14//:log",
             "@cargo_raze__openssl__0_10_40//:openssl",
