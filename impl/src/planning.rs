@@ -95,25 +95,25 @@ pub fn consolidate_platform_attributes<
 ) -> Vec<T> {
   let mut platform_map: BTreeMap<AttrType, Vec<String>> = BTreeMap::new();
   for (platform, pfs) in platform_attributes {
-    for feature in pfs {
+    for attr in pfs {
       platform_map
-        .entry(feature)
+        .entry(attr)
         .and_modify(|e| e.push(platform.clone()))
         .or_insert_with(|| vec![platform.clone()]);
     }
   }
 
-  let mut platforms_to_features: BTreeMap<Vec<String>, Vec<AttrType>> = BTreeMap::new();
-  for (feature, platforms) in platform_map {
-    platforms_to_features
+  let mut platforms_to_attrs: BTreeMap<Vec<String>, Vec<AttrType>> = BTreeMap::new();
+  for (attr, platforms) in platform_map {
+    platforms_to_attrs
       .entry(platforms.clone())
-      .and_modify(|e| e.push(feature.clone()))
-      .or_insert_with(|| vec![feature.clone()]);
+      .and_modify(|e| e.push(attr.clone()))
+      .or_insert_with(|| vec![attr.clone()]);
   }
 
-  platforms_to_features
+  platforms_to_attrs
     .iter()
-    .map(|(platforms, features)| T::new(platforms.to_vec(), features.to_vec()))
+    .map(|(platforms, attrs)| T::new(platforms.to_vec(), attrs.to_vec()))
     .collect()
 }
 

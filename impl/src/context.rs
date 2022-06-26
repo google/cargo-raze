@@ -147,6 +147,7 @@ pub struct CrateTargetedDepContext {
 
 impl PlatformCrateAttribute<CrateDependencyContext> for CrateTargetedDepContext {
   fn new(platforms: Vec<String>, attrs: Vec<CrateDependencyContext>) -> Self {
+    assert_eq!(attrs.len(), 1);
     CrateTargetedDepContext {
       platform_targets: platforms,
       deps: attrs[0].clone(),

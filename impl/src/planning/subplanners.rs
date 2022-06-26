@@ -316,8 +316,10 @@ impl<'planner> CrateSubplanner<'planner> {
           .flat_map(|(target, dep_context)| {
             let target = target.unwrap();
             if let Ok(triples) = util::get_matching_bazel_triples(&target, &self.settings.targets) {
+              let mut dep_set = BTreeSet::new();
+              dep_set.insert(dep_context.clone());
               triples
-                .map(|i| (i.to_string(), BTreeSet::from([dep_context.clone()])))
+                .map(|i| (i.to_string(), dep_set.clone()))
                 .collect()
             } else {
               vec![]
