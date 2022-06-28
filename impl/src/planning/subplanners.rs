@@ -50,7 +50,7 @@ use url::Url;
 type CrateContextProduction = (Vec<CrateContext>, Vec<DependencyAlias>);
 
 /// Utility type alias to reduce declaration noise
-type DepProduction = HashMap<Option<String>, CrateDependencyContext>;
+type DepProduction = BTreeMap<Option<String>, CrateDependencyContext>;
 
 /// An internal working planner for generating context for an individual crate.
 struct CrateSubplanner<'planner> {
@@ -308,23 +308,39 @@ impl<'planner> CrateSubplanner<'planner> {
       ctx.subtract(&default_deps);
     }
 
+    let remaining_deps: Vec<(String, CrateDependencyContext)> = deps
+      .into_iter()
+      .flat_map(|(target, dep_context)| {
+        let target = target.unwrap();
+        if let Ok(triples) = util::get_matching_bazel_triples(&target, &self.settings.targets) {
+          triples
+            .map(|i| (i.to_string(), dep_context.clone()))
+            .collect()
+        } else {
+          vec![]
+        }
+      })
+      .collect();
+
+    let mut platform_deps: BTreeMap<String, BTreeSet<CrateDependencyContext>> = BTreeMap::new();
+    for (platform, context) in remaining_deps {
+      platform_deps
+        .entry(platform.to_string())
+        .and_modify(|e| {
+          e.insert(context.clone());
+        })
+        .or_insert_with(|| {
+          let mut set = BTreeSet::new();
+          set.insert(context.clone());
+          set
+        });
+    }
+
     // Build a list of dependencies while addressing a potential allowlist of target triples and consolidate any dependencies duplicated across platforms.
-    let targeted_deps =
-      consolidate_platform_attributes::<CrateDependencyContext, CrateTargetedDepContext>(
-        deps
-          .into_iter()
-          .flat_map(|(target, dep_context)| {
-            let target = target.unwrap();
-            if let Ok(triples) = util::get_matching_bazel_triples(&target, &self.settings.targets) {
-              let mut dep_set = BTreeSet::new();
-              dep_set.insert(dep_context);
-              triples.map(|i| (i.to_string(), dep_set.clone())).collect()
-            } else {
-              vec![]
-            }
-          })
-          .collect(),
-      );
+    let targeted_deps = consolidate_platform_attributes::<
+      CrateDependencyContext,
+      CrateTargetedDepContext,
+    >(platform_deps);
 
     let mut workspace_member_dependents: Vec<Utf8PathBuf> = Vec::new();
     let mut workspace_member_dev_dependents: Vec<Utf8PathBuf> = Vec::new();

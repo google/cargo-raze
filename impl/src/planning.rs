@@ -16,7 +16,10 @@ mod crate_catalog;
 mod license;
 mod subplanners;
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::{
+  collections::{BTreeMap, BTreeSet},
+  fmt::Debug,
+};
 
 use anyhow::Result;
 use cargo_lock::Lockfile;
@@ -88,7 +91,7 @@ pub trait PlatformCrateAttribute<T> {
 
 /// Group PlatformCrateAttribute items into concise select blocks, with no duplicates.
 pub fn consolidate_platform_attributes<
-  AttrType: Ord + Clone,
+  AttrType: Ord + Clone + Debug,
   T: PlatformCrateAttribute<AttrType>,
 >(
   platform_attributes: BTreeMap<String, BTreeSet<AttrType>>,
@@ -448,6 +451,81 @@ pub mod tests {
       .find(|dep| dep.name == "miniz_oxide");
     assert!(miniz_oxide.is_some());
     assert_eq!(flate2.targeted_deps[0].deps.dependencies.len(), 0);
+  }
+
+  #[test]
+  fn test_plan_includes_all_not_unknown_targets() {
+    let mut settings = dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+    let mut triples = HashSet::new();
+    triples.insert("aarch64-apple-darwin".to_string());
+    triples.insert("aarch64-unknown-linux-gnu".to_string());
+    triples.insert("i686-apple-darwin".to_string());
+    triples.insert("i686-pc-windows-msvc".to_string());
+    triples.insert("i686-unknown-linux-gnu".to_string());
+    triples.insert("x86_64-apple-darwin".to_string());
+    triples.insert("x86_64-pc-windows-msvc".to_string());
+    triples.insert("x86_64-unknown-linux-gnu".to_string());
+    triples.insert("wasm32-wasi".to_string());
+    triples.insert("wasm32-unknown-unknown".to_string());
+    settings.targets = Some(triples);
+
+    let planner = BuildPlannerImpl::new(
+      dummy_workspace_crate_metadata(templates::TARGET_OS_IS_NOT_UNKNOWN),
+      settings,
+    );
+    let planned_build = planner.plan_build(None).unwrap();
+    let async_std = planned_build
+      .crate_contexts
+      .iter()
+      .find(|ctx| ctx.pkg_name == "async-std")
+      .unwrap();
+
+    // The wasm-targeted deps should have both wasm platforms
+    let wasm_targeted_dep_context = async_std
+      .targeted_deps
+      .iter()
+      .find(|dep_context| {
+        dep_context
+          .deps
+          .dependencies
+          .iter()
+          .find(|dep| dep.name == "wasm-bindgen-futures")
+          .is_some()
+      })
+      .unwrap();
+    assert_eq!(
+      wasm_targeted_dep_context.platform_targets,
+      vec!["wasm32-unknown-unknown", "wasm32-wasi",]
+    );
+
+    // The wasm-targeted deps should have both wasm platforms
+    let os_targeted_dep_context = async_std
+      .targeted_deps
+      .iter()
+      .find(|dep_context| {
+        dep_context
+          .deps
+          .dependencies
+          .iter()
+          .find(|dep| dep.name == "async-io")
+          .is_some()
+      })
+      .unwrap();
+    assert_eq!(
+      os_targeted_dep_context.platform_targets,
+      vec![
+        "aarch64-apple-darwin",
+        "aarch64-unknown-linux-gnu",
+        "i686-apple-darwin",
+        "i686-pc-windows-msvc",
+        "i686-unknown-linux-gnu",
+        "wasm32-wasi",
+        "x86_64-apple-darwin",
+        "x86_64-pc-windows-msvc",
+        "x86_64-unknown-linux-gnu"
+      ]
+    );
   }
 
   #[test]

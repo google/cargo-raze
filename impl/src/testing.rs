@@ -68,6 +68,7 @@ pub mod templates {
     "subplan_produces_crate_root_with_forward_slash.json.template";
   pub const SUBPLAN_OMITS_PLATFORM_DEPS_ALREADY_IN_DEFAULT_DEPS: &str =
     "subplan_omits_platform_deps_already_in_default_deps.json.template";
+  pub const TARGET_OS_IS_NOT_UNKNOWN: &str = "target_os_is_not_unknown.json.template";
 }
 
 pub const fn basic_toml_contents() -> &'static str {
