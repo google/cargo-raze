@@ -499,7 +499,7 @@ pub mod tests {
       vec!["wasm32-unknown-unknown", "wasm32-wasi",]
     );
 
-    // The wasm-targeted deps should have both wasm platforms
+    // The os-targeted deps should only have wasm32-wasi
     let os_targeted_dep_context = async_std
       .targeted_deps
       .iter()
