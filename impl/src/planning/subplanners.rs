@@ -20,7 +20,7 @@ use std::{
 
 use anyhow::{anyhow, bail, Context, Result};
 use camino::{Utf8Path, Utf8PathBuf};
-use cargo_lock::SourceId;
+use cargo_lock::{SourceId, package::name};
 use cargo_metadata::{DepKindInfo, DependencyKind, Node, Package, Source};
 use cargo_platform::Platform;
 use itertools::Itertools;
@@ -136,6 +136,10 @@ impl<'planner> WorkspaceSubplanner<'planner> {
     let own_crate_catalog_entry = catalog.entry_for_package_id(&node.id)?;
     let own_package = own_crate_catalog_entry.package();
 
+    // This section prevents produce_crate_contexts from functioning
+    // properly. To build the root_ctxs list, it checks whether the
+    // dependency is a workspace crate.
+    /*
     let is_binary_dep = self
       .settings
       .binary_deps
@@ -145,7 +149,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
     // Skip workspace members unless they are binary dependencies
     if own_crate_catalog_entry.is_workspace_crate() && !is_binary_dep {
       return None;
-    }
+    } */
 
     // UNWRAP: Safe given unwrap during serialize step of metadata
     let own_source_id = own_package
@@ -174,6 +178,8 @@ impl<'planner> WorkspaceSubplanner<'planner> {
     let res = crate_subplanner
       .produce_context(&self.metadata.cargo_workspace_root)
       .map(|x| (x, own_crate_catalog_entry.is_workspace_crate()));
+
+    eprintln!("res: {:#?}", res);
 
     Some(res)
   }
@@ -220,6 +226,12 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       .filter_map(|node| self.create_crate_context(node, self.crate_catalog))
       .collect::<Result<Vec<_>>>()?;
 
+    eprintln!("contexts len: {:?}", contexts.len());
+    for (ctx, is_w) in contexts.iter() {
+      eprintln!("context: {}", ctx.pkg_name);
+      eprintln!("is_w: {}", is_w);
+    }
+
     let root_ctxs = contexts
       .iter()
       .filter_map(|(ctx, is_workspace)| match is_workspace {
@@ -231,8 +243,25 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
     let contexts = contexts.into_iter().map(|(ctx, _)| ctx).collect_vec();
     let aliases = self.produce_workspace_aliases(root_ctxs, &contexts);
+    let renamed_contexts = contexts.into_iter().map(|mut ctx| {
+      if let Some(alias) = aliases.iter().find(|alias| { 
+        eprintln!("alias.target {:?}", alias.alias);
+        eprintln!("alias.target {:?}", alias.target);
+        if ctx.pkg_name == "rand" {
+          let alias_name = alias.target.clone();
+          eprintln!("alias_name: {}", alias_name);
+        }
 
-    Ok((contexts, aliases))
+        format!("{}:{}", ctx.workspace_path_to_crate, ctx.pkg_name) == alias.target
+      }) {
+        ctx.pkg_name = alias.alias.clone();
+        ctx
+      } else {
+        ctx
+      }
+    }).collect();
+
+    Ok((renamed_contexts, aliases))
   }
 
   fn produce_workspace_aliases(
@@ -240,12 +269,16 @@ impl<'planner> WorkspaceSubplanner<'planner> {
     root_dep_aliases: BTreeMap<String, DependencyAlias>,
     all_packages: &[CrateContext],
   ) -> Vec<DependencyAlias> {
+    eprintln!("!!! root_dep_aliases: {:#?}", root_dep_aliases);
+
     let renames = root_dep_aliases
       .iter()
       .map(|(_name, rename)| (&rename.target, &rename.alias))
       .collect::<HashMap<_, _>>();
 
-    all_packages
+    eprintln!("!!! renames: {:#?}", renames);
+
+    let dep_aliases = all_packages
       .iter()
       .filter(|to_alias| {
         to_alias.lib_target_name.is_some()
@@ -256,12 +289,17 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           || !to_alias.raze_settings.extra_aliased_targets.is_empty()
       })
       .flat_map(|to_alias| {
+        eprintln!("!!! to_alias: {:#?}, version: {:?}", to_alias.pkg_name, to_alias.pkg_version);
+
         let pkg_name = to_alias.pkg_name.replace('-', "_");
         let target = format!("{}:{}", &to_alias.workspace_path_to_crate, &pkg_name);
         let alias = renames
           .get(&target)
           .map(|x| x.to_string())
           .unwrap_or(pkg_name);
+
+          eprintln!("!!! alias: {:#?}", alias);
+
         let dep_alias = DependencyAlias { target, alias };
 
         to_alias
@@ -275,7 +313,11 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           .chain(std::iter::once(dep_alias))
       })
       .sorted()
-      .collect_vec()
+      .collect_vec();
+
+    eprintln!("!!! dep_aliases: {:#?}", dep_aliases);
+
+    dep_aliases
   }
 }
 
@@ -394,6 +436,7 @@ impl<'planner> CrateSubplanner<'planner> {
 
     let context = CrateContext {
       pkg_name: package.name.clone(),
+      download_name: package.name.clone(),
       pkg_version: package.version.clone(),
       edition: package.edition.clone(),
       license: self.produce_license(),
@@ -401,6 +444,7 @@ impl<'planner> CrateSubplanner<'planner> {
       workspace_member_dependents,
       workspace_member_dev_dependents,
       workspace_member_build_dependents,
+      is_workspace_member: self.crate_catalog_entry.is_workspace_crate(),
       is_workspace_member_dependency,
       is_binary_dependency,
       is_proc_macro,
