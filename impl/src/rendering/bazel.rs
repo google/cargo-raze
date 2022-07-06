@@ -191,9 +191,10 @@ impl BazelRenderer {
   ) -> Result<String, tera::Error> {
     let mut context = Context::new();
     // Filter out workspace members, they don't need to be downloaded.
-    let crates: Vec<&CrateContext> = all_packages.iter().filter(|crate_context| {
-      !crate_context.is_workspace_member
-    }).collect();
+    let crates: Vec<&CrateContext> = all_packages
+      .iter()
+      .filter(|crate_context| !crate_context.is_workspace_member)
+      .collect();
     context.insert("workspace", &workspace_context);
     context.insert("crates", &crates);
     context.insert("bazel_package_name", &bazel_package_name);
@@ -535,6 +536,7 @@ mod tests {
   fn dummy_binary_crate_with_name(buildfile_suffix: &str) -> CrateContext {
     CrateContext {
       pkg_name: "test-binary".to_owned(),
+      download_name: "test-binary".to_owned(),
       pkg_version: Version::parse("1.1.1").unwrap(),
       edition: "2015".to_owned(),
       features: Features {
@@ -583,6 +585,7 @@ mod tests {
   fn dummy_library_crate_with_name(buildfile_suffix: &str) -> CrateContext {
     CrateContext {
       pkg_name: "test-library".to_owned(),
+      download_name: "test-library".to_owned(),
       pkg_version: Version::parse("1.1.1").unwrap(),
       edition: "2015".to_owned(),
       license: LicenseData::default(),
@@ -631,6 +634,7 @@ mod tests {
   fn dummy_proc_macro_crate_with_name(buildfile_suffix: &str) -> CrateContext {
     CrateContext {
       pkg_name: "test-proc-macro".to_owned(),
+      download_name: "test-proc-macro".to_owned(),
       pkg_version: Version::parse("1.1.1").unwrap(),
       edition: "2015".to_owned(),
       license: LicenseData::default(),

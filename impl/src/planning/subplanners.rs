@@ -20,7 +20,7 @@ use std::{
 
 use anyhow::{anyhow, bail, Context, Result};
 use camino::{Utf8Path, Utf8PathBuf};
-use cargo_lock::{SourceId, package::name};
+use cargo_lock::SourceId;
 use cargo_metadata::{DepKindInfo, DependencyKind, Node, Package, Source};
 use cargo_platform::Platform;
 use itertools::Itertools;
@@ -243,23 +243,26 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
     let contexts = contexts.into_iter().map(|(ctx, _)| ctx).collect_vec();
     let aliases = self.produce_workspace_aliases(root_ctxs, &contexts);
-    let renamed_contexts = contexts.into_iter().map(|mut ctx| {
-      if let Some(alias) = aliases.iter().find(|alias| { 
-        eprintln!("alias.target {:?}", alias.alias);
-        eprintln!("alias.target {:?}", alias.target);
-        if ctx.pkg_name == "rand" {
-          let alias_name = alias.target.clone();
-          eprintln!("alias_name: {}", alias_name);
-        }
+    let renamed_contexts = contexts
+      .into_iter()
+      .map(|mut ctx| {
+        if let Some(alias) = aliases.iter().find(|alias| {
+          eprintln!("alias.target {:?}", alias.alias);
+          eprintln!("alias.target {:?}", alias.target);
+          if ctx.pkg_name == "rand" {
+            let alias_name = alias.target.clone();
+            eprintln!("alias_name: {}", alias_name);
+          }
 
-        format!("{}:{}", ctx.workspace_path_to_crate, ctx.pkg_name) == alias.target
-      }) {
-        ctx.pkg_name = alias.alias.clone();
-        ctx
-      } else {
-        ctx
-      }
-    }).collect();
+          format!("{}:{}", ctx.workspace_path_to_crate, ctx.pkg_name) == alias.target
+        }) {
+          ctx.pkg_name = alias.alias.clone();
+          ctx
+        } else {
+          ctx
+        }
+      })
+      .collect();
 
     Ok((renamed_contexts, aliases))
   }
@@ -289,7 +292,10 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           || !to_alias.raze_settings.extra_aliased_targets.is_empty()
       })
       .flat_map(|to_alias| {
-        eprintln!("!!! to_alias: {:#?}, version: {:?}", to_alias.pkg_name, to_alias.pkg_version);
+        eprintln!(
+          "!!! to_alias: {:#?}, version: {:?}",
+          to_alias.pkg_name, to_alias.pkg_version
+        );
 
         let pkg_name = to_alias.pkg_name.replace('-', "_");
         let target = format!("{}:{}", &to_alias.workspace_path_to_crate, &pkg_name);
@@ -298,7 +304,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
           .map(|x| x.to_string())
           .unwrap_or(pkg_name);
 
-          eprintln!("!!! alias: {:#?}", alias);
+        eprintln!("!!! alias: {:#?}", alias);
 
         let dep_alias = DependencyAlias { target, alias };
 
