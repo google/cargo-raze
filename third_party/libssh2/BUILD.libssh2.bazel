@@ -10,6 +10,7 @@ _CACHE_ENTRIES = {
     "BUILD_SHARED_LIBS": "off",
     "BUILD_TESTING": "off",
     "CMAKE_FIND_DEBUG_MODE": "on",
+    "CMAKE_INSTALL_LIBDIR": "lib",
     "CMAKE_PREFIX_PATH": "$EXT_BUILD_DEPS/openssl",
 }
 
