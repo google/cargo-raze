@@ -402,7 +402,6 @@ proc-macro2 v1.0.26|default,proc-macro| (*)
       "x86_64-pc-windows-msvc",
       "x86_64-unknown-linux-gnu",
       "wasm32-unknown-unknown",
-      "wasm-wasi",
     ];
 
     let temp_dir = make_basic_workspace();
@@ -445,7 +444,6 @@ proc-macro2 v1.0.26|default,proc-macro| (*)
       vec![
         "aarch64-apple-darwin",
         "aarch64-unknown-linux-gnu",
-        "wasm-wasi",
         "wasm32-unknown-unknown",
         "x86_64-apple-darwin",
       ]
