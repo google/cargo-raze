@@ -38,9 +38,6 @@ rust_binary(
     srcs = glob(["**/*.rs"]),
     aliases = {
     },
-    crate_features = [
-        "default",
-    ],
     crate_root = "src/main.rs",
     data = [],
     edition = "2018",
@@ -58,7 +55,6 @@ rust_binary(
         "@remote_binary_dependencies__structopt__0_3_20//:structopt",
         "@remote_binary_dependencies__texture_synthesis__0_8_0//:texture_synthesis",
     ] + selects.with_or({
-        # cfg(not(target_arch = "wasm32"))
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-pc-windows-msvc",

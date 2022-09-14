@@ -34,11 +34,6 @@ licenses([
 rust_library(
     name = "rand_core",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "alloc",
-        "getrandom",
-        "std",
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

@@ -48,11 +48,6 @@ licenses([
 rust_library(
     name = "once_cell",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "alloc",
-        "default",
-        "std",
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

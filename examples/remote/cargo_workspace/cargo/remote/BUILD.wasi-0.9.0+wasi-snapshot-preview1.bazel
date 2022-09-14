@@ -34,10 +34,6 @@ licenses([
 rust_library(
     name = "wasi",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "default",
-        "std",
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

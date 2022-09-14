@@ -42,11 +42,6 @@ licenses([
 rust_library(
     name = "error_chain",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "backtrace",
-        "default",
-        "example_generated",
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

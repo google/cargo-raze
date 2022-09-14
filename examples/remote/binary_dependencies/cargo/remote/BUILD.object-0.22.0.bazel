@@ -44,15 +44,6 @@ licenses([
 rust_library(
     name = "object",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "archive",
-        "coff",
-        "elf",
-        "macho",
-        "pe",
-        "read_core",
-        "unaligned",
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

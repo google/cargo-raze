@@ -34,8 +34,6 @@ licenses([
 rust_proc_macro(
     name = "derivative",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

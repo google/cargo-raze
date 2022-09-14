@@ -41,11 +41,6 @@ rust_library(
     aliases = {
         "@remote_binary_dependencies__jpeg_decoder__0_1_20//:jpeg_decoder": "jpeg",
     },
-    crate_features = [
-        "bmp",
-        "jpeg",
-        "png",
-    ],
     crate_root = "src/lib.rs",
     data = [] + ["README.md"],
     edition = "2018",

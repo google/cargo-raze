@@ -38,10 +38,6 @@ licenses([
 rust_library(
     name = "hibitset",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "parallel",
-        "rayon",
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

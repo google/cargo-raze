@@ -49,14 +49,6 @@ rust_library(
     aliases = {
         "//vendored/cargo_workspace/cargo/vendor/getrandom-0.1.15:getrandom": "getrandom_package",
     },
-    crate_features = [
-        "alloc",
-        "default",
-        "getrandom",
-        "getrandom_package",
-        "libc",
-        "std",
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
@@ -74,7 +66,6 @@ rust_library(
         "//vendored/cargo_workspace/cargo/vendor/getrandom-0.1.15:getrandom",
         "//vendored/cargo_workspace/cargo/vendor/rand_core-0.5.1:rand_core",
     ] + selects.with_or({
-        # cfg(not(target_os = "emscripten"))
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
@@ -103,7 +94,6 @@ rust_library(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(unix)
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",

@@ -44,11 +44,6 @@ licenses([
 rust_library(
     name = "crossbeam_epoch",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "alloc",
-        "lazy_static",
-        "std",
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

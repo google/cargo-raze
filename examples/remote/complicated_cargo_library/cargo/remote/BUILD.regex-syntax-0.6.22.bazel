@@ -36,17 +36,6 @@ licenses([
 rust_library(
     name = "regex_syntax",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "default",
-        "unicode",
-        "unicode-age",
-        "unicode-bool",
-        "unicode-case",
-        "unicode-gencat",
-        "unicode-perl",
-        "unicode-script",
-        "unicode-segment",
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

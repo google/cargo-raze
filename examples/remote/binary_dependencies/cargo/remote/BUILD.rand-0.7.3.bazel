@@ -48,8 +48,6 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     aliases = {
     },
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
@@ -66,7 +64,6 @@ rust_library(
     deps = [
         "@remote_binary_dependencies__rand_core__0_5_1//:rand_core",
     ] + selects.with_or({
-        # cfg(not(target_os = "emscripten"))
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-pc-windows-msvc",

@@ -34,8 +34,6 @@ licenses([
 rust_library(
     name = "conduit_mime_types",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [] + glob(["data/**"]),
     edition = "2015",

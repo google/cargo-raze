@@ -40,14 +40,6 @@ licenses([
 rust_library(
     name = "backtrace",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "addr2line",
-        "default",
-        "gimli-symbolize",
-        "miniz_oxide",
-        "object",
-        "std",
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

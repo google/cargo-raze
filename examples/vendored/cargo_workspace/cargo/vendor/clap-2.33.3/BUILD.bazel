@@ -36,15 +36,6 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     aliases = {
     },
-    crate_features = [
-        "ansi_term",
-        "atty",
-        "color",
-        "default",
-        "strsim",
-        "suggestions",
-        "vec_map",
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",
@@ -66,7 +57,6 @@ rust_library(
         "//vendored/cargo_workspace/cargo/vendor/unicode-width-0.1.8:unicode_width",
         "//vendored/cargo_workspace/cargo/vendor/vec_map-0.8.2:vec_map",
     ] + selects.with_or({
-        # cfg(not(windows))
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",

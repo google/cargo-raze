@@ -36,10 +36,6 @@ licenses([
 rust_library(
     name = "smallvec",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "default",
-        "std",
-    ],
     crate_root = "lib.rs",
     data = [],
     edition = "2015",

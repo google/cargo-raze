@@ -36,10 +36,6 @@ licenses([
 rust_library(
     name = "adler32",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "default",
-        "std",
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
