@@ -34,6 +34,9 @@ licenses([
 rust_library(
     name = "ppv_lite86",
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "simd",
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

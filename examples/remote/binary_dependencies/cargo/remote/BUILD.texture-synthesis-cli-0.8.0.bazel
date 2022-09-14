@@ -38,6 +38,9 @@ rust_binary(
     srcs = glob(["**/*.rs"]),
     aliases = {
     },
+    crate_features = [
+        "default",
+    ],
     crate_root = "src/main.rs",
     data = [],
     edition = "2018",

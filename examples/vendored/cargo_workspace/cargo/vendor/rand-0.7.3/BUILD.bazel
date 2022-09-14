@@ -49,6 +49,14 @@ rust_library(
     aliases = {
         "//vendored/cargo_workspace/cargo/vendor/getrandom-0.1.15:getrandom": "getrandom_package",
     },
+    crate_features = [
+        "alloc",
+        "default",
+        "getrandom",
+        "getrandom_package",
+        "libc",
+        "std",
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

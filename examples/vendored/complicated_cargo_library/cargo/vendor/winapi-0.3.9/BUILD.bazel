@@ -36,6 +36,15 @@ licenses([
 rust_library(
     name = "winapi",
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "minwinbase",
+        "minwindef",
+        "ntdef",
+        "profileapi",
+        "std",
+        "sysinfoapi",
+        "timezoneapi",
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

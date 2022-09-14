@@ -34,6 +34,12 @@ licenses([
 rust_library(
     name = "crossbeam_deque",
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "crossbeam-epoch",
+        "crossbeam-utils",
+        "default",
+        "std",
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

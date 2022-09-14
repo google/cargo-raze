@@ -44,6 +44,9 @@ licenses([
 rust_library(
     name = "gimli",
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "read",
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

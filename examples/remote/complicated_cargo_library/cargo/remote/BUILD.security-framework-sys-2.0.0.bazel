@@ -34,6 +34,10 @@ licenses([
 rust_library(
     name = "security_framework_sys",
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "OSX_10_9",
+        "default",
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

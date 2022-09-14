@@ -36,6 +36,15 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     aliases = {
     },
+    crate_features = [
+        "ansi_term",
+        "atty",
+        "color",
+        "default",
+        "strsim",
+        "suggestions",
+        "vec_map",
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

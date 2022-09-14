@@ -38,6 +38,11 @@ licenses([
 rust_library(
     name = "crossbeam_utils",
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "lazy_static",
+        "std",
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

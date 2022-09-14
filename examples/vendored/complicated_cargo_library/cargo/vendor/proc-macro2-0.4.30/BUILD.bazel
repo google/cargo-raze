@@ -36,6 +36,10 @@ licenses([
 rust_library(
     name = "proc_macro2",
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "proc-macro",
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

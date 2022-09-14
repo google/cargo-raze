@@ -36,6 +36,17 @@ licenses([
 rust_library(
     name = "syn",
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "clone-impls",
+        "default",
+        "derive",
+        "extra-traits",
+        "parsing",
+        "printing",
+        "proc-macro",
+        "quote",
+        "visit",
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

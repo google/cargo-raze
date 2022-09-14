@@ -40,6 +40,11 @@ licenses([
 rust_library(
     name = "png",
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "deflate",
+        "png-encoding",
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",

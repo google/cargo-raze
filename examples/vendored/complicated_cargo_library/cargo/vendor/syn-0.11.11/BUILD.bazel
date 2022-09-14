@@ -34,6 +34,14 @@ licenses([
 rust_library(
     name = "syn",
     srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "parsing",
+        "printing",
+        "quote",
+        "synom",
+        "unicode-xid",
+    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",
