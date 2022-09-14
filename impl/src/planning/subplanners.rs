@@ -52,6 +52,13 @@ type CrateContextProduction = (Vec<CrateContext>, Vec<DependencyAlias>);
 /// Utility type alias to reduce declaration noise
 type DepProduction = HashMap<Option<String>, CrateDependencyContext>;
 
+/// Represents the various places we can load a Bazel repository for a Rust package from.
+enum RepositorySourceId<'planner> {
+  SourceId(SourceId),
+  LocalRepository(&'planner Utf8Path),
+  None,
+}
+
 /// An internal working planner for generating context for an individual crate.
 struct CrateSubplanner<'planner> {
   // Workspace-Wide details
@@ -60,7 +67,7 @@ struct CrateSubplanner<'planner> {
   crate_catalog: &'planner CrateCatalog,
   // Crate specific content
   crate_catalog_entry: &'planner CrateCatalogEntry,
-  source_id: &'planner Option<SourceId>,
+  source_id: RepositorySourceId<'planner>,
   node: &'planner Node,
   crate_settings: Option<&'planner CrateSettings>,
   sha256: &'planner Option<String>,
@@ -147,13 +154,23 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       return None;
     }
 
-    // UNWRAP: Safe given unwrap during serialize step of metadata
-    let own_source_id = own_package
-      .source
-      .as_ref()
-      .map(|s| SourceId::from_url(&s.to_string()).unwrap());
-
     let crate_settings = self.crate_settings(own_package).ok()?;
+    let own_source_id = if let Some(local_repository_path) = crate_settings
+      .as_ref()
+      .and_then(|s| s.local_repository_path.as_ref())
+    {
+      RepositorySourceId::LocalRepository(&local_repository_path)
+    } else if let Some(path_in_additional_workspace) = own_crate_catalog_entry
+      .path_in_additional_workspace
+      .as_ref()
+    {
+      RepositorySourceId::LocalRepository(path_in_additional_workspace.as_str().into())
+    } else if let Some(source) = own_package.source.as_ref() {
+      // UNWRAP: Safe given unwrap during serialize step of metadata
+      RepositorySourceId::SourceId(SourceId::from_url(&source.to_string()).unwrap())
+    } else {
+      RepositorySourceId::None
+    };
 
     let checksum_opt = self
       .metadata
@@ -164,7 +181,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       settings: self.settings,
       platform_details: self.platform_details,
       crate_catalog_entry: own_crate_catalog_entry,
-      source_id: &own_source_id,
+      source_id: own_source_id,
       node,
       crate_settings,
       sha256: &checksum_opt.map(|c| c.to_owned()),
@@ -647,80 +664,119 @@ impl<'planner> CrateSubplanner<'planner> {
     package_root: &Utf8Path,
     binary_dep_spec: Option<&cargo_toml::Dependency>,
   ) -> Result<SourceDetails> {
-    let mut git_data = None;
-    let mut download_url = None;
-
-    if let Some(source_id) = self.source_id {
-      if source_id.is_git() {
-        let manifest_parent = package.manifest_path.parent().ok_or_else(|| {
-          anyhow!(
-            "Expected manifest_path to have a parent but was {}",
-            package.manifest_path
-          )
-        })?;
-        let path_to_crate_root = manifest_parent
-          .strip_prefix(package_root)
-          .with_context(|| {
+    Ok(match &self.source_id {
+      RepositorySourceId::SourceId(source_id) => {
+        if source_id.is_git() {
+          let manifest_parent = package.manifest_path.parent().ok_or_else(|| {
             anyhow!(
-              "Expected package root `{}` to be a prefix of manifest path dir `{}` but it wasn't",
-              package_root,
-              manifest_parent
+              "Expected manifest_path to have a parent but was {}",
+              package.manifest_path
             )
           })?;
-        let path_to_crate_root = if path_to_crate_root.components().next().is_some() {
-          Some(path_to_crate_root.to_string())
-        } else {
-          None
-        };
-        git_data = Some(GitRepo {
-          remote: source_id.url().to_string(),
-          commit: source_id
-            .precise()
-            .ok_or_else(|| {
-              anyhow!(
-                "Expected source_id to have a `precise` field with a git commit, but it didn't"
+          let path_to_crate_root =
+            manifest_parent
+              .strip_prefix(package_root)
+              .with_context(|| {
+                anyhow!(
+                "Expected package root `{}` to be a prefix of manifest path dir `{}` but it wasn't",
+                package_root,
+                manifest_parent
               )
-            })?
-            .to_owned(),
-          path_to_crate_root,
-        });
-      }
-      if source_id.is_remote_registry() {
-        if let Some(source) = package.source.as_ref() {
-          download_url = Some(
-            Self::produce_download_url(crates_io_template, source, &package.name, &package.version)
+              })?;
+          let path_to_crate_root = if path_to_crate_root.components().next().is_some() {
+            Some(path_to_crate_root.to_string())
+          } else {
+            None
+          };
+          let git_data = Some(GitRepo {
+            remote: source_id.url().to_string(),
+            commit: source_id
+              .precise()
+              .ok_or_else(|| {
+                anyhow!(
+                  "Expected source_id to have a `precise` field with a git commit, but it didn't"
+                )
+              })?
+              .to_owned(),
+            path_to_crate_root,
+          });
+          SourceDetails {
+            git_data,
+            download_url: None,
+            local_repository_path: None,
+          }
+        } else if source_id.is_remote_registry() {
+          if let Some(source) = package.source.as_ref() {
+            let download_url = Some(
+              Self::produce_download_url(
+                crates_io_template,
+                source,
+                &package.name,
+                &package.version,
+              )
               .with_context(|| {
                 format!(
                   "Producing download URL for crate {} version {}",
                   &package.name, &package.version
                 )
               })?,
-          );
+            );
+            SourceDetails {
+              git_data: None,
+              download_url,
+              local_repository_path: None,
+            }
+          } else {
+            bail!(
+              "Expected source to be present for package {} version {}",
+              package.name,
+              package.version.to_string()
+            );
+          }
         } else {
           bail!(
-            "Expected source to be present for package {} version {}",
+            "Failed to determine download URL for {}, unsupported source ID {}",
             package.name,
-            package.version.to_string()
+            source_id
           );
         }
       }
-    } else if let Some(binary_dep_spec) = binary_dep_spec {
-      if let Dependency::Detailed(detailed) = binary_dep_spec {
-        if detailed.registry.is_some() || detailed.registry_index.is_some() {
-          bail!("Binary deps do not support registries other than crates.io, but {} attempted to use a custom registry", package.name);
+      RepositorySourceId::LocalRepository(local_repository_path) => SourceDetails {
+        git_data: None,
+        download_url: None,
+        local_repository_path: Some(local_repository_path.into()),
+      },
+      RepositorySourceId::None => {
+        if let Some(binary_dep_spec) = binary_dep_spec {
+          if let Dependency::Detailed(detailed) = binary_dep_spec {
+            if detailed.registry.is_some() || detailed.registry_index.is_some() {
+              bail!("Binary deps do not support registries other than crates.io, but {} attempted to use a custom registry", package.name);
+            }
+          }
+          let source = Source {
+            repr: "registry+https://github.com/rust-lang/crates.io-index".to_owned(),
+          };
+          let download_url = Some(
+            Self::produce_download_url(
+              crates_io_template,
+              &source,
+              &package.name,
+              &package.version,
+            )
+            .with_context(|| format!("Producing download URL for binary dep {}", package.name))?,
+          );
+          SourceDetails {
+            git_data: None,
+            download_url,
+            local_repository_path: None,
+          }
+        } else {
+          bail!(
+            "No source ID and not a binary dep, failed to determined download URL for {}",
+            package.name
+          );
         }
       }
-      let source = Source {
-        repr: "registry+https://github.com/rust-lang/crates.io-index".to_owned(),
-      };
-      download_url = Some(
-        Self::produce_download_url(crates_io_template, &source, &package.name, &package.version)
-          .with_context(|| format!("Producing download URL for binary dep {}", package.name))?,
-      );
-    }
-    Ok(SourceDetails {
-      git_data,
-      download_url,
     })
   }
 
@@ -832,8 +888,11 @@ impl<'planner> CrateSubplanner<'planner> {
   /// interest among others.
   fn find_package_root_for_manifest(&self, manifest_path: &Utf8Path) -> Result<Utf8PathBuf> {
     let has_git_repo_root = {
-      let is_git = self.source_id.as_ref().map_or(false, SourceId::is_git);
-      is_git && self.settings.genmode == GenMode::Remote
+      if let RepositorySourceId::SourceId(source_id) = &self.source_id {
+        source_id.is_git() && self.settings.genmode == GenMode::Remote
+      } else {
+        false
+      }
     };
 
     // Return manifest path itself if not git

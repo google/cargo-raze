@@ -59,7 +59,7 @@ impl BuildPlanner for BuildPlannerImpl {
   /// Retrieves metadata for local workspace and produces a build plan.
   fn plan_build(&self, platform_details: Option<PlatformDetails>) -> Result<PlannedBuild> {
     // Create one combined metadata object which includes all dependencies and binaries
-    let crate_catalog = CrateCatalog::new(&self.metadata.metadata)?;
+    let crate_catalog = CrateCatalog::new(&self.metadata, &self.settings)?;
 
     // Generate additional PlatformDetails
     let workspace_subplanner = WorkspaceSubplanner {

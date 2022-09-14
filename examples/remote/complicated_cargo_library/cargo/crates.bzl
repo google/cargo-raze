@@ -9,7 +9,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")  # bui
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")  # buildifier: disable=load
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")  # buildifier: disable=load
 
-def remote_complicated_cargo_library_fetch_remote_crates():
+def remote_complicated_cargo_library_fetch_remote_crates(local_path_prefix = ""):
     """This function defines a collection of repos and should be called in a WORKSPACE file"""
     maybe(
         http_archive,

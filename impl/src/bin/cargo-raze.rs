@@ -209,8 +209,15 @@ fn fetch_raze_metadata(
     None
   };
 
+  let cargo_workspace_root = &local_metadata.workspace_root;
+  let additional_workspaces: Vec<_> = settings
+    .additional_workspace_paths
+    .iter()
+    .map(|path| cargo_workspace_root.join(path))
+    .collect();
   let raze_metadata = metadata_fetcher.fetch_metadata(
-    local_metadata.workspace_root.as_ref(),
+    cargo_workspace_root.as_ref(),
+    &additional_workspaces,
     binary_dep_info,
     reused_lockfile,
   )?;

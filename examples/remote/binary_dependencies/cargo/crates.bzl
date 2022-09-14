@@ -167,7 +167,7 @@ def _flatten_dependency_maps(all_dependency_maps):
 
     return dependencies
 
-def remote_binary_dependencies_fetch_remote_crates():
+def remote_binary_dependencies_fetch_remote_crates(local_path_prefix = ""):
     """This function defines a collection of repos and should be called in a WORKSPACE file"""
     maybe(
         http_archive,

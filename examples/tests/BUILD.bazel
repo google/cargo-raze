@@ -10,6 +10,7 @@ test_suite(
     tests = [
         launch_test(target = "@cargo_raze_examples//remote/binary_dependencies:binary_dependencies_bin"),
         launch_test(target = "@cargo_raze_examples//remote/cargo_workspace/num_printer:number_printer"),
+        launch_test(target = "@cargo_raze_examples//remote/parent_directory_workspace/main/remote_num_printer:remote_number_printer"),
         launch_test(target = "@cargo_raze_examples//remote/complicated_cargo_library"),
         launch_test(target = "@cargo_raze_examples//remote/no_deps"),
         launch_test(target = "@cargo_raze_examples//remote/non_cratesio:non_cratesio_remote"),
