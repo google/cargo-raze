@@ -163,6 +163,21 @@ pub fn get_matching_bazel_triples<'a>(
   Ok(triples)
 }
 
+/// Returns all of the supported targets, filtered by an allowlist.
+pub fn get_enabled_targets<'a>(
+  allowlist: &'a Option<HashSet<String>>,
+) -> impl Iterator<Item = &'static str> + 'a {
+  SUPPORTED_PLATFORM_TRIPLES
+    .iter()
+    .filter(move |x| {
+      allowlist
+        .as_ref()
+        .map(|targets| targets.contains(**x))
+        .unwrap_or(true)
+    })
+    .map(AsRef::as_ref)
+}
+
 /// Returns whether or not the given path is a Bazel workspace root
 pub fn is_bazel_workspace_root(dir: &Utf8Path) -> bool {
   let workspace_files = [dir.join("WORKSPACE.bazel"), dir.join("WORKSPACE")];

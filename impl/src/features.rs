@@ -75,13 +75,7 @@ pub fn get_per_platform_features_with_command(
   packages: &[Package],
   command: fn(&Path, &str) -> Result<String>,
 ) -> Result<BTreeMap<PackageId, Features>> {
-  let mut triples: BTreeSet<String> = BTreeSet::new();
-  if let Some(target) = settings.target.clone() {
-    triples.insert(target);
-  }
-  if let Some(targets) = settings.targets.clone() {
-    triples.extend(targets);
-  }
+  let triples = settings.enabled_targets();
 
   // Map of PackageIds using the keys that cargo-tree provides
   let mut package_map: HashMap<(String, Version), PackageId> = HashMap::new();
@@ -141,6 +135,7 @@ fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<String> {
     .arg("tree")
     .arg("--prefix=none")
     .arg("--frozen")
+    .arg("--workspace")
     .arg(format!("--target={}", triple))
     .arg("--format={p}|{f}|"); // The format to print output with
 
