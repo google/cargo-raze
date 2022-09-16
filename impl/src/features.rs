@@ -138,12 +138,14 @@ fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<String> {
   let cargo_bin: Utf8PathBuf = cargo_bin_path();
   let mut cargo_tree = Command::new(&cargo_bin);
   cargo_tree.current_dir(cargo_dir);
-  cargo_tree
-    .arg("tree")
-    .arg("--prefix=none")
-    .arg("--frozen")
-    .arg(format!("--target={}", triple))
-    .arg("--format={p}|{f}|"); // The format to print output with
+  let args = [
+    "tree".to_string(),
+    "--prefix=none".to_string(),
+    "--frozen".to_string(),
+    format!("--target={}", triple),
+    "--format={p}|{f}|".to_string(), // The format to print output with
+  ];
+  cargo_tree.args(args.iter());
 
   let tree_output = cargo_tree
     .output()
@@ -152,10 +154,7 @@ fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<String> {
     eprintln!(
       "Running `{:?} {}` in {:?} failed, output follows:",
       cargo_bin,
-      cargo_tree
-        .get_args()
-        .map(|os_str| os_str.to_str().unwrap_or("<unprintable>"))
-        .join(" "),
+      args.iter().join(" "),
       cargo_dir
     );
     eprintln!("{:?}", std::str::from_utf8(&tree_output.stderr));
