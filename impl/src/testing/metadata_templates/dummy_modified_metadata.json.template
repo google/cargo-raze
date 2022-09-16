@@ -26,7 +26,7 @@ the package has one additional resolved dependency.
             "dependencies": [
                 {
                     "name": "test_dep",
-                    "source": null,
+                    "source": "registry+https://github.com/rust-lang/crates.io-index",
                     "req": "0.0.1",
                     "kind": null,
                     "rename": null,
@@ -72,7 +72,7 @@ the package has one additional resolved dependency.
             "version": "0.0.1",
             "authors": [],
             "id": "test_dep_id",
-            "source": null,
+            "source": "registry+https://github.com/rust-lang/crates.io-index",
             "description": null,
             "dependencies": [],
             "license": null,

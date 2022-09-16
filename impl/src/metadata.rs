@@ -816,7 +816,7 @@ pub mod tests {
     }));
 
     fetcher
-      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), &[] as &[&Utf8Path], None, None)
       .unwrap()
   }
 
@@ -832,7 +832,7 @@ pub mod tests {
       lockfile_contents: None,
     }));
     fetcher
-      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), &[] as &[&Utf8Path], None, None)
       .unwrap();
   }
 
@@ -858,7 +858,7 @@ pub mod tests {
       lockfile_contents: None,
     }));
     fetcher
-      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), &[] as &[&Utf8Path], None, None)
       .unwrap();
   }
 
@@ -874,7 +874,7 @@ pub mod tests {
 
     let fetcher = RazeMetadataFetcher::default();
     assert!(fetcher
-      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), &[] as &[&Utf8Path], None, None)
       .is_err());
   }
 

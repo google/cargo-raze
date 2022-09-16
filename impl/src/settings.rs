@@ -827,7 +827,7 @@ pub mod tests {
     RazeSettings {
       workspace_path: "//cargo".to_owned(),
       additional_workspace_paths: Vec::new(),
-      bazel_workspace_path: None,
+      bazel_workspace_path: default_bazel_workspace_path(),
       package_aliases_dir: "cargo".to_owned(),
       render_package_aliases: default_render_package_aliases(),
       target: Some("x86_64-unknown-linux-gnu".to_owned()),

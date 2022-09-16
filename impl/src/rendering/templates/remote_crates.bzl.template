@@ -6,7 +6,14 @@ load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")  # buildifier: di
 {% if experimental_api %}
 {% include "templates/partials/crates_macro.template" %}
 {% endif %}
+"""
+Args:
+    local_path_prefix: An optional prefix to append to local paths within the Bazel repository.
+        Many uses should use `bazel_workspace_path` in the raze settings instead, this is only
+        for unusual sitations which use the same fetch_remote_crates from multiple repositories.
+"""
 def {{workspace.gen_workspace_prefix}}_fetch_remote_crates(local_path_prefix = ""):
+    _ = local_path_prefix
 {%- if crates %}
     """This function defines a collection of repos and should be called in a WORKSPACE file"""
 {%- for crate in crates %}

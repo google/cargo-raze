@@ -329,7 +329,7 @@ pub fn template_raze_metadata(template_path: &str) -> RazeMetadata {
   }));
 
   fetcher
-    .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+    .fetch_metadata(utf8_path(dir.as_ref()), &[] as &[&Utf8Path], None, None)
     .unwrap()
 }
 
