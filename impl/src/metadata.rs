@@ -399,7 +399,7 @@ impl RazeMetadataFetcher {
   fn fetch_crate_checksum(&self, name: &str, version: &str) -> Result<String> {
     let index_url_is_file = self.index_url.scheme().to_lowercase() == "file";
     let crate_index_path = if !index_url_is_file {
-      crates_index::BareIndex::from_url(&self.index_url.to_string())?
+      crates_index::BareIndex::from_url(self.index_url.as_ref())?
         .open_or_clone()?
         .crate_(name)
         .ok_or_else(|| anyhow!("Failed to find crate '{}' in index", name))?
@@ -491,7 +491,7 @@ impl RazeMetadataFetcher {
       for package in &lockfile.packages {
         if let Some(checksum) = &package.checksum {
           checksums.insert(
-            package_ident(&package.name.to_string(), &package.version.to_string()),
+            package_ident(package.name.as_ref(), &package.version.to_string()),
             checksum.to_string(),
           );
         }
