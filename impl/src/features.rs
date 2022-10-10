@@ -22,6 +22,7 @@ use crate::util::cargo_bin_path;
 use anyhow::{Error, Result};
 use camino::Utf8PathBuf;
 use cargo_metadata::{Package, PackageId, Version};
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 type UnconsolidatedFeatures = BTreeMap<PackageId, BTreeMap<String, BTreeSet<String>>>;
@@ -129,20 +130,31 @@ fn clean_cargo_tree_output(cargo_tree_output: &str) -> Vec<String> {
 // to extract per-platform targets.
 fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<String> {
   let cargo_bin: Utf8PathBuf = cargo_bin_path();
-  let mut cargo_tree = Command::new(cargo_bin);
+  let mut cargo_tree = Command::new(&cargo_bin);
   cargo_tree.current_dir(cargo_dir);
-  cargo_tree
-    .arg("tree")
-    .arg("--prefix=none")
-    .arg("--frozen")
-    .arg("--workspace")
-    .arg(format!("--target={}", triple))
-    .arg("--format={p}|{f}|"); // The format to print output with
+  let args = [
+    "tree".to_string(),
+    "--prefix=none".to_string(),
+    "--frozen".to_string(),
+    "--workspace".to_string(),
+    format!("--target={}", triple),
+    "--format={p}|{f}|".to_string(), // The format to print output with
+  ];
+  cargo_tree.args(args.iter());
 
   let tree_output = cargo_tree
     .output()
     .map_err(|_err| Error::new(RazeError::Generic("Failed to run cargo-tree.".into())))?;
-  assert!(tree_output.status.success());
+  if !tree_output.status.success() {
+    eprintln!(
+      "Running `{:?} {}` in {:?} failed, output follows:",
+      cargo_bin,
+      args.iter().join(" "),
+      cargo_dir
+    );
+    eprintln!("{:?}", std::str::from_utf8(&tree_output.stderr));
+    panic!("cargo-tree ran and returned failure, see stderr for details");
+  }
 
   String::from_utf8(tree_output.stdout).map_err(|_err| {
     Error::new(RazeError::Generic(
