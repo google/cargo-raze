@@ -164,9 +164,9 @@ pub fn get_matching_bazel_triples<'a>(
 }
 
 /// Returns all of the supported targets, filtered by an allowlist.
-pub fn get_enabled_targets<'a>(
-  allowlist: &'a Option<HashSet<String>>,
-) -> impl Iterator<Item = &'static str> + 'a {
+pub fn get_enabled_targets(
+  allowlist: &'_ Option<HashSet<String>>,
+) -> impl Iterator<Item = &'static str> + '_ {
   SUPPORTED_PLATFORM_TRIPLES
     .iter()
     .filter(move |x| {
