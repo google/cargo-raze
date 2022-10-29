@@ -404,6 +404,7 @@ impl<'planner> CrateSubplanner<'planner> {
       is_workspace_member_dependency,
       is_binary_dependency,
       is_proc_macro,
+      all_aliases: CrateSubplanner::combine_all_aliases(&default_deps, &targeted_deps),
       default_deps,
       targeted_deps,
       workspace_path_to_crate: self.crate_catalog_entry.workspace_path(self.settings)?,
@@ -424,6 +425,19 @@ impl<'planner> CrateSubplanner<'planner> {
     };
 
     Ok(context)
+  }
+  
+  fn combine_all_aliases(
+    default_deps: &CrateDependencyContext,
+    targeted_deps: &Vec<CrateTargetedDepContext>,
+  ) -> Vec<DependencyAlias> {
+    default_deps
+        .aliased_dependencies
+        .values()
+        .chain(targeted_deps.iter().flat_map(|t| t.deps.aliased_dependencies.values()))
+        .cloned()
+        .unique()
+        .collect()
   }
 
   /// Generates license data from internal crate details.
@@ -866,5 +880,33 @@ impl<'planner> CrateSubplanner<'planner> {
         .into(),
       )
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::planning::subplanners::CrateSubplanner;
+  use hamcrest2::{core::expect, prelude::*};
+  use crate::planning::DependencyAlias;
+  use crate::planning::subplanners::CrateTargetedDepContext;
+  use crate::planning::subplanners::CrateDependencyContext;
+  
+  #[test]
+  fn remove_duplicate_aliases() {
+    let alias = DependencyAlias {
+      alias: "wgc".to_string(),
+      target: "@raze__wgpu_core__0_13_2//:wgpu_core".to_string(),
+    };
+    let mut default_deps = CrateDependencyContext::default();
+    default_deps.aliased_dependencies.insert(alias.target.clone(), alias.clone());
+    let targeted_deps = vec![
+      CrateTargetedDepContext {
+        target: "test".to_string(),
+        deps: default_deps.clone(),
+        platform_targets: vec![],
+      }
+    ];
+      
+    expect(CrateSubplanner::combine_all_aliases(&default_deps, &targeted_deps).len() == 1, "Duplicate aliases removed".to_string()).unwrap();
   }
 }

@@ -31,7 +31,7 @@ pub struct BuildableDependency {
   pub is_proc_macro: bool,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct DependencyAlias {
   pub target: String,
   pub alias: String,
@@ -155,6 +155,7 @@ pub struct CrateContext {
   pub canonical_additional_build_file: Option<Utf8PathBuf>,
   pub default_deps: CrateDependencyContext,
   pub targeted_deps: Vec<CrateTargetedDepContext>,
+  pub all_aliases: Vec<DependencyAlias>,
   pub license: LicenseData,
   pub features: Features,
   pub workspace_path_to_crate: String,
