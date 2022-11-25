@@ -72,7 +72,6 @@ rust_library(
         "@remote_binary_dependencies__terminal_size__0_1_13//:terminal_size",
         "@remote_binary_dependencies__unicode_width__0_1_8//:unicode_width",
     ] + selects.with_or({
-        # cfg(windows)
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",

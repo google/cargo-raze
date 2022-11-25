@@ -36,8 +36,6 @@ rust_binary(
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_bench",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/bin/bench.rs",
     data = [],
     edition = "2015",
@@ -61,8 +59,6 @@ rust_binary(
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_stress_msq",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/bin/stress-msq.rs",
     data = [],
     edition = "2015",
@@ -84,8 +80,6 @@ rust_binary(
 rust_library(
     name = "crossbeam",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

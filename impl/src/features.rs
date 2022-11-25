@@ -76,13 +76,7 @@ pub fn get_per_platform_features_with_command(
   packages: &[Package],
   command: fn(&Path, &str) -> Result<String>,
 ) -> Result<BTreeMap<PackageId, Features>> {
-  let mut triples: BTreeSet<String> = BTreeSet::new();
-  if let Some(target) = settings.target.clone() {
-    triples.insert(target);
-  }
-  if let Some(targets) = settings.targets.clone() {
-    triples.extend(targets);
-  }
+  let triples = settings.enabled_targets();
 
   // Map of PackageIds using the keys that cargo-tree provides
   let mut package_map: HashMap<(String, Version), PackageId> = HashMap::new();
@@ -142,6 +136,7 @@ fn run_cargo_tree(cargo_dir: &Path, triple: &str) -> Result<String> {
     "tree".to_string(),
     "--prefix=none".to_string(),
     "--frozen".to_string(),
+    "--workspace".to_string(),
     format!("--target={}", triple),
     "--format={p}|{f}|".to_string(), // The format to print output with
   ];
@@ -419,7 +414,6 @@ proc-macro2 v1.0.26|default,proc-macro| (*)
       "x86_64-pc-windows-msvc",
       "x86_64-unknown-linux-gnu",
       "wasm32-unknown-unknown",
-      "wasm-wasi",
     ];
 
     let temp_dir = make_basic_workspace();
@@ -462,7 +456,6 @@ proc-macro2 v1.0.26|default,proc-macro| (*)
       vec![
         "aarch64-apple-darwin",
         "aarch64-unknown-linux-gnu",
-        "wasm-wasi",
         "wasm32-unknown-unknown",
         "x86_64-apple-darwin",
       ]

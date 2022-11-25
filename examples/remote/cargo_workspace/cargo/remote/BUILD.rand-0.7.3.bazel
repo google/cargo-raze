@@ -74,7 +74,6 @@ rust_library(
         "@remote_cargo_workspace__getrandom__0_1_15//:getrandom",
         "@remote_cargo_workspace__rand_core__0_5_1//:rand_core",
     ] + selects.with_or({
-        # cfg(not(target_os = "emscripten"))
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
@@ -103,7 +102,6 @@ rust_library(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(unix)
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",

@@ -38,8 +38,6 @@ licenses([
 rust_library(
     name = "humantime",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",

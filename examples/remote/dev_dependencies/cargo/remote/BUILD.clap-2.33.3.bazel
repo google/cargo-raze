@@ -66,7 +66,6 @@ rust_library(
         "@remote_dev_dependencies__unicode_width__0_1_8//:unicode_width",
         "@remote_dev_dependencies__vec_map__0_8_2//:vec_map",
     ] + selects.with_or({
-        # cfg(not(windows))
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",

@@ -23,7 +23,7 @@ use cargo_metadata::{Metadata, MetadataCommand, Package};
 use semver::VersionReq;
 use serde::{Deserialize, Serialize};
 use std::{
-  collections::{BTreeMap, HashMap, HashSet},
+  collections::{BTreeMap, BTreeSet, HashMap, HashSet},
   hash::Hash,
 };
 
@@ -126,6 +126,19 @@ pub struct RazeSettings {
    */
   #[serde(default = "default_raze_settings_experimental_api")]
   pub experimental_api: bool,
+}
+
+impl RazeSettings {
+  /// Returns all of the supported targets that are enabled.
+  pub fn enabled_targets(&self) -> BTreeSet<String> {
+    let mut result: BTreeSet<String> = BTreeSet::new();
+    if let Some(target) = &self.target {
+      result.insert(target.into());
+    } else {
+      result.extend(util::get_enabled_targets(&self.targets).map(String::from));
+    }
+    result
+  }
 }
 
 /// Override settings for individual crates (as part of `RazeSettings`).
