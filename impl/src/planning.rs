@@ -545,7 +545,7 @@ pub mod tests {
       .unwrap();
 
     // Ensure binary dependencies are not considered workspace members after planning
-    let binary_dep_name = format!("some-binary-crate-{}", version.to_string());
+    let binary_dep_name = format!("some-binary-crate-{}", version);
     assert_eq!(
       planned_build
         .workspace_context
@@ -790,7 +790,7 @@ pub mod tests {
     let crate_dir = make_workspace(workspace_toml, Some(workspace_lock));
 
     for (member, dep_version) in vec![("lib_a", "0.2.1"), ("lib_b", "0.1.0")].iter() {
-      let member_dir = crate_dir.as_ref().join(&member);
+      let member_dir = crate_dir.as_ref().join(member);
       std::fs::create_dir_all(&member_dir).unwrap();
       std::fs::write(
         member_dir.join("Cargo.toml"),

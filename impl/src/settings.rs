@@ -356,7 +356,7 @@ fn validate_crate_setting_additional_build_file(
   additional_build_file: &Utf8Path,
   cargo_workspace_root: &Utf8Path,
 ) -> Result<()> {
-  let additional_build_file = cargo_workspace_root.join(&additional_build_file);
+  let additional_build_file = cargo_workspace_root.join(additional_build_file);
   if !additional_build_file.exists() {
     return Err(anyhow!(
       "File not found. `{}` should be a relative path from the cargo workspace root: {}",
@@ -823,7 +823,7 @@ pub mod tests {
       .expect("Failed to set up temporary directory");
     let cargo_toml_path =
       Utf8PathBuf::from_path_buf(temp_workspace_dir.path().join("Cargo.toml")).unwrap();
-    std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
+    std::fs::write(&cargo_toml_path, toml_contents).unwrap();
 
     assert!(load_settings_from_manifest(cargo_toml_path, None).is_err());
   }
@@ -859,7 +859,7 @@ pub mod tests {
       .expect("Failed to set up temporary directory");
     let cargo_toml_path =
       Utf8PathBuf::from_path_buf(temp_workspace_dir.path().join("Cargo.toml")).unwrap();
-    std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
+    std::fs::write(&cargo_toml_path, toml_contents).unwrap();
 
     let settings = load_settings_from_manifest(cargo_toml_path, None).unwrap();
     assert!(!settings.binary_deps.is_empty());
@@ -896,7 +896,7 @@ pub mod tests {
       .expect("Failed to set up temporary directory");
     let cargo_toml_path =
       Utf8PathBuf::from_path_buf(temp_workspace_dir.path().join("Cargo.toml")).unwrap();
-    std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
+    std::fs::write(&cargo_toml_path, toml_contents).unwrap();
 
     let settings = load_settings_from_manifest(cargo_toml_path, /*cargo_bin_path=*/ None).unwrap();
     assert!(!settings.binary_deps.is_empty());
@@ -944,19 +944,15 @@ pub mod tests {
   #[test]
   fn test_formatting_registry_url() {
     assert_eq!(
-      format_registry_url(
-        &default_raze_settings_registry(),
-        &"foo".to_string(),
-        &"0.0.1".to_string()
-      ),
+      format_registry_url(&default_raze_settings_registry(), "foo", "0.0.1"),
       "https://crates.io/api/v1/crates/foo/0.0.1/download"
     );
 
     assert_eq!(
       format_registry_url(
-        &"https://registry.io/{crate}/{crate}/{version}/{version}".to_string(),
-        &"foo".to_string(),
-        &"0.0.1".to_string()
+        "https://registry.io/{crate}/{crate}/{version}/{version}",
+        "foo",
+        "0.0.1"
       ),
       "https://registry.io/foo/foo/0.0.1/0.0.1"
     );

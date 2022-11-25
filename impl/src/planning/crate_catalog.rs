@@ -198,7 +198,7 @@ impl CrateCatalog {
     // This loop also ensures there are no duplicates
     for (idx, entry) in entries.iter().enumerate() {
       let existing_value = package_id_to_entries_idx.insert(entry.package.id.clone(), idx);
-      assert!(None == existing_value);
+      assert!(existing_value.is_none());
     }
 
     Ok(Self {

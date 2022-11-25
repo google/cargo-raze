@@ -340,5 +340,5 @@ pub fn template_metadata(template_path: &str) -> Metadata {
 
 /// Coerce a path to UTF-*
 pub fn utf8_path(path: &std::path::Path) -> &Utf8Path {
-  Utf8Path::from_path(path.as_ref()).unwrap()
+  Utf8Path::from_path(path).unwrap()
 }

@@ -301,7 +301,7 @@ fn write_files(
 
 /// Writes rendered files to filesystem.
 fn write_to_file(path: &Utf8Path, contents: &str, verbose: bool) -> Result<()> {
-  File::create(&path).and_then(|mut f| f.write_all(contents.as_bytes()))?;
+  File::create(path).and_then(|mut f| f.write_all(contents.as_bytes()))?;
   if verbose {
     println!("Generated {} successfully", path);
   }
