@@ -385,7 +385,7 @@ impl<'planner> CrateSubplanner<'planner> {
     let canonical_additional_build_file = match &raze_settings.additional_build_file {
       Some(build_file) => Some(
         cargo_workspace_root
-          .join(&build_file)
+          .join(build_file)
           .canonicalize_utf8()
           .with_context(|| format!("Failed to find additional_build_file: {}", &build_file))?,
       ),

@@ -96,7 +96,7 @@ impl LockfileGenerator for CargoLockfileGenerator {
     // Generate lockfile
     let output = std::process::Command::new(&self.cargo_bin_path)
       .arg("generate-lockfile")
-      .current_dir(&crate_root_dir)
+      .current_dir(crate_root_dir)
       .output()
       .with_context(|| format!("Generating lockfile in {}", crate_root_dir))?;
 
@@ -404,7 +404,7 @@ impl RazeMetadataFetcher {
         .crate_(name)
         .ok_or_else(|| anyhow!("Failed to find crate '{}' in index", name))?
     } else {
-      crates_index::Index::new(&self.index_url.path())
+      crates_index::Index::new(self.index_url.path())
         .crate_(name)
         .ok_or_else(|| anyhow!("Failed to find crate '{}' in index", name))?
     };
@@ -438,7 +438,7 @@ impl RazeMetadataFetcher {
 
     // Use the reusable lockfile if one is provided
     if let Some(reused_lockfile) = reused_lockfile {
-      fs::copy(&reused_lockfile, &lockfile_path)?;
+      fs::copy(reused_lockfile, &lockfile_path)?;
       return Ok(None);
     }
 
