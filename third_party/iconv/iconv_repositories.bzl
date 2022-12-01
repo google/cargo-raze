@@ -8,10 +8,10 @@ def iconv_repositories():
         http_archive,
         name = "cargo_raze__iconv",
         urls = [
-            "https://opensource.apple.com/tarballs/libiconv/libiconv-59.tar.gz",
+            "https://github.com/apple-oss-distributions/libiconv/archive/libiconv-61.tar.gz",
         ],
         type = "tar.gz",
-        sha256 = "f7729999a9f2adc8c158012bc4bc8d69bea5dec88c8203cdd62067f91ed60b43",
-        strip_prefix = "libiconv-59/libiconv",
+        sha256 = "cfc6eb15fc7de4413323bdd01bfd050da54577895fcc6832020534647812aacd",
+        strip_prefix = "libiconv-libiconv-61/libiconv",
         build_file = Label("//third_party/iconv:BUILD.iconv.bazel"),
     )
