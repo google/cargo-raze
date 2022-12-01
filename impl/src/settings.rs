@@ -18,13 +18,13 @@ use crate::{
   util,
 };
 use anyhow::{anyhow, bail, Context, Result};
+use camino::{Utf8Path, Utf8PathBuf};
 use cargo_metadata::{Metadata, MetadataCommand, Package};
 use semver::VersionReq;
 use serde::{Deserialize, Serialize};
 use std::{
-  collections::{BTreeMap, HashMap, HashSet},
+  collections::{BTreeMap, BTreeSet, HashMap, HashSet},
   hash::Hash,
-  path::{Path, PathBuf},
 };
 
 pub type CrateSettingsPerVersion = HashMap<VersionReq, CrateSettings>;
@@ -126,6 +126,19 @@ pub struct RazeSettings {
    */
   #[serde(default = "default_raze_settings_experimental_api")]
   pub experimental_api: bool,
+}
+
+impl RazeSettings {
+  /// Returns all of the supported targets that are enabled.
+  pub fn enabled_targets(&self) -> BTreeSet<String> {
+    let mut result: BTreeSet<String> = BTreeSet::new();
+    if let Some(target) = &self.target {
+      result.insert(target.into());
+    } else {
+      result.extend(util::get_enabled_targets(&self.targets).map(String::from));
+    }
+    result
+  }
 }
 
 /// Override settings for individual crates (as part of `RazeSettings`).
@@ -247,7 +260,7 @@ pub struct CrateSettings {
   /// Note: This field should be a path to a file relative to the Cargo workspace root. For more
   /// context, see https://doc.rust-lang.org/cargo/reference/workspaces.html#root-package
   #[serde(default)]
-  pub additional_build_file: Option<PathBuf>,
+  pub additional_build_file: Option<Utf8PathBuf>,
 }
 
 /// Describes how dependencies should be managed in tree.
@@ -353,15 +366,15 @@ pub fn format_registry_url(registry_url: &str, name: &str, version: &str) -> Str
 
 /// Check that the the `additional_build_file` represents a path to a file from the cargo workspace root
 fn validate_crate_setting_additional_build_file(
-  additional_build_file: &Path,
-  cargo_workspace_root: &Path,
+  additional_build_file: &Utf8Path,
+  cargo_workspace_root: &Utf8Path,
 ) -> Result<()> {
-  let additional_build_file = cargo_workspace_root.join(&additional_build_file);
+  let additional_build_file = cargo_workspace_root.join(additional_build_file);
   if !additional_build_file.exists() {
     return Err(anyhow!(
       "File not found. `{}` should be a relative path from the cargo workspace root: {}",
-      additional_build_file.display(),
-      cargo_workspace_root.display()
+      additional_build_file,
+      cargo_workspace_root
     ));
   }
 
@@ -371,7 +384,7 @@ fn validate_crate_setting_additional_build_file(
 /// Ensures crate settings associatd with the parsed [RazeSettings](crate::settings::RazeSettings) have valid crate settings
 fn validate_crate_settings(
   settings: &RazeSettings,
-  cargo_workspace_root: &Path,
+  cargo_workspace_root: &Utf8Path,
 ) -> Result<(), RazeError> {
   let mut errors = Vec::new();
 
@@ -413,7 +426,7 @@ fn validate_crate_settings(
 /// Verifies that the provided settings make sense.
 fn validate_settings(
   settings: &mut RazeSettings,
-  cargo_workspace_path: &Path,
+  cargo_workspace_path: &Utf8Path,
 ) -> Result<(), RazeError> {
   if !settings.workspace_path.starts_with("//") {
     return Err(RazeError::Config {
@@ -698,7 +711,7 @@ fn parse_raze_settings(metadata: &Metadata) -> Result<RazeSettings> {
 
 /// A cargo command wrapper for gathering cargo metadata used to parse [RazeSettings](crate::settings::RazeSettings)
 pub struct SettingsMetadataFetcher {
-  pub cargo_bin_path: PathBuf,
+  pub cargo_bin_path: Utf8PathBuf,
 }
 
 impl Default for SettingsMetadataFetcher {
@@ -710,32 +723,31 @@ impl Default for SettingsMetadataFetcher {
 }
 
 impl MetadataFetcher for SettingsMetadataFetcher {
-  fn fetch_metadata(&self, working_dir: &Path, _include_deps: bool) -> Result<Metadata> {
+  fn fetch_metadata(&self, working_dir: &Utf8Path, _include_deps: bool) -> Result<Metadata> {
     // This fetch does not require network access.
     MetadataCommand::new()
       .cargo_path(&self.cargo_bin_path)
       .no_deps()
-      .current_dir(working_dir)
+      .current_dir(working_dir.as_std_path())
       .other_options(vec!["--offline".to_owned()])
       .exec()
       .with_context(|| {
         format!(
           "Failed to fetch Metadata with `{}` from `{}`",
-          &self.cargo_bin_path.display(),
-          working_dir.display()
+          &self.cargo_bin_path, working_dir
         )
       })
   }
 }
 
 /// Load settings from a given Cargo manifest
-pub fn load_settings_from_manifest<T: AsRef<Path>>(
+pub fn load_settings_from_manifest<T: AsRef<Utf8Path>>(
   cargo_toml_path: T,
   cargo_bin_path: Option<String>,
 ) -> Result<RazeSettings, RazeError> {
   // Get the path to the cargo binary from either an optional Cargo binary
   // path or a fallback expected to be found on the system.
-  let bin_path: PathBuf = if let Some(path) = cargo_bin_path {
+  let bin_path: Utf8PathBuf = if let Some(path) = cargo_bin_path {
     path.into()
   } else {
     util::cargo_bin_path()
@@ -749,7 +761,7 @@ pub fn load_settings_from_manifest<T: AsRef<Path>>(
   let cargo_toml_dir = cargo_toml_path.as_ref().parent().ok_or_else(|| {
     RazeError::Generic(format!(
       "Failed to find parent directory for cargo toml file: {:?}",
-      cargo_toml_path.as_ref().display(),
+      cargo_toml_path.as_ref(),
     ))
   })?;
   let metadata = {
@@ -822,8 +834,9 @@ pub mod tests {
     let temp_workspace_dir = TempDir::new()
       .ok()
       .expect("Failed to set up temporary directory");
-    let cargo_toml_path = temp_workspace_dir.path().join("Cargo.toml");
-    std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
+    let cargo_toml_path =
+      Utf8PathBuf::from_path_buf(temp_workspace_dir.path().join("Cargo.toml")).unwrap();
+    std::fs::write(&cargo_toml_path, toml_contents).unwrap();
 
     assert!(load_settings_from_manifest(cargo_toml_path, None).is_err());
   }
@@ -857,8 +870,9 @@ pub mod tests {
     let temp_workspace_dir = TempDir::new()
       .ok()
       .expect("Failed to set up temporary directory");
-    let cargo_toml_path = temp_workspace_dir.path().join("Cargo.toml");
-    std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
+    let cargo_toml_path =
+      Utf8PathBuf::from_path_buf(temp_workspace_dir.path().join("Cargo.toml")).unwrap();
+    std::fs::write(&cargo_toml_path, toml_contents).unwrap();
 
     let settings = load_settings_from_manifest(cargo_toml_path, None).unwrap();
     assert!(!settings.binary_deps.is_empty());
@@ -893,8 +907,9 @@ pub mod tests {
     let temp_workspace_dir = TempDir::new()
       .ok()
       .expect("Failed to set up temporary directory");
-    let cargo_toml_path = temp_workspace_dir.path().join("Cargo.toml");
-    std::fs::write(&cargo_toml_path, &toml_contents).unwrap();
+    let cargo_toml_path =
+      Utf8PathBuf::from_path_buf(temp_workspace_dir.path().join("Cargo.toml")).unwrap();
+    std::fs::write(&cargo_toml_path, toml_contents).unwrap();
 
     let settings = load_settings_from_manifest(cargo_toml_path, /*cargo_bin_path=*/ None).unwrap();
     assert!(!settings.binary_deps.is_empty());
@@ -929,7 +944,11 @@ pub mod tests {
       std::fs::write(crate_toml, toml_contents).unwrap();
     }
 
-    let settings = load_settings_from_manifest(dir.as_ref().join("Cargo.toml"), None).unwrap();
+    let settings = load_settings_from_manifest(
+      Utf8PathBuf::from_path_buf(dir.as_ref().join("Cargo.toml")).unwrap(),
+      None,
+    )
+    .unwrap();
     assert_eq!(&settings.workspace_path, "//workspace_path/raze");
     assert_eq!(settings.genmode, GenMode::Remote);
     assert_eq!(settings.crates.len(), 2);
@@ -938,19 +957,15 @@ pub mod tests {
   #[test]
   fn test_formatting_registry_url() {
     assert_eq!(
-      format_registry_url(
-        &default_raze_settings_registry(),
-        &"foo".to_string(),
-        &"0.0.1".to_string()
-      ),
+      format_registry_url(&default_raze_settings_registry(), "foo", "0.0.1"),
       "https://crates.io/api/v1/crates/foo/0.0.1/download"
     );
 
     assert_eq!(
       format_registry_url(
-        &"https://registry.io/{crate}/{crate}/{version}/{version}".to_string(),
-        &"foo".to_string(),
-        &"0.0.1".to_string()
+        "https://registry.io/{crate}/{crate}/{version}/{version}",
+        "foo",
+        "0.0.1"
       ),
       "https://registry.io/foo/foo/0.0.1/0.0.1"
     );

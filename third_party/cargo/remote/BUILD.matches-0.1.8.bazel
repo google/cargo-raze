@@ -34,8 +34,6 @@ licenses([
 rust_library(
     name = "matches",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "lib.rs",
     data = [],
     edition = "2015",

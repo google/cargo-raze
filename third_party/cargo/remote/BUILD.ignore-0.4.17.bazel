@@ -38,8 +38,6 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     aliases = {
     },
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2015",
@@ -54,17 +52,16 @@ rust_library(
     version = "0.4.17",
     # buildifier: leave-alone
     deps = [
-        "@cargo_raze__crossbeam_utils__0_8_3//:crossbeam_utils",
+        "@cargo_raze__crossbeam_utils__0_8_8//:crossbeam_utils",
         "@cargo_raze__globset__0_4_6//:globset",
         "@cargo_raze__lazy_static__1_4_0//:lazy_static",
         "@cargo_raze__log__0_4_14//:log",
         "@cargo_raze__memchr__2_4_0//:memchr",
-        "@cargo_raze__regex__1_4_5//:regex",
+        "@cargo_raze__regex__1_5_5//:regex",
         "@cargo_raze__same_file__1_0_6//:same_file",
-        "@cargo_raze__thread_local__1_1_3//:thread_local",
+        "@cargo_raze__thread_local__1_1_4//:thread_local",
         "@cargo_raze__walkdir__2_3_2//:walkdir",
     ] + selects.with_or({
-        # cfg(windows)
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",

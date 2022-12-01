@@ -36,8 +36,8 @@ licenses([
 rust_library(
     name = "fastrand",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
+    aliases = {
+    },
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
@@ -52,7 +52,15 @@ rust_library(
     version = "1.4.0",
     # buildifier: leave-alone
     deps = [
-    ],
+    ] + selects.with_or({
+        (
+            "@rules_rust//rust/platform:wasm32-unknown-unknown",
+            "@rules_rust//rust/platform:wasm32-wasi",
+        ): [
+            "@cargo_raze__instant__0_1_9//:instant",
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 # Unsupported target "smoke" with type "test" omitted

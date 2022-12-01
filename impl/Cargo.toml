@@ -1,6 +1,6 @@
 [package]
 name = "cargo-raze"
-version = "0.15.0"
+version = "0.16.1"
 authors = ["Alex McArther <acmcarther@google.com>"]
 readme = "README.md"
 keywords = ["subcommand"]
@@ -10,6 +10,7 @@ edition = "2018"
 description = """
 A Cargo subcommand to generate Bazel BUILD files
 """
+resolver = "2"
 
 [badges]
 travis-ci = { repository = "google/cargo-raze", branch = "master" }
@@ -23,6 +24,7 @@ path = "src/bin/cargo-raze.rs"
 
 [dependencies]
 anyhow = "1.0.38"
+camino = "1.0.9"
 cargo_metadata = "0.14"
 cargo_toml = "0.8.1"
 cargo-clone-crate = { version = "0.1.6", default-features = false }
@@ -70,6 +72,8 @@ targets = [
     "i686-apple-darwin",
     "i686-pc-windows-msvc",
     "i686-unknown-linux-gnu",
+    "wasm32-unknown-unknown",
+    "wasm32-wasi",
     "x86_64-apple-darwin",
     "x86_64-pc-windows-msvc",
     "x86_64-unknown-linux-gnu",

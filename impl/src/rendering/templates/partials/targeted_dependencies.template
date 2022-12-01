@@ -1,5 +1,4 @@
 {% for targeted_dep in crate.targeted_deps %} + selects.with_or({
-        # {{ targeted_dep.target }}
         (
 {%- for platform_target in targeted_dep.platform_targets %}
             "@{{ rust_rules_workspace_name }}//rust/platform:{{platform_target}}",

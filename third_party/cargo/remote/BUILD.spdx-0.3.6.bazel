@@ -34,8 +34,6 @@ licenses([
 rust_library(
     name = "spdx",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
@@ -51,7 +49,7 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         "@cargo_raze__lazy_static__1_4_0//:lazy_static",
-        "@cargo_raze__regex__1_4_5//:regex",
+        "@cargo_raze__regex__1_5_5//:regex",
         "@cargo_raze__smallvec__1_8_0//:smallvec",
     ],
 )

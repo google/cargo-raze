@@ -121,7 +121,7 @@ rust_library(
     # buildifier: leave-alone
     deps = [
         ":isahc_build_script",
-        "@cargo_raze__crossbeam_utils__0_8_3//:crossbeam_utils",
+        "@cargo_raze__crossbeam_utils__0_8_8//:crossbeam_utils",
         "@cargo_raze__curl__0_4_35//:curl",
         "@cargo_raze__curl_sys__0_4_41_curl_7_75_0//:curl_sys",
         "@cargo_raze__encoding_rs__0_8_28//:encoding_rs",

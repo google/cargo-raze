@@ -1,0 +1,10 @@
+per-platform-features v0.1.0 (/home/sayrer/github/grafica/cargo-raze-new-features/impl/src/testing/cargo_tree/per_platform_features)||
+tokio v1.17.0|default,fs,libc,mio,net,socket2,stats,time|
+libc v0.2.122|default,std|
+mio v0.8.2|default,net,os-ext,os-poll|
+libc v0.2.122|default,std|
+log v0.4.16||
+cfg-if v1.0.0||
+pin-project-lite v0.2.8||
+socket2 v0.4.4|all|
+libc v0.2.122|default,std|

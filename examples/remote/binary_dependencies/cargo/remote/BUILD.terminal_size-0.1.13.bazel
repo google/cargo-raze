@@ -36,8 +36,6 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     aliases = {
     },
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
@@ -53,7 +51,6 @@ rust_library(
     # buildifier: leave-alone
     deps = [
     ] + selects.with_or({
-        # cfg(not(windows))
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
@@ -61,9 +58,11 @@ rust_library(
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
             "@rules_rust//rust/platform:aarch64-apple-darwin",
             "@rules_rust//rust/platform:aarch64-apple-ios",
+            "@rules_rust//rust/platform:aarch64-apple-ios-sim",
             "@rules_rust//rust/platform:aarch64-linux-android",
             "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
             "@rules_rust//rust/platform:arm-unknown-linux-gnueabi",
+            "@rules_rust//rust/platform:armv7-linux-androideabi",
             "@rules_rust//rust/platform:i686-linux-android",
             "@rules_rust//rust/platform:i686-unknown-freebsd",
             "@rules_rust//rust/platform:powerpc-unknown-linux-gnu",
@@ -78,7 +77,6 @@ rust_library(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(windows)
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",

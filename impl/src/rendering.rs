@@ -16,7 +16,7 @@ pub mod bazel;
 
 use crate::planning::PlannedBuild;
 use anyhow::Result;
-use std::path::PathBuf;
+use camino::Utf8PathBuf;
 
 pub trait BuildRenderer {
   fn render_planned_build(
@@ -33,17 +33,17 @@ pub trait BuildRenderer {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FileOutputs {
-  pub path: PathBuf,
+  pub path: Utf8PathBuf,
   pub contents: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct RenderDetails {
-  pub cargo_root: PathBuf,
-  pub path_prefix: PathBuf,
+  pub cargo_root: Utf8PathBuf,
+  pub path_prefix: Utf8PathBuf,
   pub package_aliases_dir: String,
   pub vendored_buildfile_name: String,
-  pub bazel_root: PathBuf,
+  pub bazel_root: Utf8PathBuf,
   pub rust_rules_workspace_name: String,
   pub experimental_api: bool,
   pub render_package_aliases: bool,

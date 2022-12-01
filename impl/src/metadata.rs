@@ -13,16 +13,16 @@
 // limitations under the License.
 
 use std::{
-  collections::HashMap,
+  collections::{BTreeMap, HashMap},
   env::consts,
   fs,
-  path::{Path, PathBuf},
   string::String,
 };
 
 use anyhow::{anyhow, Context, Result};
+use camino::{Utf8Path, Utf8PathBuf};
 use cargo_lock::Lockfile;
-use cargo_metadata::{Metadata, MetadataCommand};
+use cargo_metadata::{Metadata, MetadataCommand, PackageId};
 use glob::glob;
 use pathdiff::diff_paths;
 use regex::Regex;
@@ -31,18 +31,22 @@ use tempfile::TempDir;
 use url::Url;
 
 use crate::util::{cargo_bin_path, package_ident};
+use crate::{
+  features::{get_per_platform_features, Features},
+  settings::RazeSettings,
+};
 
 pub(crate) const DEFAULT_CRATE_REGISTRY_URL: &str = "https://crates.io";
 pub(crate) const DEFAULT_CRATE_INDEX_URL: &str = "https://github.com/rust-lang/crates.io-index";
 
 /// An entity that can generate Cargo metadata within a Cargo workspace
 pub trait MetadataFetcher {
-  fn fetch_metadata(&self, working_dir: &Path, include_deps: bool) -> Result<Metadata>;
+  fn fetch_metadata(&self, working_dir: &Utf8Path, include_deps: bool) -> Result<Metadata>;
 }
 
 /// A lockfile generator which simply wraps the `cargo_metadata::MetadataCommand` command
 struct CargoMetadataFetcher {
-  pub cargo_bin_path: PathBuf,
+  pub cargo_bin_path: Utf8PathBuf,
 }
 
 impl Default for CargoMetadataFetcher {
@@ -54,7 +58,7 @@ impl Default for CargoMetadataFetcher {
 }
 
 impl MetadataFetcher for CargoMetadataFetcher {
-  fn fetch_metadata(&self, working_dir: &Path, include_deps: bool) -> Result<Metadata> {
+  fn fetch_metadata(&self, working_dir: &Utf8Path, include_deps: bool) -> Result<Metadata> {
     let mut command = MetadataCommand::new();
 
     if !include_deps {
@@ -68,8 +72,7 @@ impl MetadataFetcher for CargoMetadataFetcher {
       .with_context(|| {
         format!(
           "Failed to fetch Metadata with `{}` from `{}`",
-          &self.cargo_bin_path.display(),
-          working_dir.display()
+          &self.cargo_bin_path, working_dir
         )
       })
   }
@@ -77,37 +80,37 @@ impl MetadataFetcher for CargoMetadataFetcher {
 
 /// An entity that can generate a lockfile data within a Cargo workspace
 pub trait LockfileGenerator {
-  fn generate_lockfile(&self, crate_root_dir: &Path) -> Result<Lockfile>;
+  fn generate_lockfile(&self, crate_root_dir: &Utf8Path) -> Result<Lockfile>;
 }
 
 /// A lockfile generator which simply wraps the `cargo generate-lockfile` command
 struct CargoLockfileGenerator {
-  cargo_bin_path: PathBuf,
+  cargo_bin_path: Utf8PathBuf,
 }
 
 impl LockfileGenerator for CargoLockfileGenerator {
   /// Generate lockfile information from a cargo workspace root
-  fn generate_lockfile(&self, crate_root_dir: &Path) -> Result<Lockfile> {
+  fn generate_lockfile(&self, crate_root_dir: &Utf8Path) -> Result<Lockfile> {
     let lockfile_path = crate_root_dir.join("Cargo.lock");
 
     // Generate lockfile
     let output = std::process::Command::new(&self.cargo_bin_path)
       .arg("generate-lockfile")
-      .current_dir(&crate_root_dir)
+      .current_dir(crate_root_dir)
       .output()
-      .with_context(|| format!("Generating lockfile in {}", crate_root_dir.display()))?;
+      .with_context(|| format!("Generating lockfile in {}", crate_root_dir))?;
 
     if !output.status.success() {
       anyhow::bail!(
         "Failed to generate lockfile in {}: {}",
-        crate_root_dir.display(),
+        crate_root_dir,
         String::from_utf8_lossy(&output.stderr)
       );
     }
 
     // Load lockfile contents
     Lockfile::load(&lockfile_path)
-      .with_context(|| format!("Failed to load lockfile: {}", lockfile_path.display()))
+      .with_context(|| format!("Failed to load lockfile: {}", lockfile_path))
   }
 }
 
@@ -120,13 +123,16 @@ pub struct RazeMetadata {
   // The absolute path to the current project's cargo workspace root. Note that the workspace
   // root in `metadata` will be inside of a temporary directory. For details see:
   // https://doc.rust-lang.org/cargo/reference/workspaces.html#root-package
-  pub cargo_workspace_root: PathBuf,
+  pub cargo_workspace_root: Utf8PathBuf,
 
   // The metadata of a lockfile that was generated as a result of fetching metadata
   pub lockfile: Option<Lockfile>,
 
   // A map of all known crates with checksums. Use `checksums_for` to access data from this map.
   pub checksums: HashMap<String, String>,
+
+  // A map of crates to their enabled general and per-platform features.
+  pub features: BTreeMap<PackageId, Features>,
 }
 
 impl RazeMetadata {
@@ -138,14 +144,14 @@ impl RazeMetadata {
 
 /// Create a symlink file on unix systems
 #[cfg(target_family = "unix")]
-fn make_symlink(src: &Path, dest: &Path) -> Result<()> {
+fn make_symlink(src: &Utf8Path, dest: &Utf8Path) -> Result<()> {
   std::os::unix::fs::symlink(src, dest)
     .with_context(|| "Failed to create symlink for generating metadata")
 }
 
 /// Create a symlink file on windows systems
 #[cfg(target_family = "windows")]
-fn make_symlink(src: &Path, dest: &Path) -> Result<()> {
+fn make_symlink(src: &Utf8Path, dest: &Utf8Path) -> Result<()> {
   std::os::windows::fs::symlink_file(src, dest)
     .with_context(|| "Failed to create symlink for generating metadata")
 }
@@ -157,15 +163,17 @@ pub struct RazeMetadataFetcher {
   index_url: Url,
   metadata_fetcher: Box<dyn MetadataFetcher>,
   lockfile_generator: Box<dyn LockfileGenerator>,
+  settings: Option<RazeSettings>,
 }
 
 impl RazeMetadataFetcher {
-  pub fn new<P: Into<PathBuf>>(
+  pub fn new<P: Into<Utf8PathBuf>>(
     cargo_bin_path: P,
     registry_url: Url,
     index_url: Url,
+    settings: Option<RazeSettings>,
   ) -> RazeMetadataFetcher {
-    let cargo_bin_pathbuf: PathBuf = cargo_bin_path.into();
+    let cargo_bin_pathbuf: Utf8PathBuf = cargo_bin_path.into();
     RazeMetadataFetcher {
       registry_url,
       index_url,
@@ -175,7 +183,18 @@ impl RazeMetadataFetcher {
       lockfile_generator: Box::new(CargoLockfileGenerator {
         cargo_bin_path: cargo_bin_pathbuf,
       }),
+      settings,
     }
+  }
+
+  pub fn new_with_settings(settings: Option<RazeSettings>) -> RazeMetadataFetcher {
+    RazeMetadataFetcher::new(
+      cargo_bin_path(),
+      // UNWRAP: The default is covered by testing and should never return err
+      Url::parse(DEFAULT_CRATE_REGISTRY_URL).unwrap(),
+      Url::parse(DEFAULT_CRATE_INDEX_URL).unwrap(),
+      settings,
+    )
   }
 
   /// Reassign the [`crate::metadata::MetadataFetcher`] associated with the Raze Metadata Fetcher
@@ -189,7 +208,7 @@ impl RazeMetadataFetcher {
   }
 
   /// Symlinks the source code of all workspace members into the temp workspace
-  fn link_src_to_workspace(&self, no_deps_metadata: &Metadata, temp_dir: &Path) -> Result<()> {
+  fn link_src_to_workspace(&self, no_deps_metadata: &Metadata, temp_dir: &Utf8Path) -> Result<()> {
     let crate_member_id_re = match consts::OS {
       "windows" => Regex::new(r".+\(path\+file:///(.+)\)")?,
       _ => Regex::new(r".+\(path\+file://(.+)\)")?,
@@ -206,7 +225,7 @@ impl RazeMetadataFetcher {
         }
 
         // UNWRAP: guarded above
-        PathBuf::from(crate_member_id_match.unwrap().as_str())
+        Utf8PathBuf::from(crate_member_id_match.unwrap().as_str())
       };
 
       // Sanity check: The assumption is that any crate with an `id` that matches
@@ -218,18 +237,20 @@ impl RazeMetadataFetcher {
         return Err(anyhow!(format!(
           "The regex pattern `{}` found a path that did not contain a Cargo.toml file: `{}`",
           crate_member_id_re.as_str(),
-          workspace_member_directory.display()
+          workspace_member_directory
         )));
       }
 
       // Copy the Cargo.toml files into the temp directory to match the directory structure on disk
-      let diff = diff_paths(
+      let path_diff = diff_paths(
         &workspace_member_directory,
         &no_deps_metadata.workspace_root,
       )
       .ok_or_else(|| {
         anyhow!("All workspace members are expected to be under the workspace root")
       })?;
+      let diff = Utf8PathBuf::from_path_buf(path_diff)
+        .map_err(|_e| anyhow!("Invalid UTF-8 in path diff."))?;
       let new_path = temp_dir.join(diff);
       fs::create_dir_all(&new_path)?;
       fs::copy(
@@ -240,17 +261,20 @@ impl RazeMetadataFetcher {
       // Additionally, symlink everything in some common source directories to ensure specified
       // library targets can be relied on and won't prevent fetching metadata
       for dir in vec!["bin", "src"].iter() {
-        let glob_pattern = format!("{}/**/*.rs", workspace_member_directory.join(dir).display());
+        let glob_pattern = format!("{}/**/*.rs", workspace_member_directory.join(dir));
         for entry in glob(glob_pattern.as_str()).expect("Failed to read glob pattern") {
-          let path = entry?;
+          let path = Utf8PathBuf::from_path_buf(entry?)
+            .map_err(|_e| anyhow!("Invalid UTF-8 in source directory."))?;
 
           // Determine the difference between the workspace root and the current file
-          let diff = diff_paths(&path, &no_deps_metadata.workspace_root).ok_or_else(|| {
+          let path_diff = diff_paths(&path, &no_deps_metadata.workspace_root).ok_or_else(|| {
             anyhow!("All workspace members are expected to be under the workspace root")
           })?;
+          let diff = Utf8PathBuf::from_path_buf(path_diff)
+            .map_err(|_e| anyhow!("Invalid UTF-8 in source directory path diff."))?;
 
           // Create a matching directory tree for the current file within the temp workspace
-          let new_path = temp_dir.join(diff);
+          let new_path = temp_dir.join(diff.as_path());
           if let Some(parent) = new_path.parent() {
             fs::create_dir_all(parent)?;
           }
@@ -264,7 +288,7 @@ impl RazeMetadataFetcher {
   }
 
   /// Creates a copy workspace in a temporary directory for fetching the metadata of the current workspace
-  fn make_temp_workspace(&self, cargo_workspace_root: &Path) -> Result<(TempDir, PathBuf)> {
+  fn make_temp_workspace(&self, cargo_workspace_root: &Utf8Path) -> Result<(TempDir, Utf8PathBuf)> {
     let temp_dir = TempDir::new()?;
 
     // First gather metadata without downloading any dependencies so we can identify any path dependencies.
@@ -296,12 +320,14 @@ impl RazeMetadataFetcher {
     }
 
     // Copy over the Cargo.toml files of each workspace member
-    self.link_src_to_workspace(&no_deps_metadata, temp_dir.as_ref())?;
-    Ok((temp_dir, no_deps_metadata.workspace_root.into()))
+    let temp_path = Utf8Path::from_path(temp_dir.as_ref())
+      .ok_or_else(|| anyhow!("Invalid UTF-8 in temp path."))?;
+    self.link_src_to_workspace(&no_deps_metadata, temp_path)?;
+    Ok((temp_dir, no_deps_metadata.workspace_root))
   }
 
   /// Download a crate's source code from the current registry url
-  fn fetch_crate_src(&self, dir: &Path, name: &str, version: &str) -> Result<PathBuf> {
+  fn fetch_crate_src(&self, dir: &Utf8Path, name: &str, version: &str) -> Result<Utf8PathBuf> {
     // The registry url should only be the host URL with ports. No path
     let registry_url = {
       let mut r_url = self.registry_url.clone();
@@ -339,7 +365,7 @@ impl RazeMetadataFetcher {
   fn inject_binaries_into_workspace(
     &self,
     binary_deps: Vec<String>,
-    root_toml: &Path,
+    root_toml: &Utf8Path,
   ) -> Result<()> {
     // Read the current manifest
     let mut manifest = {
@@ -365,24 +391,20 @@ impl RazeMetadataFetcher {
     // cargo_toml::Manifest cannot be serialized direcly.
     // see: https://gitlab.com/crates.rs/cargo_toml/-/issues/3
     let value = toml::Value::try_from(&manifest)?;
-    std::fs::write(root_toml, toml::to_string(&value)?).with_context(|| {
-      format!(
-        "Failed to inject workspace metadata to {}",
-        root_toml.display()
-      )
-    })
+    std::fs::write(root_toml, toml::to_string(&value)?)
+      .with_context(|| format!("Failed to inject workspace metadata to {}", root_toml))
   }
 
   /// Look up a crate in a specified crate index to determine it's checksum
   fn fetch_crate_checksum(&self, name: &str, version: &str) -> Result<String> {
     let index_url_is_file = self.index_url.scheme().to_lowercase() == "file";
     let crate_index_path = if !index_url_is_file {
-      crates_index::BareIndex::from_url(&self.index_url.to_string())?
+      crates_index::BareIndex::from_url(self.index_url.as_ref())?
         .open_or_clone()?
         .crate_(name)
         .ok_or_else(|| anyhow!("Failed to find crate '{}' in index", name))?
     } else {
-      crates_index::Index::new(&self.index_url.path())
+      crates_index::Index::new(self.index_url.path())
         .crate_(name)
         .ok_or_else(|| anyhow!("Failed to find crate '{}' in index", name))?
     };
@@ -409,14 +431,14 @@ impl RazeMetadataFetcher {
   ///   `reused_lockfile` is not provided.
   fn cargo_generate_lockfile(
     &self,
-    reused_lockfile: &Option<PathBuf>,
-    cargo_dir: &Path,
+    reused_lockfile: &Option<Utf8PathBuf>,
+    cargo_dir: &Utf8Path,
   ) -> Result<Option<Lockfile>> {
     let lockfile_path = cargo_dir.join("Cargo.lock");
 
     // Use the reusable lockfile if one is provided
     if let Some(reused_lockfile) = reused_lockfile {
-      fs::copy(&reused_lockfile, &lockfile_path)?;
+      fs::copy(reused_lockfile, &lockfile_path)?;
       return Ok(None);
     }
 
@@ -429,12 +451,14 @@ impl RazeMetadataFetcher {
   /// Gather all information about a Cargo project to use for planning and rendering steps
   pub fn fetch_metadata(
     &self,
-    cargo_workspace_root: &Path,
+    cargo_workspace_root: &Utf8Path,
     binary_dep_info: Option<&HashMap<String, cargo_toml::Dependency>>,
-    reused_lockfile: Option<PathBuf>,
+    reused_lockfile: Option<Utf8PathBuf>,
   ) -> Result<RazeMetadata> {
     let (cargo_dir, cargo_workspace_root) = self.make_temp_workspace(cargo_workspace_root)?;
-    let cargo_root_toml = cargo_dir.as_ref().join("Cargo.toml");
+    let utf8_cargo_dir = Utf8Path::from_path(cargo_dir.as_ref())
+      .ok_or_else(|| anyhow!("Cargo dir has invalid UTF-8 in fetch_metadata."))?;
+    let cargo_root_toml = utf8_cargo_dir.join("Cargo.toml");
 
     // Gather new lockfile data if any binary dependencies were provided
     let mut checksums: HashMap<String, String> = HashMap::new();
@@ -444,15 +468,13 @@ impl RazeMetadataFetcher {
 
         for (name, info) in binary_dep_info.iter() {
           let version = info.req();
-          let src_dir = self.fetch_crate_src(cargo_dir.as_ref(), name, version)?;
+          let src_dir = self.fetch_crate_src(utf8_cargo_dir, name, version)?;
           checksums.insert(
             package_ident(name, version),
             self.fetch_crate_checksum(name, version)?,
           );
           if let Some(dirname) = src_dir.file_name() {
-            if let Some(dirname_str) = dirname.to_str() {
-              src_dirnames.push(dirname_str.to_string());
-            }
+            src_dirnames.push(dirname.to_string());
           }
         }
 
@@ -460,7 +482,7 @@ impl RazeMetadataFetcher {
       }
     }
 
-    let output_lockfile = self.cargo_generate_lockfile(&reused_lockfile, cargo_dir.as_ref())?;
+    let output_lockfile = self.cargo_generate_lockfile(&reused_lockfile, utf8_cargo_dir)?;
 
     // Load checksums from the lockfile
     let workspace_toml_lock = cargo_dir.as_ref().join("Cargo.lock");
@@ -469,7 +491,7 @@ impl RazeMetadataFetcher {
       for package in &lockfile.packages {
         if let Some(checksum) = &package.checksum {
           checksums.insert(
-            package_ident(&package.name.to_string(), &package.version.to_string()),
+            package_ident(package.name.as_ref(), &package.version.to_string()),
             checksum.to_string(),
           );
         }
@@ -478,13 +500,20 @@ impl RazeMetadataFetcher {
 
     let metadata = self
       .metadata_fetcher
-      .fetch_metadata(cargo_dir.as_ref(), /*include_deps=*/ true)?;
+      .fetch_metadata(utf8_cargo_dir, /*include_deps=*/ true)?;
+
+    // In this function because it's metadata, even though it's not returned by `cargo-metadata`
+    let platform_features = match self.settings.as_ref() {
+      Some(settings) => get_per_platform_features(cargo_dir.path(), settings, &metadata.packages)?,
+      None => BTreeMap::new(),
+    };
 
     Ok(RazeMetadata {
       metadata,
       checksums,
       cargo_workspace_root,
       lockfile: output_lockfile,
+      features: platform_features,
     })
   }
 }
@@ -496,6 +525,7 @@ impl Default for RazeMetadataFetcher {
       // UNWRAP: The default is covered by testing and should never return err
       Url::parse(DEFAULT_CRATE_REGISTRY_URL).unwrap(),
       Url::parse(DEFAULT_CRATE_INDEX_URL).unwrap(),
+      None,
     )
   }
 }
@@ -504,12 +534,13 @@ impl Default for RazeMetadataFetcher {
 pub struct BinaryDependencyInfo {
   pub name: String,
   pub info: cargo_toml::Dependency,
-  pub lockfile: Option<PathBuf>,
+  pub lockfile: Option<Utf8PathBuf>,
 }
 
 #[cfg(test)]
 pub mod tests {
   use anyhow::Context;
+  use camino::Utf8PathBuf;
   use httpmock::MockServer;
   use tera::Tera;
 
@@ -523,13 +554,13 @@ pub mod tests {
   }
 
   impl DummyCargoMetadataFetcher {
-    fn render_metadata(&self, mock_workspace_path: &Path) -> Option<Metadata> {
+    fn render_metadata(&self, mock_workspace_path: &Utf8Path) -> Option<Metadata> {
       self.metadata_template.as_ref()?;
 
       let dir = TempDir::new().unwrap();
       let mut renderer = Tera::new(&format!("{}/*", dir.as_ref().display())).unwrap();
 
-      let templates_dir = PathBuf::from(std::file!())
+      let templates_dir = Utf8PathBuf::from(std::file!())
         .parent()
         .unwrap()
         .join("testing/metadata_templates")
@@ -555,7 +586,7 @@ pub mod tests {
   }
 
   impl MetadataFetcher for DummyCargoMetadataFetcher {
-    fn fetch_metadata(&self, working_dir: &Path, include_deps: bool) -> Result<Metadata> {
+    fn fetch_metadata(&self, working_dir: &Utf8Path, include_deps: bool) -> Result<Metadata> {
       // Only use the template if the command is looking to reach out to the internet.
       if include_deps {
         if let Some(metadata) = self.render_metadata(working_dir) {
@@ -573,7 +604,7 @@ pub mod tests {
         .with_context(|| {
           format!(
             "Failed to run `{} metadata` with contents:\n{}",
-            cargo_bin_path().display(),
+            cargo_bin_path(),
             fs::read_to_string(working_dir.join("Cargo.toml")).unwrap()
           )
         })
@@ -586,7 +617,7 @@ pub mod tests {
   }
 
   impl LockfileGenerator for DummyLockfileGenerator {
-    fn generate_lockfile(&self, _crate_root_dir: &Path) -> Result<Lockfile> {
+    fn generate_lockfile(&self, _crate_root_dir: &Utf8Path) -> Result<Lockfile> {
       match &self.lockfile_contents {
         Some(contents) => Lockfile::from_str(contents)
           .with_context(|| format!("Failed to load provided lockfile:\n{}", contents)),
@@ -603,6 +634,7 @@ pub mod tests {
       cargo_bin_path(),
       Url::parse(&mock_server.base_url()).unwrap(),
       Url::parse(&format!("file://{}", tempdir.as_ref().display())).unwrap(),
+      None,
     );
     fetcher.set_metadata_fetcher(Box::new(DummyCargoMetadataFetcher {
       metadata_template: None,
@@ -623,7 +655,9 @@ pub mod tests {
       metadata_template: Some(templates::BASIC_METADATA.to_string()),
     }));
 
-    fetcher.fetch_metadata(dir.as_ref(), None, None).unwrap()
+    fetcher
+      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .unwrap()
   }
 
   #[test]
@@ -633,11 +667,13 @@ pub mod tests {
     let mut toml = File::create(&toml_path).unwrap();
     toml.write_all(basic_toml_contents().as_bytes()).unwrap();
 
-    let mut fetcher = RazeMetadataFetcher::default();
+    let mut fetcher = RazeMetadataFetcher::new_with_settings(None);
     fetcher.set_lockfile_generator(Box::new(DummyLockfileGenerator {
       lockfile_contents: None,
     }));
-    fetcher.fetch_metadata(dir.as_ref(), None, None).unwrap();
+    fetcher
+      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .unwrap();
   }
 
   #[test]
@@ -661,7 +697,9 @@ pub mod tests {
     fetcher.set_lockfile_generator(Box::new(DummyLockfileGenerator {
       lockfile_contents: None,
     }));
-    fetcher.fetch_metadata(dir.as_ref(), None, None).unwrap();
+    fetcher
+      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .unwrap();
   }
 
   #[test]
@@ -675,7 +713,9 @@ pub mod tests {
     }
 
     let fetcher = RazeMetadataFetcher::default();
-    assert!(fetcher.fetch_metadata(dir.as_ref(), None, None).is_err());
+    assert!(fetcher
+      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .is_err());
   }
 
   #[test]
@@ -684,7 +724,7 @@ pub mod tests {
     let mock = mock_remote_crate("fake-crate", "3.3.3", &mock_server);
 
     let path = fetcher
-      .fetch_crate_src(mock.data_dir.as_ref(), "fake-crate", "3.3.3")
+      .fetch_crate_src(utf8_path(mock.data_dir.as_ref()), "fake-crate", "3.3.3")
       .unwrap();
 
     for mock in mock.endpoints.iter() {
@@ -708,7 +748,8 @@ pub mod tests {
     let (fetcher, _mock_server, _index_url) = dummy_raze_metadata_fetcher();
 
     let crate_dir = make_workspace_with_dependency();
-    let cargo_toml_path = crate_dir.as_ref().join("Cargo.toml");
+    let utf8_crate_dir = utf8_path(crate_dir.as_ref());
+    let cargo_toml_path = utf8_crate_dir.join("Cargo.toml");
     let mut manifest =
       cargo_toml::Manifest::from_str(fs::read_to_string(&cargo_toml_path).unwrap().as_str())
         .unwrap();
@@ -749,14 +790,18 @@ pub mod tests {
     let (fetcher, _mock_server, _index_url) = dummy_raze_metadata_fetcher();
 
     let crate_dir = make_workspace_with_dependency();
-    let reused_lockfile = crate_dir.as_ref().join("locks_test/Cargo.raze.lock");
+    let reused_lockfile =
+      Utf8PathBuf::from_path_buf(crate_dir.as_ref().join("locks_test/Cargo.raze.lock")).unwrap();
 
     fs::create_dir_all(reused_lockfile.parent().unwrap()).unwrap();
     fs::write(&reused_lockfile, "# test_generate_lockfile").unwrap();
 
     // A reuse lockfile was provided so no new lockfile should be returned
     assert!(fetcher
-      .cargo_generate_lockfile(&Some(reused_lockfile.clone()), crate_dir.as_ref())
+      .cargo_generate_lockfile(
+        &Some(reused_lockfile.clone()),
+        utf8_path(crate_dir.as_ref())
+      )
       .unwrap()
       .is_none());
 
@@ -779,7 +824,7 @@ pub mod tests {
     // A new lockfile should have been created and it should match the expected contents for the advanced_toml workspace
     assert_eq!(
       fetcher
-        .cargo_generate_lockfile(&None, crate_dir.as_ref())
+        .cargo_generate_lockfile(&None, Utf8Path::from_path(crate_dir.as_ref()).unwrap())
         .unwrap()
         .unwrap(),
       Lockfile::from_str(advanced_lock_contents()).unwrap()
@@ -794,13 +839,17 @@ pub mod tests {
     }));
 
     let crate_dir = make_workspace(advanced_toml_contents(), None);
-    let expected_lockfile = crate_dir.as_ref().join("expected/Cargo.expected.lock");
+    let expected_lockfile =
+      Utf8PathBuf::from_path_buf(crate_dir.as_ref().join("expected/Cargo.expected.lock")).unwrap();
 
     fs::create_dir_all(expected_lockfile.parent().unwrap()).unwrap();
     fs::write(&expected_lockfile, advanced_lock_contents()).unwrap();
 
     assert!(fetcher
-      .cargo_generate_lockfile(&Some(expected_lockfile.clone()), crate_dir.as_ref())
+      .cargo_generate_lockfile(
+        &Some(expected_lockfile.clone()),
+        utf8_path(crate_dir.as_ref())
+      )
       .unwrap()
       .is_none());
 

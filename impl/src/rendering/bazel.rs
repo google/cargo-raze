@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use anyhow::Result;
+use camino::Utf8Path;
 use pathdiff::diff_paths;
 use tera::{self, Context, Tera};
 
@@ -23,7 +24,7 @@ use crate::{
   rendering::{BuildRenderer, FileOutputs, RenderDetails},
 };
 
-use std::{error::Error, path::Path};
+use std::error::Error;
 
 macro_rules! unwind_tera_error {
   ($err:ident) => {{
@@ -125,6 +126,10 @@ impl BazelRenderer {
           "templates/workspace.BUILD.template",
           include_str!("templates/workspace.BUILD.template"),
         ),
+        (
+          "templates/partials/features.template",
+          include_str!("templates/partials/features.template"),
+        ),
       ])
       .unwrap();
 
@@ -216,11 +221,7 @@ impl BazelRenderer {
         })?;
 
       // Only the root package will have a `crates.bzl` file to export
-      let is_root_workspace_member = member_path
-        .to_str()
-        // Root workspace paths will are represented by an exmpty string
-        .map(|member_path| member_path.is_empty())
-        .unwrap_or(false);
+      let is_root_workspace_member = member_path.as_str().is_empty();
       if is_root_workspace_member {
         // In remote genmode, a `crates.bzl` file will always be rendered. For
         // vendored genmode, one is only rendered when using the experimental
@@ -245,7 +246,7 @@ impl BazelRenderer {
 
   fn render_crates_bzl_package_file(
     &self,
-    path_prefix: &Path,
+    path_prefix: &Utf8Path,
     file_outputs: &[FileOutputs],
   ) -> Result<Option<FileOutputs>> {
     let crates_bzl_pkg_file = path_prefix.join("BUILD.bazel");
@@ -286,8 +287,7 @@ fn include_additional_build_file(
           crate_name_opt: Some(package.pkg_name.to_owned()),
           message: format!(
             "failed to read additional_build_file '{}': {}",
-            file_path.display(),
-            e
+            file_path, e
           ),
         })?;
 
@@ -299,8 +299,7 @@ fn include_additional_build_file(
           .raze_settings
           .additional_build_file
           .as_ref()
-          .unwrap()
-          .display(),
+          .unwrap(),
         additional_content
       ))
     }
@@ -474,6 +473,7 @@ impl BuildRenderer for BazelRenderer {
 
 #[cfg(test)]
 mod tests {
+  use camino::Utf8PathBuf;
   use hamcrest2::{core::expect, prelude::*};
 
   use semver::Version;
@@ -481,10 +481,11 @@ mod tests {
 
   use crate::{
     context::*,
+    features::Features,
     planning::PlannedBuild,
     rendering::{FileOutputs, RenderDetails},
     settings::CrateSettings,
-    testing::basic_lock_contents,
+    testing::{basic_lock_contents, utf8_path},
   };
 
   use super::*;
@@ -492,17 +493,16 @@ mod tests {
   use std::{
     collections::{BTreeMap, BTreeSet},
     fs,
-    path::PathBuf,
     str::FromStr,
   };
 
   fn dummy_render_details(buildfile_suffix: &str) -> RenderDetails {
     RenderDetails {
-      cargo_root: PathBuf::from("/some/cargo/root"),
-      path_prefix: PathBuf::from("./some_render_prefix"),
+      cargo_root: Utf8PathBuf::from("/some/cargo/root"),
+      path_prefix: Utf8PathBuf::from("./some_render_prefix"),
       package_aliases_dir: "cargo".to_string(),
       vendored_buildfile_name: buildfile_suffix.to_owned(),
-      bazel_root: PathBuf::from("/some/bazel/root"),
+      bazel_root: Utf8PathBuf::from("/some/bazel/root"),
       rust_rules_workspace_name: "rules_rust".to_owned(),
       experimental_api: true,
       render_package_aliases: true,
@@ -520,7 +520,7 @@ mod tests {
         output_buildfile_suffix: "BUILD".to_owned(),
         // This will typically resolve to:
         // `/some/cargo/root/some/crate`
-        workspace_members: vec![PathBuf::from("some/crate")],
+        workspace_members: vec![Utf8PathBuf::from("some/crate")],
       },
       crate_contexts,
       workspace_aliases: aliases,
@@ -533,7 +533,10 @@ mod tests {
       pkg_name: "test-binary".to_owned(),
       pkg_version: Version::parse("1.1.1").unwrap(),
       edition: "2015".to_owned(),
-      features: vec!["feature1".to_owned(), "feature2".to_owned()],
+      features: Features {
+        features: vec!["feature1".to_owned(), "feature2".to_owned()],
+        targeted_features: vec![],
+      },
       expected_build_path: format!("vendor/test-binary-1.1.1/{}", buildfile_suffix),
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
@@ -580,7 +583,10 @@ mod tests {
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
       canonical_additional_build_file: CrateSettings::default().additional_build_file,
-      features: vec!["feature1".to_owned(), "feature2".to_owned()],
+      features: Features {
+        features: vec!["feature1".to_owned(), "feature2".to_owned()],
+        targeted_features: vec![],
+      },
       expected_build_path: format!("vendor/test-library-1.1.1/{}", buildfile_suffix),
       default_deps: CrateDependencyContext::default(),
       targeted_deps: Vec::new(),
@@ -624,7 +630,10 @@ mod tests {
       license: LicenseData::default(),
       raze_settings: CrateSettings::default(),
       canonical_additional_build_file: CrateSettings::default().additional_build_file,
-      features: vec!["feature1".to_owned(), "feature2".to_owned()].to_owned(),
+      features: Features {
+        features: vec!["feature1".to_owned(), "feature2".to_owned()],
+        targeted_features: vec![],
+      },
       expected_build_path: format!("vendor/test-proc-macro-1.1.1/{}", buildfile_suffix),
       default_deps: CrateDependencyContext {
         dependencies: BTreeSet::new(),
@@ -707,7 +716,7 @@ mod tests {
     let file_outputs = render_crates_for_test(vec![], vec![]);
     let file_names = file_outputs
       .iter()
-      .map(|output| output.path.display().to_string())
+      .map(|output| output.path.to_string())
       .collect::<Vec<String>>();
 
     assert_that!(
@@ -726,7 +735,7 @@ mod tests {
     let file_outputs = render_crates_for_test(vec![dummy_library_crate()], vec![]);
     let file_names = file_outputs
       .iter()
-      .map(|output| output.path.display().to_string())
+      .map(|output| output.path.to_string())
       .collect::<Vec<String>>();
 
     assert_that!(
@@ -750,7 +759,7 @@ mod tests {
     );
     let file_names = file_outputs
       .iter()
-      .map(|output| output.path.display().to_string())
+      .map(|output| output.path.to_string())
       .collect::<Vec<String>>();
 
     assert_that!(
@@ -771,7 +780,7 @@ mod tests {
     context.is_workspace_member_dependency = true;
     context
       .workspace_member_dependents
-      .push(PathBuf::from("some/crate"));
+      .push(Utf8PathBuf::from("some/crate"));
 
     let aliases = vec![DependencyAlias {
       target: "target".to_string(),
@@ -901,7 +910,7 @@ mod tests {
     )
     .unwrap();
 
-    let additional_build_file = tmp_dir.as_ref().join("some_additional_build_file");
+    let additional_build_file = utf8_path(tmp_dir.as_ref()).join("some_additional_build_file");
 
     let file_outputs = render_crates_for_test(
       vec![CrateContext {
@@ -922,7 +931,7 @@ mod tests {
     expect(
       crate_build_contents.contains(&format!(
         "# Additional content from {}",
-        additional_build_file.display()
+        additional_build_file
       )),
       format!(
         "expected crate build contents to include additional_build_file, but it just contained \
@@ -945,7 +954,7 @@ mod tests {
 
     // Ensure that the lockfiles for binary dependencies get written out properly
     assert!(render_result.iter().any(|file_output| {
-      file_output.path == PathBuf::from("/some/bazel/root/./some_render_prefix/Cargo.raze.lock")
+      file_output.path == *"/some/bazel/root/./some_render_prefix/Cargo.raze.lock"
         && file_output.contents
           == indoc::formatdoc! { r#"
               # This file is automatically @generated by Cargo.
@@ -963,16 +972,16 @@ mod tests {
     let mut render_details = dummy_render_details("BUILD.bazel");
     render_details.experimental_api = true;
     render_details.render_package_aliases = false;
-    render_details.bazel_root = PathBuf::from("/tmp/workspace");
-    render_details.cargo_root = PathBuf::from("/tmp/workspace");
-    render_details.path_prefix = PathBuf::from("cargo");
+    render_details.bazel_root = Utf8PathBuf::from("/tmp/workspace");
+    render_details.cargo_root = Utf8PathBuf::from("/tmp/workspace");
+    render_details.path_prefix = Utf8PathBuf::from("cargo");
 
     // Setup planned build
     let mut lib_a = dummy_library_crate();
-    lib_a.workspace_member_dependents = vec![PathBuf::from("lib_a")];
+    lib_a.workspace_member_dependents = vec![Utf8PathBuf::from("lib_a")];
 
     let mut lib_b = dummy_library_crate();
-    lib_b.workspace_member_dependents = vec![PathBuf::from("lib_b")];
+    lib_b.workspace_member_dependents = vec![Utf8PathBuf::from("lib_b")];
 
     let mut planned_build = dummy_planned_build(vec![lib_a, lib_b], vec![]);
 
@@ -981,7 +990,7 @@ mod tests {
       workspace_path: "//cargo".to_owned(),
       gen_workspace_prefix: "raze".to_owned(),
       output_buildfile_suffix: "BUILD.bazel".to_owned(),
-      workspace_members: vec![PathBuf::from("lib_a"), PathBuf::from("lib_b")],
+      workspace_members: vec![Utf8PathBuf::from("lib_a"), Utf8PathBuf::from("lib_b")],
     };
 
     let file_outputs = BazelRenderer::new()

@@ -16,10 +16,10 @@ use std::{
   env,
   fs::{self, File},
   io::Write,
-  path::{Path, PathBuf},
 };
 
 use anyhow::{anyhow, Context, Result};
+use camino::{Utf8Path, Utf8PathBuf};
 
 use cargo_metadata::Metadata;
 use docopt::Docopt;
@@ -104,6 +104,11 @@ fn main() -> Result<()> {
   Ok(())
 }
 
+fn current_dir_utf8() -> Result<Utf8PathBuf> {
+  Utf8PathBuf::from_path_buf(std::env::current_dir()?)
+    .map_err(|_e| anyhow!("std::env::current_dir is invalid UTF-8."))
+}
+
 fn parse_options() -> Options {
   // When used as a cargo subcommand, the string "raze" will always be
   // passed as the second `argv` entry. We need to remove that to keep
@@ -147,34 +152,26 @@ fn fetch_local_metadata(options: &Options) -> Result<Metadata> {
   // Gather basic, offline metadata to parse settings from
   let fetcher = if let Some(cargo_bin_path) = &options.flag_cargo_bin_path {
     SettingsMetadataFetcher {
-      cargo_bin_path: PathBuf::from(cargo_bin_path),
+      cargo_bin_path: Utf8PathBuf::from(cargo_bin_path),
     }
   } else {
     SettingsMetadataFetcher::default()
   };
 
   let working_directory = if let Some(manifest_path) = &options.flag_manifest_path {
-    let manifest_path = PathBuf::from(manifest_path).canonicalize()?;
+    let manifest_path = Utf8PathBuf::from(manifest_path).canonicalize_utf8()?;
     if !manifest_path.is_file() {
-      return Err(anyhow!(
-        "manifest path `{}` is not a file.",
-        manifest_path.display()
-      ));
+      return Err(anyhow!("manifest path `{}` is not a file.", manifest_path));
     }
     // UNWRAP: Unwrap safe due to check above.
-    PathBuf::from(manifest_path.parent().unwrap())
+    Utf8PathBuf::from(manifest_path.parent().unwrap())
   } else {
-    env::current_dir()?
+    current_dir_utf8()?
   };
 
   fetcher
     .fetch_metadata(&working_directory, false)
-    .with_context(|| {
-      format!(
-        "Failed to fetch metadata for {}",
-        working_directory.display()
-      )
-    })
+    .with_context(|| format!("Failed to fetch metadata for {}", working_directory))
 }
 
 fn fetch_raze_metadata(
@@ -187,12 +184,13 @@ fn fetch_raze_metadata(
       cargo_bin_path,
       Url::parse(&settings.registry)?,
       Url::parse(&settings.index_url)?,
+      Some(settings.clone()),
     ),
-    None => RazeMetadataFetcher::default(),
+    None => RazeMetadataFetcher::new_with_settings(Some(settings.clone())),
   };
 
   let cargo_raze_working_dir = find_bazel_workspace_root(local_metadata.workspace_root.as_ref())
-    .unwrap_or(env::current_dir()?);
+    .unwrap_or(current_dir_utf8()?);
 
   let binary_dep_info = if settings.genmode == GenMode::Remote {
     Some(&settings.binary_deps)
@@ -237,12 +235,12 @@ fn render_files(
   local_metadata: &Metadata,
 ) -> Result<(RenderDetails, Vec<FileOutputs>)> {
   let cargo_raze_working_dir = find_bazel_workspace_root(local_metadata.workspace_root.as_ref())
-    .unwrap_or(env::current_dir()?);
+    .unwrap_or(current_dir_utf8()?);
 
   let mut bazel_renderer = BazelRenderer::new();
   let render_details = RenderDetails {
     cargo_root: metadata.cargo_workspace_root.clone(),
-    path_prefix: PathBuf::from(&settings.workspace_path.trim_start_matches('/')),
+    path_prefix: Utf8PathBuf::from(&settings.workspace_path.trim_start_matches('/')),
     package_aliases_dir: settings.package_aliases_dir.clone(),
     vendored_buildfile_name: settings.output_buildfile_suffix.clone(),
     bazel_root: cargo_raze_working_dir,
@@ -275,7 +273,7 @@ fn write_files(
       .join("remote");
     // Clean out the "remote" directory so users can easily see what build files are relevant
     if remote_dir.exists() {
-      let build_glob = format!("{}/BUILD*.bazel", remote_dir.display());
+      let build_glob = format!("{}/BUILD*.bazel", remote_dir);
       for entry in glob::glob(&build_glob)? {
         fs::remove_file(entry?)?;
       }
@@ -284,7 +282,7 @@ fn write_files(
 
   for output in bazel_file_outputs.iter() {
     if options.flag_dryrun.unwrap_or(false) {
-      println!("{}:\n{}", output.path.display(), output.contents);
+      println!("{}:\n{}", output.path, output.contents);
       continue;
     }
     // Ensure all parent directories exist
@@ -302,10 +300,10 @@ fn write_files(
 }
 
 /// Writes rendered files to filesystem.
-fn write_to_file(path: &Path, contents: &str, verbose: bool) -> Result<()> {
-  File::create(&path).and_then(|mut f| f.write_all(contents.as_bytes()))?;
+fn write_to_file(path: &Utf8Path, contents: &str, verbose: bool) -> Result<()> {
+  File::create(path).and_then(|mut f| f.write_all(contents.as_bytes()))?;
   if verbose {
-    println!("Generated {} successfully", path.display());
+    println!("Generated {} successfully", path);
   }
   Ok(())
 }

@@ -23,7 +23,7 @@ alias(
 
 alias(
     name = "regex",
-    actual = "//vendored/complicated_cargo_library/cargo/vendor/regex-0.2.11:regex",
+    actual = "//vendored/complicated_cargo_library/cargo/vendor/regex-1.5.6:regex",
     tags = [
         "cargo-raze",
         "manual",

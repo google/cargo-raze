@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-  collections::{BTreeMap, BTreeSet},
-  path::PathBuf,
-};
+use std::collections::{BTreeMap, BTreeSet};
 
-use crate::settings::CrateSettings;
+use crate::{features::Features, settings::CrateSettings};
+use camino::Utf8PathBuf;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -154,15 +152,15 @@ pub struct CrateContext {
   pub pkg_version: Version,
   pub edition: String,
   pub raze_settings: CrateSettings,
-  pub canonical_additional_build_file: Option<PathBuf>,
+  pub canonical_additional_build_file: Option<Utf8PathBuf>,
   pub default_deps: CrateDependencyContext,
   pub targeted_deps: Vec<CrateTargetedDepContext>,
   pub license: LicenseData,
-  pub features: Vec<String>,
+  pub features: Features,
   pub workspace_path_to_crate: String,
-  pub workspace_member_dependents: Vec<PathBuf>,
-  pub workspace_member_dev_dependents: Vec<PathBuf>,
-  pub workspace_member_build_dependents: Vec<PathBuf>,
+  pub workspace_member_dependents: Vec<Utf8PathBuf>,
+  pub workspace_member_dev_dependents: Vec<Utf8PathBuf>,
+  pub workspace_member_build_dependents: Vec<Utf8PathBuf>,
   pub is_workspace_member_dependency: bool,
   pub is_binary_dependency: bool,
   pub targets: Vec<BuildableTarget>,
@@ -203,5 +201,5 @@ pub struct WorkspaceContext {
   pub output_buildfile_suffix: String,
 
   // A list of relative paths from a Cargo workspace root to a Cargo package.
-  pub workspace_members: Vec<PathBuf>,
+  pub workspace_members: Vec<Utf8PathBuf>,
 }

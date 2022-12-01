@@ -15,11 +15,11 @@
 use std::{
   collections::{BTreeMap, HashMap, HashSet},
   io, iter,
-  path::{Path, PathBuf},
   str::FromStr,
 };
 
 use anyhow::{anyhow, bail, Context, Result};
+use camino::{Utf8Path, Utf8PathBuf};
 use cargo_lock::SourceId;
 use cargo_metadata::{DepKindInfo, DependencyKind, Node, Package, Source};
 use cargo_platform::Platform;
@@ -32,6 +32,7 @@ use crate::{
     WorkspaceContext,
   },
   error::{RazeError, PLEASE_FILE_A_BUG},
+  features::Features,
   metadata::RazeMetadata,
   planning::license,
   settings::{CrateSettings, GenMode, RazeSettings},
@@ -63,6 +64,7 @@ struct CrateSubplanner<'planner> {
   node: &'planner Node,
   crate_settings: Option<&'planner CrateSettings>,
   sha256: &'planner Option<String>,
+  features: &'planner Option<&'planner Features>,
 }
 
 /// An internal working planner for generating context for a whole workspace.
@@ -166,6 +168,7 @@ impl<'planner> WorkspaceSubplanner<'planner> {
       node,
       crate_settings,
       sha256: &checksum_opt.map(|c| c.to_owned()),
+      features: &self.metadata.features.get(&node.id),
     };
 
     let res = crate_subplanner
@@ -278,10 +281,10 @@ impl<'planner> WorkspaceSubplanner<'planner> {
 
 impl<'planner> CrateSubplanner<'planner> {
   /// Builds a crate context from internal state.
-  fn produce_context(&self, cargo_workspace_root: &Path) -> Result<CrateContext> {
+  fn produce_context(&self, cargo_workspace_root: &Utf8Path) -> Result<CrateContext> {
     let package = self.crate_catalog_entry.package();
 
-    let manifest_path = PathBuf::from(&package.manifest_path);
+    let manifest_path = Utf8PathBuf::from(&package.manifest_path);
     assert!(manifest_path.is_absolute());
     let package_root = self.find_package_root_for_manifest(&manifest_path)?;
 
@@ -328,9 +331,9 @@ impl<'planner> CrateSubplanner<'planner> {
 
     targeted_deps.sort();
 
-    let mut workspace_member_dependents: Vec<PathBuf> = Vec::new();
-    let mut workspace_member_dev_dependents: Vec<PathBuf> = Vec::new();
-    let mut workspace_member_build_dependents: Vec<PathBuf> = Vec::new();
+    let mut workspace_member_dependents: Vec<Utf8PathBuf> = Vec::new();
+    let mut workspace_member_dev_dependents: Vec<Utf8PathBuf> = Vec::new();
+    let mut workspace_member_build_dependents: Vec<Utf8PathBuf> = Vec::new();
 
     for pkg_id in self.crate_catalog_entry.workspace_member_dependents.iter() {
       let workspace_member = self
@@ -382,14 +385,9 @@ impl<'planner> CrateSubplanner<'planner> {
     let canonical_additional_build_file = match &raze_settings.additional_build_file {
       Some(build_file) => Some(
         cargo_workspace_root
-          .join(&build_file)
-          .canonicalize()
-          .with_context(|| {
-            format!(
-              "Failed to find additional_build_file: {}",
-              &build_file.display()
-            )
-          })?,
+          .join(build_file)
+          .canonicalize_utf8()
+          .with_context(|| format!("Failed to find additional_build_file: {}", &build_file))?,
       ),
       None => None,
     };
@@ -399,7 +397,7 @@ impl<'planner> CrateSubplanner<'planner> {
       pkg_version: package.version.clone(),
       edition: package.edition.clone(),
       license: self.produce_license(),
-      features: self.node.features.clone(),
+      features: self.features.unwrap_or(&Features::empty()).clone(),
       workspace_member_dependents,
       workspace_member_dev_dependents,
       workspace_member_build_dependents,
@@ -646,7 +644,7 @@ impl<'planner> CrateSubplanner<'planner> {
     &self,
     crates_io_template: &str,
     package: &Package,
-    package_root: &Path,
+    package_root: &Utf8Path,
     binary_dep_spec: Option<&cargo_toml::Dependency>,
   ) -> Result<SourceDetails> {
     let mut git_data = None;
@@ -665,7 +663,7 @@ impl<'planner> CrateSubplanner<'planner> {
           .with_context(|| {
             anyhow!(
               "Expected package root `{}` to be a prefix of manifest path dir `{}` but it wasn't",
-              package_root.display(),
+              package_root,
               manifest_parent
             )
           })?;
@@ -786,7 +784,7 @@ impl<'planner> CrateSubplanner<'planner> {
   /// Produces the complete set of build targets specified by this crate.
   /// This function may access the file system. See #find_package_root_for_manifest for more
   /// details.
-  fn produce_targets(&self, package_root_path: &Path) -> Result<Vec<BuildableTarget>> {
+  fn produce_targets(&self, package_root_path: &Utf8Path) -> Result<Vec<BuildableTarget>> {
     let mut targets = Vec::new();
     let package = self.crate_catalog_entry.package();
     for target in &package.targets {
@@ -832,7 +830,7 @@ impl<'planner> CrateSubplanner<'planner> {
   /// to find the true filesystem root of the dependency. The root cause is that git dependencies
   /// often aren't solely the crate of interest, but rather a repository that contains the crate of
   /// interest among others.
-  fn find_package_root_for_manifest(&self, manifest_path: &Path) -> Result<PathBuf> {
+  fn find_package_root_for_manifest(&self, manifest_path: &Utf8Path) -> Result<Utf8PathBuf> {
     let has_git_repo_root = {
       let is_git = self.source_id.as_ref().map_or(false, SourceId::is_git);
       is_git && self.settings.genmode == GenMode::Remote
@@ -842,7 +840,7 @@ impl<'planner> CrateSubplanner<'planner> {
     if !has_git_repo_root {
       // TODO(acmcarther): How do we know parent is valid here?
       // UNWRAP: Pathbuf guaranteed to succeed from Path
-      return Ok(PathBuf::from(manifest_path.parent().unwrap()));
+      return Ok(Utf8PathBuf::from(manifest_path.parent().unwrap()));
     }
 
     // If package is git package it may be nested under a parent repository. We need to find the
@@ -853,7 +851,7 @@ impl<'planner> CrateSubplanner<'planner> {
         let joined = c.join(".git");
         if joined.is_dir() {
           // UNWRAP: Pathbuf guaranteed to succeed from Path
-          return Ok(PathBuf::from(c));
+          return Ok(c.to_path_buf());
         } else {
           check_path = c;
         }

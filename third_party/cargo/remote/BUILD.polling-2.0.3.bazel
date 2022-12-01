@@ -59,7 +59,6 @@ rust_library(
         "@cargo_raze__cfg_if__1_0_0//:cfg_if",
         "@cargo_raze__log__0_4_14//:log",
     ] + selects.with_or({
-        # cfg(unix)
         (
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
@@ -72,7 +71,6 @@ rust_library(
         ],
         "//conditions:default": [],
     }) + selects.with_or({
-        # cfg(windows)
         (
             "@rules_rust//rust/platform:i686-pc-windows-msvc",
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",

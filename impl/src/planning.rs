@@ -80,8 +80,8 @@ impl BuildPlannerImpl {
 }
 
 #[cfg(test)]
-mod tests {
-  use std::{collections::HashMap, collections::HashSet, path::PathBuf};
+pub mod tests {
+  use std::{collections::BTreeMap, collections::HashMap, collections::HashSet};
 
   use crate::{
     metadata::tests::{
@@ -92,6 +92,7 @@ mod tests {
   };
 
   use super::*;
+  use camino::Utf8PathBuf;
   use cargo_metadata::PackageId;
   use indoc::indoc;
   use itertools::Itertools;
@@ -104,9 +105,10 @@ mod tests {
     metadata.resolve = None;
     RazeMetadata {
       metadata,
-      cargo_workspace_root: PathBuf::from("/some/crate"),
+      cargo_workspace_root: Utf8PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
+      features: BTreeMap::new(),
     }
   }
 
@@ -159,7 +161,7 @@ mod tests {
     );
   }
 
-  fn dummy_workspace_crate_metadata(metadata_template: &str) -> RazeMetadata {
+  pub fn dummy_workspace_crate_metadata(metadata_template: &str) -> RazeMetadata {
     let dir = make_basic_workspace();
     let (mut fetcher, _server, _index_dir) = dummy_raze_metadata_fetcher();
 
@@ -168,7 +170,9 @@ mod tests {
       metadata_template: Some(metadata_template.to_string()),
     }));
 
-    let raze_metadata = fetcher.fetch_metadata(dir.as_ref(), None, None).unwrap();
+    let raze_metadata = fetcher
+      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .unwrap();
     let mut metadata = raze_metadata.metadata;
 
     // Phase 1: Create a workspace package, add it to the packages list.
@@ -191,9 +195,10 @@ mod tests {
 
     RazeMetadata {
       metadata,
-      cargo_workspace_root: PathBuf::from("/some/crate"),
+      cargo_workspace_root: Utf8PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
+      features: BTreeMap::new(),
     }
   }
 
@@ -424,7 +429,7 @@ mod tests {
     let mock = mock_remote_crate("some-binary-crate", "3.3.3", &server);
     let dir = mock_crate_index(
       &to_index_crates_map(vec![("some-binary-crate", "3.3.3")]),
-      Some(index_dir.as_ref()),
+      Some(utf8_path(index_dir.path())),
     );
     assert!(dir.is_none());
 
@@ -436,7 +441,7 @@ mod tests {
 
     let dir = make_basic_workspace();
     let raze_metadata = fetcher
-      .fetch_metadata(dir.as_ref(), Some(&settings.binary_deps), None)
+      .fetch_metadata(utf8_path(dir.as_ref()), Some(&settings.binary_deps), None)
       .unwrap();
 
     for mock in mock.endpoints.iter() {
@@ -540,7 +545,7 @@ mod tests {
       .unwrap();
 
     // Ensure binary dependencies are not considered workspace members after planning
-    let binary_dep_name = format!("some-binary-crate-{}", version.to_string());
+    let binary_dep_name = format!("some-binary-crate-{}", version);
     assert_eq!(
       planned_build
         .workspace_context
@@ -649,7 +654,7 @@ mod tests {
 
     let settings = {
       let temp_dir = make_workspace(toml_file, None);
-      let manifest_path = temp_dir.as_ref().join("Cargo.toml");
+      let manifest_path = Utf8PathBuf::from_path_buf(temp_dir.as_ref().join("Cargo.toml")).unwrap();
       crate::settings::load_settings_from_manifest(&manifest_path, None).unwrap()
     };
 
@@ -785,7 +790,7 @@ mod tests {
     let crate_dir = make_workspace(workspace_toml, Some(workspace_lock));
 
     for (member, dep_version) in vec![("lib_a", "0.2.1"), ("lib_b", "0.1.0")].iter() {
-      let member_dir = crate_dir.as_ref().join(&member);
+      let member_dir = crate_dir.as_ref().join(member);
       std::fs::create_dir_all(&member_dir).unwrap();
       std::fs::write(
         member_dir.join("Cargo.toml"),
@@ -795,7 +800,7 @@ mod tests {
     }
 
     fetcher
-      .fetch_metadata(crate_dir.as_ref(), None, None)
+      .fetch_metadata(utf8_path(crate_dir.as_ref()), None, None)
       .unwrap()
   }
 

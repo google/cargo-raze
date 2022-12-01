@@ -36,8 +36,6 @@ rust_binary(
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_cargo_lock",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/bin/cargo-lock/main.rs",
     data = [],
     edition = "2018",
@@ -63,8 +61,6 @@ rust_binary(
 rust_library(
     name = "cargo_lock",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
     data = [],
     edition = "2018",
