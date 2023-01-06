@@ -5,7 +5,7 @@ edition = "2021"
 resolver = "2"
 
 [dependencies]
-tokio = {version = "1.17.0", default-features = false}
+tokio = {version = "1.18.4", default-features = false}
 
 [target.'cfg(windows)'.dependencies.tokio]
 features = ["winapi"]
