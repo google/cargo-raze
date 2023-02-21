@@ -19,6 +19,7 @@ configure_make(
         "@rules_rust//rust/platform:darwin": {"AR": ""},
         "//conditions:default": {},
     }),
+    features = ["-libtool"],
     lib_source = ":all",
     out_static_libs = ["libiconv.a"],
     targets = ["install-lib"],
