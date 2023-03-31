@@ -74,8 +74,7 @@ fn bazel_package_name(render_details: &RenderDetails) -> String {
 
 impl BazelRenderer {
   pub fn new() -> Self {
-    // Configure tera with a bogus template dir: We don't want any runtime template support
-    let mut internal_renderer = Tera::new("/tmp/cargo-raze/doesnt/exist/*").unwrap();
+    let mut internal_renderer = Tera::default();
     internal_renderer
       .add_raw_templates(vec![
         (
