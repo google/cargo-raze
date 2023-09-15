@@ -8,7 +8,7 @@ We believe `crate_universe` supports all of the functionality which was supporte
 
 `cargo-raze` has been archived to reflect the reality that PRs and Issues filed against it are unlikely to be addressed.
 
-Please reach out to [#rust](https://bazelbuild.slack.com/archives/CDCMRLS23) in the Bazel Slack if you are interested in taking over maintenance of this project.
+Please reach out to [#rust](https://bazelbuild.slack.com/archives/CDCMRLS23) in the [Bazel Slack](https://slack.bazel.build) if you are interested in taking over maintenance of this project.
 
 [![Build
 status](https://badge.buildkite.com/bd8945700a2e0ddb094b1fefabde71cb81bad9a93bb774c384.svg?branch=main)](https://buildkite.com/bazel/cargo-raze?branch=main)
