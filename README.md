@@ -1,5 +1,15 @@
 # cargo-raze: Bazel BUILD generation for Rust Crates
 
+**cargo-raze is currently an unmaintained and unsupported product**.
+
+[`crate_universe` in `rules_rust`](https://bazelbuild.github.io/rules_rust/crate_universe.html) is a supported and maintained product with similar aims.
+
+We believe `crate_universe` supports all of the functionality which was supported by cargo-raze. We encourage you to try to migrate to it. If you find missing support, or bugs, please file an issue or PR against `rules_rust`.
+
+`cargo-raze` has been archived to reflect the reality that PRs and Issues filed against it are unlikely to be addressed.
+
+Please reach out to [#rust](https://bazelbuild.slack.com/archives/CDCMRLS23) in the Bazel Slack if you are interested in taking over maintenance of this project.
+
 [![Build
 status](https://badge.buildkite.com/bd8945700a2e0ddb094b1fefabde71cb81bad9a93bb774c384.svg?branch=main)](https://buildkite.com/bazel/cargo-raze?branch=main)
 
