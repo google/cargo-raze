@@ -16,6 +16,11 @@ mod crate_catalog;
 mod license;
 mod subplanners;
 
+use std::{
+  collections::{BTreeMap, BTreeSet},
+  fmt::Debug,
+};
+
 use anyhow::Result;
 use cargo_lock::Lockfile;
 
@@ -77,6 +82,42 @@ impl BuildPlannerImpl {
   pub fn new(metadata: RazeMetadata, settings: RazeSettings) -> Self {
     Self { metadata, settings }
   }
+}
+
+/// Items that need to be rendered with platform select blocks.
+pub trait PlatformCrateAttribute<T> {
+  fn new(platforms: Vec<String>, attrs: Vec<T>) -> Self;
+}
+
+/// Group PlatformCrateAttribute items into concise select blocks, with no duplicates.
+pub fn consolidate_platform_attributes<
+  AttrType: Ord + Clone + Debug,
+  T: PlatformCrateAttribute<AttrType>,
+>(
+  platform_attributes: BTreeMap<String, BTreeSet<AttrType>>,
+) -> Vec<T> {
+  let mut platform_map: BTreeMap<AttrType, Vec<String>> = BTreeMap::new();
+  for (platform, pfs) in platform_attributes {
+    for attr in pfs {
+      platform_map
+        .entry(attr)
+        .and_modify(|e| e.push(platform.clone()))
+        .or_insert_with(|| vec![platform.clone()]);
+    }
+  }
+
+  let mut platforms_to_attrs: BTreeMap<Vec<String>, Vec<AttrType>> = BTreeMap::new();
+  for (attr, platforms) in platform_map {
+    platforms_to_attrs
+      .entry(platforms.clone())
+      .and_modify(|e| e.push(attr.clone()))
+      .or_insert_with(|| vec![attr.clone()]);
+  }
+
+  platforms_to_attrs
+    .iter()
+    .map(|(platforms, attrs)| T::new(platforms.to_vec(), attrs.to_vec()))
+    .collect()
 }
 
 #[cfg(test)]
@@ -410,6 +451,114 @@ pub mod tests {
       .find(|dep| dep.name == "miniz_oxide");
     assert!(miniz_oxide.is_some());
     assert_eq!(flate2.targeted_deps[0].deps.dependencies.len(), 0);
+  }
+
+  #[test]
+  fn test_plan_includes_all_not_unknown_targets() {
+    let mut settings = dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+    let mut triples = HashSet::new();
+    triples.insert("aarch64-apple-darwin".to_string());
+    triples.insert("aarch64-unknown-linux-gnu".to_string());
+    triples.insert("i686-apple-darwin".to_string());
+    triples.insert("i686-pc-windows-msvc".to_string());
+    triples.insert("i686-unknown-linux-gnu".to_string());
+    triples.insert("x86_64-apple-darwin".to_string());
+    triples.insert("x86_64-pc-windows-msvc".to_string());
+    triples.insert("x86_64-unknown-linux-gnu".to_string());
+    triples.insert("wasm32-wasi".to_string());
+    triples.insert("wasm32-unknown-unknown".to_string());
+    settings.targets = Some(triples);
+
+    let planner = BuildPlannerImpl::new(
+      dummy_workspace_crate_metadata(templates::TARGET_OS_IS_NOT_UNKNOWN),
+      settings,
+    );
+    let planned_build = planner.plan_build(None).unwrap();
+    let async_std = planned_build
+      .crate_contexts
+      .iter()
+      .find(|ctx| ctx.pkg_name == "async-std")
+      .unwrap();
+
+    // The wasm-targeted deps should have both wasm platforms
+    let wasm_targeted_dep_context = async_std
+      .targeted_deps
+      .iter()
+      .find(|dep_context| {
+        dep_context
+          .deps
+          .dependencies
+          .iter()
+          .find(|dep| dep.name == "wasm-bindgen-futures")
+          .is_some()
+      })
+      .unwrap();
+    assert_eq!(
+      wasm_targeted_dep_context.platform_targets,
+      vec!["wasm32-unknown-unknown", "wasm32-wasi",]
+    );
+
+    // The os-targeted deps should only have wasm32-wasi
+    let os_targeted_dep_context = async_std
+      .targeted_deps
+      .iter()
+      .find(|dep_context| {
+        dep_context
+          .deps
+          .dependencies
+          .iter()
+          .find(|dep| dep.name == "async-io")
+          .is_some()
+      })
+      .unwrap();
+    assert_eq!(
+      os_targeted_dep_context.platform_targets,
+      vec![
+        "aarch64-apple-darwin",
+        "aarch64-unknown-linux-gnu",
+        "i686-apple-darwin",
+        "i686-pc-windows-msvc",
+        "i686-unknown-linux-gnu",
+        "wasm32-wasi",
+        "x86_64-apple-darwin",
+        "x86_64-pc-windows-msvc",
+        "x86_64-unknown-linux-gnu"
+      ]
+    );
+  }
+
+  #[test]
+  // Tests the fix for https://github.com/google/cargo-raze/issues/451.
+  // Bazel errors out if mutually exclusive select branches contain the
+  // same dependency. rust-errno is a real world example of this problem,
+  // where libc is listed under 'cfg(unix)' and 'cfg(target_os="wasi")'.
+  fn test_plan_build_consolidates_targets_across_platforms() {
+    let mut settings = dummy_raze_settings();
+    settings.genmode = GenMode::Remote;
+    let mut triples = HashSet::new();
+    triples.insert("wasm32-wasi".to_string());
+    triples.insert("x86_64-unknown-linux-gnu".to_string());
+    settings.target = None;
+    settings.targets = Some(triples);
+
+    let planner = BuildPlannerImpl::new(
+      dummy_workspace_crate_metadata(templates::SUBPLAN_CONSOLIDATES_TARGETED_DEPS),
+      settings,
+    );
+    let planned_build = planner.plan_build(None).unwrap();
+
+    let errno = planned_build
+      .crate_contexts
+      .iter()
+      .find(|ctx| ctx.pkg_name == "errno")
+      .unwrap();
+
+    assert_eq!(errno.targeted_deps.len(), 1);
+    assert_eq!(
+      errno.targeted_deps[0].platform_targets,
+      vec!["wasm32-wasi", "x86_64-unknown-linux-gnu",]
+    );
   }
 
   fn dummy_binary_dependency_metadata(is_remote_genmode: bool) -> (RazeMetadata, RazeSettings) {

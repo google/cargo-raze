@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{
-  collections::{BTreeMap, HashMap, HashSet},
+  collections::{BTreeMap, BTreeSet, HashMap, HashSet},
   io, iter,
   str::FromStr,
 };
@@ -34,7 +34,7 @@ use crate::{
   error::{RazeError, PLEASE_FILE_A_BUG},
   features::Features,
   metadata::RazeMetadata,
-  planning::license,
+  planning::{consolidate_platform_attributes, license},
   settings::{CrateSettings, GenMode, RazeSettings},
   util,
 };
@@ -50,7 +50,7 @@ use url::Url;
 type CrateContextProduction = (Vec<CrateContext>, Vec<DependencyAlias>);
 
 /// Utility type alias to reduce declaration noise
-type DepProduction = HashMap<Option<String>, CrateDependencyContext>;
+type DepProduction = BTreeMap<Option<String>, CrateDependencyContext>;
 
 /// An internal working planner for generating context for an individual crate.
 struct CrateSubplanner<'planner> {
@@ -308,28 +308,39 @@ impl<'planner> CrateSubplanner<'planner> {
       ctx.subtract(&default_deps);
     }
 
-    // Build a list of dependencies while addression a potential allowlist of target triples
-    let mut targeted_deps = deps
+    let remaining_deps: Vec<(String, CrateDependencyContext)> = deps
       .into_iter()
-      .map(|(target, deps)| {
+      .flat_map(|(target, dep_context)| {
         let target = target.unwrap();
-        let platform_targets = util::get_matching_bazel_triples(&target, &self.settings.targets)?
-          .map(|x| x.to_string())
-          .collect();
+        if let Ok(triples) = util::get_matching_bazel_triples(&target, &self.settings.targets) {
+          triples
+            .map(|i| (i.to_string(), dep_context.clone()))
+            .collect()
+        } else {
+          vec![]
+        }
+      })
+      .collect();
 
-        Ok(CrateTargetedDepContext {
-          target,
-          deps,
-          platform_targets,
+    let mut platform_deps: BTreeMap<String, BTreeSet<CrateDependencyContext>> = BTreeMap::new();
+    for (platform, context) in remaining_deps {
+      platform_deps
+        .entry(platform.to_string())
+        .and_modify(|e| {
+          e.insert(context.clone());
         })
-      })
-      .filter(|res| match res {
-        Ok(ctx) => !ctx.platform_targets.is_empty(),
-        Err(_) => true,
-      })
-      .collect::<Result<Vec<_>>>()?;
+        .or_insert_with(|| {
+          let mut set = BTreeSet::new();
+          set.insert(context.clone());
+          set
+        });
+    }
 
-    targeted_deps.sort();
+    // Build a list of dependencies while addressing a potential allowlist of target triples and consolidate any dependencies duplicated across platforms.
+    let targeted_deps = consolidate_platform_attributes::<
+      CrateDependencyContext,
+      CrateTargetedDepContext,
+    >(platform_deps);
 
     let mut workspace_member_dependents: Vec<Utf8PathBuf> = Vec::new();
     let mut workspace_member_dev_dependents: Vec<Utf8PathBuf> = Vec::new();

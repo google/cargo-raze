@@ -17,6 +17,7 @@ use std::path::Path;
 use std::process::Command;
 
 use crate::error::RazeError;
+use crate::planning::{consolidate_platform_attributes, PlatformCrateAttribute};
 use crate::settings::RazeSettings;
 use crate::util::cargo_bin_path;
 use anyhow::{Error, Result};
@@ -46,6 +47,15 @@ impl Features {
 pub struct TargetedFeatures {
   pub platforms: Vec<String>,
   pub features: Vec<String>,
+}
+
+impl PlatformCrateAttribute<String> for TargetedFeatures {
+  fn new(platforms: Vec<String>, attrs: Vec<String>) -> Self {
+    TargetedFeatures {
+      platforms,
+      features: attrs,
+    }
+  }
 }
 
 // A function that runs `cargo-tree` to analyze per-platform features.
@@ -255,48 +265,23 @@ fn consolidate_features(
   let common_features = sets.iter().skip(1).fold(sets[0].clone(), |acc, hs| {
     acc.intersection(hs).cloned().collect()
   });
-
-  // Partition the platform features
-  let mut platform_map: BTreeMap<String, Vec<String>> = BTreeMap::new();
-  for (platform, pfs) in features {
-    for feature in pfs {
-      if !common_features.contains(&feature) {
-        platform_map
-          .entry(feature)
-          .and_modify(|e| e.push(platform.clone()))
-          .or_insert_with(|| vec![platform.clone()]);
-      }
-    }
-  }
-
-  let mut platforms_to_features: BTreeMap<Vec<String>, Vec<String>> = BTreeMap::new();
-  for (feature, platforms) in platform_map {
-    let key = platforms.clone();
-    platforms_to_features
-      .entry(key)
-      .and_modify(|e| e.push(feature.clone()))
-      .or_insert_with(|| vec![feature]);
-  }
-
-  let mut common_vec: Vec<String> = common_features.iter().cloned().collect();
-  common_vec.sort();
-
-  let targeted_features: Vec<TargetedFeatures> = platforms_to_features
+  let platform_features: BTreeMap<String, BTreeSet<String>> = features
     .iter()
-    .map(|ptf| {
-      let (platforms, features) = ptf;
-      TargetedFeatures {
-        platforms: platforms.to_vec(),
-        features: features.to_vec(),
-      }
+    .map(|(platform, pfs)| {
+      (
+        platform.to_string(),
+        pfs.difference(&common_features).cloned().collect(),
+      )
     })
     .collect();
 
   (
     id,
     Features {
-      features: common_vec,
-      targeted_features,
+      features: common_features.iter().cloned().collect(),
+      targeted_features: consolidate_platform_attributes::<String, TargetedFeatures>(
+        platform_features,
+      ),
     },
   )
 }

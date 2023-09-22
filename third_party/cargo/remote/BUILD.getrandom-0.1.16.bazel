@@ -57,18 +57,18 @@ cargo_build_script(
     deps = [
     ] + selects.with_or({
         (
-            "@rules_rust//rust/platform:wasm32-wasi",
+            "@rules_rust//rust/platform:aarch64-apple-darwin",
+            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:i686-apple-darwin",
+            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
+            "@rules_rust//rust/platform:x86_64-apple-darwin",
+            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
         ],
         "//conditions:default": [],
     }) + selects.with_or({
         (
-            "@rules_rust//rust/platform:i686-apple-darwin",
-            "@rules_rust//rust/platform:i686-unknown-linux-gnu",
-            "@rules_rust//rust/platform:x86_64-apple-darwin",
-            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:wasm32-wasi",
         ): [
         ],
         "//conditions:default": [],
@@ -100,21 +100,21 @@ rust_library(
         "@cargo_raze__cfg_if__1_0_0//:cfg_if",
     ] + selects.with_or({
         (
-            "@rules_rust//rust/platform:wasm32-wasi",
-        ): [
-            "@cargo_raze__wasi__0_9_0_wasi_snapshot_preview1//:wasi",
-        ],
-        "//conditions:default": [],
-    }) + selects.with_or({
-        (
+            "@rules_rust//rust/platform:aarch64-apple-darwin",
+            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
             "@rules_rust//rust/platform:x86_64-apple-darwin",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
         ): [
             "@cargo_raze__libc__0_2_92//:libc",
+        ],
+        "//conditions:default": [],
+    }) + selects.with_or({
+        (
+            "@rules_rust//rust/platform:wasm32-wasi",
+        ): [
+            "@cargo_raze__wasi__0_9_0_wasi_snapshot_preview1//:wasi",
         ],
         "//conditions:default": [],
     }),

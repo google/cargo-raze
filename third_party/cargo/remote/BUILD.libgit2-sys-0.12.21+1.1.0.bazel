@@ -65,12 +65,12 @@ rust_library(
         "@cargo_raze__libz_sys__1_1_2//:libz_sys",
     ] + selects.with_or({
         (
+            "@rules_rust//rust/platform:aarch64-apple-darwin",
+            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
             "@rules_rust//rust/platform:x86_64-apple-darwin",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
         ): [
             "@cargo_raze__openssl_sys__0_9_73//:openssl_sys",
         ],

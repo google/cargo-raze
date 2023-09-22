@@ -14,7 +14,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::{features::Features, settings::CrateSettings};
+use crate::{features::Features, planning::PlatformCrateAttribute, settings::CrateSettings};
 use camino::Utf8PathBuf;
 use semver::Version;
 use serde::{Deserialize, Serialize};
@@ -137,13 +137,54 @@ impl CrateDependencyContext {
       .cloned()
       .collect();
   }
+
+  pub fn add(&mut self, other: &CrateDependencyContext) {
+    self.dependencies = self
+      .dependencies
+      .union(&other.dependencies)
+      .cloned()
+      .collect();
+    self.proc_macro_dependencies = self
+      .proc_macro_dependencies
+      .union(&other.proc_macro_dependencies)
+      .cloned()
+      .collect();
+    self.build_dependencies = self
+      .build_dependencies
+      .union(&other.build_dependencies)
+      .cloned()
+      .collect();
+    self.build_proc_macro_dependencies = self
+      .build_proc_macro_dependencies
+      .union(&other.build_proc_macro_dependencies)
+      .cloned()
+      .collect();
+    self.dev_dependencies = self
+      .dev_dependencies
+      .union(&other.dev_dependencies)
+      .cloned()
+      .collect();
+  }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct CrateTargetedDepContext {
-  pub target: String,
-  pub deps: CrateDependencyContext,
   pub platform_targets: Vec<String>,
+  pub deps: CrateDependencyContext,
+}
+
+impl PlatformCrateAttribute<CrateDependencyContext> for CrateTargetedDepContext {
+  fn new(platforms: Vec<String>, attrs: Vec<CrateDependencyContext>) -> Self {
+    let deps = attrs.iter().skip(1).fold(attrs[0].clone(), |mut acc, hs| {
+      acc.add(hs);
+      acc
+    });
+
+    CrateTargetedDepContext {
+      platform_targets: platforms,
+      deps,
+    }
+  }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]

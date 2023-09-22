@@ -67,12 +67,12 @@ rust_library(
         "@cargo_raze__log__0_4_14//:log",
     ] + selects.with_or({
         (
+            "@rules_rust//rust/platform:aarch64-apple-darwin",
+            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
             "@rules_rust//rust/platform:i686-apple-darwin",
             "@rules_rust//rust/platform:i686-unknown-linux-gnu",
             "@rules_rust//rust/platform:x86_64-apple-darwin",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
-            "@rules_rust//rust/platform:aarch64-apple-darwin",
-            "@rules_rust//rust/platform:aarch64-unknown-linux-gnu",
         ): [
             "@cargo_raze__libc__0_2_92//:libc",
         ],
