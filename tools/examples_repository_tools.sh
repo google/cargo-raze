@@ -63,7 +63,8 @@ function raze() {
     vendor
     
     # Regenerate all outputs
-    MANIFESTS=$(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d)
+    MANIFESTS=$(find $EXAMPLES_DIR -mindepth 2 -maxdepth 2 -type d -not -name parent_directory_workspace)
+    MANIFESTS+=($EXAMPLES_DIR/remote/parent_directory_workspace/main)
     for manifest in ${MANIFESTS[@]}; do
         echo "Running raze on ${manifest}"
         ${RAZE} --manifest-path=${manifest}/Cargo.toml

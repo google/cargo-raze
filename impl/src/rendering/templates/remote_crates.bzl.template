@@ -6,9 +6,16 @@ load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")  # buildifier: di
 {% if experimental_api %}
 {% include "templates/partials/crates_macro.template" %}
 {% endif %}
-def {{workspace.gen_workspace_prefix}}_fetch_remote_crates():
+def {{workspace.gen_workspace_prefix}}_fetch_remote_crates(local_path_prefix = ""):
+    """This function defines a collection of repos and should be called in a WORKSPACE file.
+
+    Args:
+        local_path_prefix: An optional prefix to append to local paths within the Bazel repository.
+            Many uses should use `bazel_workspace_path` in the raze settings instead, this is only
+            for unusual sitations which use the same fetch_remote_crates from multiple repositories.
+    """
+    _unused = local_path_prefix  # @unused
 {%- if crates %}
-    """This function defines a collection of repos and should be called in a WORKSPACE file"""
 {%- for crate in crates %}
 {%- if crate.source_details.git_data %}
     maybe(
@@ -20,7 +27,7 @@ def {{workspace.gen_workspace_prefix}}_fetch_remote_crates():
         init_submodules = True,
         {%- include "templates/partials/remote_crates_patch.template" %}
     )
-{%- else %}
+{%- elif crate.source_details.download_url %}
     maybe(
         http_archive,
         name = "{{workspace.gen_workspace_prefix}}__{{crate.pkg_name | replace(from="-", to="_")}}__{{crate.pkg_version | slugify | replace(from="-", to="_")}}",
@@ -33,10 +40,20 @@ def {{workspace.gen_workspace_prefix}}_fetch_remote_crates():
         {%- include "templates/partials/remote_crates_patch.template" %}
         build_file = Label("{{workspace.workspace_path}}/remote:BUILD.{{crate.pkg_name}}-{{crate.pkg_version}}.bazel"),
     )
+{%- elif crate.source_details.local_repository_path %}
+    maybe(
+        native.new_local_repository,
+        name = "{{workspace.gen_workspace_prefix}}__{{crate.pkg_name | replace(from="-", to="_")}}__{{crate.pkg_version | slugify | replace(from="-", to="_")}}",
+        path = local_path_prefix + "{{ crate.source_details.local_repository_path }}",
+        build_file = local_path_prefix + "{{workspace.workspace_path}}/remote/BUILD.{{crate.pkg_name}}-{{crate.pkg_version}}.bazel".strip("/"),
+    )
+{%- else %}
+    fail("Not sure how to download crate {{ crate.pkg_name }}")
 {%- endif %}
 {%  endfor %}
 {%- else %}
-    """No crates were detected in the source Cargo.toml. This is a no-op"""
+
+    # No crates were detected in the source Cargo.toml. This is a no-op
     pass
 {% endif %}
 {%- else %}

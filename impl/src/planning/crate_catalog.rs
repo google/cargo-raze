@@ -18,10 +18,12 @@ use std::{
 };
 
 use anyhow::{anyhow, Result};
+use camino::{Utf8Path, Utf8PathBuf};
 use cargo_metadata::{Metadata, Node, Package, PackageId};
 
 use crate::{
   error::RazeError,
+  planning::RazeMetadata,
   settings::{GenMode, RazeSettings},
   util,
   util::package_ident,
@@ -39,6 +41,9 @@ pub struct CrateCatalogEntry {
   pub package_ident: String,
   // Is this a member of the root crate workspace?
   pub is_workspace_crate: bool,
+  // If this is part of a local Cargo workspace, but not the main one, this is the path to it from
+  // the Bazel workspace
+  pub path_in_additional_workspace: Option<String>,
   // A list of workspace members that depend on this entry
   pub workspace_member_dependents: Vec<PackageId>,
 }
@@ -47,6 +52,7 @@ impl CrateCatalogEntry {
   pub fn new(
     package: &Package,
     is_workspace_crate: bool,
+    path_in_additional_workspace: Option<String>,
     workspace_member_dependents: Vec<PackageId>,
   ) -> Self {
     let sanitized_name = package.name.replace('-', "_");
@@ -58,6 +64,7 @@ impl CrateCatalogEntry {
       sanitized_name,
       sanitized_version,
       is_workspace_crate,
+      path_in_additional_workspace,
       workspace_member_dependents,
     }
   }
@@ -160,7 +167,8 @@ pub struct CrateCatalog {
 
 impl CrateCatalog {
   /// Produces a CrateCatalog using the package entries from a metadata blob.
-  pub fn new(metadata: &Metadata) -> Result<Self> {
+  pub fn new(raze_metadata: &RazeMetadata, settings: &RazeSettings) -> Result<Self> {
+    let metadata = &raze_metadata.metadata;
     let resolve = metadata
       .resolve
       .as_ref()
@@ -172,6 +180,40 @@ impl CrateCatalog {
       .filter(|node| metadata.workspace_members.contains(&node.id))
       .collect();
 
+    let find_path_in_additional_workspace = |package: &Package| -> Option<String> {
+      for additional_metadata in raze_metadata.additional_workspace_metadata.iter() {
+        if additional_metadata
+          .metadata
+          .workspace_members
+          .contains(&package.id)
+        {
+          // UNWRAP: We just checked that this package is a member of this workspace.
+          let package = additional_metadata
+            .metadata
+            .packages
+            .iter()
+            .find(|c| &c.id == &package.id)
+            .unwrap();
+          // UNWRAP: The Cargo.toml is in some directory.
+          let package_folder = package.manifest_path.parent().unwrap();
+          // UNWRAP: These are both absolute paths pointing into the same temporary
+          // directory.
+          let package_relative =
+            pathdiff::diff_paths(&package_folder, &additional_metadata.temp_dir_path).unwrap();
+          // UNWRAP: They were both UTF8 paths before, their difference will also be.
+          let package_relative = Utf8PathBuf::from_path_buf(package_relative).unwrap();
+          let workspace_file_path: &Utf8Path = settings.bazel_workspace_path.as_str().into();
+          return Some(
+            workspace_file_path
+              .join(&additional_metadata.relative_path)
+              .join(package_relative)
+              .into(),
+          );
+        }
+      }
+      None
+    };
+
     let entries = metadata
       .packages
       .iter()
@@ -179,6 +221,7 @@ impl CrateCatalog {
         CrateCatalogEntry::new(
           package,
           metadata.workspace_members.contains(&package.id),
+          find_path_in_additional_workspace(package),
           workspace_crates
             .iter()
             .filter_map(|node| {

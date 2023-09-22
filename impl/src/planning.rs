@@ -59,7 +59,7 @@ impl BuildPlanner for BuildPlannerImpl {
   /// Retrieves metadata for local workspace and produces a build plan.
   fn plan_build(&self, platform_details: Option<PlatformDetails>) -> Result<PlannedBuild> {
     // Create one combined metadata object which includes all dependencies and binaries
-    let crate_catalog = CrateCatalog::new(&self.metadata.metadata)?;
+    let crate_catalog = CrateCatalog::new(&self.metadata, &self.settings)?;
 
     // Generate additional PlatformDetails
     let workspace_subplanner = WorkspaceSubplanner {
@@ -92,7 +92,7 @@ pub mod tests {
   };
 
   use super::*;
-  use camino::Utf8PathBuf;
+  use camino::{Utf8Path, Utf8PathBuf};
   use cargo_metadata::PackageId;
   use indoc::indoc;
   use itertools::Itertools;
@@ -105,6 +105,7 @@ pub mod tests {
     metadata.resolve = None;
     RazeMetadata {
       metadata,
+      additional_workspace_metadata: Vec::new(),
       cargo_workspace_root: Utf8PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
@@ -171,7 +172,7 @@ pub mod tests {
     }));
 
     let raze_metadata = fetcher
-      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), &[] as &[&Utf8Path], None, None)
       .unwrap();
     let mut metadata = raze_metadata.metadata;
 
@@ -195,6 +196,7 @@ pub mod tests {
 
     RazeMetadata {
       metadata,
+      additional_workspace_metadata: Vec::new(),
       cargo_workspace_root: Utf8PathBuf::from("/some/crate"),
       lockfile: None,
       checksums: HashMap::new(),
@@ -441,7 +443,12 @@ pub mod tests {
 
     let dir = make_basic_workspace();
     let raze_metadata = fetcher
-      .fetch_metadata(utf8_path(dir.as_ref()), Some(&settings.binary_deps), None)
+      .fetch_metadata(
+        utf8_path(dir.as_ref()),
+        &[] as &[&Utf8Path],
+        Some(&settings.binary_deps),
+        None,
+      )
       .unwrap();
 
     for mock in mock.endpoints.iter() {
@@ -800,7 +807,12 @@ pub mod tests {
     }
 
     fetcher
-      .fetch_metadata(utf8_path(crate_dir.as_ref()), None, None)
+      .fetch_metadata(
+        utf8_path(crate_dir.as_ref()),
+        &[] as &[&Utf8Path],
+        None,
+        None,
+      )
       .unwrap()
   }
 

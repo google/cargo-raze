@@ -14,7 +14,7 @@ examples_repository()
 
 load("@cargo_raze_examples//:repositories.bzl", examples_repositories = "repositories")
 
-examples_repositories()
+examples_repositories(local_path_prefix = "examples/")
 
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_deps")
 

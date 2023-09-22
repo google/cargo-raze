@@ -39,6 +39,25 @@ pub struct RazeSettings {
   /// outputs in `//foo/third_party`.)
   pub workspace_path: String,
 
+  /// Paths to additional Cargo workspaces that the top-level one has references to.
+  ///
+  /// This is a common workaround for not being able to nest these inside each other, see
+  /// https://github.com/rust-lang/cargo/issues/5042 for details. Raze needs the path to each of
+  /// them so it can collect metadata from all of them.
+  ///
+  /// Note: This field should be a path to a file relative to the Cargo workspace root. For more
+  /// context, see https://doc.rust-lang.org/cargo/reference/workspaces.html#root-package
+  #[serde(default)]
+  pub additional_workspace_paths: Vec<String>,
+
+  /// Path from the root of the bazel workspace to this Cargo.toml.
+  ///
+  /// Defaults to `/`.
+  ///
+  /// Setting this is only necessary when using `additional_workspace_paths`.
+  #[serde(default = "default_bazel_workspace_path")]
+  pub bazel_workspace_path: String,
+
   /// The relative path within each workspace member directory where aliases the member's dependencies should be rendered.
   ///
   /// By default, a new directory will be created next to the `Cargo.toml` file named `cargo` for users to refer to them
@@ -261,6 +280,12 @@ pub struct CrateSettings {
   /// context, see https://doc.rust-lang.org/cargo/reference/workspaces.html#root-package
   #[serde(default)]
   pub additional_build_file: Option<Utf8PathBuf>,
+
+  /// Value for a `local_repository.path` for this package.
+  ///
+  /// This is useful to locally vendor a few packages with the remote genmode.
+  #[serde(default)]
+  pub local_repository_path: Option<Utf8PathBuf>,
 }
 
 /// Describes how dependencies should be managed in tree.
@@ -298,6 +323,7 @@ impl Default for CrateSettings {
       patch_tool: None,
       patches: Vec::new(),
       additional_build_file: None,
+      local_repository_path: None,
     }
   }
 }
@@ -347,6 +373,10 @@ fn default_crate_settings_field_gen_buildrs() -> Option<bool> {
 
 fn default_crate_settings_field_data_attr() -> Option<String> {
   None
+}
+
+fn default_bazel_workspace_path() -> String {
+  "/".to_owned()
 }
 
 fn default_package_aliases_dir() -> String {
@@ -466,6 +496,10 @@ struct RawRazeSettings {
   #[serde(default)]
   pub workspace_path: Option<String>,
   #[serde(default)]
+  pub additional_workspace_paths: Vec<String>,
+  #[serde(default)]
+  pub bazel_workspace_path: Option<String>,
+  #[serde(default)]
   pub package_aliases_dir: Option<String>,
   #[serde(default)]
   pub render_package_aliases: Option<bool>,
@@ -501,6 +535,8 @@ impl RawRazeSettings {
   /// Checks whether or not the settings have non-package specific settings specified
   fn contains_primary_options(&self) -> bool {
     self.workspace_path.is_some()
+      || !self.additional_workspace_paths.is_empty()
+      || self.bazel_workspace_path.is_some()
       || self.package_aliases_dir.is_some()
       || self.render_package_aliases.is_some()
       || self.target.is_some()
@@ -803,6 +839,8 @@ pub mod tests {
   pub fn dummy_raze_settings() -> RazeSettings {
     RazeSettings {
       workspace_path: "//cargo".to_owned(),
+      additional_workspace_paths: Vec::new(),
+      bazel_workspace_path: default_bazel_workspace_path(),
       package_aliases_dir: "cargo".to_owned(),
       render_package_aliases: default_render_package_aliases(),
       target: Some("x86_64-unknown-linux-gnu".to_owned()),

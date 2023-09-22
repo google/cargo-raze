@@ -114,16 +114,32 @@ impl LockfileGenerator for CargoLockfileGenerator {
   }
 }
 
+/// A struct containing all metadata about an additional Cargo workspace
+#[derive(Debug, Clone)]
+pub struct AdditionalWorkspaceMetadata {
+  pub metadata: Metadata,
+  /// Relative path to this workspace from the main Cargo workspace
+  pub relative_path: Utf8PathBuf,
+  /// The path to this workspace in the temporary directory.
+  pub temp_dir_path: Utf8PathBuf,
+}
+
 /// A struct containing all metadata about a project with which to plan generated output files for
 #[derive(Debug, Clone)]
 pub struct RazeMetadata {
   // `cargo metadata` output of the current project
   pub metadata: Metadata,
 
+  // `cargo metadata` output from any additional Cargo workspaces
+  pub additional_workspace_metadata: Vec<AdditionalWorkspaceMetadata>,
+
   // The absolute path to the current project's cargo workspace root. Note that the workspace
   // root in `metadata` will be inside of a temporary directory. For details see:
   // https://doc.rust-lang.org/cargo/reference/workspaces.html#root-package
   pub cargo_workspace_root: Utf8PathBuf,
+
+  // Absolute paths to additional cargo workspace roots which contain path dependencies.
+  //pub additional_workspaces: Vec<Utf8PathBuf>,
 
   // The metadata of a lockfile that was generated as a result of fetching metadata
   pub lockfile: Option<Lockfile>,
@@ -154,6 +170,202 @@ fn make_symlink(src: &Utf8Path, dest: &Utf8Path) -> Result<()> {
 fn make_symlink(src: &Utf8Path, dest: &Utf8Path) -> Result<()> {
   std::os::windows::fs::symlink_file(src, dest)
     .with_context(|| "Failed to create symlink for generating metadata")
+}
+
+/// Returns the shared parent directory of two paths, potentially an empty path if they share no
+/// components.
+fn common_parent_directory(a: &Utf8Path, b: &Utf8Path) -> Utf8PathBuf {
+  let mut result = Utf8PathBuf::new();
+  for (l, r) in a.components().zip(b.components()) {
+    if l == r {
+      result.push(l);
+    } else {
+      break;
+    }
+  }
+  result
+}
+
+struct TempWorkspaceInfo<'a> {
+  pub metadata: &'a Metadata,
+  pub all_info: &'a AllTempWorkspaceInfo,
+}
+
+impl TempWorkspaceInfo<'_> {
+  /// Returns the relative path to this workspace from the root of the temp directory.
+  pub fn relative_path(&self) -> &Utf8Path {
+    self
+      .metadata
+      .workspace_root
+      .strip_prefix(&self.all_info.parent_source_directory)
+      .expect("We constructed this path as a prefix of the other one")
+  }
+
+  /// Returns the path to this workspace within the temp directory.
+  pub fn temp_dir_path(&self) -> Result<Utf8PathBuf> {
+    Ok(self.all_info.temp_path()?.join(self.relative_path()))
+  }
+
+  /// Returns the source workspace root.
+  pub fn workspace_root(&self) -> &Utf8Path {
+    &self.metadata.workspace_root
+  }
+
+  /// Copies over some top-level config files.
+  pub fn copy_config_files(&self) -> Result<()> {
+    let workspace_root = self.workspace_root();
+    let temp_dir_path = self.temp_dir_path()?;
+    fs::create_dir_all(&temp_dir_path).context("Failed to create directory in temp dir")?;
+
+    // There should be a `Cargo.toml` file in the workspace root
+    fs::copy(
+      workspace_root.join("Cargo.toml"),
+      temp_dir_path.join("Cargo.toml"),
+    )
+    .context("Failed to copy Cargo.toml")?;
+
+    // Optionally copy over the lock file
+    if self.workspace_root().join("Cargo.lock").exists() {
+      fs::copy(
+        workspace_root.join("Cargo.lock"),
+        temp_dir_path.join("Cargo.lock"),
+      )
+      .context("Failed to copy Cargo.lock")?;
+    }
+
+    let source_dotcargo = workspace_root.join(".cargo");
+    let source_dotcargo_config = source_dotcargo.join("config.toml");
+    if source_dotcargo_config.exists() {
+      let destination_dotcargo = temp_dir_path.join(".cargo");
+      fs::create_dir(&destination_dotcargo).context("Failed to create .cargo directory")?;
+      let destination_dotcargo_config = destination_dotcargo.join("config.toml");
+      fs::copy(&source_dotcargo_config, &destination_dotcargo_config)
+        .context("Failed to copy .cargo/config.toml")?;
+    }
+
+    Ok(())
+  }
+
+  /// Symlinks the source code of all workspace members into the temp workspace.
+  pub fn link_src_to_workspace(&self) -> Result<()> {
+    let crate_member_id_re = match consts::OS {
+      "windows" => Regex::new(r".+\(path\+file:///(.+)\)")?,
+      _ => Regex::new(r".+\(path\+file://(.+)\)")?,
+    };
+    for member in self.metadata.workspace_members.iter() {
+      // Get a path to the workspace member directory
+      let workspace_member_directory = {
+        let crate_member_id_match = crate_member_id_re
+          .captures(&member.repr)
+          .and_then(|cap| cap.get(1));
+
+        if crate_member_id_match.is_none() {
+          continue;
+        }
+
+        // UNWRAP: guarded above
+        Utf8PathBuf::from(crate_member_id_match.unwrap().as_str())
+      };
+
+      // Sanity check: The assumption is that any crate with an `id` that matches
+      // the regex pattern above should contain a Cargo.toml file with which we
+      // can use to infer the existence of libraries from relative paths such as
+      // `src/lib.rs` and `src/main.rs`.
+      let toml_path = workspace_member_directory.join("Cargo.toml");
+      if !toml_path.exists() {
+        return Err(anyhow!(format!(
+          "The regex pattern `{}` found a path that did not contain a Cargo.toml file: `{}`",
+          crate_member_id_re.as_str(),
+          workspace_member_directory
+        )));
+      }
+
+      // Copy the Cargo.toml files into the temp directory to match the directory structure on disk
+      let path_diff = diff_paths(&workspace_member_directory, &self.metadata.workspace_root)
+        .ok_or_else(|| {
+          anyhow!("All workspace members are expected to be under the workspace root")
+        })?;
+      let diff = Utf8PathBuf::from_path_buf(path_diff)
+        .map_err(|_e| anyhow!("Invalid UTF-8 in path diff."))?;
+      let new_path = self.temp_dir_path()?.join(diff);
+      fs::create_dir_all(&new_path)?;
+      fs::copy(
+        workspace_member_directory.join("Cargo.toml"),
+        new_path.join("Cargo.toml"),
+      )?;
+
+      // Additionally, symlink everything in some common source directories to ensure specified
+      // library targets can be relied on and won't prevent fetching metadata
+      for dir in vec!["bin", "src"].iter() {
+        let glob_pattern = format!("{}/**/*.rs", workspace_member_directory.join(dir));
+        for entry in glob(glob_pattern.as_str()).expect("Failed to read glob pattern") {
+          let path = Utf8PathBuf::from_path_buf(entry?)
+            .map_err(|_e| anyhow!("Invalid UTF-8 in source directory."))?;
+
+          // Determine the difference between the workspace root and the current file
+          let path_diff = diff_paths(&path, &self.metadata.workspace_root).ok_or_else(|| {
+            anyhow!("All workspace members are expected to be under the workspace root")
+          })?;
+          let diff = Utf8PathBuf::from_path_buf(path_diff)
+            .map_err(|_e| anyhow!("Invalid UTF-8 in source directory path diff."))?;
+
+          // Create a matching directory tree for the current file within the temp workspace
+          let new_path = self.temp_dir_path()?.join(diff.as_path());
+          if let Some(parent) = new_path.parent() {
+            fs::create_dir_all(parent)?;
+          }
+
+          make_symlink(&path, &new_path)?;
+        }
+      }
+    }
+
+    Ok(())
+  }
+}
+
+/// Manages information about a set of temporary workspaces.
+///
+/// We have to build up this information piece by piece, but it's much more useful to expose it as
+/// a struct with information about each of the individual workspaces. This class manages
+/// converting between the representations.
+struct AllTempWorkspaceInfo {
+  temp_dir: TempDir,
+  metadata: Vec<Metadata>,
+  parent_source_directory: Utf8PathBuf,
+}
+
+impl AllTempWorkspaceInfo {
+  pub fn new(temp_dir: TempDir, metadata: impl Iterator<Item = Result<Metadata>>) -> Result<Self> {
+    let metadata = metadata.collect::<Result<Vec<_>>>()?;
+    let mut parent_source_directory = Utf8PathBuf::from(
+      &metadata
+        .first()
+        .expect("Top-level workspace must be in this list")
+        .workspace_root,
+    );
+    for m in metadata.iter() {
+      parent_source_directory =
+        common_parent_directory(&parent_source_directory, &m.workspace_root);
+    }
+    Ok(Self {
+      temp_dir,
+      metadata,
+      parent_source_directory,
+    })
+  }
+
+  pub fn temp_path(&self) -> Result<&Utf8Path> {
+    Utf8Path::from_path(self.temp_dir.as_ref())
+      .ok_or_else(|| anyhow!("Invalid UTF-8 in temp path."))
+  }
+
+  pub fn all_workspaces(&self) -> impl Iterator<Item = TempWorkspaceInfo<'_>> {
+    self.metadata.iter().map(move |metadata| TempWorkspaceInfo {
+      metadata,
+      all_info: self,
+    })
+  }
 }
 
 /// A workspace metadata fetcher that uses the Cargo commands to gather information about a Cargo
@@ -207,123 +419,40 @@ impl RazeMetadataFetcher {
     self.lockfile_generator = generator;
   }
 
-  /// Symlinks the source code of all workspace members into the temp workspace
-  fn link_src_to_workspace(&self, no_deps_metadata: &Metadata, temp_dir: &Utf8Path) -> Result<()> {
-    let crate_member_id_re = match consts::OS {
-      "windows" => Regex::new(r".+\(path\+file:///(.+)\)")?,
-      _ => Regex::new(r".+\(path\+file://(.+)\)")?,
-    };
-    for member in no_deps_metadata.workspace_members.iter() {
-      // Get a path to the workspace member directory
-      let workspace_member_directory = {
-        let crate_member_id_match = crate_member_id_re
-          .captures(&member.repr)
-          .and_then(|cap| cap.get(1));
-
-        if crate_member_id_match.is_none() {
-          continue;
-        }
-
-        // UNWRAP: guarded above
-        Utf8PathBuf::from(crate_member_id_match.unwrap().as_str())
-      };
-
-      // Sanity check: The assumption is that any crate with an `id` that matches
-      // the regex pattern above should contain a Cargo.toml file with which we
-      // can use to infer the existence of libraries from relative paths such as
-      // `src/lib.rs` and `src/main.rs`.
-      let toml_path = workspace_member_directory.join("Cargo.toml");
-      if !toml_path.exists() {
-        return Err(anyhow!(format!(
-          "The regex pattern `{}` found a path that did not contain a Cargo.toml file: `{}`",
-          crate_member_id_re.as_str(),
-          workspace_member_directory
-        )));
-      }
-
-      // Copy the Cargo.toml files into the temp directory to match the directory structure on disk
-      let path_diff = diff_paths(
-        &workspace_member_directory,
-        &no_deps_metadata.workspace_root,
-      )
-      .ok_or_else(|| {
-        anyhow!("All workspace members are expected to be under the workspace root")
-      })?;
-      let diff = Utf8PathBuf::from_path_buf(path_diff)
-        .map_err(|_e| anyhow!("Invalid UTF-8 in path diff."))?;
-      let new_path = temp_dir.join(diff);
-      fs::create_dir_all(&new_path)?;
-      fs::copy(
-        workspace_member_directory.join("Cargo.toml"),
-        new_path.join("Cargo.toml"),
-      )?;
-
-      // Additionally, symlink everything in some common source directories to ensure specified
-      // library targets can be relied on and won't prevent fetching metadata
-      for dir in vec!["bin", "src"].iter() {
-        let glob_pattern = format!("{}/**/*.rs", workspace_member_directory.join(dir));
-        for entry in glob(glob_pattern.as_str()).expect("Failed to read glob pattern") {
-          let path = Utf8PathBuf::from_path_buf(entry?)
-            .map_err(|_e| anyhow!("Invalid UTF-8 in source directory."))?;
-
-          // Determine the difference between the workspace root and the current file
-          let path_diff = diff_paths(&path, &no_deps_metadata.workspace_root).ok_or_else(|| {
-            anyhow!("All workspace members are expected to be under the workspace root")
-          })?;
-          let diff = Utf8PathBuf::from_path_buf(path_diff)
-            .map_err(|_e| anyhow!("Invalid UTF-8 in source directory path diff."))?;
-
-          // Create a matching directory tree for the current file within the temp workspace
-          let new_path = temp_dir.join(diff.as_path());
-          if let Some(parent) = new_path.parent() {
-            fs::create_dir_all(parent)?;
-          }
-
-          make_symlink(&path, &new_path)?;
-        }
-      }
-    }
-
-    Ok(())
-  }
-
   /// Creates a copy workspace in a temporary directory for fetching the metadata of the current workspace
-  fn make_temp_workspace(&self, cargo_workspace_root: &Utf8Path) -> Result<(TempDir, Utf8PathBuf)> {
-    let temp_dir = TempDir::new()?;
-
+  fn make_temp_workspace(
+    &self,
+    cargo_workspace_root: &Utf8Path,
+    additional_workspaces: &[impl AsRef<Utf8Path>],
+  ) -> Result<AllTempWorkspaceInfo> {
+    let all_workspaces =
+      std::iter::once(cargo_workspace_root).chain(additional_workspaces.iter().map(AsRef::as_ref));
     // First gather metadata without downloading any dependencies so we can identify any path dependencies.
-    let no_deps_metadata = self
-      .metadata_fetcher
-      .fetch_metadata(cargo_workspace_root, /*include_deps=*/ false)?;
+    let no_deps_metadata = all_workspaces.map(|workspace_root| {
+      self
+        .metadata_fetcher
+        .fetch_metadata(workspace_root, /*include_deps=*/ false)
+    });
+    let temp_dir = TempDir::new().context("Failed to create temporary directory")?;
+    let workspace_info = AllTempWorkspaceInfo::new(temp_dir, no_deps_metadata)
+      .context("Failed to collect initial metadata for all Cargo workspaces")?;
 
-    // There should be a `Cargo.toml` file in the workspace root
-    fs::copy(
-      no_deps_metadata.workspace_root.join("Cargo.toml"),
-      temp_dir.as_ref().join("Cargo.toml"),
-    )?;
+    for workspace in workspace_info.all_workspaces() {
+      workspace.copy_config_files().with_context(|| {
+        format!(
+          "Failed to copy Cargo config files from {:?}",
+          workspace.workspace_root()
+        )
+      })?;
 
-    // Optionally copy over the lock file
-    if no_deps_metadata.workspace_root.join("Cargo.lock").exists() {
-      fs::copy(
-        no_deps_metadata.workspace_root.join("Cargo.lock"),
-        temp_dir.as_ref().join("Cargo.lock"),
-      )?;
+      workspace.link_src_to_workspace().with_context(|| {
+        format!(
+          "Failed to symlink source files from {:?}",
+          workspace.workspace_root()
+        )
+      })?;
     }
-
-    let source_dotcargo = cargo_workspace_root.join(".cargo");
-    let source_dotcargo_config = source_dotcargo.join("config.toml");
-    if source_dotcargo_config.exists() {
-      let destination_dotcargo = temp_dir.path().join(".cargo");
-      fs::create_dir(&destination_dotcargo)?;
-      let destination_dotcargo_config = destination_dotcargo.join("config.toml");
-      fs::copy(&source_dotcargo_config, &destination_dotcargo_config)?;
-    }
-
-    // Copy over the Cargo.toml files of each workspace member
-    let temp_path = Utf8Path::from_path(temp_dir.as_ref())
-      .ok_or_else(|| anyhow!("Invalid UTF-8 in temp path."))?;
-    self.link_src_to_workspace(&no_deps_metadata, temp_path)?;
-    Ok((temp_dir, no_deps_metadata.workspace_root))
+    Ok(workspace_info)
   }
 
   /// Download a crate's source code from the current registry url
@@ -452,13 +581,20 @@ impl RazeMetadataFetcher {
   pub fn fetch_metadata(
     &self,
     cargo_workspace_root: &Utf8Path,
+    additional_workspaces: &[impl AsRef<Utf8Path>],
     binary_dep_info: Option<&HashMap<String, cargo_toml::Dependency>>,
     reused_lockfile: Option<Utf8PathBuf>,
   ) -> Result<RazeMetadata> {
-    let (cargo_dir, cargo_workspace_root) = self.make_temp_workspace(cargo_workspace_root)?;
-    let utf8_cargo_dir = Utf8Path::from_path(cargo_dir.as_ref())
-      .ok_or_else(|| anyhow!("Cargo dir has invalid UTF-8 in fetch_metadata."))?;
-    let cargo_root_toml = utf8_cargo_dir.join("Cargo.toml");
+    let workspace_info = self
+      .make_temp_workspace(cargo_workspace_root, additional_workspaces)
+      .context("Failed to create temporary workspace")?;
+
+    let top_level_workspace = workspace_info
+      .all_workspaces()
+      .next()
+      .expect("Top-level workspace must be in this list");
+    let cargo_dir = top_level_workspace.temp_dir_path()?;
+    let cargo_root_toml = cargo_dir.join("Cargo.toml");
 
     // Gather new lockfile data if any binary dependencies were provided
     let mut checksums: HashMap<String, String> = HashMap::new();
@@ -468,7 +604,7 @@ impl RazeMetadataFetcher {
 
         for (name, info) in binary_dep_info.iter() {
           let version = info.req();
-          let src_dir = self.fetch_crate_src(utf8_cargo_dir, name, version)?;
+          let src_dir = self.fetch_crate_src(&cargo_dir, name, version)?;
           checksums.insert(
             package_ident(name, version),
             self.fetch_crate_checksum(name, version)?,
@@ -482,10 +618,10 @@ impl RazeMetadataFetcher {
       }
     }
 
-    let output_lockfile = self.cargo_generate_lockfile(&reused_lockfile, utf8_cargo_dir)?;
+    let output_lockfile = self.cargo_generate_lockfile(&reused_lockfile, &cargo_dir)?;
 
     // Load checksums from the lockfile
-    let workspace_toml_lock = cargo_dir.as_ref().join("Cargo.lock");
+    let workspace_toml_lock = cargo_dir.join("Cargo.lock");
     if workspace_toml_lock.exists() {
       let lockfile = Lockfile::load(workspace_toml_lock)?;
       for package in &lockfile.packages {
@@ -498,20 +634,44 @@ impl RazeMetadataFetcher {
       }
     }
 
-    let metadata = self
-      .metadata_fetcher
-      .fetch_metadata(utf8_cargo_dir, /*include_deps=*/ true)?;
+    let mut all_metadata = workspace_info
+      .all_workspaces()
+      .map(|workspace| {
+        let dir = workspace.temp_dir_path()?;
+        self
+          .metadata_fetcher
+          .fetch_metadata(&dir, /*include_deps=*/ true)
+      })
+      .collect::<Result<Vec<_>>>()?;
+    let metadata = all_metadata
+      .drain(0..1)
+      .next()
+      .expect("Top-level workspace must be in this list");
+    let additional_workspace_metadata = all_metadata
+      .into_iter()
+      .zip(workspace_info.all_workspaces().skip(1))
+      .map(|(metadata, info)| -> Result<AdditionalWorkspaceMetadata> {
+        Ok(AdditionalWorkspaceMetadata {
+          metadata,
+          relative_path: info.relative_path().into(),
+          temp_dir_path: info.temp_dir_path()?,
+        })
+      })
+      .collect::<Result<Vec<_>>>()?;
 
     // In this function because it's metadata, even though it's not returned by `cargo-metadata`
     let platform_features = match self.settings.as_ref() {
-      Some(settings) => get_per_platform_features(cargo_dir.path(), settings, &metadata.packages)?,
+      Some(settings) => {
+        get_per_platform_features(&cargo_dir.as_std_path(), settings, &metadata.packages)?
+      }
       None => BTreeMap::new(),
     };
 
     Ok(RazeMetadata {
       metadata,
+      additional_workspace_metadata,
       checksums,
-      cargo_workspace_root,
+      cargo_workspace_root: top_level_workspace.workspace_root().into(),
       lockfile: output_lockfile,
       features: platform_features,
     })
@@ -656,7 +816,7 @@ pub mod tests {
     }));
 
     fetcher
-      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), &[] as &[&Utf8Path], None, None)
       .unwrap()
   }
 
@@ -672,7 +832,7 @@ pub mod tests {
       lockfile_contents: None,
     }));
     fetcher
-      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), &[] as &[&Utf8Path], None, None)
       .unwrap();
   }
 
@@ -698,7 +858,7 @@ pub mod tests {
       lockfile_contents: None,
     }));
     fetcher
-      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), &[] as &[&Utf8Path], None, None)
       .unwrap();
   }
 
@@ -714,7 +874,7 @@ pub mod tests {
 
     let fetcher = RazeMetadataFetcher::default();
     assert!(fetcher
-      .fetch_metadata(utf8_path(dir.as_ref()), None, None)
+      .fetch_metadata(utf8_path(dir.as_ref()), &[] as &[&Utf8Path], None, None)
       .is_err());
   }
 

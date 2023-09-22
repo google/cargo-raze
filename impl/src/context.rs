@@ -82,6 +82,7 @@ pub struct GitRepo {
 pub struct SourceDetails {
   pub git_data: Option<GitRepo>,
   pub download_url: Option<Url>,
+  pub local_repository_path: Option<Utf8PathBuf>,
 }
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]

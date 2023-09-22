@@ -559,6 +559,7 @@ mod tests {
       build_script_target: None,
       links: None,
       source_details: SourceDetails {
+        local_repository_path: None,
         git_data: None,
         download_url: Some(
           "https://crates.io/api/v1/crates/test-binary/1.1.1/download"
@@ -606,6 +607,7 @@ mod tests {
       build_script_target: None,
       links: Some("ssh2".to_owned()),
       source_details: SourceDetails {
+        local_repository_path: None,
         git_data: None,
         download_url: Some(
           "https://crates.io/api/v1/crates/test-binary/1.1.1/download"
@@ -663,6 +665,7 @@ mod tests {
       build_script_target: None,
       links: Some("ssh2".to_owned()),
       source_details: SourceDetails {
+        local_repository_path: None,
         git_data: None,
         download_url: Some(
           "https://crates.io/api/v1/crates/test-proc-macro/1.1.1/download"

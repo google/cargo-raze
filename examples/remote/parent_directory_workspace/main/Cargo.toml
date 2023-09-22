@@ -1,0 +1,15 @@
+[workspace]
+members = [
+    "printer",
+    "remote_num_printer",
+]
+
+[workspace.metadata.raze]
+workspace_path = "//remote/parent_directory_workspace/cargo"
+bazel_workspace_path = "remote/parent_directory_workspace"
+additional_workspace_paths = ["../dep"]
+gen_workspace_prefix = "remote_parent_directory_workspace"
+genmode = "Remote"
+default_gen_buildrs = true
+experimental_api = true
+render_package_aliases = false
