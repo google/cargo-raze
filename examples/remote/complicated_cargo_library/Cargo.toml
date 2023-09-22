@@ -10,7 +10,7 @@ path = "src/main.rs"
 # Newer versions of libloading don't depend on C code anymore, so we're using an older version to
 # test additional_build_file.
 libloading = "=0.7.0"
-regex = "=1.4.3"
+regex = "=1.5.5"
 security-framework-sys = "=2.0.0"
 specs = "=0.16.1"
 
