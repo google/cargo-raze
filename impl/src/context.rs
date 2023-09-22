@@ -149,6 +149,7 @@ pub struct CrateTargetedDepContext {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct CrateContext {
   pub pkg_name: String,
+  pub download_name: String,
   pub pkg_version: Version,
   pub edition: String,
   pub raze_settings: CrateSettings,
@@ -161,6 +162,7 @@ pub struct CrateContext {
   pub workspace_member_dependents: Vec<Utf8PathBuf>,
   pub workspace_member_dev_dependents: Vec<Utf8PathBuf>,
   pub workspace_member_build_dependents: Vec<Utf8PathBuf>,
+  pub is_workspace_member: bool,
   pub is_workspace_member_dependency: bool,
   pub is_binary_dependency: bool,
   pub targets: Vec<BuildableTarget>,

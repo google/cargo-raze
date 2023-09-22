@@ -130,7 +130,14 @@ pub mod tests {
       Vec::new(), /* attrs */
     )));
 
-    assert!(planned_build_res.unwrap().crate_contexts.is_empty());
+    let contexts: Vec<CrateContext> = planned_build_res
+      .unwrap()
+      .crate_contexts
+      .iter()
+      .filter(|ctx| !ctx.is_workspace_member)
+      .cloned()
+      .collect();
+    assert!(contexts.is_empty());
   }
 
   #[test]
@@ -145,8 +152,13 @@ pub mod tests {
     )));
 
     let planned_build = planned_build_res.unwrap();
-    assert_eq!(planned_build.crate_contexts.len(), 1);
-    let dep = planned_build.crate_contexts.get(0).unwrap();
+    let contexts: Vec<&CrateContext> = planned_build
+      .crate_contexts
+      .iter()
+      .filter(|ctx| !ctx.is_workspace_member)
+      .collect();
+    assert_eq!(contexts.len(), 1);
+    let dep = contexts.get(0).unwrap();
     assert_eq!(dep.pkg_name, "test_dep");
     assert!(!dep.workspace_member_dependents.is_empty());
     assert!(
@@ -216,7 +228,14 @@ pub mod tests {
       "some_target_triple".to_owned(),
       Vec::new(), /* attrs */
     )));
-    assert!(planned_build_res.unwrap().crate_contexts.is_empty());
+    let contexts: Vec<CrateContext> = planned_build_res
+      .unwrap()
+      .crate_contexts
+      .iter()
+      .filter(|ctx| !ctx.is_workspace_member)
+      .cloned()
+      .collect();
+    assert!(contexts.is_empty());
   }
 
   #[test]
