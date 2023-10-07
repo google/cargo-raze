@@ -2,6 +2,9 @@
 buildifier:
   version: latest
   warnings: "all"
+commands:
+  - "ls -la"
+  - "whoami"
 tasks:
   # TODO(acmcarther): Add check to verify that examples are up-to-date.
   macos:
