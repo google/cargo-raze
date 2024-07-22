@@ -8,7 +8,7 @@ name = "dev_dependencies"
 path = "src/main.rs"
 
 [dependencies]
-ferris-says = "0.2.0"
+ferris-says = "0.3.1"
 
 [dev-dependencies]
 indoc = "1.0.3"
